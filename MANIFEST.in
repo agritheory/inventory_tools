@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include inventory_tools *.css
+recursive-include inventory_tools *.csv
+recursive-include inventory_tools *.html
+recursive-include inventory_tools *.ico
+recursive-include inventory_tools *.js
+recursive-include inventory_tools *.json
+recursive-include inventory_tools *.md
+recursive-include inventory_tools *.png
+recursive-include inventory_tools *.py
+recursive-include inventory_tools *.svg
+recursive-include inventory_tools *.txt
+recursive-exclude inventory_tools *.pyc
