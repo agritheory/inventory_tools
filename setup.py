@@ -1,19 +1,6 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
-with open("requirements.txt") as f:
-	install_requires = f.read().strip().split("\n")
+# TODO: Remove this file when bench >=v5.11.0 is adopted / v15.0.0 is released
+name = "inventory_tools"
 
-# get version from __version__ variable in inventory_tools/__init__.py
-from inventory_tools import __version__ as version
-
-setup(
-	name="inventory_tools",
-	version=version,
-	description="Inventory Tools",
-	author="AgriTheory",
-	author_email="support@agritheory.dev",
-	packages=find_packages(),
-	zip_safe=False,
-	include_package_data=True,
-	install_requires=install_requires
-)
+setup()

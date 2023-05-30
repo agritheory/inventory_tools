@@ -6,6 +6,7 @@ app_publisher = "AgriTheory"
 app_description = "Inventory Tools"
 app_email = "support@agritheory.dev"
 app_license = "MIT"
+required_apps = ["erpnext", "hrms"]
 
 # Includes in <head>
 # ------------------
@@ -65,6 +66,7 @@ app_license = "MIT"
 
 # before_install = "inventory_tools.install.before_install"
 # after_install = "inventory_tools.install.after_install"
+after_migrate = 'inventory_tools.customize.load_customizations'
 
 # Uninstallation
 # ------------
