@@ -11,7 +11,7 @@ from erpnext.setup.utils import enable_all_roles_and_domains, set_defaults_for_t
 from erpnext.stock.get_item_details import get_item_details
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 
-from beam.tests.fixtures import boms, items, operations, suppliers, workstations
+from inventory_tools.tests.fixtures import boms, items, operations, suppliers, workstations
 
 
 def before_test():
