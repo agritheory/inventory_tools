@@ -1,4 +1,4 @@
-## BEAM
+## Inventory Tools
 
 Inventory Tools for ERPNext
 
@@ -26,7 +26,7 @@ bench get-app erpnext --branch version-14
 ```
 Download this application and install all apps
 ```
-bench get-app beam git@github.com:agritheory/inventory_tools.git
+bench get-app inventory_tools git@github.com:agritheory/inventory_tools.git
 ```
 Set developer mode in `site_config.json`
 ```
