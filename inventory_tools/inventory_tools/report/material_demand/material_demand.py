@@ -5,8 +5,12 @@ import json
 from itertools import groupby
 
 import frappe
+<<<<<<< HEAD
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.get_item_details import get_price_list_rate_for
+=======
+from erpnext.stock.get_item_details import get_price_list_rate
+>>>>>>> 269b44b (wip: material demand)
 from frappe.utils.data import fmt_money, getdate
 
 
@@ -69,13 +73,18 @@ def get_columns(filters):
 		},
 		{"fieldname": "item_name", "fieldtype": "Data", "hidden": 1},  # unset for export
 		{
+<<<<<<< HEAD
 			"label": "MR Qty",
+=======
+			"label": "Qty",
+>>>>>>> 269b44b (wip: material demand)
 			"fieldname": "qty",
 			"fieldtype": "Data",
 			"width": "90px",
 			"align": "right",
 		},
 		{
+<<<<<<< HEAD
 			"label": "Total Demand",
 			"fieldname": "total_demand",
 			"fieldtype": "Data",
@@ -90,6 +99,8 @@ def get_columns(filters):
 			"align": "right",
 		},
 		{
+=======
+>>>>>>> 269b44b (wip: material demand)
 			"label": "UOM",
 			"fieldname": "uom",
 			"fieldtype": "Link",
@@ -103,6 +114,7 @@ def get_columns(filters):
 			"width": "90px",
 			"align": "right",
 		},
+<<<<<<< HEAD
 		{
 			"label": "Selected Amount",
 			"fieldname": "amount",
@@ -110,6 +122,8 @@ def get_columns(filters):
 			"width": "120px",
 			"align": "right",
 		},
+=======
+>>>>>>> 269b44b (wip: material demand)
 		{"fieldname": "currency", "fieldtype": "Link", "options": "Currency", "hidden": 1},
 	]
 
@@ -124,7 +138,10 @@ def get_data(filters):
 	`tabMaterial Request`.name AS material_request,
 	`tabMaterial Request`.company,
 	`tabMaterial Request`.schedule_date,
+<<<<<<< HEAD
 	`tabMaterial Request Item`.name AS mri,
+=======
+>>>>>>> 269b44b (wip: material demand)
 	`tabMaterial Request Item`.item_code,
 	`tabMaterial Request Item`.item_name,
 	`tabMaterial Request Item`.qty,
