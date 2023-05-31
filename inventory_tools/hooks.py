@@ -30,7 +30,9 @@ required_apps = ["erpnext", "hrms"]
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+	"Purchase Order": "public/js/custom/purchase_order_custom.js",
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -43,7 +45,7 @@ required_apps = ["erpnext", "hrms"]
 
 # website user home page (by Role)
 # role_home_page = {
-#	"Role": "home_page"
+# 	"Role": "home_page"
 # }
 
 # Generators
@@ -57,8 +59,8 @@ required_apps = ["erpnext", "hrms"]
 
 # add methods and filters to jinja environment
 # jinja = {
-#	"methods": "inventory_tools.utils.jinja_methods",
-#	"filters": "inventory_tools.utils.jinja_filters"
+# 	"methods": "inventory_tools.utils.jinja_methods",
+# 	"filters": "inventory_tools.utils.jinja_filters"
 # }
 
 # Installation
@@ -66,7 +68,7 @@ required_apps = ["erpnext", "hrms"]
 
 # before_install = "inventory_tools.install.before_install"
 # after_install = "inventory_tools.install.after_install"
-after_migrate = 'inventory_tools.customize.load_customizations'
+after_migrate = "inventory_tools.customize.load_customizations"
 
 # Uninstallation
 # ------------
@@ -85,52 +87,54 @@ after_migrate = 'inventory_tools.customize.load_customizations'
 # Permissions evaluated in scripted ways
 
 # permission_query_conditions = {
-#	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
+# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
 #
 # has_permission = {
-#	"Event": "frappe.desk.doctype.event.event.has_permission",
+# 	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
 # DocType Class
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-#	"ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+	"Purchase Invoice": "inventory_tools.inventory_tools.overrides.purchase_invoice.InventoryToolsPurchaseInvoice",
+	"Purchase Order": "inventory_tools.inventory_tools.overrides.purchase_order.InventoryToolsPurchaseOrder",
+	"Purchase Receipt": "inventory_tools.inventory_tools.overrides.purchase_receipt.InventoryToolsPurchaseReceipt",
+}
 
 # Document Events
 # ---------------
 # Hook on document methods and events
 
 # doc_events = {
-#	"*": {
-#		"on_update": "method",
-#		"on_cancel": "method",
-#		"on_trash": "method"
-#	}
+# 	"*": {
+# 		"on_update": "method",
+# 		"on_cancel": "method",
+# 		"on_trash": "method"
+# 	}
 # }
 
 # Scheduled Tasks
 # ---------------
 
 # scheduler_events = {
-#	"all": [
-#		"inventory_tools.tasks.all"
-#	],
-#	"daily": [
-#		"inventory_tools.tasks.daily"
-#	],
-#	"hourly": [
-#		"inventory_tools.tasks.hourly"
-#	],
-#	"weekly": [
-#		"inventory_tools.tasks.weekly"
-#	],
-#	"monthly": [
-#		"inventory_tools.tasks.monthly"
-#	],
+# 	"all": [
+# 		"inventory_tools.tasks.all"
+# 	],
+# 	"daily": [
+# 		"inventory_tools.tasks.daily"
+# 	],
+# 	"hourly": [
+# 		"inventory_tools.tasks.hourly"
+# 	],
+# 	"weekly": [
+# 		"inventory_tools.tasks.weekly"
+# 	],
+# 	"monthly": [
+# 		"inventory_tools.tasks.monthly"
+# 	],
 # }
 
 # Testing
@@ -142,14 +146,14 @@ after_migrate = 'inventory_tools.customize.load_customizations'
 # ------------------------------
 #
 # override_whitelisted_methods = {
-#	"frappe.desk.doctype.event.event.get_events": "inventory_tools.event.get_events"
+# 	"frappe.desk.doctype.event.event.get_events": "inventory_tools.event.get_events"
 # }
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 # override_doctype_dashboards = {
-#	"Task": "inventory_tools.task.get_dashboard_data"
+# 	"Task": "inventory_tools.task.get_dashboard_data"
 # }
 
 # exempt linked doctypes from being automatically cancelled
@@ -175,29 +179,29 @@ after_migrate = 'inventory_tools.customize.load_customizations'
 # --------------------
 
 # user_data_fields = [
-#	{
-#		"doctype": "{doctype_1}",
-#		"filter_by": "{filter_by}",
-#		"redact_fields": ["{field_1}", "{field_2}"],
-#		"partial": 1,
-#	},
-#	{
-#		"doctype": "{doctype_2}",
-#		"filter_by": "{filter_by}",
-#		"partial": 1,
-#	},
-#	{
-#		"doctype": "{doctype_3}",
-#		"strict": False,
-#	},
-#	{
-#		"doctype": "{doctype_4}"
-#	}
+# 	{
+# 		"doctype": "{doctype_1}",
+# 		"filter_by": "{filter_by}",
+# 		"redact_fields": ["{field_1}", "{field_2}"],
+# 		"partial": 1,
+# 	},
+# 	{
+# 		"doctype": "{doctype_2}",
+# 		"filter_by": "{filter_by}",
+# 		"partial": 1,
+# 	},
+# 	{
+# 		"doctype": "{doctype_3}",
+# 		"strict": False,
+# 	},
+# 	{
+# 		"doctype": "{doctype_4}"
+# 	}
 # ]
 
 # Authentication and authorization
 # --------------------------------
 
 # auth_hooks = [
-#	"inventory_tools.auth.validate"
+# 	"inventory_tools.auth.validate"
 # ]
