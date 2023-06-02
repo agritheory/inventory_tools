@@ -81,7 +81,7 @@ def create_test_data():
 	create_items(settings)
 	create_boms(settings)
 	create_material_request(settings)
-	# create_production_plan(settings)
+	create_production_plan(settings)
 
 
 def create_suppliers(settings):
@@ -127,7 +127,7 @@ def setup_manufacturing_settings(settings):
 	mfg_settings.default_wip_warehouse = "Kitchen - APC"
 	mfg_settings.default_fg_warehouse = "Baked Goods - APC"
 	mfg_settings.overproduction_percentage_for_work_order = 5.00
-	mfg_settings.job_Card_excess_transfer = 1
+	mfg_settings.job_card_excess_transfer = 1
 	mfg_settings.save()
 
 	if frappe.db.exists("Account", {"account_name": "Work In Progress", "company": settings.company}):
@@ -231,14 +231,23 @@ def create_items(settings):
 		i.item_group = item.get("item_group")
 		i.stock_uom = item.get("uom")
 		i.description = item.get("description")
-		i.maintain_stock = 1
+		i.is_stock_item = 0 if item.get("is_stock_item") == 0 else 1
 		i.include_item_in_manufacturing = 1
+		i.is_sub_contracted_item = item.get("is_sub_contracted_item") or 0
 		i.default_warehouse = settings.get("warehouse")
 		i.default_material_request_type = (
-			"Purchase" if item.get("item_group") in ("Bakery Supplies", "Ingredients") else "Manufacture"
+			"Purchase"
+			if item.get("item_group") in ("Bakery Supplies", "Ingredients")
+			or item.get("is_sub_contracted_item")
+			else "Manufacture"
 		)
 		i.valuation_method = "FIFO"
-		i.is_purchase_item = 1 if item.get("item_group") in ("Bakery Supplies", "Ingredients") else 0
+		i.is_purchase_item = (
+			1
+			if item.get("item_group") in ("Bakery Supplies", "Ingredients")
+			or item.get("is_sub_contracted_item")
+			else 0
+		)
 		i.is_sales_item = 1 if item.get("item_group") == "Baked Goods" else 0
 		i.append(
 			"item_defaults",
@@ -256,6 +265,26 @@ def create_items(settings):
 			ip.valid_from = "2018-1-1"
 			ip.price_list_rate = item.get("item_price")
 			ip.save()
+		if item.get("available_in_house"):
+			se = frappe.new_doc("Stock Entry")
+			se.posting_date = settings.day
+			se.set_posting_time = 1
+			se.stock_entry_type = "Material Receipt"
+			se.append(
+				"items",
+				{
+					"item_code": item.get("item_code"),
+					"t_warehouse": item.get("default_warehouse"),
+					"qty": item.get("opening_qty"),
+					"uom": item.get("uom"),
+					"stock_uom": item.get("uom"),
+					"conversion_factor": 1,
+					"basic_rate": item.get("item_price"),
+					"expense_account": "1910 - Temporary Opening - APC",
+				},
+			)
+			se.save()
+			se.submit()
 
 
 def create_warehouses(settings):
@@ -361,6 +390,9 @@ def create_production_plan(settings):
 	pp.get_sub_assembly_items()
 	for item in pp.sub_assembly_items:
 		item.schedule_date = settings.day
+		if item.production_item == "Pie Crust":
+			item.type_of_manufacturing = "Subcontract"
+			item.supplier = "Freedom Provisions"
 	pp.for_warehouse = "Storeroom - APC"
 	raw_materials = get_items_for_material_requests(
 		pp.as_dict(), warehouses=None, get_parent_warehouse_data=None
