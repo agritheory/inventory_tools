@@ -62,7 +62,7 @@ async function create_pos() {
 		frappe.show_alert({ message: 'Please select one or more rows.', seconds: 5, indicator: 'red' })
 	} else {
 		await frappe
-			.xcall('hausers.hausers.report.material_demand.material_demand.create_pos', {
+			.xcall('inventory_tools.inventory_tools.report.material_demand.material_demand.create_pos', {
 				rows: selected_items,
 			})
 			.then(r => {})
