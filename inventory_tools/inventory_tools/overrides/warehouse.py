@@ -9,6 +9,8 @@ def update_warehouse_path(doc, method=None) -> None:
 	warehouse_path = frappe.db.get_value(
 		"Inventory Tools Settings", doc.company, "update_warehouse_path"
 	)
+	if not update_warehouse_path:
+		return
 
 	def get_parents(doc):
 		parents = [doc.warehouse_name]
@@ -33,4 +35,4 @@ def update_warehouse_path(doc, method=None) -> None:
 		else:
 			return ""
 
-		doc.warehouse_path = _update_warehouse_path(doc)
+	doc.warehouse_path = _update_warehouse_path(doc)

@@ -125,7 +125,7 @@ def setup_manufacturing_settings(settings):
 	mfg_settings = frappe.get_doc("Manufacturing Settings", "Manufacturing Settings")
 	mfg_settings.material_consumption = 1
 	mfg_settings.default_wip_warehouse = "Kitchen - APC"
-	mfg_settings.default_fg_warehouse = "Baked Goods - APC"
+	mfg_settings.default_fg_warehouse = "Refrigerated Display - APC"
 	mfg_settings.overproduction_percentage_for_work_order = 5.00
 	mfg_settings.job_Card_excess_transfer = 1
 	mfg_settings.save()
@@ -278,6 +278,20 @@ def create_warehouses(settings):
 		wh.company = settings.company
 		wh.save()
 
+	frappe.set_value("Warehouse", "Baked Goods", "is_group", 1)
+
+	wh = frappe.new_doc("Warehouse")
+	wh.warehouse_name = "Bakery Display"
+	wh.parent_warehouse = "Baked Goods"
+	wh.company = settings.company
+	wh.save()
+
+	wh = frappe.new_doc("Warehouse")
+	wh.warehouse_name = "Refrigerated Display"
+	wh.parent_warehouse = "Baked Goods"
+	wh.company = settings.company
+	wh.save()
+
 
 def create_boms(settings):
 	for bom in boms[::-1]:  # reversed
@@ -312,7 +326,7 @@ def create_material_request(settings):
 			"item_code": "Ambrosia Pie",
 			"schedule_date": mr.schedule_date,
 			"qty": 40,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	mr.append(
@@ -321,7 +335,7 @@ def create_material_request(settings):
 			"item_code": "Double Plum Pie",
 			"schedule_date": mr.schedule_date,
 			"qty": 40,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	mr.append(
@@ -330,7 +344,7 @@ def create_material_request(settings):
 			"item_code": "Gooseberry Pie",
 			"schedule_date": mr.schedule_date,
 			"qty": 10,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	mr.append(
@@ -339,7 +353,7 @@ def create_material_request(settings):
 			"item_code": "Kaduka Key Lime Pie",
 			"schedule_date": mr.schedule_date,
 			"qty": 10,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	mr.save()
