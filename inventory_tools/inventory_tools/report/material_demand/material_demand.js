@@ -4,15 +4,6 @@
 
 frappe.query_reports['Material Demand'] = {
 	filters: [
-		// {
-		// 	fieldname: 'price_list',
-		// 	label: __('Price List'),
-		// 	fieldtype: 'Link',
-		// 	options: 'Price List',
-		// 	reqd: 1,
-		// 	default: 'Standard Buying',
-		// 	// only buying price lists?
-		// },
 		{
 			fieldname: 'company',
 			label: __('Company'),
@@ -33,7 +24,14 @@ frappe.query_reports['Material Demand'] = {
 	],
 	get_datatable_options(options) {
 		return Object.assign(options, {
+			treeView: true,
+			checkedRowStatus: false,
 			checkboxColumn: true,
+			events: {
+				onCheckRow: row => {
+					update_selection(row)
+				},
+			},
 		})
 	},
 	onload: reportview => {
@@ -67,4 +65,40 @@ async function create_pos() {
 			})
 			.then(r => {})
 	}
+}
+
+function update_selection(row) {
+	if (!row[5]) {
+		// const checked = true //frappe.query_report.datatable.rowmanager.checkMap[row.rowIndex]
+		// // console.log(checked)
+		// frappe.query_report.datatable.datamanager.data.forEach((supplier_row, index) => {
+		// 	if(supplier_row.supplier === row[2].content){
+		// 		frappe.query_report.datatable.rowmanager.checkMap.splice(index, 1, checked)
+		// 	}
+		// })
+	} else {
+		// this should be a standalone function
+		// update selected_qty, format red if its over demand qty
+		update_selected_qty(row)
+	}
+}
+
+function update_selected_qty(row) {
+	const checked = frappe.query_report.datatable.rowmanager.checkMap[row[0].rowIndex]
+	let total_item_qty = 0.0
+	frappe.query_report.datatable.datamanager.data.forEach((supplier_row, index) => {
+		if (supplier_row.item_code === row[5].content) {
+			if (checked) {
+				total_item_qty += supplier_row.qty
+			}
+		}
+	})
+	console.log(total_item_qty)
+	// frappe.query_report.datatable.datamanager.data.forEach((supplier_row, index) => {
+	// 	if (supplier_row.item_code === row[5].content) {
+	// 		if (checked) {
+	// 			console.log('total', total_item_qty)
+	// 		}
+	// 	}
+	// })
 }

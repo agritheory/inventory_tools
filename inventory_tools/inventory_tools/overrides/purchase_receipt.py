@@ -1,5 +1,6 @@
 # Copyright (c) 2023, AgriTheory and Contributors
 # See license.txt
+
 import json
 
 import frappe

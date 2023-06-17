@@ -68,8 +68,22 @@ def get_columns(filters):
 		},
 		{"fieldname": "item_name", "fieldtype": "Data", "hidden": 1},  # unset for export
 		{
-			"label": "Qty",
+			"label": "MR Qty",
 			"fieldname": "qty",
+			"fieldtype": "Data",
+			"width": "90px",
+			"align": "right",
+		},
+		{
+			"label": "Total Demand",
+			"fieldname": "total_demand",
+			"fieldtype": "Data",
+			"width": "90px",
+			"align": "right",
+		},
+		{
+			"label": "Total Selected",
+			"fieldname": "total_selected",
 			"fieldtype": "Data",
 			"width": "90px",
 			"align": "right",
@@ -88,6 +102,13 @@ def get_columns(filters):
 			"width": "90px",
 			"align": "right",
 		},
+		{
+			"label": "Selected Amount",
+			"fieldname": "amount",
+			"fieldtype": "Data",
+			"width": "90px",
+			"align": "left",
+		},
 		{"fieldname": "currency", "fieldtype": "Link", "options": "Currency", "hidden": 1},
 	]
 
@@ -102,6 +123,7 @@ def get_data(filters):
 	`tabMaterial Request`.name AS material_request,
 	`tabMaterial Request`.company,
 	`tabMaterial Request`.schedule_date,
+	`tabMaterial Request Item`.name AS mri,
 	`tabMaterial Request Item`.item_code,
 	`tabMaterial Request Item`.item_name,
 	`tabMaterial Request Item`.qty,
@@ -129,11 +151,22 @@ def get_data(filters):
 		as_dict=True,
 		# debug=True,
 	)
+	total_demand = frappe._dict()
+	mris = []
+	for row in data:
+		if row.item_code not in total_demand and row.mri not in mris:
+			total_demand[row.item_code] = row.qty
+			mris.append(row.mri)
+		elif row.item_code in total_demand and row.mri not in mris:
+			total_demand[row.item_code] += row.qty
+			mris.append(row.mri)
+
 	for supplier, _rows in groupby(data, lambda x: x.get("supplier")):
 		rows = list(_rows)
 		output.append({"supplier": supplier, "indent": 0})
 		for r in rows:
 			r.supplier_price = fmt_money(r.get("supplier_price"), 2, r.get("currency")).replace(" ", "")
+			r.total_demand = total_demand[r.item_code]
 			output.append({**r, "indent": 1})
 	return output
 
