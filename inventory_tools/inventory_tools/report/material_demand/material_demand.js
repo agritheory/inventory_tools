@@ -4,15 +4,6 @@
 
 frappe.query_reports['Material Demand'] = {
 	filters: [
-		// {
-		// 	fieldname: 'price_list',
-		// 	label: __('Price List'),
-		// 	fieldtype: 'Link',
-		// 	options: 'Price List',
-		// 	reqd: 1,
-		// 	default: 'Standard Buying',
-		// 	// only buying price lists?
-		// },
 		{
 			fieldname: 'company',
 			label: __('Company'),
@@ -33,7 +24,14 @@ frappe.query_reports['Material Demand'] = {
 	],
 	get_datatable_options(options) {
 		return Object.assign(options, {
+			treeView: true,
+			checkedRowStatus: false,
 			checkboxColumn: true,
+			events: {
+				onCheckRow: row => {
+					update_selection(row)
+				},
+			},
 		})
 	},
 	onload: reportview => {
