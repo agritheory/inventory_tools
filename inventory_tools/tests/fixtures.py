@@ -20,7 +20,7 @@ suppliers = [
 		None,
 		"Net 30",
 		{
-			"address_line1": "34 Pinar St",  # TODO: randomize this address
+			"address_line1": "34 Pinar St",
 			"city": "Unity",
 			"state": "RI",
 			"country": "United States",

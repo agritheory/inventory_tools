@@ -2,14 +2,17 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.desk.search import search_link
 
 
 @frappe.whitelist()
 def update_warehouse_path(doc, method=None) -> None:
+	if not frappe.db.exists("Inventory Tools Settings", doc.company):
+		return
 	warehouse_path = frappe.db.get_value(
 		"Inventory Tools Settings", doc.company, "update_warehouse_path"
 	)
-	if not update_warehouse_path:
+	if not warehouse_path:
 		return
 
 	def get_parents(doc):
@@ -36,3 +39,14 @@ def update_warehouse_path(doc, method=None) -> None:
 			return ""
 
 	doc.warehouse_path = _update_warehouse_path(doc)
+
+
+@frappe.whitelist()
+def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
+	company = frappe.defaults.get_defaults().get("company")
+	if not company:
+		return search_link(doctype, txt, searchfield, start, page_len, filters)
+	if not frappe.db.exists("Inventory Tools Settings", company) and frappe.db.get_value(
+		"Inventory Tools Settings", company, "update_warehouse_path"
+	):
+		return search_link(doctype, txt, searchfield, start, page_len, filters)

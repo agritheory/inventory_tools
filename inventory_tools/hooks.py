@@ -158,6 +158,10 @@ doc_events = {
 # 	"Task": "inventory_tools.task.get_dashboard_data"
 # }
 
+standard_queries = {
+	"Warehouse": "inventory_tools.inventory_tools.overrides.warehouse.warehouse_query",
+}
+
 # exempt linked doctypes from being automatically cancelled
 #
 # auto_cancel_exempted_doctypes = ["Auto Repeat"]
