@@ -233,6 +233,7 @@ def create_items(settings):
 		i.description = item.get("description")
 		i.is_stock_item = 0 if item.get("is_stock_item") == 0 else 1
 		i.include_item_in_manufacturing = 1
+		i.valuation_rate = item.get("valuation_rate") or 0
 		i.is_sub_contracted_item = item.get("is_sub_contracted_item") or 0
 		i.default_warehouse = settings.get("warehouse")
 		i.default_material_request_type = (

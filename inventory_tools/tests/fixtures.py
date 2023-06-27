@@ -205,6 +205,7 @@ items = [
 		"default_warehouse": "Refrigerator - APC",
 		"is_sub_contracted_item": 1,
 		"supplier": "Freedom Provisions",
+		"valuation_rate": 3.0196,
 	},
 	{
 		"item_code": "Pie Crust Service",
