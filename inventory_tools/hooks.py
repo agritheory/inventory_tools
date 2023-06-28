@@ -30,7 +30,7 @@ required_apps = ["erpnext", "hrms"]
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {"Purchase Invoice": "public/js/purchase_invoice_custom.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
@@ -98,6 +98,7 @@ after_migrate = "inventory_tools.customize.load_customizations"
 
 override_doctype_class = {
 	"Work Order": "inventory_tools.overrides.work_order.CustomWorkOrder",
+	"Purchase Invoice": "inventory_tools.overrides.purchase_invoice.CustomPurchaseInvoice",
 }
 
 # Document Events
