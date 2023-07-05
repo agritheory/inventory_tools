@@ -1,9 +1,27 @@
 frappe.ui.form.on('Purchase Invoice', {
 	refresh: function (frm) {
+		show_subcontracting_fields(frm)
 		frm.remove_custom_button(__('Fetch Stock Entries'))
 		fetch_stock_entry_dialog(frm)
 	},
 })
+
+function show_subcontracting_fields(frm) {
+	if (!frm.doc.company || !frm.doc.is_subcontracted) {
+		hide_field('subcontracting')
+		return
+	}
+	frappe.db
+		.get_value('Inventory Tools Settings', { company: frm.doc.company }, 'enable_work_order_subcontracting')
+		.then(r => {
+			if (r && r.message && r.message.enable_work_order_subcontracting) {
+				// console.log('r.message:', r.message);
+				return
+			} else {
+				hide_field('subcontracting')
+			}
+		})
+}
 
 function add_stock_entry_row(frm, row) {
 	frm.add_child('subcontracting', {
