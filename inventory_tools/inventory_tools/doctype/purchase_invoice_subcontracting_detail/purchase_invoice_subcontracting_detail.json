@@ -15,7 +15,9 @@
   "uom",
   "stock_uom",
   "conversion_factor",
-  "valuation_rate"
+  "valuation_rate",
+  "paid_qty",
+  "to_pay_qty"
  ],
  "fields": [
   {
@@ -48,7 +50,7 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty"
+   "label": "Total Qty"
   },
   {
    "fieldname": "transfer_qty",
@@ -77,12 +79,24 @@
    "fieldtype": "Currency",
    "label": "Valuation Rate",
    "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "paid_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Paid Qty"
+  },
+  {
+   "fieldname": "to_pay_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "To Pay Qty"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-06-28 12:49:02.466708",
+ "modified": "2023-07-05 16:26:03.236795",
  "modified_by": "Administrator",
  "module": "Inventory Tools",
  "name": "Purchase Invoice Subcontracting Detail",

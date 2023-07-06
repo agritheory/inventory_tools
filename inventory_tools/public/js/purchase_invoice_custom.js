@@ -35,6 +35,8 @@ function add_stock_entry_row(frm, row) {
 		stock_uom: row.stock_uom,
 		conversion_factor: row.conversion_factor,
 		valuation_rate: row.valuation_rate,
+		paid_qty: row.paid_qty,
+		to_pay_qty: row.qty - row.paid_qty,
 	})
 	frm.refresh_field('subcontracting')
 }
