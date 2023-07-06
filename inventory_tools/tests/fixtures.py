@@ -204,6 +204,7 @@ items = [
 		"item_group": "Sub Assemblies",
 		"default_warehouse": "Refrigerator - APC",
 		"is_sub_contracted_item": 1,
+		"default_supplier": "Freedom Provisions",
 		"supplier": "Freedom Provisions",
 		"valuation_rate": 3.0196,
 	},
@@ -216,6 +217,7 @@ items = [
 		"is_sub_contracted_item": 1,
 		"is_stock_item": 0,
 		"item_price": 2.00,
+		"default_supplier": "Freedom Provisions",
 		"supplier": "Freedom Provisions",
 	},
 	{

@@ -223,6 +223,10 @@ def create_items(settings):
 		pr.append("item_groups", {"item_group": "Baked Goods"})
 		pr.save()
 
+	supps = frappe.get_all("Supplier")
+	for s in supps:
+		frappe.set_value("Supplier", s, "default_price_list", "Bakery Buying")
+
 	for item in items:
 		if frappe.db.exists("Item", item.get("item_code")):
 			continue
@@ -252,7 +256,11 @@ def create_items(settings):
 		i.is_sales_item = 1 if item.get("item_group") == "Baked Goods" else 0
 		i.append(
 			"item_defaults",
-			{"company": settings.company, "default_warehouse": item.get("default_warehouse")},
+			{
+				"company": settings.company,
+				"default_warehouse": item.get("default_warehouse"),
+				"default_supplier": item.get("default_supplier"),
+			},
 		)
 		if i.is_purchase_item and item.get("supplier"):
 			i.append("supplier_items", {"supplier": item.get("supplier")})
