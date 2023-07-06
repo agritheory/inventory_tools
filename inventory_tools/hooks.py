@@ -98,6 +98,7 @@ after_migrate = "inventory_tools.customize.load_customizations"
 
 override_doctype_class = {
 	"Work Order": "inventory_tools.overrides.work_order.CustomWorkOrder",
+	"Purchase Order": "inventory_tools.overrides.purchase_order.CustomPurchaseOrder",
 	"Purchase Invoice": "inventory_tools.overrides.purchase_invoice.CustomPurchaseInvoice",
 }
 
