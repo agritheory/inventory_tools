@@ -14,12 +14,31 @@ frappe.query_reports['Material Demand'] = {
 			fieldname: 'start_date',
 			label: __('Start Date'),
 			fieldtype: 'Date',
+			default: moment().add(-28, 'days'),
 		},
 		{
 			fieldname: 'end_date',
 			label: __('End Date'),
 			fieldtype: 'Date',
 			default: moment(),
+		},
+		{
+			fieldname: 'company',
+			label: __('Company'),
+			fieldtype: 'Link',
+			options: 'Company',
+		},
+		// {
+		// 	fieldname: 'use_price_list',
+		// 	label: __('Use Price List'),
+		// 	fieldtype: 'Select',
+		// 	options: ['Use Price List', 'Use Last Purchased Price'],
+		// },
+		{
+			fieldname: 'price_list',
+			label: __('Price List'),
+			fieldtype: 'Link',
+			options: 'Price List',
 		},
 	],
 	get_datatable_options(options) {
@@ -68,37 +87,67 @@ async function create_pos() {
 }
 
 function update_selection(row) {
-	if (!row[5]) {
-		// const checked = true //frappe.query_report.datatable.rowmanager.checkMap[row.rowIndex]
-		// // console.log(checked)
-		// frappe.query_report.datatable.datamanager.data.forEach((supplier_row, index) => {
-		// 	if(supplier_row.supplier === row[2].content){
-		// 		frappe.query_report.datatable.rowmanager.checkMap.splice(index, 1, checked)
-		// 	}
-		// })
+	if (!row[5].content) {
+		const toggle = frappe.query_report.datatable.rowmanager.checkMap[row[0].rowIndex]
+		select_all_supplier_items(row, toggle).then(() => {
+			update_selected_qty()
+		})
 	} else {
-		// this should be a standalone function
-		// update selected_qty, format red if its over demand qty
-		update_selected_qty(row)
+		update_selected_qty()
 	}
 }
 
-function update_selected_qty(row) {
-	const checked = frappe.query_report.datatable.rowmanager.checkMap[row[0].rowIndex]
-	let total_item_qty = 0.0
+function update_selected_qty() {
+	// iterate all rows for selected items
+	let item_map = {}
 	frappe.query_report.datatable.datamanager.data.forEach((supplier_row, index) => {
-		if (supplier_row.item_code === row[5].content) {
-			if (checked) {
-				total_item_qty += supplier_row.qty
+		if (frappe.query_report.datatable.rowmanager.checkMap[index]) {
+			if (supplier_row.item_code && !item_map[supplier_row.item_code]) {
+				item_map[supplier_row.item_code] = supplier_row.qty
+			} else if (supplier_row.item_code && item_map[supplier_row.item_code]) {
+				item_map[supplier_row.item_code] += supplier_row.qty
 			}
 		}
 	})
-	console.log(total_item_qty)
-	// frappe.query_report.datatable.datamanager.data.forEach((supplier_row, index) => {
-	// 	if (supplier_row.item_code === row[5].content) {
-	// 		if (checked) {
-	// 			console.log('total', total_item_qty)
-	// 		}
-	// 	}
-	// })
+	frappe.query_report.datatable.datamanager.data.forEach((supplier_row, index) => {
+		if (supplier_row.item_code in item_map) {
+			let supplier_price = Number(String(supplier_row.supplier_price).replace(/[^0-9\.-]+/g, ''))
+			let total_selected = item_map[supplier_row.item_code]
+			let selected_price = item_map[supplier_row.item_code] * (supplier_price || 0)
+			selected_price = format_currency(selected_price, supplier_row.currency, 2)
+			if (item_map[supplier_row.item_code] > supplier_row.total_demand) {
+				total_selected = `<span style="color: red">${total_selected}</span>`
+				selected_price = `<span style="color: red">${selected_price}</span>`
+			}
+			frappe.query_report.datatable.cellmanager.updateCell(8, index, total_selected, true)
+			frappe.query_report.datatable.cellmanager.updateCell(11, index, selected_price, true)
+		} else {
+			frappe.query_report.datatable.cellmanager.updateCell(8, index, '', true)
+			frappe.query_report.datatable.cellmanager.updateCell(11, index, '', true)
+		}
+	})
+}
+
+async function select_all_supplier_items(row, toggle) {
+	return new Promise(resolve => {
+		if (frappe.query_report.datatable.datamanager._filteredRows) {
+			frappe.query_report.datatable.datamanager._filteredRows.forEach(f => {
+				if (f[2].content === row[1].content) {
+					frappe.query_report.datatable.rowmanager.checkMap.splice(row[0].rowIndex, 0, toggle ? 1 : 0)
+					$(row[0].content).find('input').check = toggle
+				}
+			})
+		} else {
+			frappe.query_report.datatable.datamanager.rows.forEach(f => {
+				if (f[2].content === row[2].content) {
+					frappe.query_report.datatable.rowmanager.checkMap.splice(row[0].rowIndex, 0, toggle ? 1 : 0)
+					let input = $(frappe.query_report.datatable.rowmanager.getRow$(f[0].rowIndex)).find('input')
+					if (input[0]) {
+						input[0].checked = toggle
+					}
+				}
+			})
+		}
+		resolve()
+	})
 }

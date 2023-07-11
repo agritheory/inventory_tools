@@ -5,7 +5,8 @@ import json
 from itertools import groupby
 
 import frappe
-from erpnext.stock.get_item_details import get_price_list_rate
+from erpnext.stock.doctype.item.item import get_last_purchase_details
+from erpnext.stock.get_item_details import get_price_list_rate_for
 from frappe.utils.data import fmt_money, getdate
 
 
@@ -106,8 +107,8 @@ def get_columns(filters):
 			"label": "Selected Amount",
 			"fieldname": "amount",
 			"fieldtype": "Data",
-			"width": "90px",
-			"align": "left",
+			"width": "120px",
+			"align": "right",
 		},
 		{"fieldname": "currency", "fieldtype": "Link", "options": "Currency", "hidden": 1},
 	]
@@ -165,10 +166,23 @@ def get_data(filters):
 		rows = list(_rows)
 		output.append({"supplier": supplier, "indent": 0})
 		for r in rows:
-			r.supplier_price = fmt_money(r.get("supplier_price"), 2, r.get("currency")).replace(" ", "")
 			r.total_demand = total_demand[r.item_code]
+			r.supplier_price = get_item_price(filters, r)
+			r.supplier_price = fmt_money(r.get("supplier_price"), 2, r.get("currency")).replace(" ", "")
 			output.append({**r, "indent": 1})
 	return output
+
+
+def get_item_price(filters, r):
+	if filters.price_list:
+		args = frappe._dict(
+			{"price_list": filters.price_list, "uom": r.uom, "supplier": r.supplier, "qty": r.total_demand}
+		)
+		return get_price_list_rate_for(args, r.item_code)
+	else:
+		details = get_last_purchase_details(r.item_code, None, conversion_rate=1.0)
+		print(details)
+		# return details.get('last_purchased_rate')
 
 
 @frappe.whitelist()
