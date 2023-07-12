@@ -71,6 +71,13 @@ function manage_buttons(reportview) {
 }
 
 async function create_pos() {
+	let values = frappe.query_report.get_filter_values()
+	let company = undefined
+	if (!values.company) {
+		company = await select_company()
+	} else {
+		company = values.company
+	}
 	let selected_rows = frappe.query_report.datatable.rowmanager.getCheckedRows()
 	let selected_items = frappe.query_report.datatable.datamanager.data.filter((row, index) => {
 		return selected_rows.includes(String(index)) ? row : false
@@ -80,6 +87,7 @@ async function create_pos() {
 	} else {
 		await frappe
 			.xcall('inventory_tools.inventory_tools.report.material_demand.material_demand.create_pos', {
+				company: company,
 				rows: selected_items,
 			})
 			.then(r => {})
@@ -153,5 +161,30 @@ async function select_all_supplier_items(row, toggle) {
 			})
 		}
 		resolve()
+	})
+}
+
+async function select_company() {
+	return new Promise(resolve => {
+		let dialog = new frappe.ui.Dialog({
+			title: __('Select a Company'),
+			fields: [
+				{
+					fieldtype: 'Link',
+					fieldname: 'company',
+					label: 'Company',
+					options: 'Company',
+					reqd: 1,
+				},
+			],
+			primary_action: () => {
+				let values = dialog.get_values()
+				dialog.hide()
+				return resolve(values.company)
+			},
+			primary_action_label: __('Select'),
+		})
+		dialog.show()
+		dialog.get_close_btn()
 	})
 }

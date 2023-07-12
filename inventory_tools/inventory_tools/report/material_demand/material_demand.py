@@ -186,10 +186,11 @@ def get_item_price(filters, r):
 
 
 @frappe.whitelist()
-def create_pos(rows):
+def create_pos(company, rows):
 	rows = json.loads(rows) if isinstance(rows, str) else rows
 	if not rows:
 		return
+	companies = set()
 	counter = 0
 	for supplier, _rows in groupby(rows, lambda x: x.get("supplier")):
 		rows = list(_rows)
@@ -197,11 +198,10 @@ def create_pos(rows):
 		po.schedule_date = po.posting_date = getdate()
 		po.supplier = supplier
 		po.company = frappe.get_value("Material Request", rows[0].get("material_request"), "company")
-		buying_settings = frappe.get_doc("Buying Settings", "Buying Settings")
-		po.company = (
-			buying_settings.purchase_order_aggregation_company
-			or frappe.defaults.get_defaults().get("company")
-		)
+		companies.add(po.company)
+		settings = frappe.get_doc("Inventory Tools Settings", company)
+		if settings.purchase_order_aggregation_company:
+			po.company = settings.purchase_order_aggregation_company
 
 		for row in rows:
 			if not row.get("item_code"):
@@ -218,12 +218,12 @@ def create_pos(rows):
 					"uom": row.get("uom"),
 					"material_request": row.get("material_request"),
 					"material_request_item": row.get("material_request_item"),
-					"warehouse": buying_settings.aggregated_purchasing_warehouse
-					if buying_settings.aggregated_purchasing_warehouse
+					"warehouse": settings.aggregated_purchasing_warehouse
+					if settings.aggregated_purchasing_warehouse
 					else row.get("warehouse"),
 				},
 			)
-		po.multi_company_purchase_order = True
+		po.multi_company_purchase_order = True if len(list(companies)) > 1 else False
 		po.save()
 		counter += 1
 
