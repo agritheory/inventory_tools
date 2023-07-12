@@ -87,7 +87,7 @@ async function create_pos() {
 }
 
 function update_selection(row) {
-	if (!row[5].content) {
+	if (row !== undefined && !row[5].content) {
 		const toggle = frappe.query_report.datatable.rowmanager.checkMap[row[0].rowIndex]
 		select_all_supplier_items(row, toggle).then(() => {
 			update_selected_qty()
@@ -135,6 +135,8 @@ async function select_all_supplier_items(row, toggle) {
 				if (f[2].content === row[1].content) {
 					frappe.query_report.datatable.rowmanager.checkMap.splice(row[0].rowIndex, 0, toggle ? 1 : 0)
 					$(row[0].content).find('input').check = toggle
+				} else {
+					frappe.query_report.datatable.rowmanager.checkMap.splice(f[0].rowIndex, 0, 0)
 				}
 			})
 		} else {
@@ -145,6 +147,8 @@ async function select_all_supplier_items(row, toggle) {
 					if (input[0]) {
 						input[0].checked = toggle
 					}
+				} else {
+					frappe.query_report.datatable.rowmanager.checkMap.splice(f[0].rowIndex, 0, 0)
 				}
 			})
 		}
