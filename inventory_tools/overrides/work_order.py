@@ -38,15 +38,15 @@ class CustomWorkOrder(WorkOrder):
 			if po.docstatus == 0:  # amend draft PO workflow
 				po.flags.ignore_mandatory = True
 				po.flags.ignore_validate = True
+				# TODO: make adjustments to Items table or leave alone for user to handle?
 				for item_row in po.get("items"):
 					if (
 						item_row.get("fg_item") == self.production_item and item_row.get("fg_item_qty") >= self.qty
 					):
 						item_row.fg_item_qty -= self.qty
-						item_row.qty -= (
-							self.qty
-						)  # TODO: check/adjust for UOMs? Will this work in scenarios where the 'item' uom is diff (hours vs. Nos)?
-						item_row.stock_qty -= self.qty  # TODO: check/adjust for UOMs?
+						# TODO: check/adjust for UOMs? Will this work in scenarios where the 'item' uom is diff (hours vs. Nos)?
+						item_row.qty -= self.qty
+						item_row.stock_qty -= self.qty
 						break
 				for wo_row in po.get("subcontracting"):
 					if wo_row.work_order == self.name:
@@ -61,31 +61,6 @@ class CustomWorkOrder(WorkOrder):
 					alert=True,
 					indicator="green",
 				)
-			# # TODO: remove? Never gets to this code, system detects link to PO and asks to cancel all linked docs
-			# else:  # cancel / amend submitted PO workflow
-			# 	po.cancel()
-			# 	new_po = frappe.copy_doc(po)
-			# 	new_po.amended_from = po.name
-			# 	new_po.status = "Draft"
-			# 	new_po.flags.ignore_mandatory = True
-			# 	new_po.flags.ignore_validate = True
-			# 	for item_row in new_po.get("items"):
-			# 		if item_row.get("fg_item") == self.production_item and item_row.get("fg_item_qty") >= self.qty:
-			# 			item_row.fg_item_qty -= self.qty
-			# 			item_row.qty -= self.qty  # TODO: check/adjust for UOMs?
-			# 			item_row.stock_qty -= self.qty  # TODO: check/adjust for UOMs?
-			# 			break
-			# 	for wo_row in new_po.get("subcontracting"):
-			# 		if wo_row.work_order == self.name:
-			# 			new_po.remove(wo_row)
-			# 			break
-			# 	new_po.calculate_taxes_and_totals()
-			# 	new_po.save()  # TODO: keep as draft or submit?
-			# 	msgprint(
-			# 		_(f"New subcontracting Purchase Order {get_link_to_form('Purchase Order', new_po.name)} created by amending {po.name} to remove Work Order {self.name}"),
-			# 		alert=True,
-			# 		indicator="green"
-			# 	)
 
 		return super().on_cancel()
 
@@ -227,14 +202,7 @@ def add_to_existing_purchase_order(wo_name, po_name):
 			if po.docstatus == 2:
 				frappe.throw(_("Unable to add to the selected Purchase Order because it is cancelled."))
 			elif po.docstatus == 0:  # amend draft PO workflow
-				for item in po.get("items"):
-					if item.get("fg_item") == production_item:
-						item.fg_item_qty += wo_qty
-						item.qty += wo_qty  # TODO: check/adjust for UOMs?
-						item.stock_qty += wo_qty  # TODO: check/adjust for UOMs?
-						break
-				else:
-					po.append("items", item_row_data)
+				po.append("items", item_row_data)
 				po.append("subcontracting", subc_row_data)
 				po.set_missing_values()
 				po.flags.ignore_mandatory = True
@@ -248,19 +216,12 @@ def add_to_existing_purchase_order(wo_name, po_name):
 					indicator="green",
 				)
 				return
-			else:  # cancel / amend submitted PO workflow
+			else:  # cancel / amend submitted PO workflow. Leaves amended PO in Draft status so user can make adjustments as needed to Items table
 				po.cancel()
 				new_po = frappe.copy_doc(po)
 				new_po.amended_from = po.name
 				new_po.status = "Draft"
-				for item in new_po.get("items"):
-					if item.get("fg_item") == production_item:
-						item.fg_item_qty += wo_qty
-						item.qty += wo_qty  # TODO: check/adjust for UOMs?
-						item.stock_qty += wo_qty  # TODO: check/adjust for UOMs?
-						break
-				else:
-					new_po.append("items", item_row_data)
+				new_po.append("items", item_row_data)
 				new_po.append("subcontracting", subc_row_data)
 				new_po.flags.ignore_mandatory = True
 				new_po.flags.ignore_validate = True
