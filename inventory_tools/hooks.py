@@ -104,6 +104,7 @@ override_doctype_class = {
 	"Purchase Receipt": "inventory_tools.inventory_tools.overrides.purchase_receipt.InventoryToolsPurchaseReceipt",
 }
 
+
 # Document Events
 # ---------------
 # Hook on document methods and events
