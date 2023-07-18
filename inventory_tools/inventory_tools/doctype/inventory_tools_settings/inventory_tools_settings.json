@@ -14,7 +14,9 @@
   "aggregated_purchasing_warehouse",
   "work_order_subcontracting_section",
   "enable_work_order_subcontracting",
-  "create_purchase_orders"
+  "create_purchase_orders",
+  "section_break_ksp0d",
+  "update_warehouse_path"
  ],
  "fields": [
   {
@@ -30,6 +32,7 @@
    "label": "Material Demand"
   },
   {
+   "description": "Leave this field blank to disallow aggregation for this company",
    "fieldname": "purchase_order_aggregation_company",
    "fieldtype": "Link",
    "label": "Purchase Order Aggregation Company",
@@ -62,11 +65,21 @@
    "fieldname": "create_purchase_orders",
    "fieldtype": "Check",
    "label": "Create Purchase Orders in Production Plan"
+  },
+  {
+   "fieldname": "section_break_ksp0d",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "update_warehouse_path",
+   "fieldtype": "Check",
+   "label": "Update Warehouse Path"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-05-30 20:26:59.132951",
+ "modified": "2023-06-16 15:13:17.067894",
  "modified_by": "Administrator",
  "module": "Inventory Tools",
  "name": "Inventory Tools Settings",

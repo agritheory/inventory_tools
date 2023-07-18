@@ -101,22 +101,27 @@ after_migrate = "inventory_tools.customize.load_customizations"
 # Override standard doctype classes
 
 override_doctype_class = {
-	"Work Order": "inventory_tools.overrides.work_order.CustomWorkOrder",
-	"Purchase Order": "inventory_tools.overrides.purchase_order.CustomPurchaseOrder",
-	"Purchase Invoice": "inventory_tools.overrides.purchase_invoice.CustomPurchaseInvoice",
+	"Work Order": "inventory_tools.overrides.work_order.InventoryToolsWorkOrder",
+	"Purchase Invoice": "inventory_tools.inventory_tools.overrides.purchase_invoice.InventoryToolsPurchaseInvoice",
+	"Purchase Order": "inventory_tools.inventory_tools.overrides.purchase_order.InventoryToolsPurchaseOrder",
+	"Purchase Receipt": "inventory_tools.inventory_tools.overrides.purchase_receipt.InventoryToolsPurchaseReceipt",
 }
+
 
 # Document Events
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Company": {
+		"validate": [
+			"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.create_inventory_tools_settings",
+		],
+		"after_insert": [
+			"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.create_inventory_tools_settings",
+		],
+	}
+}
 
 # Scheduled Tasks
 # ---------------

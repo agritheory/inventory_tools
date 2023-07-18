@@ -5,7 +5,7 @@ from frappe import _, msgprint
 from frappe.utils import flt, get_link_to_form, getdate, nowdate
 
 
-class CustomWorkOrder(WorkOrder):
+class InventoryToolsWorkOrder(WorkOrder):
 	def validate(self):
 		settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
 		sc_items = self.get_sub_contracted_items()
