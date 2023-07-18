@@ -81,7 +81,7 @@ def create_test_data():
 	create_items(settings)
 	create_boms(settings)
 	create_material_request(settings)
-	# create_production_plan(settings)
+	create_production_plan(settings)
 
 
 def create_suppliers(settings):
@@ -245,7 +245,10 @@ def create_items(settings):
 			{"company": settings.company, "default_warehouse": item.get("default_warehouse")},
 		)
 		if i.is_purchase_item and item.get("supplier"):
-			i.append("supplier_items", {"supplier": item.get("supplier")})
+			if isinstance(item.get("supplier"), list):
+				[i.append("supplier_items", {"supplier": s}) for s in item.get("supplier")]
+			else:
+				i.append("supplier_items", {"supplier": item.get("supplier")})
 		i.save()
 		if item.get("item_price"):
 			ip = frappe.new_doc("Item Price")
@@ -384,38 +387,39 @@ def create_production_plan(settings):
 	mr.save()
 	mr.submit()
 
-	for item in mr.items:
-		supplier = frappe.get_value("Item Supplier", {"parent": item.get("item_code")}, "supplier")
-		item.supplier = supplier
+	# TODO: this should test the material demand report instead
+	# for item in mr.items:
+	# 	supplier = frappe.get_value("Item Supplier", {"parent": item.get("item_code")}, "supplier")
+	# 	item.supplier = supplier
 
-	for supplier, _items in groupby(
-		sorted((m for m in mr.items if m.supplier), key=lambda d: d.supplier),
-		lambda x: x.get("supplier"),
-	):
-		items = list(_items)
-		if not supplier:
-			continue
-		pr = frappe.new_doc("Purchase Receipt")
-		pr.company = settings.company
-		pr.supplier = supplier
-		pr.posting_date = settings.day
-		pr.set_posting_time = 1
-		pr.buying_price_list = "Bakery Buying"
-		for item in items:
-			item_details = get_item_details(
-				{
-					"item_code": item.item_code,
-					"qty": item.qty,
-					"supplier": pr.supplier,
-					"company": pr.company,
-					"doctype": pr.doctype,
-					"currency": pr.currency,
-					"buying_price_list": pr.buying_price_list,
-				}
-			)
-			pr.append("items", {**item_details})
-		pr.save()
-		pr.submit()
+	# for supplier, _items in groupby(
+	# 	sorted((m for m in mr.items if m.supplier), key=lambda d: d.supplier),
+	# 	lambda x: x.get("supplier"),
+	# ):
+	# 	items = list(_items)
+	# 	if not supplier:
+	# 		continue
+	# 	pr = frappe.new_doc("Purchase Receipt")
+	# 	pr.company = settings.company
+	# 	pr.supplier = supplier
+	# 	pr.posting_date = settings.day
+	# 	pr.set_posting_time = 1
+	# 	pr.buying_price_list = "Bakery Buying"
+	# 	for item in items:
+	# 		item_details = get_item_details(
+	# 			{
+	# 				"item_code": item.item_code,
+	# 				"qty": item.qty,
+	# 				"supplier": pr.supplier,
+	# 				"company": pr.company,
+	# 				"doctype": pr.doctype,
+	# 				"currency": pr.currency,
+	# 				"buying_price_list": pr.buying_price_list,
+	# 			}
+	# 		)
+	# 		pr.append("items", {**item_details})
+	# 	pr.save()
+	# 	pr.submit()
 
 	pp.make_work_order()
 	wos = frappe.get_all("Work Order", {"production_plan": pp.name})

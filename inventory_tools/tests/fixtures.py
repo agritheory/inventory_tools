@@ -318,7 +318,7 @@ items = [
 		"item_group": "Bakery Supplies",
 		"item_price": 0.4,
 		"default_warehouse": "Storeroom - APC",
-		"supplier": "Unity Bakery Supply",
+		"supplier": ["Freedom Provisions", "Unity Bakery Supply"],
 	},
 	{
 		"item_code": "Pie Tin",
@@ -327,7 +327,7 @@ items = [
 		"item_price": 0.18,
 		"item_group": "Bakery Supplies",
 		"default_warehouse": "Storeroom - APC",
-		"supplier": "Unity Bakery Supply",
+		"supplier": ["Freedom Provisions", "Unity Bakery Supply"],
 	},
 	{
 		"item_code": "Parchment Paper",
@@ -336,7 +336,7 @@ items = [
 		"item_group": "Bakery Supplies",
 		"item_price": 0.02,
 		"default_warehouse": "Storeroom - APC",
-		"supplier": "Unity Bakery Supply",
+		"supplier": ["Freedom Provisions", "Unity Bakery Supply"],
 	},
 	{
 		"item_code": "Salt",

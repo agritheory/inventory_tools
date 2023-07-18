@@ -10,7 +10,7 @@ class InventoryToolsSettings(Document):
 
 
 @frappe.whitelist()
-def create_inventory_tools_settings(doc, method=None):
+def create_inventory_tools_settings(doc, method=None) -> None:
 	if not frappe.db.exists("Company", doc.name) or frappe.db.exists(
 		"Inventory Tools Settings", doc.name
 	):
