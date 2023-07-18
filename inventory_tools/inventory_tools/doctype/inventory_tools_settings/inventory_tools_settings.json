@@ -68,12 +68,8 @@
   },
   {
    "fieldname": "section_break_ksp0d",
-<<<<<<< HEAD
    "fieldtype": "Section Break",
    "label": "Warehouse Path"
-=======
-   "fieldtype": "Section Break"
->>>>>>> 3e36baa (wip: material demand report improvements)
   },
   {
    "default": "0",
@@ -84,11 +80,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
-<<<<<<< HEAD
  "modified": "2023-06-17 11:22:22.377549",
-=======
- "modified": "2023-06-16 15:13:17.067894",
->>>>>>> 3e36baa (wip: material demand report improvements)
  "modified_by": "Administrator",
  "module": "Inventory Tools",
  "name": "Inventory Tools Settings",
