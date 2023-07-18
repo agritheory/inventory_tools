@@ -14,8 +14,7 @@ def execute(filters=None):
 	if (filters.start_date and filters.end_date) and (filters.start_date > filters.end_date):
 		frappe.throw(frappe._("Start date cannot be before end date"))
 
-	columns, data = get_columns(filters), get_data(filters)
-	return columns, data
+	return get_columns(filters), get_data(filters)
 
 
 def get_columns(filters):
@@ -116,7 +115,7 @@ def get_columns(filters):
 
 def get_data(filters):
 	output = []
-	# refactor to frappe query builder
+	# TODO: refactor to frappe query builder
 	company_query = "AND `tabMaterial Request`.company = (%(company)s)" if filters.company else ""
 	data = frappe.db.sql(
 		f"""
@@ -181,8 +180,7 @@ def get_item_price(filters, r):
 		return get_price_list_rate_for(args, r.item_code)
 	else:
 		details = get_last_purchase_details(r.item_code, None, conversion_rate=1.0)
-		print(details)
-		# return details.get('last_purchased_rate')
+		return details.get("rate")
 
 
 @frappe.whitelist()

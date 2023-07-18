@@ -21,6 +21,12 @@ frappe.query_reports['Material Demand'] = {
 			fieldtype: 'Date',
 			default: moment(),
 		},
+		{
+			fieldname: 'price_list',
+			label: __('Price List'),
+			fieldtype: 'Link',
+			options: 'Price List',
+		},
 	],
 	get_datatable_options(options) {
 		return Object.assign(options, {

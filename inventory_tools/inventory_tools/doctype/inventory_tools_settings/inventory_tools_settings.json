@@ -68,8 +68,7 @@
   },
   {
    "fieldname": "section_break_ksp0d",
-   "fieldtype": "Section Break",
-   "label": "Warehouse Path"
+   "fieldtype": "Section Break"
   },
   {
    "default": "0",
@@ -80,7 +79,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-06-17 11:22:22.377549",
+ "modified": "2023-06-16 15:13:17.067894",
  "modified_by": "Administrator",
  "module": "Inventory Tools",
  "name": "Inventory Tools Settings",
