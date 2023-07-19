@@ -101,7 +101,7 @@ after_migrate = "inventory_tools.customize.load_customizations"
 # Override standard doctype classes
 
 override_doctype_class = {
-	"Work Order": "inventory_tools.overrides.work_order.InventoryToolsWorkOrder",
+	"Work Order": "inventory_tools.inventory_tools.overrides.work_order.InventoryToolsWorkOrder",
 	"Purchase Invoice": "inventory_tools.inventory_tools.overrides.purchase_invoice.InventoryToolsPurchaseInvoice",
 	"Purchase Order": "inventory_tools.inventory_tools.overrides.purchase_order.InventoryToolsPurchaseOrder",
 	"Purchase Receipt": "inventory_tools.inventory_tools.overrides.purchase_receipt.InventoryToolsPurchaseReceipt",
