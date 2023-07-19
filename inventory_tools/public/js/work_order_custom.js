@@ -17,9 +17,12 @@ frappe.ui.form.on('Work Order', {
 								frm.add_custom_button(
 									__('Create Subcontract PO'),
 									() => {
-										frappe.xcall('inventory_tools.overrides.work_order.make_subcontracted_purchase_order', {
-											wo_name: frm.doc.name,
-										})
+										frappe.xcall(
+											'inventory_tools.inventory_tools.overrides.work_order.make_subcontracted_purchase_order',
+											{
+												wo_name: frm.doc.name,
+											}
+										)
 									},
 									__('Subcontracting')
 								)
@@ -41,10 +44,13 @@ frappe.ui.form.on('Work Order', {
 											primary_action: function () {
 												let data = d.get_values()
 												frappe
-													.xcall('inventory_tools.overrides.work_order.add_to_existing_purchase_order', {
-														wo_name: frm.doc.name,
-														po_name: data.purchase_order,
-													})
+													.xcall(
+														'inventory_tools.inventory_tools.overrides.work_order.add_to_existing_purchase_order',
+														{
+															wo_name: frm.doc.name,
+															po_name: data.purchase_order,
+														}
+													)
 													.then(r => {
 														d.hide()
 													})

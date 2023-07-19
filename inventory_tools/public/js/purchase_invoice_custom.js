@@ -78,7 +78,7 @@ function fetch_stock_entry_dialog(frm) {
 					po.push(item.doc.purchase_order)
 				})
 				frappe
-					.xcall('inventory_tools.overrides.purchase_invoice.get_stock_entries', {
+					.xcall('inventory_tools.inventory_tools.overrides.purchase_invoice.get_stock_entries', {
 						purchase_orders: po,
 						from_date: data.from_date,
 						to_date: data.to_date,
