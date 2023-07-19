@@ -14,6 +14,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 	make_purchase_receipt,
 )
 from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
+from frappe import _
 
 
 def _bypass(*args, **kwargs):
@@ -72,6 +73,31 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 			validate_disabled_warehouse(w)
 			if not self.multi_company_purchase_order:
 				validate_warehouse_company(w, self.company)
+
+	def validate(self):
+		if self.is_subcontracting_enabled():
+			self.validate_subcontracting_fg_qty()
+		super().validate()  # TODO: modify the existing subcontracting checks?
+
+	def is_subcontracting_enabled(self):
+		settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
+		return bool(settings and settings.enable_work_order_subcontracting)
+
+	def validate_subcontracting_fg_qty(self):
+		sub_wo = self.get("subcontracting")
+		if self.is_subcontracted and sub_wo:
+			items_fg_qty = sum(item.get("fg_item_qty") or 0 for item in self.get("items"))
+			subc_fg_qty = sum(row.get("fg_item_qty") or 0 for row in sub_wo)
+			precision = int(frappe.get_precision("Purchase Order Item", "stock_qty"))
+			diff = abs(items_fg_qty - subc_fg_qty)
+			if diff > (1 / (10**precision)):
+				frappe.msgprint(  # Just a warning in the case: PO is created before WO's exist, several WOs needed to complete the work (each one has less than PO)
+					msg=_(
+						f"The total of Finished Good Item Qty for all items does not match the total Finished Good Item Qty in the Subcontracting table. There is a difference of {diff}."
+					),
+					title=_("Warning"),
+					indicator="red",
+				)
 
 
 @frappe.whitelist()
