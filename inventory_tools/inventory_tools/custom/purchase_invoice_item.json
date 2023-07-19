@@ -19,7 +19,7 @@
    "is_system_generated": 0,
    "modified": "2023-06-26 15:52:33.804721",
    "modified_by": "Administrator",
-   "module": null,
+   "module": "Inventory Tools",
    "name": "Purchase Invoice Item-from_warehouse-hidden",
    "owner": "Administrator",
    "property": "hidden",
