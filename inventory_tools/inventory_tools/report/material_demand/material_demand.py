@@ -198,7 +198,8 @@ def get_item_price(filters, r):
 
 
 @frappe.whitelist()
-def create_pos(company, rows):
+def create_pos(company, filters, rows):
+	filters = frappe._dict(json.loads(filters)) if isinstance(filters, str) else filters
 	rows = json.loads(rows) if isinstance(rows, str) else rows
 	if not rows:
 		return
@@ -210,6 +211,7 @@ def create_pos(company, rows):
 		po.schedule_date = po.posting_date = getdate()
 		po.supplier = supplier
 		po.company = frappe.get_value("Material Request", rows[0].get("material_request"), "company")
+		po.buying_price_list = filters.price_list
 		companies.add(po.company)
 		settings = frappe.get_doc("Inventory Tools Settings", company)
 		if settings.purchase_order_aggregation_company:
