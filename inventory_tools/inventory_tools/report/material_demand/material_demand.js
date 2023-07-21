@@ -75,6 +75,7 @@ async function create_pos() {
 		await frappe
 			.xcall('inventory_tools.inventory_tools.report.material_demand.material_demand.create_pos', {
 				company: company,
+				filters: values,
 				rows: selected_items,
 			})
 			.then(r => {})

@@ -82,6 +82,13 @@ def get_columns(filters):
 			"align": "right",
 		},
 		{
+			"label": "Draft POs",
+			"fieldname": "draft_po",
+			"fieldtype": "Data",
+			"width": "90px",
+			"align": "right",
+		},
+		{
 			"label": "Total Selected",
 			"fieldname": "total_selected",
 			"fieldtype": "Data",
@@ -140,6 +147,7 @@ def get_data(filters):
 	AND `tabMaterial Request Item`.ordered_qty < `tabMaterial Request Item`.stock_qty
 	AND `tabMaterial Request Item`.received_qty < `tabMaterial Request Item`.stock_qty
 	AND `tabItem Supplier`.parent = `tabMaterial Request Item`.item_code
+	
 	{company_query}
 	ORDER BY supplier, item_name
 	""",
@@ -168,6 +176,12 @@ def get_data(filters):
 			r.total_demand = total_demand[r.item_code]
 			r.supplier_price = get_item_price(filters, r)
 			r.supplier_price = fmt_money(r.get("supplier_price"), 2, r.get("currency")).replace(" ", "")
+			r.draft_po = frappe.db.get_value(
+				"Purchase Order Item",
+				{"material_request_item": r.material_request_item, "docstatus": 0},
+				"qty",
+			)
+			r.draft_po = f'<span style="color: red">{r.draft_po}</span>' if r.draft_po else None
 			output.append({**r, "indent": 1})
 	return output
 
@@ -184,7 +198,8 @@ def get_item_price(filters, r):
 
 
 @frappe.whitelist()
-def create_pos(company, rows):
+def create_pos(company, filters, rows):
+	filters = frappe._dict(json.loads(filters)) if isinstance(filters, str) else filters
 	rows = json.loads(rows) if isinstance(rows, str) else rows
 	if not rows:
 		return
@@ -196,6 +211,7 @@ def create_pos(company, rows):
 		po.schedule_date = po.posting_date = getdate()
 		po.supplier = supplier
 		po.company = frappe.get_value("Material Request", rows[0].get("material_request"), "company")
+		po.buying_price_list = filters.price_list
 		companies.add(po.company)
 		settings = frappe.get_doc("Inventory Tools Settings", company)
 		if settings.purchase_order_aggregation_company:
