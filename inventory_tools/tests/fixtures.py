@@ -209,7 +209,7 @@ items = [
 		"valuation_rate": 3.0196,
 	},
 	{
-		"item_code": "Pie Crust Service",
+		"item_code": "Pie Crust Service per Crust",
 		"uom": "Nos",
 		"description": "Subcontracted pie crust manufacturing service. Item price is per crust.",
 		"item_group": "Sub Assemblies",
@@ -217,6 +217,18 @@ items = [
 		"is_sub_contracted_item": 1,
 		"is_stock_item": 0,
 		"item_price": 2.00,
+		"default_supplier": "Freedom Provisions",
+		"supplier": "Freedom Provisions",
+	},
+	{
+		"item_code": "Pie Crust Service per Hour",
+		"uom": "Hour",
+		"description": "Subcontracted pie crust manufacturing service. Item price is per hour.",
+		"item_group": "Sub Assemblies",
+		"default_warehouse": "Subcontracted Items - APC",
+		"is_sub_contracted_item": 1,
+		"is_stock_item": 0,
+		"item_price": 30.00,  # Assumes 5 crusts takes 20 mins (excluding chilling time), or 15 crusts/hour at rate of $2.00/crust
 		"default_supplier": "Freedom Provisions",
 		"supplier": "Freedom Provisions",
 	},
@@ -640,10 +652,26 @@ boms = [
 		],
 	},
 	{
-		"item": "Pie Crust",
+		"item": "Pie Crust",  # Subcontracted BOM
 		"quantity": 5.0,
 		"uom": "Nos",
+		"is_default": 0,
+		"is_subcontracted": 1,
 		"with_operations": 0,
+		"items": [
+			{"item_code": "Flour", "qty": 4.25, "qty_consumed_per_unit": 0.85, "uom": "Pound"},
+			{"item_code": "Butter", "qty": 2.5, "qty_consumed_per_unit": 0.5, "uom": "Pound"},
+			# {"item_code": "Ice Water", "qty": 2.5, "qty_consumed_per_unit": 0.5, "uom": "Cup"},
+			{"item_code": "Salt", "qty": 0.05, "qty_consumed_per_unit": 0.01, "uom": "Pound"},
+			{"item_code": "Parchment Paper", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
+			{"item_code": "Pie Tin", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
+		],
+		"operations": [],  # Subcontracted item -> operations done by supplier
+	},
+	{
+		"item": "Pie Crust",  # In-house BOM
+		"quantity": 5.0,
+		"uom": "Nos",
 		"items": [
 			{"item_code": "Flour", "qty": 4.25, "qty_consumed_per_unit": 0.85, "uom": "Pound"},
 			{"item_code": "Butter", "qty": 2.5, "qty_consumed_per_unit": 0.5, "uom": "Pound"},
@@ -652,37 +680,39 @@ boms = [
 			{"item_code": "Parchment Paper", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
 			{"item_code": "Pie Tin", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
 		],
-		"operations": [  # Subcontracted item -> operations done by supplier
-			# {
-			# 	"batch_size": 5,
-			# 	"operation": "Gather Pie Crust Ingredients",
-			# 	"time_in_mins": 5.0,
-			# 	"workstation": "Food Prep Table 2",
-			# },
-			# {
-			# 	"batch_size": 5,
-			# 	"operation": "Mix Pie Crust Op",
-			# 	"time_in_mins": 5.0,
-			# 	"workstation": "Mixer Station",
-			# },
-			# {
-			# 	"batch_size": 1,
-			# 	"operation": "Divide Dough Op",
-			# 	"time_in_mins": 10.0,
-			# 	"workstation": "Food Prep Table 2",
-			# },
-			# {
-			# 	"batch_size": 1,
-			# 	"operation": "Chill Pie Crust Op",
-			# 	"time_in_mins": 30.0,
-			# 	"workstation": "Refrigerator Station",
-			# },
-			# {
-			# 	"batch_size": 5,
-			# 	"operation": "Roll Pie Crust Op",
-			# 	"time_in_mins": 30.0,
-			# 	"workstation": "Food Prep Table 2",
-			# },
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Gather Pie Crust Ingredients",
+				"time_in_mins": 5.0,
+				"workstation": "Food Prep Table 2",
+			},
+			{
+				"batch_size": 5,
+				"operation": "Mix Pie Crust Op",
+				"time_in_mins": 5.0,
+				"workstation": "Mixer Station",
+			},
+			{
+				"batch_size": 1,
+				"operation": "Divide Dough Op",
+				"time_in_mins": 2.0,
+				"workstation": "Food Prep Table 2",
+			},
+			{
+				"batch_size": 1,
+				"operation": "Chill Pie Crust Op",
+				"time_in_mins": 30.0,
+				"workstation": "Refrigerator Station",
+			},
+			{
+				"batch_size": 5,
+				"operation": "Roll Pie Crust Op",
+				"time_in_mins": 10.0,
+				"workstation": "Food Prep Table 2",
+			},
 		],
 	},
 ]
+
+uom_convs = [{"category": "Subcontracting", "from_uom": "Hour", "to_uom": "Nos", "value": 15.0}]

@@ -11,7 +11,14 @@ from erpnext.setup.utils import enable_all_roles_and_domains, set_defaults_for_t
 from erpnext.stock.get_item_details import get_item_details
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 
-from inventory_tools.tests.fixtures import boms, items, operations, suppliers, workstations
+from inventory_tools.tests.fixtures import (
+	boms,
+	items,
+	operations,
+	suppliers,
+	uom_convs,
+	workstations,
+)
 
 
 def before_test():
@@ -78,6 +85,7 @@ def create_test_data():
 	create_operations()
 	create_item_groups(settings)
 	create_suppliers(settings)
+	create_uom_conversions(settings)
 	create_items(settings)
 	create_boms(settings)
 	create_material_request(settings)
@@ -179,6 +187,20 @@ def create_operations():
 		oper.save()
 
 
+def create_uom_conversions(settings):
+	for uom in uom_convs:
+		if not frappe.db.exists("UOM Category", uom.get("category")):
+			uc = frappe.new_doc("UOM Category")
+			uc.name = uom.get("category")
+			uc.save()
+		uom_conv = frappe.new_doc("UOM Conversion")
+		uom_conv.category = uom.get("category")
+		uom_conv.from_uom = uom.get("from_uom")
+		uom_conv.to_uom = uom.get("to_uom")
+		uom_conv.value = uom.get("value")
+		uom_conv.save()
+
+
 def create_item_groups(settings):
 	for ig_name in (
 		"Baked Goods",
@@ -267,6 +289,9 @@ def create_items(settings):
 				[i.append("supplier_items", {"supplier": s}) for s in item.get("supplier")]
 			else:
 				i.append("supplier_items", {"supplier": item.get("supplier")})
+		if i.item_code == "Pie Crust":
+			i.append("uoms", {"uom": "Hour", "conversion_factor": 15.0})
+			i.purchase_uom = "Hour"
 		i.save()
 		if item.get("item_price"):
 			ip = frappe.new_doc("Item Price")
@@ -319,13 +344,15 @@ def create_warehouses(settings):
 
 def create_boms(settings):
 	for bom in boms[::-1]:  # reversed
-		if frappe.db.exists("BOM", {"item": bom.get("item")}):
+		if frappe.db.exists("BOM", {"item": bom.get("item")}) and bom.get("item") != "Pie Crust":
 			continue
 		b = frappe.new_doc("BOM")
 		b.item = bom.get("item")
 		b.quantity = bom.get("quantity")
 		b.uom = bom.get("uom")
 		b.company = settings.company
+		b.is_default = 0 if bom.get("is_default") == 0 else 1
+		b.is_subcontracted = bom.get("is_subcontracted") or 0
 		b.rm_cost_as_per = "Price List"
 		b.buying_price_list = "Bakery Buying"
 		b.currency = "USD"
