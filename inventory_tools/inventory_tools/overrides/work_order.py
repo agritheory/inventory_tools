@@ -7,32 +7,41 @@ from frappe.utils import flt, get_link_to_form, getdate, nowdate
 
 class InventoryToolsWorkOrder(WorkOrder):
 	def validate(self):
-		settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
-		sc_items = self.get_sub_contracted_items()
-		if settings and settings.enable_work_order_subcontracting and sc_items:
-			has_ops = [
-				item for item, bom_no in sc_items if frappe.get_value("BOM", bom_no, "with_operations")
-			]
-			if has_ops:
-				formatted_items = "</li><li>".join(has_ops)
-				frappe.throw(
-					_(
-						f"This Work Order requires subcontracted items, and BOM operations were detected for the following ones:<br><ul><li>{formatted_items}</li></ul><br>Subcontracted item BOMs should not include operations."
-					)
-				)
-			if self.skip_transfer:
-				frappe.throw(
-					_("Skip Material Transfer may not be selected when subcontracted items are present.")
-				)
-
+		if self.is_subcontracting_enabled() and frappe.get_value("BOM", self.bom_no, "is_subcontracted"):
+			self.validate_subcontracting_no_bom_ops()
+			self.validate_subcontracting_no_skip_transfer()
 		return super().validate()
 
 	def on_cancel(self):
+		if self.is_subcontracting_enabled():
+			self.on_cancel_remove_wo_from_po()
+		return super().on_cancel()
+
+	def is_subcontracting_enabled(self):
 		settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
-		is_sc = frappe.get_value("Item", self.production_item, "is_sub_contracted_item")
+		return bool(settings and settings.enable_work_order_subcontracting)
+
+	def validate_subcontracting_no_bom_ops(self):
+		if frappe.get_value("BOM", self.bom_no, "with_operations"):
+			frappe.throw(
+				_(
+					"This Work Order uses a BOM that's subcontracted, and BOM operations were detected. Subcontracted item BOMs should not include operations."
+				)
+			)
+
+	def validate_subcontracting_no_skip_transfer(self):
+		if self.skip_transfer:
+			frappe.throw(
+				_(
+					"Skip Material Transfer may not be selected when the Work Order uses a BOM that is subcontracted."
+				)
+			)
+
+	def on_cancel_remove_wo_from_po(self):
+		is_sc = frappe.get_value("BOM", self.bom_no, "is_subcontracted")
 		existing_po = in_existing_po(self.name)
 
-		if settings and settings.enable_work_order_subcontracting and is_sc and len(existing_po) > 0:
+		if is_sc and len(existing_po) > 0:
 			po = frappe.get_doc("Purchase Order", existing_po[0])
 
 			if po.docstatus == 0:  # amend draft PO workflow
@@ -44,9 +53,8 @@ class InventoryToolsWorkOrder(WorkOrder):
 						item_row.get("fg_item") == self.production_item and item_row.get("fg_item_qty") >= self.qty
 					):
 						item_row.fg_item_qty -= self.qty
-						# TODO: check/adjust for UOMs? Will this work in scenarios where the 'item' uom is diff (hours vs. Nos)?
-						item_row.qty -= self.qty
-						item_row.stock_qty -= self.qty
+						item_row.qty -= self.qty  # TODO: check/convert UOMs
+						item_row.stock_qty -= self.qty  # TODO: check/convert UOMs
 						break
 				for wo_row in po.get("subcontracting"):
 					if wo_row.work_order == self.name:
@@ -62,26 +70,12 @@ class InventoryToolsWorkOrder(WorkOrder):
 					indicator="green",
 				)
 
-		return super().on_cancel()
-
-	def get_sub_contracted_items(self):
-		"""
-		Returns a list of (item_code, bom_no) for subcontracted items only. Checks the item
-		in the work oder itself as well as sub assembly items
-		"""
-		bom_data = []
-		get_sub_assembly_items(self.bom_no, bom_data, self.qty, self.company)
-		sc_items = [(d.production_item, d.bom_no) for d in bom_data if d.is_sub_contracted_item]
-		if frappe.get_value("Item", self.production_item, "is_sub_contracted_item"):
-			sc_items.append((self.production_item, self.bom_no))
-		return sc_items
-
 
 @frappe.whitelist()
 def make_subcontracted_purchase_order(wo_name):
-	company, production_item = frappe.get_value("Work Order", wo_name, ["company", "production_item"])
+	company, bom_no = frappe.get_value("Work Order", wo_name, ["company", "bom_no"])
 	settings = frappe.get_doc("Inventory Tools Settings", {"company": company})
-	is_sc = frappe.get_value("Item", production_item, "is_sub_contracted_item")
+	is_sc = frappe.get_value("BOM", bom_no, "is_subcontracted")
 
 	if settings and settings.enable_work_order_subcontracting and is_sc:
 		frappe.flags.mute_messages = False
@@ -104,11 +98,7 @@ def make_subcontracted_purchase_order(wo_name):
 			)
 		)
 	else:
-		msgprint(
-			_(
-				f"Unable to create Purchase Order: the production item '{production_item}' is not set as a subcontracted item in the Item master."
-			)
-		)
+		msgprint(_("Unable to create Purchase Order: the Work Order's BOM is not set as subcontracted."))
 
 
 def in_existing_po(wo_name):
@@ -153,26 +143,28 @@ def create_po_table_data(wo_name):
 
 
 def make_purchase_order(wo_name):
-	wo = frappe.get_doc("Work Order", wo_name)
+	company, production_item, planned_start_date = frappe.get_value(
+		"Work Order", wo_name, ["company", "production_item", "planned_start_date"]
+	)
 
 	# Get supplier
-	supplier = frappe.get_value("Item Default", {"parent": wo.production_item}, "default_supplier")
+	supplier = frappe.get_value("Item Default", {"parent": production_item}, "default_supplier")
 	if not supplier:
 		supplier = frappe.get_all(
-			"Item Supplier", {"parent": wo.production_item}, "supplier", pluck="supplier"
+			"Item Supplier", {"parent": production_item}, "supplier", pluck="supplier"
 		)
 		try:
 			supplier = supplier[-1]
 		except IndexError as e:
 			frappe.throw(
-				_(f"Default Supplier or Item Supplier must be set for subcontracted item {wo.production_item}")
+				_(f"Default Supplier or Item Supplier must be set for subcontracted item {production_item}")
 			)
 
 	# Make Purchase Order
 	po = frappe.new_doc("Purchase Order")
-	po.company = wo.company
+	po.company = company
 	po.supplier = supplier
-	po.schedule_date = getdate(wo.planned_start_date) if wo.planned_start_date else nowdate()
+	po.schedule_date = getdate(planned_start_date) if planned_start_date else nowdate()
 	po.is_subcontracted = 1
 	item_row_data, subc_row_data = create_po_table_data(wo_name)
 	po.append("items", item_row_data)
@@ -202,7 +194,15 @@ def add_to_existing_purchase_order(wo_name, po_name):
 			if po.docstatus == 2:
 				frappe.throw(_("Unable to add to the selected Purchase Order because it is cancelled."))
 			elif po.docstatus == 0:  # amend draft PO workflow
-				po.append("items", item_row_data)
+				# TODO: check for existing fg_item in items table to adjust or add new row
+				for item in po.get("items"):
+					if item.Zget("fg_item") == production_item:
+						item.fg_item_qty += wo_qty
+						item.qty += wo_qty  # TODO: check/convert UOMs
+						item.stock_qty += wo_qty  # TODO: check/convert UOMs
+						break
+				else:
+					po.append("items", item_row_data)
 				po.append("subcontracting", subc_row_data)
 				po.set_missing_values()
 				po.flags.ignore_mandatory = True
@@ -221,7 +221,14 @@ def add_to_existing_purchase_order(wo_name, po_name):
 				new_po = frappe.copy_doc(po)
 				new_po.amended_from = po.name
 				new_po.status = "Draft"
-				new_po.append("items", item_row_data)
+				for item in new_po.get("items"):
+					if item.get("fg_item") == production_item:
+						item.fg_item_qty += wo_qty
+						item.qty += wo_qty  # TODO: check/convert UOMs
+						item.stock_qty += wo_qty  # TODO: check/convert UOMs
+						break
+				else:
+					new_po.append("items", item_row_data)
 				new_po.append("subcontracting", subc_row_data)
 				new_po.flags.ignore_mandatory = True
 				new_po.flags.ignore_validate = True
