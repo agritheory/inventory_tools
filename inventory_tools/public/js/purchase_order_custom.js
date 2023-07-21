@@ -10,6 +10,8 @@ frappe.ui.form.on('Purchase Order', {
 	},
 })
 
+// TODO: subcontracting table: autofill fields when a row is manually added and user selects the WO
+
 function show_subcontracting_fields(frm) {
 	if (!frm.doc.company || !frm.doc.is_subcontracted) {
 		hide_field('subcontracting')

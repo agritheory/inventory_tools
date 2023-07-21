@@ -8,8 +8,8 @@ frappe.ui.form.on('Work Order', {
 
 	refresh: function (frm) {
 		if (frm.doc.company && frm.doc.docstatus == 1) {
-			frappe.db.get_value('Item', { item_code: frm.doc.production_item }, 'is_sub_contracted_item').then(r => {
-				if (r && r.message && r.message.is_sub_contracted_item) {
+			frappe.db.get_value('BOM', { name: frm.doc.bom_no }, 'is_subcontracted').then(r => {
+				if (r && r.message && r.message.is_subcontracted) {
 					frappe.db
 						.get_value('Inventory Tools Settings', { company: frm.doc.company }, 'enable_work_order_subcontracting')
 						.then(r => {
