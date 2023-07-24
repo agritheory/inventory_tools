@@ -207,6 +207,7 @@ items = [
 		"default_supplier": "Freedom Provisions",
 		"supplier": "Freedom Provisions",
 		"valuation_rate": 3.0196,
+		"uom_conversion_detail": {"Hour": 20},
 	},
 	{
 		"item_code": "Pie Crust Service per Crust",
@@ -228,7 +229,7 @@ items = [
 		"default_warehouse": "Subcontracted Items - APC",
 		"is_sub_contracted_item": 1,
 		"is_stock_item": 0,
-		"item_price": 30.00,  # Assumes 5 crusts takes 20 mins (excluding chilling time), or 15 crusts/hour at rate of $2.00/crust
+		"item_price": 40.00,  # Assumes 5 crusts takes 15 mins (excluding chilling time), or 20 crusts/hour at rate of $2.00/crust
 		"default_supplier": "Freedom Provisions",
 		"supplier": "Freedom Provisions",
 	},
@@ -714,5 +715,3 @@ boms = [
 		],
 	},
 ]
-
-uom_convs = [{"category": "Subcontracting", "from_uom": "Hour", "to_uom": "Nos", "value": 15.0}]

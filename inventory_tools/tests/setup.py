@@ -11,14 +11,7 @@ from erpnext.setup.utils import enable_all_roles_and_domains, set_defaults_for_t
 from erpnext.stock.get_item_details import get_item_details
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 
-from inventory_tools.tests.fixtures import (
-	boms,
-	items,
-	operations,
-	suppliers,
-	uom_convs,
-	workstations,
-)
+from inventory_tools.tests.fixtures import boms, items, operations, suppliers, workstations
 
 
 def before_test():
@@ -85,7 +78,6 @@ def create_test_data():
 	create_operations()
 	create_item_groups(settings)
 	create_suppliers(settings)
-	create_uom_conversions(settings)
 	create_items(settings)
 	create_boms(settings)
 	create_material_request(settings)
@@ -187,20 +179,6 @@ def create_operations():
 		oper.save()
 
 
-def create_uom_conversions(settings):
-	for uom in uom_convs:
-		if not frappe.db.exists("UOM Category", uom.get("category")):
-			uc = frappe.new_doc("UOM Category")
-			uc.name = uom.get("category")
-			uc.save()
-		uom_conv = frappe.new_doc("UOM Conversion")
-		uom_conv.category = uom.get("category")
-		uom_conv.from_uom = uom.get("from_uom")
-		uom_conv.to_uom = uom.get("to_uom")
-		uom_conv.value = uom.get("value")
-		uom_conv.save()
-
-
 def create_item_groups(settings):
 	for ig_name in (
 		"Baked Goods",
@@ -269,6 +247,9 @@ def create_items(settings):
 			else "Manufacture"
 		)
 		i.valuation_method = "FIFO"
+		if item.get("uom_conversion_detail"):
+			for uom, cf in item.get("uom_conversion_detail").items():
+				i.append("uoms", {"uom": uom, "conversion_factor": cf})
 		i.is_purchase_item = (
 			1
 			if item.get("item_group") in ("Bakery Supplies", "Ingredients")
@@ -289,9 +270,6 @@ def create_items(settings):
 				[i.append("supplier_items", {"supplier": s}) for s in item.get("supplier")]
 			else:
 				i.append("supplier_items", {"supplier": item.get("supplier")})
-		if i.item_code == "Pie Crust":
-			i.append("uoms", {"uom": "Hour", "conversion_factor": 15.0})
-			i.purchase_uom = "Hour"
 		i.save()
 		if item.get("item_price"):
 			ip = frappe.new_doc("Item Price")
