@@ -47,14 +47,18 @@ class InventoryToolsWorkOrder(WorkOrder):
 			if po.docstatus == 0:  # amend draft PO workflow
 				po.flags.ignore_mandatory = True
 				po.flags.ignore_validate = True
-				# TODO: make adjustments to Items table or leave alone for user to handle?
 				for item_row in po.get("items"):
 					if (
 						item_row.get("fg_item") == self.production_item and item_row.get("fg_item_qty") >= self.qty
 					):
 						item_row.fg_item_qty -= self.qty
-						item_row.qty -= self.qty  # TODO: check/convert UOMs
-						item_row.stock_qty -= self.qty  # TODO: check/convert UOMs
+
+						qty_cf, q_msg = get_uom_cf(item_row.get("fg_item"), self.stock_uom, item_row.uom)
+						stock_qty_cf, sq_msg = get_uom_cf(
+							item_row.get("fg_item"), self.stock_uom, item_row.stock_uom
+						)
+						item_row.qty -= self.qty * qty_cf
+						item_row.stock_qty -= self.qty * stock_qty_cf
 						break
 				for wo_row in po.get("subcontracting"):
 					if wo_row.work_order == self.name:
@@ -64,7 +68,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 				po.save()
 				msgprint(
 					_(
-						f"Subcontracting Purchase Order {get_link_to_form('Purchase Order', po.name)} modified to remove Work Order {self.name}"
+						f"Subcontracting Purchase Order {get_link_to_form('Purchase Order', po.name)} modified to remove Work Order {self.name}. {q_msg or sq_msg}"
 					),
 					alert=True,
 					indicator="green",
@@ -176,11 +180,35 @@ def make_purchase_order(wo_name):
 	return po.name
 
 
+def get_uom_cf(fg_item_code, from_uom, to_uom):
+	"""
+	Finds the UOM Conversion Detail conversion factor for given item code, if it exists, otherwise returns 0.
+	Returns the conversion factor and a status message (blank if CF found, explanation if not).
+	"""
+	message = ""
+	cf = (
+		1
+		if from_uom == to_uom
+		else (
+			frappe.get_value(
+				"UOM Conversion Detail", {"parent": fg_item_code, "uom": to_uom}, "conversion_factor"
+			)
+			or 0
+		)
+	)
+	try:
+		cf = 1 / cf
+		return cf, message
+	except ZeroDivisionError:
+		message = f" PO Item quantities require manual adjustment - no UOM Conversion Detail exists to convert {fg_item_code} in {from_uom} to {to_uom}."
+		return cf, message
+
+
 @frappe.whitelist()
 def add_to_existing_purchase_order(wo_name, po_name):
 	po = frappe.get_doc("Purchase Order", po_name)
-	company, production_item, wo_qty = frappe.get_value(
-		"Work Order", wo_name, ["company", "production_item", "qty"]
+	company, production_item, wo_qty, wo_stock_uom = frappe.get_value(
+		"Work Order", wo_name, ["company", "production_item", "qty", "stock_uom"]
 	)
 	settings = frappe.get_doc("Inventory Tools Settings", {"company": company})
 	if settings and settings.enable_work_order_subcontracting and po.get("is_subcontracted"):
@@ -194,12 +222,13 @@ def add_to_existing_purchase_order(wo_name, po_name):
 			if po.docstatus == 2:
 				frappe.throw(_("Unable to add to the selected Purchase Order because it is cancelled."))
 			elif po.docstatus == 0:  # amend draft PO workflow
-				# TODO: check for existing fg_item in items table to adjust or add new row
 				for item in po.get("items"):
-					if item.Zget("fg_item") == production_item:
+					if item.get("fg_item") == production_item:
 						item.fg_item_qty += wo_qty
-						item.qty += wo_qty  # TODO: check/convert UOMs
-						item.stock_qty += wo_qty  # TODO: check/convert UOMs
+						qty_cf, q_msg = get_uom_cf(item.get("fg_item"), wo_stock_uom, item.uom)
+						stock_qty_cf, sq_msg = get_uom_cf(item.get("fg_item"), wo_stock_uom, item.stock_uom)
+						item.qty += wo_qty * qty_cf
+						item.stock_qty += wo_qty * stock_qty_cf
 						break
 				else:
 					po.append("items", item_row_data)
@@ -210,7 +239,7 @@ def add_to_existing_purchase_order(wo_name, po_name):
 				po.save()
 				msgprint(
 					_(
-						f"Added items to subcontracting Purchase Order {get_link_to_form('Purchase Order', po.name)}."
+						f"Added items to subcontracting Purchase Order {get_link_to_form('Purchase Order', po.name)}. {q_msg or sq_msg}"
 					),
 					alert=True,
 					indicator="green",
@@ -224,8 +253,10 @@ def add_to_existing_purchase_order(wo_name, po_name):
 				for item in new_po.get("items"):
 					if item.get("fg_item") == production_item:
 						item.fg_item_qty += wo_qty
-						item.qty += wo_qty  # TODO: check/convert UOMs
-						item.stock_qty += wo_qty  # TODO: check/convert UOMs
+						qty_cf, q_msg = get_uom_cf(item.get("fg_item"), wo_stock_uom, item.uom)
+						stock_qty_cf, sq_msg = get_uom_cf(item.get("fg_item"), wo_stock_uom, item.stock_uom)
+						item.qty += wo_qty * qty_cf
+						item.stock_qty += wo_qty * stock_qty_cf
 						break
 				else:
 					new_po.append("items", item_row_data)
@@ -235,7 +266,7 @@ def add_to_existing_purchase_order(wo_name, po_name):
 				new_po.insert()
 				msgprint(
 					_(
-						f"Added items to revised subcontracting Purchase Order {get_link_to_form('Purchase Order', new_po.name)}."
+						f"Added items to revised subcontracting Purchase Order {get_link_to_form('Purchase Order', new_po.name)}. {q_msg or sq_msg}"
 					),
 					alert=True,
 					indicator="green",
