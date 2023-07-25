@@ -75,11 +75,12 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 				validate_warehouse_company(w, self.company)
 
 	def validate(self):
-		if self.is_subcontracting_enabled():
+		if self.is_work_order_subcontracting_enabled():
 			self.validate_subcontracting_fg_qty()
 		super().validate()  # TODO: modify the existing subcontracting checks?
+		# TODO: set supplier field in associated work order
 
-	def is_subcontracting_enabled(self):
+	def is_work_order_subcontracting_enabled(self):
 		settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
 		return bool(settings and settings.enable_work_order_subcontracting)
 

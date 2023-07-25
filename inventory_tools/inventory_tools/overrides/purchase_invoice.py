@@ -52,21 +52,21 @@ class InventoryToolsPurchaseInvoice(PurchaseInvoice):
 			)
 
 	def validate(self):
-		if self.is_subcontracting_enabled():
+		if self.is_work_order_subcontracting_enabled():
 			self.validate_subcontracting_to_pay_qty()
 		return super().validate()
 
 	def on_submit(self):
-		if self.is_subcontracting_enabled():
+		if self.is_work_order_subcontracting_enabled():
 			self.on_submit_save_se_paid_qty()
 		return super().on_submit()
 
 	def on_cancel(self):
-		if self.is_subcontracting_enabled():
+		if self.is_work_order_subcontracting_enabled():
 			self.on_cancel_revert_se_paid_qty()
 		return super().on_cancel()
 
-	def is_subcontracting_enabled(self):
+	def is_work_order_subcontracting_enabled(self):
 		settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
 		return bool(settings and settings.enable_work_order_subcontracting)
 

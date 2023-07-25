@@ -81,7 +81,7 @@ def create_test_data():
 	create_items(settings)
 	create_boms(settings)
 	create_material_request(settings)
-	# create_production_plan(settings)
+	create_production_plan(settings)
 
 
 def create_suppliers(settings):
@@ -160,7 +160,7 @@ def setup_manufacturing_settings(settings):
 	frappe.set_value(
 		"Inventory Tools Settings", settings.company, "enable_work_order_subcontracting", 1
 	)
-	frappe.set_value("Inventory Tools Settings", settings.company, "create_purchase_orders", 1)
+	frappe.set_value("Inventory Tools Settings", settings.company, "create_purchase_orders", 0)
 
 
 def create_workstations():
@@ -415,7 +415,7 @@ def create_production_plan(settings):
 		item.schedule_date = settings.day
 		if item.production_item == "Pie Crust":
 			item.type_of_manufacturing = "Subcontract"
-			item.supplier = "Freedom Provisions"
+			item.supplier = "Credible Contract Baking"
 			item.qty = 50
 	pp.append("sub_assembly_items", pp.sub_assembly_items[0].as_dict())
 	pp.sub_assembly_items[-1].name = None

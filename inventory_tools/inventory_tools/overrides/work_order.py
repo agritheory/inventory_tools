@@ -7,17 +7,19 @@ from frappe.utils import flt, get_link_to_form, getdate, nowdate
 
 class InventoryToolsWorkOrder(WorkOrder):
 	def validate(self):
-		if self.is_subcontracting_enabled() and frappe.get_value("BOM", self.bom_no, "is_subcontracted"):
+		if self.is_work_order_subcontracting_enabled() and frappe.get_value(
+			"BOM", self.bom_no, "is_subcontracted"
+		):
 			self.validate_subcontracting_no_bom_ops()
 			self.validate_subcontracting_no_skip_transfer()
 		return super().validate()
 
 	def on_cancel(self):
-		if self.is_subcontracting_enabled():
+		if self.is_work_order_subcontracting_enabled():
 			self.on_cancel_remove_wo_from_po()
 		return super().on_cancel()
 
-	def is_subcontracting_enabled(self):
+	def is_work_order_subcontracting_enabled(self):
 		settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
 		return bool(settings and settings.enable_work_order_subcontracting)
 
@@ -76,7 +78,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 
 
 @frappe.whitelist()
-def make_subcontracted_purchase_order(wo_name):
+def make_subcontracted_purchase_order(wo_name, supplier=None):
 	company, bom_no = frappe.get_value("Work Order", wo_name, ["company", "bom_no"])
 	settings = frappe.get_doc("Inventory Tools Settings", {"company": company})
 	is_sc = frappe.get_value("BOM", bom_no, "is_subcontracted")
@@ -87,12 +89,13 @@ def make_subcontracted_purchase_order(wo_name):
 		if len(existing_po) > 0:
 			msgprint(_(f"Work Order items are already included in Purchase Order {existing_po[0]}"))
 		else:
-			po = make_purchase_order(wo_name)
+			po = make_purchase_order(wo_name, supplier)
 			msgprint(
 				_(f"Subcontracting Purchase Order {get_link_to_form('Purchase Order', po)} created"),
 				alert=True,
 				indicator="green",
 			)
+			return po
 	elif not settings:
 		msgprint(_("Unable to create Purchase Order: no Inventory Tools Settings detected."))
 	elif not settings.enable_work_order_subcontracting:
@@ -146,23 +149,24 @@ def create_po_table_data(wo_name):
 	return item_row_data, subc_row_data
 
 
-def make_purchase_order(wo_name):
+def make_purchase_order(wo_name, supplier=None):
 	company, production_item, planned_start_date = frappe.get_value(
 		"Work Order", wo_name, ["company", "production_item", "planned_start_date"]
 	)
 
 	# Get supplier
-	supplier = frappe.get_value("Item Default", {"parent": production_item}, "default_supplier")
 	if not supplier:
-		supplier = frappe.get_all(
-			"Item Supplier", {"parent": production_item}, "supplier", pluck="supplier"
-		)
-		try:
-			supplier = supplier[-1]
-		except IndexError as e:
-			frappe.throw(
-				_(f"Default Supplier or Item Supplier must be set for subcontracted item {production_item}")
+		supplier = frappe.get_value("Item Default", {"parent": production_item}, "default_supplier")
+		if not supplier:
+			supplier = frappe.get_all(
+				"Item Supplier", {"parent": production_item}, "supplier", pluck="supplier"
 			)
+			try:
+				supplier = supplier[-1]
+			except IndexError as e:
+				frappe.throw(
+					_(f"Default Supplier or Item Supplier must be set for subcontracted item {production_item}")
+				)
 
 	# Make Purchase Order
 	po = frappe.new_doc("Purchase Order")
@@ -173,11 +177,7 @@ def make_purchase_order(wo_name):
 	item_row_data, subc_row_data = create_po_table_data(wo_name)
 	po.append("items", item_row_data)
 	po.append("subcontracting", subc_row_data)
-	po.set_missing_values()
-	po.flags.ignore_mandatory = True
-	po.flags.ignore_validate = True
-	po.insert()
-	return po.name
+	po.save()
 
 
 def get_uom_cf(fg_item_code, from_uom, to_uom):

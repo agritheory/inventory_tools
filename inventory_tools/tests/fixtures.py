@@ -41,6 +41,20 @@ suppliers = [
 			"pincode": "89077",
 		},
 	),
+	(
+		"Credible Contract Baking",
+		None,
+		None,
+		None,
+		"Net 30",
+		{
+			"address_line1": "4 Crumb Circle",
+			"city": "Belmont",
+			"state": "MA",
+			"country": "United States",
+			"pincode": "89074",
+		},
+	),
 ]
 
 workstations = [
@@ -204,8 +218,8 @@ items = [
 		"item_group": "Sub Assemblies",
 		"default_warehouse": "Refrigerator - APC",
 		"is_sub_contracted_item": 1,
-		"default_supplier": "Freedom Provisions",
-		"supplier": "Freedom Provisions",
+		"default_supplier": "",
+		"supplier": "",
 		"valuation_rate": 3.0196,
 		"uom_conversion_detail": {"Hour": 20},
 	},
@@ -218,8 +232,8 @@ items = [
 		"is_sub_contracted_item": 1,
 		"is_stock_item": 0,
 		"item_price": 2.00,
-		"default_supplier": "Freedom Provisions",
-		"supplier": "Freedom Provisions",
+		"default_supplier": "Credible Contract Baking",
+		"supplier": "Credible Contract Baking",
 	},
 	{
 		"item_code": "Pie Crust Service per Hour",
@@ -230,8 +244,8 @@ items = [
 		"is_sub_contracted_item": 1,
 		"is_stock_item": 0,
 		"item_price": 40.00,  # Assumes 5 crusts takes 15 mins (excluding chilling time), or 20 crusts/hour at rate of $2.00/crust
-		"default_supplier": "Freedom Provisions",
-		"supplier": "Freedom Provisions",
+		"default_supplier": "Credible Contract Baking",
+		"supplier": "Credible Contract Baking",
 	},
 	{
 		"item_code": "Cloudberry",

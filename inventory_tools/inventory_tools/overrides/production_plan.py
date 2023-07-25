@@ -14,7 +14,8 @@ class InventoryToolsProductionPlan(ProductionPlan):
 
 		self.make_work_order_for_finished_goods(wo_list, default_warehouses)
 		self.make_work_order_for_subassembly_items(wo_list, subcontracted_po, default_warehouses)
-		self.make_subcontracted_purchase_order(subcontracted_po, po_list)
+		if frappe.get_value("Inventory Tools Settings", self.company, "create_purchase_orders"):
+			self.make_subcontracted_purchase_order(subcontracted_po, po_list)
 		self.show_list_created_message("Work Order", wo_list)
 		self.show_list_created_message("Purchase Order", po_list)
 
