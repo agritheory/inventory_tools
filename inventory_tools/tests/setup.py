@@ -81,7 +81,7 @@ def create_test_data():
 	create_items(settings)
 	create_boms(settings)
 	create_material_request(settings)
-	create_production_plan(settings)
+	# create_production_plan(settings)
 
 
 def create_suppliers(settings):
@@ -130,31 +130,37 @@ def setup_manufacturing_settings(settings):
 	mfg_settings.job_card_excess_transfer = 1
 	mfg_settings.save()
 
-	if frappe.db.exists("Account", {"account_name": "Work In Progress", "company": settings.company}):
-		return
-	wip = frappe.new_doc("Account")
-	wip.account_name = "Work in Progress"
-	wip.parent_account = "1400 - Stock Assets - APC"
-	wip.account_number = "1420"
-	wip.company = settings.company
-	wip.currency = "USD"
-	wip.report_type = "Balance Sheet"
-	wip.root_type = "Asset"
-	wip.save()
+	if not frappe.db.exists(
+		"Account", {"account_name": "Work In Progress", "company": settings.company}
+	):
+		wip = frappe.new_doc("Account")
+		wip.account_name = "Work in Progress"
+		wip.parent_account = "1400 - Stock Assets - APC"
+		wip.account_number = "1420"
+		wip.company = settings.company
+		wip.currency = "USD"
+		wip.report_type = "Balance Sheet"
+		wip.root_type = "Asset"
+		wip.save()
 
-	if frappe.db.exists("Account", {"account_name": "Work In Progress", "company": settings.company}):
-		return
-	wip = frappe.new_doc("Account")
-	wip.account_name = "Standard Costing Reconciliation"
-	wip.parent_account = "1400 - Stock Assets - APC"
-	wip.account_number = "1430"
-	wip.company = settings.company
-	wip.currency = "USD"
-	wip.report_type = "Balance Sheet"
-	wip.root_type = "Asset"
-	wip.save()
+	if not frappe.db.exists(
+		"Account", {"account_name": "Work In Progress", "company": settings.company}
+	):
+		wip = frappe.new_doc("Account")
+		wip.account_name = "Standard Costing Reconciliation"
+		wip.parent_account = "1400 - Stock Assets - APC"
+		wip.account_number = "1430"
+		wip.company = settings.company
+		wip.currency = "USD"
+		wip.report_type = "Balance Sheet"
+		wip.root_type = "Asset"
+		wip.save()
 
 	frappe.set_value("Warehouse", "Kitchen - APC", "account", wip.name)
+	frappe.set_value(
+		"Inventory Tools Settings", settings.company, "enable_work_order_subcontracting", 1
+	)
+	frappe.set_value("Inventory Tools Settings", settings.company, "create_purchase_orders", 1)
 
 
 def create_workstations():
@@ -410,6 +416,12 @@ def create_production_plan(settings):
 		if item.production_item == "Pie Crust":
 			item.type_of_manufacturing = "Subcontract"
 			item.supplier = "Freedom Provisions"
+			item.qty = 50
+	pp.append("sub_assembly_items", pp.sub_assembly_items[0].as_dict())
+	pp.sub_assembly_items[-1].name = None
+	pp.sub_assembly_items[-1].type_of_manufacturing = "In House"
+	pp.sub_assembly_items[-1].bom_no = "BOM-Pie Crust-001"
+	pp.sub_assembly_items[-1].supplier = None
 	pp.for_warehouse = "Storeroom - APC"
 	raw_materials = get_items_for_material_requests(
 		pp.as_dict(), warehouses=None, get_parent_warehouse_data=None
@@ -432,40 +444,6 @@ def create_production_plan(settings):
 	mr.schedule_date = mr.transaction_date = settings.day
 	mr.save()
 	mr.submit()
-
-	# TODO: this should test the material demand report instead
-	# for item in mr.items:
-	# 	supplier = frappe.get_value("Item Supplier", {"parent": item.get("item_code")}, "supplier")
-	# 	item.supplier = supplier
-
-	# for supplier, _items in groupby(
-	# 	sorted((m for m in mr.items if m.supplier), key=lambda d: d.supplier),
-	# 	lambda x: x.get("supplier"),
-	# ):
-	# 	items = list(_items)
-	# 	if not supplier:
-	# 		continue
-	# 	pr = frappe.new_doc("Purchase Receipt")
-	# 	pr.company = settings.company
-	# 	pr.supplier = supplier
-	# 	pr.posting_date = settings.day
-	# 	pr.set_posting_time = 1
-	# 	pr.buying_price_list = "Bakery Buying"
-	# 	for item in items:
-	# 		item_details = get_item_details(
-	# 			{
-	# 				"item_code": item.item_code,
-	# 				"qty": item.qty,
-	# 				"supplier": pr.supplier,
-	# 				"company": pr.company,
-	# 				"doctype": pr.doctype,
-	# 				"currency": pr.currency,
-	# 				"buying_price_list": pr.buying_price_list,
-	# 			}
-	# 		)
-	# 		pr.append("items", {**item_details})
-	# 	pr.save()
-	# 	pr.submit()
 
 	pp.make_work_order()
 	wos = frappe.get_all("Work Order", {"production_plan": pp.name})
