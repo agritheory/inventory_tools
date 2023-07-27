@@ -89,6 +89,7 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 		if self.is_subcontracted and sub_wo:
 			items_fg_qty = sum(item.get("fg_item_qty") or 0 for item in self.get("items"))
 			subc_fg_qty = sum(row.get("fg_item_qty") or 0 for row in sub_wo)
+			# Check that the item finished good qty and the subcontracting qty are within the item's stock_qty field's precision number of decimals
 			precision = int(frappe.get_precision("Purchase Order Item", "stock_qty"))
 			diff = abs(items_fg_qty - subc_fg_qty)
 			if diff > (1 / (10**precision)):
