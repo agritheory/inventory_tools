@@ -49,15 +49,24 @@ frappe.query_reports['Material Demand'] = {
 }
 
 function manage_buttons(reportview) {
-	reportview.page.set_primary_action('Create PO(s)', () => {
-		create_pos()
-	})
+	reportview.page.add_inner_button("Create PO(s)", function() {
+		create('po')
+	}, 'Create')
+
+	reportview.page.add_inner_button("Create RFQ(s)", function() {
+		create('rfq')
+	}, 'Create')
+
+	reportview.page.add_inner_button("Create based on Item", function() {
+		create('item_based')
+	}, 'Create')
+
 	// these don't seem to be working
 	$(".btn-default:contains('Create Card')").addClass('hidden')
 	$(".btn-default:contains('Set Chart')").addClass('hidden')
 }
 
-async function create_pos() {
+async function create(type) {
 	let values = frappe.query_report.get_filter_values()
 	let company = undefined
 	if (!values.company) {
@@ -73,9 +82,10 @@ async function create_pos() {
 		frappe.show_alert({ message: 'Please select one or more rows.', seconds: 5, indicator: 'red' })
 	} else {
 		await frappe
-			.xcall('inventory_tools.inventory_tools.report.material_demand.material_demand.create_pos', {
+			.xcall('inventory_tools.inventory_tools.report.material_demand.material_demand.create', {
 				company: company,
 				filters: values,
+				creation_type: type,
 				rows: selected_items,
 			})
 			.then(r => {})

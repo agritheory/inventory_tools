@@ -198,6 +198,15 @@ def get_item_price(filters, r):
 
 
 @frappe.whitelist()
+def create(company, filters, creation_type, rows):
+	if creation_type == 'po':
+		create_pos(company, filters, rows)
+	elif creation_type == 'rfq':
+		frappe.msgprint("TODO RFQ(s)", alert=True, indicator="green")
+	elif creation_type == 'item_based':
+		frappe.msgprint("TODO ITEM BASED", alert=True, indicator="green")
+
+@frappe.whitelist()
 def create_pos(company, filters, rows):
 	filters = frappe._dict(json.loads(filters)) if isinstance(filters, str) else filters
 	rows = json.loads(rows) if isinstance(rows, str) else rows
