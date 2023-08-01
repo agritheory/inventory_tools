@@ -25,6 +25,7 @@ function show_subcontracting_fields(frm) {
 			} else {
 				hide_field('subcontracting')
 			}
+			toggle_subcontracting_columns(frm)
 		})
 }
 
@@ -100,4 +101,68 @@ function fetch_stock_entry_dialog(frm) {
 		})
 		d.show()
 	})
+}
+
+function toggle_subcontracting_columns(frm) {
+	if (!frm.doc.is_subcontracted) {
+		// hide columns
+		frm.get_field('subcontracting').grid.reset_grid()
+		frm.get_field('subcontracting').grid.visible_columns.forEach((column, index) => {
+			if (index >= frm.get_field('subcontracting').grid.visible_columns.length - 2) {
+				column[0].columns = 2
+				column[1] = 2
+			}
+		})
+		for (let row of frm.get_field('subcontracting').grid.grid_rows) {
+			if (row.open_form_button) {
+				row.open_form_button.parent().remove()
+				delete row.open_form_button
+			}
+
+			for (let field in row.columns) {
+				if (row.columns[field] !== undefined) {
+					row.columns[field].remove()
+				}
+			}
+			delete row.columns
+			row.columns = []
+			row.render_row()
+		}
+	} else {
+		// show subcontracting fields
+		frm.get_field('items').grid.reset_grid()
+		let user_defined_columns = frm.get_field('subcontracting').grid.visible_columns.map(col => {
+			return col[0]
+		})
+		user_defined_columns.forEach((column, index) => {
+			if (index > 0) {
+				column.columns = 1
+			}
+		})
+		let paid_qty = frappe.meta.get_docfield(frm.get_field('subcontracting').grid.doctype, 'paid_qty')
+		paid_qty.in_list_view = 1
+		user_defined_columns.push(paid_qty)
+		let to_pay_qty = frappe.meta.get_docfield(frm.get_field('subcontracting').grid.doctype, 'to_pay_qty')
+		to_pay_qty.in_list_view = 1
+		user_defined_columns.push(to_pay_qty)
+		frm.get_field('subcontracting').grid.visible_columns = user_defined_columns.map(col => {
+			return [col, col.columns]
+		})
+		for (let row of frm.get_field('subcontracting').grid.grid_rows) {
+			if (row.open_form_button) {
+				row.open_form_button.parent().remove()
+				delete row.open_form_button
+			}
+
+			for (let field in row.columns) {
+				if (row.columns[field] !== undefined) {
+					row.columns[field].remove()
+				}
+			}
+			delete row.columns
+			row.columns = []
+			row.render_row()
+		}
+	}
+	frm.get_field('subcontracting').refresh()
 }
