@@ -108,7 +108,8 @@ def create_suppliers(settings):
 				"subcontracting_defaults",
 				{
 					"company": settings.company,
-					"default_warehouse": "Credible Contract Baking - APC",
+					"wip_warehouse": "Credible Contract Baking - APC",
+					"return_warehouse": "Baked Goods - APC",
 				},
 			)
 		biz.save()

@@ -1,6 +1,9 @@
 import frappe
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
+from erpnext.manufacturing.doctype.work_order.work_order import (
+	make_stock_entry as _make_stock_entry,
+)
 from frappe.utils import flt, get_link_to_form, getdate, nowdate
 
 
@@ -329,3 +332,30 @@ def get_sub_assembly_items(bom_no, bom_data, to_produce_qty, company, indent=0):
 
 			if d.value:
 				get_sub_assembly_items(d.value, bom_data, stock_qty, company, indent=indent + 1)
+
+
+@frappe.whitelist()
+def make_stock_entry(work_order_id, purpose, qty=None):
+	se = _make_stock_entry(work_order_id, purpose, qty)
+	settings = frappe.get_doc("Inventory Tools Settings", {"company": se.get("company")})
+	if not (settings and settings.enable_work_order_subcontracting):
+		return se
+	supplier = frappe.db.get_value("Work Order", work_order_id, "supplier")
+	if supplier:
+		wip_warehouse, return_warehouse = frappe.db.get_value(
+			"Subcontracting Default",
+			{"parent": supplier, "company": se.get("company")},
+			["wip_warehouse", "return_warehouse"],
+		)
+		if purpose == "Material Transfer for Manufacture":
+			for row in se.get("items"):
+				row["t_warehouse"] = wip_warehouse
+		elif purpose == "Manufacture":
+			for row in se.get("items"):
+				if not row.is_finished_item:
+					row["s_warehouse"] = wip_warehouse
+					row["t_warehouse"] = None
+				else:
+					row["s_warehouse"] = None
+					row["t_warehouse"] = return_warehouse
+	return se
