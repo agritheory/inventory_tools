@@ -23,7 +23,7 @@ function manage_subcontracting_buttons(frm) {
 								() => make_subcontracting_po(frm),
 								__('Subcontracting')
 							)
-							frm.add_custom_button(__('Add to Existing PO'), () => add_to_existing_po(), __('Subcontracting'))
+							frm.add_custom_button(__('Add to Existing PO'), () => add_to_existing_po(frm), __('Subcontracting'))
 						}
 					})
 			}
@@ -55,7 +55,7 @@ function make_subcontracting_po(frm) {
 	d.show()
 }
 
-function add_to_existing_po() {
+function add_to_existing_po(frm) {
 	let d = new frappe.ui.Dialog({
 		title: __('Add to Purchase Order'),
 		fields: [

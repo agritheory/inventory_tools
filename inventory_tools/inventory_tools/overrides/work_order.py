@@ -121,7 +121,7 @@ def in_existing_po(wo_name):
 	po_sub = frappe.qb.DocType("Purchase Order Subcontracting Detail")
 
 	query = (
-		frappe.qb.fromfrappe._(po)
+		frappe.qb.from_(po)
 		.inner_join(po_sub)
 		.on(po.name == po_sub.parent)
 		.select(po.name)
@@ -136,7 +136,7 @@ def in_existing_po(wo_name):
 def create_po_table_data(wo_name):
 	wo = frappe.get_doc("Work Order", wo_name)
 	item_row_data = {
-		"item_code": wo.production_item,
+		# "item_code": wo.production_item,
 		"fg_item": wo.production_item,
 		"fg_item_qty": wo.qty,
 		"warehouse": wo.fg_warehouse,
@@ -190,7 +190,11 @@ def make_purchase_order(wo_name, supplier=None):
 	item_row_data, subc_row_data = create_po_table_data(wo_name)
 	po.append("items", item_row_data)
 	po.append("subcontracting", subc_row_data)
+	po.set_missing_values()
+	po.flags.ignore_mandatory = True
+	po.flags.ignore_validate = True
 	po.save()
+	return po.name
 
 
 def get_uom_cf(fg_item_code, from_uom, to_uom):
@@ -218,6 +222,7 @@ def get_uom_cf(fg_item_code, from_uom, to_uom):
 
 @frappe.whitelist()
 def add_to_existing_purchase_order(wo_name, po_name):
+	print("IN ADD_TO_EXISTING_PO")
 	po = frappe.get_doc("Purchase Order", po_name)
 	company, production_item, wo_qty, wo_stock_uom = frappe.get_value(
 		"Work Order", wo_name, ["company", "production_item", "qty", "stock_uom"]
@@ -236,6 +241,7 @@ def add_to_existing_purchase_order(wo_name, po_name):
 			if po.docstatus == 2:
 				frappe.throw(frappe._("Unable to add to the selected Purchase Order because it is cancelled."))
 			elif po.docstatus == 0:  # amend draft PO workflow
+				print("IN AMEND DRAFT PO")
 				for item in po.get("items"):
 					if item.get("fg_item") == production_item:
 						item.fg_item_qty += wo_qty
@@ -251,7 +257,7 @@ def add_to_existing_purchase_order(wo_name, po_name):
 				po.flags.ignore_mandatory = True
 				po.flags.ignore_validate = True
 				po.save()
-				frappe.frappe.msgprint(
+				frappe.msgprint(
 					frappe._(
 						f"Added items to subcontracting Purchase Order {get_link_to_form('Purchase Order', po.name)}. {q_msg or sq_msg}"
 					),
@@ -260,6 +266,7 @@ def add_to_existing_purchase_order(wo_name, po_name):
 				)
 				return
 			else:  # cancel / amend submitted PO workflow. Leaves amended PO in Draft status so user can make adjustments as needed to Items table
+				print("IN CANCEL/AMEND SUBMITTED PO")
 				po.cancel()
 				new_po = frappe.copy_doc(po)
 				new_po.amended_from = po.name
