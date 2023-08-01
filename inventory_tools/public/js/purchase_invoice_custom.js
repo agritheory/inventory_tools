@@ -53,7 +53,7 @@ function fetch_stock_entry_dialog(frm) {
 	if (!frm.is_new() && frm.doc.docstatus > 0) {
 		return
 	}
-	frm.get_field('subcontracting').grid.add_custom_button('Fetch Stock Entries', () => {
+	let fetch_button = frm.get_field('subcontracting').grid.add_custom_button('Fetch Stock Entries', () => {
 		let d = new frappe.ui.Dialog({
 			title: __('Fetch Stock Entries'),
 			fields: [
@@ -101,6 +101,7 @@ function fetch_stock_entry_dialog(frm) {
 		})
 		d.show()
 	})
+	$(fetch_button).removeClass('btn-secondary').addClass('btn-primary')
 }
 
 function toggle_subcontracting_columns(frm) {
