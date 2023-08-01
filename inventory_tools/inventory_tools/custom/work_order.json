@@ -63,7 +63,52 @@
  ],
  "custom_perms": [],
  "doctype": "Work Order",
- "links": [],
- "property_setters": [],
+ "links": [
+  {
+   "creation": "2023-08-01 10:32:00.285381",
+   "custom": 1,
+   "docstatus": 0,
+   "group": null,
+   "hidden": 0,
+   "idx": 0,
+   "is_child_table": 0,
+   "link_doctype": "Purchase Order",
+   "link_fieldname": "work_order",
+   "modified": "2023-08-01 10:32:00.285381",
+   "modified_by": "Administrator",
+   "name": "566b0717fa",
+   "owner": "Administrator",
+   "parent": "Work Order",
+   "parent_doctype": null,
+   "parentfield": "links",
+   "parenttype": "Customize Form",
+   "table_fieldname": "subcontracting"
+  }
+ ],
+ "property_setters": [
+  {
+   "_assign": null,
+   "_comments": null,
+   "_liked_by": null,
+   "_user_tags": null,
+   "creation": "2023-08-01 10:32:00.305040",
+   "default_value": null,
+   "doc_type": "Work Order",
+   "docstatus": 0,
+   "doctype_or_field": "DocType",
+   "field_name": null,
+   "idx": 0,
+   "is_system_generated": 0,
+   "modified": "2023-08-01 10:32:00.305040",
+   "modified_by": "Administrator",
+   "module": null,
+   "name": "Work Order-main-links_order",
+   "owner": "Administrator",
+   "property": "links_order",
+   "property_type": "Small Text",
+   "row_name": null,
+   "value": "[\"566b0717fa\"]"
+  }
+ ],
  "sync_on_migrate": 1
 }

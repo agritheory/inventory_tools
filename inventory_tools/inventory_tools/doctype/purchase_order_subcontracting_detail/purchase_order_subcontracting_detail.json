@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "work_order",
+  "warehouse",
   "item_name",
   "fg_item",
   "fg_item_qty",
@@ -36,6 +37,7 @@
    "reqd": 1
   },
   {
+   "columns": 1,
    "fieldname": "fg_item_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -46,19 +48,29 @@
    "fieldname": "bom",
    "fieldtype": "Link",
    "label": "BOM",
-   "options": "BOM"
+   "options": "BOM",
+   "read_only": 1
   },
   {
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "label": "Stock UOM",
-   "options": "UOM"
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-07-07 14:42:04.377001",
+ "modified": "2023-08-01 08:17:24.132999",
  "modified_by": "Administrator",
  "module": "Inventory Tools",
  "name": "Purchase Order Subcontracting Detail",

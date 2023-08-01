@@ -13,6 +13,7 @@ frappe.ui.form.on('Purchase Order', {
 // TODO: override when a qty changes in item table, it changes the fg_item_qty (assumes same UOM)
 // TODO: subcontracting table: autofill fields when a row is manually added and user selects the WO
 // TODO: when subcontracting table row removed, adjust Item row fg_item_qty
+// TODO: filter supplier warehouse to non-group
 
 function show_subcontracting_fields(frm) {
 	if (!frm.doc.company || !frm.doc.is_subcontracted) {

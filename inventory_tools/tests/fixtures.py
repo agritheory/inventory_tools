@@ -228,7 +228,7 @@ items = [
 		"uom": "Nos",
 		"description": "Subcontracted pie crust manufacturing service. Item price is per crust.",
 		"item_group": "Sub Assemblies",
-		"default_warehouse": "Subcontracted Items - APC",
+		"default_warehouse": "Credible Contract Baking - APC",
 		"is_sub_contracted_item": 1,
 		"is_stock_item": 0,
 		"item_price": 2.00,
@@ -240,7 +240,7 @@ items = [
 		"uom": "Hour",
 		"description": "Subcontracted pie crust manufacturing service. Item price is per hour.",
 		"item_group": "Sub Assemblies",
-		"default_warehouse": "Subcontracted Items - APC",
+		"default_warehouse": "Credible Contract Baking - APC",
 		"is_sub_contracted_item": 1,
 		"is_stock_item": 0,
 		"item_price": 40.00,  # Assumes 5 crusts takes 15 mins (excluding chilling time), or 20 crusts/hour at rate of $2.00/crust

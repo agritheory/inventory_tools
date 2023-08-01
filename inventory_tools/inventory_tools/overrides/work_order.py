@@ -1,7 +1,6 @@
 import frappe
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
-from frappe import _, msgprint
 from frappe.utils import flt, get_link_to_form, getdate, nowdate
 
 
@@ -26,7 +25,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 	def validate_subcontracting_no_bom_ops(self):
 		if frappe.get_value("BOM", self.bom_no, "with_operations"):
 			frappe.throw(
-				_(
+				frappe._(
 					"This Work Order uses a BOM that's subcontracted, and BOM operations were detected. Subcontracted item BOMs should not include operations."
 				)
 			)
@@ -34,7 +33,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 	def validate_subcontracting_no_skip_transfer(self):
 		if self.skip_transfer:
 			frappe.throw(
-				_(
+				frappe._(
 					"Skip Material Transfer may not be selected when the Work Order uses a BOM that is subcontracted."
 				)
 			)
@@ -68,8 +67,8 @@ class InventoryToolsWorkOrder(WorkOrder):
 						break
 				po.calculate_taxes_and_totals()
 				po.save()
-				msgprint(
-					_(
+				frappe.msgprint(
+					frappe._(
 						f"Subcontracting Purchase Order {get_link_to_form('Purchase Order', po.name)} modified to remove Work Order {self.name}. {q_msg or sq_msg}"
 					),
 					alert=True,
@@ -87,25 +86,31 @@ def make_subcontracted_purchase_order(wo_name, supplier=None):
 		frappe.flags.mute_messages = False
 		existing_po = in_existing_po(wo_name)
 		if len(existing_po) > 0:
-			msgprint(_(f"Work Order items are already included in Purchase Order {existing_po[0]}"))
+			frappe.msgprint(
+				frappe._(f"Work Order items are already included in Purchase Order {existing_po[0]}")
+			)
 		else:
 			po = make_purchase_order(wo_name, supplier)
-			msgprint(
-				_(f"Subcontracting Purchase Order {get_link_to_form('Purchase Order', po)} created"),
+			frappe.msgprint(
+				frappe._(f"Subcontracting Purchase Order {get_link_to_form('Purchase Order', po)} created"),
 				alert=True,
 				indicator="green",
 			)
 			return po
 	elif not settings:
-		msgprint(_("Unable to create Purchase Order: no Inventory Tools Settings detected."))
+		frappe.msgprint(
+			frappe._("Unable to create Purchase Order: no Inventory Tools Settings detected.")
+		)
 	elif not settings.enable_work_order_subcontracting:
-		msgprint(
-			_(
+		frappe.msgprint(
+			frappe._(
 				"Unable to create Purchase Order: Enable Work Order Subcontracting not set in Inventory Tools Settings."
 			)
 		)
 	else:
-		msgprint(_("Unable to create Purchase Order: the Work Order's BOM is not set as subcontracted."))
+		frappe.msgprint(
+			frappe._("Unable to create Purchase Order: the Work Order's BOM is not set as subcontracted.")
+		)
 
 
 def in_existing_po(wo_name):
@@ -113,7 +118,7 @@ def in_existing_po(wo_name):
 	po_sub = frappe.qb.DocType("Purchase Order Subcontracting Detail")
 
 	query = (
-		frappe.qb.from_(po)
+		frappe.qb.fromfrappe._(po)
 		.inner_join(po_sub)
 		.on(po.name == po_sub.parent)
 		.select(po.name)
@@ -128,17 +133,19 @@ def in_existing_po(wo_name):
 def create_po_table_data(wo_name):
 	wo = frappe.get_doc("Work Order", wo_name)
 	item_row_data = {
+		"item_code": wo.production_item,
 		"fg_item": wo.production_item,
 		"fg_item_qty": wo.qty,
 		"warehouse": wo.fg_warehouse,
 		"bom": wo.bom_no,
-		"schedule_date": getdate(wo.planned_start_date) if wo.planned_start_date else nowdate(),
+		"schedule_date": max(getdate(wo.planned_start_date), getdate()),
 		"qty": wo.qty,
 		"description": wo.description,
 	}
-
+	# supplier_wip_warehouse = frappe.get
 	subc_row_data = {
 		"work_order": wo_name,
+		"warehouse": wo.fg_warehouse,
 		"item_name": wo.item_name,
 		"fg_item": wo.production_item,
 		"fg_item_qty": wo.qty,
@@ -165,14 +172,17 @@ def make_purchase_order(wo_name, supplier=None):
 				supplier = supplier[-1]
 			except IndexError as e:
 				frappe.throw(
-					_(f"Default Supplier or Item Supplier must be set for subcontracted item {production_item}")
+					frappe._(
+						f"Default Supplier or Item Supplier must be set for subcontracted item {production_item}"
+					)
 				)
 
 	# Make Purchase Order
 	po = frappe.new_doc("Purchase Order")
 	po.company = company
 	po.supplier = supplier
-	po.schedule_date = getdate(planned_start_date) if planned_start_date else nowdate()
+	po.schedule_date = max(getdate(planned_start_date), getdate())
+	po.posting_date = getdate()
 	po.is_subcontracted = 1
 	item_row_data, subc_row_data = create_po_table_data(wo_name)
 	po.append("items", item_row_data)
@@ -186,16 +196,15 @@ def get_uom_cf(fg_item_code, from_uom, to_uom):
 	Returns the conversion factor and a status message (blank if CF found, explanation if not).
 	"""
 	message = ""
-	cf = (
-		1
-		if from_uom == to_uom
-		else (
+	if from_uom == to_uom:
+		cf = 1
+	else:
+		cf = (
 			frappe.get_value(
 				"UOM Conversion Detail", {"parent": fg_item_code, "uom": to_uom}, "conversion_factor"
 			)
 			or 0
 		)
-	)
 	try:
 		cf = 1 / cf
 		return cf, message
@@ -215,12 +224,14 @@ def add_to_existing_purchase_order(wo_name, po_name):
 		frappe.flags.mute_messages = False
 		existing_po = in_existing_po(wo_name)
 		if len(existing_po) > 0:
-			msgprint(_(f"Work Order items are already included in Purchase Order {existing_po[0]}"))
+			frappe.msgprint(
+				frappe._(f"Work Order items are already included in Purchase Order {existing_po[0]}")
+			)
 			return
 		else:
 			item_row_data, subc_row_data = create_po_table_data(wo_name)
 			if po.docstatus == 2:
-				frappe.throw(_("Unable to add to the selected Purchase Order because it is cancelled."))
+				frappe.throw(frappe._("Unable to add to the selected Purchase Order because it is cancelled."))
 			elif po.docstatus == 0:  # amend draft PO workflow
 				for item in po.get("items"):
 					if item.get("fg_item") == production_item:
@@ -237,8 +248,8 @@ def add_to_existing_purchase_order(wo_name, po_name):
 				po.flags.ignore_mandatory = True
 				po.flags.ignore_validate = True
 				po.save()
-				msgprint(
-					_(
+				frappe.frappe.msgprint(
+					frappe._(
 						f"Added items to subcontracting Purchase Order {get_link_to_form('Purchase Order', po.name)}. {q_msg or sq_msg}"
 					),
 					alert=True,
@@ -264,8 +275,8 @@ def add_to_existing_purchase_order(wo_name, po_name):
 				new_po.flags.ignore_mandatory = True
 				new_po.flags.ignore_validate = True
 				new_po.insert()
-				msgprint(
-					_(
+				frappe.msgprint(
+					frappe._(
 						f"Added items to revised subcontracting Purchase Order {get_link_to_form('Purchase Order', new_po.name)}. {q_msg or sq_msg}"
 					),
 					alert=True,
@@ -273,18 +284,20 @@ def add_to_existing_purchase_order(wo_name, po_name):
 				)
 				return
 	elif not settings:
-		msgprint(_("Unable to create Purchase Order: no Inventory Tools Settings detected."))
+		frappe.msgprint(
+			frappe._("Unable to create Purchase Order: no Inventory Tools Settings detected.")
+		)
 		return
 	elif not settings.enable_work_order_subcontracting:
-		msgprint(
-			_(
+		frappe.msgprint(
+			frappe._(
 				"Unable to create Purchase Order: Enable Work Order Subcontracting not set in Inventory Tools Settings."
 			)
 		)
 		return
 	else:
-		msgprint(
-			_(
+		frappe.msgprint(
+			frappe._(
 				f"Unable to create Purchase Order: the production item '{production_item}' is not set as a subcontracted item in the Item master."
 			)
 		)

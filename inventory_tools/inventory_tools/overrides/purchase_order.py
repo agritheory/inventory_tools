@@ -77,8 +77,11 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 	def validate(self):
 		if self.is_work_order_subcontracting_enabled():
 			self.validate_subcontracting_fg_qty()
-		super().validate()  # TODO: modify the existing subcontracting checks?
-		# TODO: set supplier field in associated work order
+			# TODO: modify the existing subcontracting checks?
+			for row in self.subcontracting:
+				# TODO: set work order supplier to empty string in on_cancel
+				frappe.set_value("Work Order", row.work_order, "supplier", self.supplier)
+		super().validate()
 
 	def is_work_order_subcontracting_enabled(self):
 		settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
@@ -189,7 +192,6 @@ def make_sales_invoices(docname: str, rows: list) -> None:
 		taxes_and_charges = get_default_taxes_and_charges(
 			"Sales Taxes and Charges Template", company=si.company
 		)
-		print(taxes_and_charges)
 		si.taxes_and_charges = taxes_and_charges.get("taxes_and_charges")
 		for tax in taxes_and_charges.get("taxes"):
 			si.append("taxes", tax)

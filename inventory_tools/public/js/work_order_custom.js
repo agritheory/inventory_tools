@@ -11,13 +11,13 @@ frappe.ui.form.on('Work Order', {
 })
 
 function manage_subcontracting_buttons(frm) {
-	if (frm.doc.company && frm.doc.docstatus == 1) {
+	if (frm.doc.company) {
 		frappe.db.get_value('BOM', { name: frm.doc.bom_no }, 'is_subcontracted').then(r => {
 			if (r && r.message && r.message.is_subcontracted) {
 				frappe.db
 					.get_value('Inventory Tools Settings', { company: frm.doc.company }, 'enable_work_order_subcontracting')
 					.then(r => {
-						if (r && r.message && r.message.enable_work_order_subcontracting) {
+						if (r && r.message && r.message.enable_work_order_subcontracting && frm.doc.docstatus == 1) {
 							frm.add_custom_button(
 								__('Create Subcontract PO'),
 								() => make_subcontracting_po(frm),
@@ -50,7 +50,7 @@ function make_subcontracting_po(frm) {
 				supplier: data.supplier,
 			})
 		},
-		primary_action_label: __('Add to PO'),
+		primary_action_label: __('Create PO'),
 	})
 	d.show()
 }

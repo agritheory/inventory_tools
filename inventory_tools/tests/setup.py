@@ -103,6 +103,14 @@ def create_suppliers(settings):
 			biz.bank_account = "123456789"
 		biz.currency = "USD"
 		biz.default_price_list = "Standard Buying"
+		if biz.supplier_name == "Credible Contract Baking":
+			biz.append(
+				"subcontracting_defaults",
+				{
+					"company": settings.company,
+					"default_warehouse": "Credible Contract Baking - APC",
+				},
+			)
 		biz.save()
 
 		existing_address = frappe.get_value("Address", {"address_line1": supplier[5]["address_line1"]})
