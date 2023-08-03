@@ -72,7 +72,7 @@ minor_tags = ["feat"]
 patch_tags = ["fix", "perf"]
 
 [tool.semantic_release.remote]
-name = "upstream"
+name = "origin"
 type = "github"
 ignore_token_for_push = false
 
