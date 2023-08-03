@@ -1,0 +1,22 @@
+name: Release
+on:
+  push:
+    branches:
+      - version-14
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    concurrency: release
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Python Semantic Release
+        uses: python-semantic-release/python-semantic-release@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
