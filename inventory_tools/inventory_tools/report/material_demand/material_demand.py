@@ -209,135 +209,70 @@ def create(company, filters, creation_type, rows):
 
 @frappe.whitelist()
 def create_rfqs(company, filters, rows):
-	"""
-	Chelsea Fruit Co [
-	        {
-	                'material_request_item': 'd4cb454353',
-	                'material_request': 'MAT-MR-2023-00002',
-	                'company': 'Ambrosia Pie Company',
-	                'schedule_date': '2023-07-28',
-	                'mri': 'd4cb454353',
-	                'item_code': 'Cloudberry',
-	                'item_name': 'Cloudberry',
-	                'qty': 60,
-	                'uom': 'Pound',
-	                'warehouse': 'Refrigerator - APC',
-	                'currency': 'USD',
-	                'supplier_price': '$10.00',
-	                'supplier': 'Chelsea Fruit Co',
-	                'total_demand': 60,
-	                'draft_po': None,
-	                'indent': 1
-	        },
-	        {
-	                'material_request_item': '8cfa467dd5',
-	                'material_request': 'MAT-MR-2023-00002',
-	                'company': 'Ambrosia Pie Company',
-	                'schedule_date': '2023-07-28',
-	                'mri': '8cfa467dd5',
-	                'item_code': 'Cocoplum',
-	                'item_name': 'Cocoplum',
-	                'qty': 60,
-	                'uom': 'Pound',
-	                'warehouse': 'Refrigerator - APC',
-	                'currency': 'USD',
-	                'supplier_price': '$5.57',
-	                'supplier': 'Chelsea Fruit Co',
-	                'total_demand': 60,
-	                'draft_po': None,
-	                'indent': 1
-	        }
-	]
-
-	Freedom Provisions [
-	        {
-	                'material_request_item': '4bfb21502a', 'material_request': 'MAT-MR-2023-00002', 'company': 'Ambrosia Pie Company',
-	                'schedule_date': '2023-07-28', 'mri': '4bfb21502a', 'item_code': 'Butter', 'item_name': 'Butter', 'qty': 56.26,
-	                'uom': 'Pound', 'warehouse': 'Refrigerator - APC', 'currency': 'USD', 'supplier_price': '$4.50',
-	                'supplier': 'Freedom Provisions', 'total_demand': 56.26, 'draft_po': None, 'indent': 1
-	        },
-	        {
-	                'material_request_item': '39e0722db1', 'material_request': 'MAT-MR-2023-00002', 'company': 'Ambrosia Pie Company', 'schedule_date': '2023-07-28', 'mri': '39e0722db1',
-	                'item_code': 'Cornstarch', 'item_name': 'Cornstarch', 'qty': 2, 'uom': 'Pound', 'warehouse': 'Storeroom - APC', 'currency': 'USD', 'supplier_price': '$0.52', 'supplier': 'Freedom Provisions',
-	                'total_demand': 2, 'draft_po': None, 'indent': 1
-	        }
-	]
-
-	[
-	        {
-	                'material_request_item': 'd4cb454353',
-	                'material_request': 'MAT-MR-2023-00002',
-	                'company': 'Ambrosia Pie Company',
-	                'schedule_date': '2023-07-28',
-	                'mri': 'd4cb454353',
-	                'item_code': 'Cloudberry',
-	                'item_name': 'Cloudberry',
-	                'qty': 60,
-	                'uom': 'Pound',
-	                'warehouse': 'Refrigerator - APC',
-	                'currency': 'USD',
-	                'supplier_price': '$10.00',
-	                'supplier': 'Chelsea Fruit Co',
-	                'total_demand': 60,
-	                'draft_po': None,
-	                'indent': 1
-	        },
-	        {
-	                'material_request_item': '8cfa467dd5',
-	                'material_request': 'MAT-MR-2023-00002',
-	                'company': 'Ambrosia Pie Company',
-	                'schedule_date': '2023-07-28',
-	                'mri': '8cfa467dd5',
-	                'item_code': 'Cocoplum',
-	                'item_name': 'Cocoplum',
-	                'qty': 60,
-	                'uom': 'Pound',
-	                'warehouse': 'Refrigerator - APC',
-	                'currency': 'USD',
-	                'supplier_price': '$5.57',
-	                'supplier': 'Chelsea Fruit Co',
-	                'total_demand': 60,
-	                'draft_po': None,
-	                'indent': 1
-	        },
-	        {
-	                'material_request_item': '4bfb21502a', 'material_request': 'MAT-MR-2023-00002', 'company': 'Ambrosia Pie Company',
-	                'schedule_date': '2023-07-28', 'mri': '4bfb21502a', 'item_code': 'Butter', 'item_name': 'Butter', 'qty': 56.26,
-	                'uom': 'Pound', 'warehouse': 'Refrigerator - APC', 'currency': 'USD', 'supplier_price': '$4.50',
-	                'supplier': 'Freedom Provisions', 'total_demand': 56.26, 'draft_po': None, 'indent': 1
-	        },
-	        {
-	                'material_request_item': '39e0722db1', 'material_request': 'MAT-MR-2023-00002', 'company': 'Ambrosia Pie Company', 'schedule_date': '2023-07-28', 'mri': '39e0722db1',
-	                'item_code': 'Cornstarch', 'item_name': 'Cornstarch', 'qty': 2, 'uom': 'Pound', 'warehouse': 'Storeroom - APC', 'currency': 'USD', 'supplier_price': '$0.52', 'supplier': 'Freedom Provisions',
-	                'total_demand': 2, 'draft_po': None, 'indent': 1
-	        }
-	]
-	"""
 	filters = frappe._dict(json.loads(filters)) if isinstance(filters, str) else filters
 	rows = json.loads(rows) if isinstance(rows, str) else rows
 	if not rows:
 		return
 
-	counter = 0
+	items = {}
+	rfqs = []
 
-	for supplier, _rows in groupby(rows, lambda x: x.get("supplier")):
-		rows = list(_rows)
+	for row in rows:
+		if row["item_code"] not in items:
+			items[row["item_code"]] = {"suppliers": [row["supplier"]], "rows": [row]}
+		else:
+			items[row["item_code"]]["suppliers"].append(row["supplier"])
+			items[row["item_code"]]["rows"].append(row)
+
+	for item_code, data in items.items():
+		if len(rfqs) == 0:
+			rfqs.append(
+				{
+					"suppliers": data["suppliers"],
+					"items": [item_code],
+					"rows": data["rows"],
+				}
+			)
+		else:
+			exists = False
+			for rfq in rfqs:
+				if rfq["suppliers"] == data["suppliers"]:
+					exists = True
+					break
+
+			if exists:
+				rfq["items"].append(item_code)
+				rfq["rows"] = rfq["rows"] + data["rows"]
+			else:
+				rfqs.append(
+					{
+						"suppliers": data["suppliers"],
+						"items": [item_code],
+						"rows": data["rows"],
+					}
+				)
+
+	for rfq_data in rfqs:
 		rfq = frappe.new_doc("Request for Quotation")
 		rfq.transaction_date = getdate()
-		rfq.company = frappe.get_value("Material Request", rows[0].get("material_request"), "company")
+		rfq.company = company
 		rfq.message_for_supplier = "TODO"
 
 		settings = frappe.get_doc("Inventory Tools Settings", company)
 
-		rfq.append(
-			"suppliers",
-			{
-				"supplier": supplier,
-			},
-		)
+		for supplier in rfq_data["suppliers"]:
+			rfq.append(
+				"suppliers",
+				{
+					"supplier": supplier,
+				},
+			)
 
-		for row in rows:
+		for row in rfq_data["rows"]:
 			if not row.get("item_code"):
+				continue
+
+			if rfq.items and list(filter(lambda i: i.item_code == row.get("item_code"), rfq.items)):
 				continue
 
 			rfq.append(
@@ -360,7 +295,10 @@ def create_rfqs(company, filters, rows):
 			)
 		rfq.set_missing_values()
 		rfq.save()
-		counter += 1
+
+	frappe.msgprint(
+		frappe._(f"{len(rfqs)} Request For Quotation created"), alert=True, indicator="green"
+	)
 
 
 @frappe.whitelist()
