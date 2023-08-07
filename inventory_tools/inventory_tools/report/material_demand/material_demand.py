@@ -200,11 +200,41 @@ def get_item_price(filters, r):
 @frappe.whitelist()
 def create(company, filters, creation_type, rows):
 	if creation_type == "po":
-		create_pos(company, filters, rows)
+		message = create_pos(company, filters, rows)
 	elif creation_type == "rfq":
-		create_rfqs(company, filters, rows)
+		message = create_rfqs(company, filters, rows)
 	elif creation_type == "item_based":
-		frappe.msgprint("TODO ITEM BASED", alert=True, indicator="green")
+		message = create_item_based(company, filters, rows)
+	frappe.msgprint(message, alert=True, indicator="green")
+
+
+@frappe.whitelist()
+def create_item_based(company, filters, rows):
+	filters = frappe._dict(json.loads(filters)) if isinstance(filters, str) else filters
+	rows = json.loads(rows) if isinstance(rows, str) else rows
+	if not rows:
+		return
+
+	rfq_rows = []
+	po_rows = []
+	rfqs_message = frappe._("0 Request For Quotation created")
+	po_message = frappe._("0 Purchase Orders created")
+
+	for row in rows:
+		if frappe.get_value(
+			"Item Supplier", {"parent": row["item_code"], "supplier": row["supplier"]}, "requires_rfq"
+		):
+			rfq_rows.append(row)
+		else:
+			po_rows.append(row)
+
+	if po_rows:
+		po_message = create_pos(company, filters, po_rows)
+
+	if rfq_rows:
+		rfqs_message = create_rfqs(company, filters, rfq_rows)
+
+	return f"{po_message} {rfqs_message}"
 
 
 @frappe.whitelist()
@@ -252,13 +282,12 @@ def create_rfqs(company, filters, rows):
 					}
 				)
 
+	settings = frappe.get_doc("Inventory Tools Settings", company)
+
 	for rfq_data in rfqs:
 		rfq = frappe.new_doc("Request for Quotation")
 		rfq.transaction_date = getdate()
 		rfq.company = company
-		rfq.message_for_supplier = "TODO"
-
-		settings = frappe.get_doc("Inventory Tools Settings", company)
 
 		for supplier in rfq_data["suppliers"]:
 			rfq.append(
@@ -293,12 +322,21 @@ def create_rfqs(company, filters, rows):
 					else row.get("warehouse"),
 				},
 			)
+
+		rfq.message_for_supplier = """
+			<p>Dear,</p>
+			<p>Please find attached the RFQ for the following items:</p>
+			<ul>
+			{% for item in items %}
+				<li>{{ item.item_name }} qty: {{ item.qty }}</li>
+			{% endfor %}
+			</ul>
+			<p>Greetings</p>
+		"""
 		rfq.set_missing_values()
 		rfq.save()
 
-	frappe.msgprint(
-		frappe._(f"{len(rfqs)} Request For Quotation created"), alert=True, indicator="green"
-	)
+	return frappe._(f"{len(rfqs)} Request For Quotation created")
 
 
 @frappe.whitelist()
@@ -345,4 +383,4 @@ def create_pos(company, filters, rows):
 		po.save()
 		counter += 1
 
-	frappe.msgprint(frappe._(f"{counter} Purchase Orders created"), alert=True, indicator="green")
+	return frappe._(f"{counter} Purchase Orders created")
