@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.desk.search import search_link
 
 
@@ -50,3 +51,27 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 		"Inventory Tools Settings", company, "update_warehouse_path"
 	):
 		return search_link(doctype, txt, searchfield, start, page_len, filters)
+	else:
+		doctype = "Warehouse"
+		conditions = []
+		searchfields = frappe.get_meta(doctype).get_search_fields()
+		searchfields.remove("name")
+		searchfields = ["name"] + searchfields
+
+		return frappe.db.sql(
+			f"""SELECT {', '.join(searchfields)}
+			FROM `tabWarehouse`
+			WHERE `tabWarehouse`.`{searchfield}` like %(txt)s
+				{get_filters_cond(doctype, filters, conditions).replace("%", "%%")}
+				{get_match_cond(doctype).replace("%", "%%")}
+			ORDER BY
+				IF(LOCATE(%(_txt)s, name), LOCATE(%(_txt)s, name), 99999),
+				idx DESC, name
+			LIMIT %(start)s, %(page_len)s""",
+			{
+				"txt": "%" + txt + "%",
+				"_txt": txt.replace("%", ""),
+				"start": start or 0,
+				"page_len": page_len or 20,
+			},
+		)

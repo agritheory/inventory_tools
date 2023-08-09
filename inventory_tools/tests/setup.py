@@ -72,8 +72,8 @@ def create_test_data():
 	company_address.append("links", {"link_doctype": "Company", "link_name": settings.company})
 	company_address.save()
 	frappe.set_value("Company", settings.company, "tax_id", "04-1871930")
-	create_warehouses(settings)
 	setup_manufacturing_settings(settings)
+	create_warehouses(settings)
 	create_workstations()
 	create_operations()
 	create_item_groups(settings)
@@ -131,31 +131,26 @@ def setup_manufacturing_settings(settings):
 	mfg_settings.job_Card_excess_transfer = 1
 	mfg_settings.save()
 
-	if frappe.db.exists("Account", {"account_name": "Work In Progress", "company": settings.company}):
-		return
-	wip = frappe.new_doc("Account")
-	wip.account_name = "Work in Progress"
-	wip.parent_account = "1400 - Stock Assets - APC"
-	wip.account_number = "1420"
-	wip.company = settings.company
-	wip.currency = "USD"
-	wip.report_type = "Balance Sheet"
-	wip.root_type = "Asset"
-	wip.save()
-
-	if frappe.db.exists("Account", {"account_name": "Work In Progress", "company": settings.company}):
-		return
-	wip = frappe.new_doc("Account")
-	wip.account_name = "Standard Costing Reconciliation"
-	wip.parent_account = "1400 - Stock Assets - APC"
-	wip.account_number = "1430"
-	wip.company = settings.company
-	wip.currency = "USD"
-	wip.report_type = "Balance Sheet"
-	wip.root_type = "Asset"
-	wip.save()
+	if not frappe.db.exists(
+		"Account", {"account_name": "Work In Progress", "company": settings.company}
+	):
+		wip = frappe.new_doc("Account")
+		wip.account_name = "Work in Progress"
+		wip.parent_account = "1400 - Stock Assets - APC"
+		wip.account_number = "1420"
+		wip.company = settings.company
+		wip.currency = "USD"
+		wip.report_type = "Balance Sheet"
+		wip.root_type = "Asset"
+		wip.save()
 
 	frappe.set_value("Warehouse", "Kitchen - APC", "account", wip.name)
+
+	inventory_tools_settings = frappe.get_doc("Inventory Tools Settings", settings.company)
+	inventory_tools_settings.enable_work_order_subcontracting = 1
+	inventory_tools_settings.create_purchase_orders = 0
+	inventory_tools_settings.update_warehouse_path = 1
+	inventory_tools_settings.save()
 
 
 def create_workstations():
@@ -292,6 +287,10 @@ def create_warehouses(settings):
 	wh.warehouse_name = "Bakery Display"
 	wh.parent_warehouse = "Baked Goods - APC"
 	wh.company = settings.company
+	wh.save()
+
+	wh = frappe.get_doc("Warehouse", "Refrigerated Display - APC")
+	wh.parent_warehouse = "Baked Goods - APC"
 	wh.save()
 
 
