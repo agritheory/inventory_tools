@@ -1,13 +1,12 @@
 import frappe
 import pytest
 
-"""
-This should be generated as part of the setup script
-"""
 
-
-@pytest.mark.order(1)
+# @pytest.mark.order(1)
 def test_warehouse_path():
+	"""
+	In the setup script this feature is turned on
+	"""
 	wh = frappe.get_doc("Warehouse", "Bakery Display - APC")
 	assert wh.warehouse_path == "Finished Goods ⇒ Bakery Display"
 	wh.parent_warehouse = "All Warehouses - APC"

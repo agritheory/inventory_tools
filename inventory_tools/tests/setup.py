@@ -56,20 +56,8 @@ def before_test():
 def create_test_data():
 	settings = frappe._dict(
 		{
-<<<<<<< HEAD
 			"day": frappe.utils.getdate().replace(month=1, day=1),
 			"company": "Ambrosia Pie Company",
-=======
-<<<<<<< HEAD
-			"day": datetime.date(
-				int(frappe.defaults.get_defaults().get("fiscal_year", datetime.datetime.now().year)), 1, 1
-			),
-			"company": frappe.defaults.get_defaults().get("company"),
-=======
-			"day": frappe.utils.getdate().replace(month=1, day=1),
-			"company": "Ambrosia Pie Company",
->>>>>>> b0a5689 (wip: warehouse path feature)
->>>>>>> 4c39d63 (wip: warehouse path feature)
 			"company_account": frappe.get_value(
 				"Account",
 				{
@@ -291,14 +279,11 @@ def create_items(settings):
 
 
 def create_warehouses(settings):
-<<<<<<< HEAD
 	inventory_tools_settings = frappe.get_doc("Inventory Tools Settings", settings.company)
 	inventory_tools_settings.enable_work_order_subcontracting = 1
 	inventory_tools_settings.create_purchase_orders = 0
 	inventory_tools_settings.update_warehouse_path = 1
 	inventory_tools_settings.save()
-=======
->>>>>>> 4c39d63 (wip: warehouse path feature)
 
 	warehouses = [item.get("default_warehouse") for item in items]
 	root_wh = frappe.get_value("Warehouse", {"company": settings.company, "is_group": 1})
@@ -323,13 +308,10 @@ def create_warehouses(settings):
 	wh.warehouse_name = "Bakery Display"
 	wh.parent_warehouse = "Baked Goods - APC"
 	wh.company = settings.company
-<<<<<<< HEAD
 	wh.save()
 
 	wh = frappe.get_doc("Warehouse", "Refrigerated Display - APC")
 	wh.parent_warehouse = "Baked Goods - APC"
-=======
->>>>>>> 4c39d63 (wip: warehouse path feature)
 	wh.save()
 
 

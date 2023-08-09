@@ -1,9 +1,8 @@
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import pytest
 import frappe
-
+import pytest
 from frappe.utils import get_bench_path
 
 
@@ -15,7 +14,7 @@ def monkeymodule():
 
 @pytest.fixture(scope="session", autouse=True)
 def db_instance():
-	currentsite = "crt-test"
+	currentsite = "test_site"
 	sites = Path(get_bench_path()) / "sites"
 	if (sites / "currentsite.txt").is_file():
 		currentsite = (sites / "currentsite.txt").read_text()

@@ -2,10 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-<<<<<<< HEAD
 from frappe.desk.reportview import get_filters_cond, get_match_cond
-=======
->>>>>>> 4c39d63 (wip: warehouse path feature)
 from frappe.desk.search import search_link
 
 
@@ -54,7 +51,6 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 		"Inventory Tools Settings", company, "update_warehouse_path"
 	):
 		return search_link(doctype, txt, searchfield, start, page_len, filters)
-<<<<<<< HEAD
 	else:
 		doctype = "Warehouse"
 		conditions = []
@@ -79,5 +75,3 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 				"page_len": page_len or 20,
 			},
 		)
-=======
->>>>>>> 4c39d63 (wip: warehouse path feature)
