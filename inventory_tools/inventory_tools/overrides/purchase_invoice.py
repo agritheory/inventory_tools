@@ -53,6 +53,8 @@ class InventoryToolsPurchaseInvoice(PurchaseInvoice):
 
 	def validate(self):
 		if self.is_work_order_subcontracting_enabled():
+			if not self.supplier_warehouse:
+				self.supplier_warehouse = fetch_supplier_warehouse(self.company, self.supplier)
 			self.validate_subcontracting_to_pay_qty()
 		return super().validate()
 
@@ -169,4 +171,13 @@ def get_stock_entries(purchase_orders, from_date=None, to_date=None):
 			# "fg_items": fg_items,
 		},
 		as_dict=1,
+	)
+
+
+@frappe.whitelist()
+def fetch_supplier_warehouse(company, supplier):
+	return frappe.db.get_value(
+		"Subcontracting Default",
+		{"parent": supplier, "company": company},
+		["return_warehouse"],
 	)

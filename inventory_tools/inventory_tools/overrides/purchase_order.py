@@ -81,6 +81,7 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 			for row in self.subcontracting:
 				# TODO: set work order supplier to empty string in on_cancel
 				frappe.set_value("Work Order", row.work_order, "supplier", self.supplier)
+
 		super().validate()
 
 	def is_work_order_subcontracting_enabled(self):

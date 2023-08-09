@@ -3,6 +3,7 @@ frappe.ui.form.on('Purchase Invoice', {
 		show_subcontracting_fields(frm)
 		frm.remove_custom_button(__('Fetch Stock Entries'))
 		fetch_stock_entry_dialog(frm)
+		fetch_supplier_warehouse(frm)
 	},
 
 	is_subcontracted: function (frm) {
@@ -87,7 +88,6 @@ function fetch_stock_entry_dialog(frm) {
 					.then(r => {
 						if (r.length > 0) {
 							frm.clear_table('subcontracting')
-							console.log(r)
 							r.forEach(d => {
 								add_stock_entry_row(frm, d)
 							})
@@ -110,8 +110,8 @@ function toggle_subcontracting_columns(frm) {
 		frm.get_field('subcontracting').grid.reset_grid()
 		frm.get_field('subcontracting').grid.visible_columns.forEach((column, index) => {
 			if (index >= frm.get_field('subcontracting').grid.visible_columns.length - 2) {
-				column[0].columns = 2
-				column[1] = 2
+				column[0].columns = 1
+				column[1] = 1
 			}
 		})
 		for (let row of frm.get_field('subcontracting').grid.grid_rows) {
@@ -136,7 +136,8 @@ function toggle_subcontracting_columns(frm) {
 			return col[0]
 		})
 		user_defined_columns.forEach((column, index) => {
-			if (index > 0) {
+			if (index > 2) {
+				// leave first two columns alone
 				column.columns = 1
 			}
 		})
@@ -166,4 +167,18 @@ function toggle_subcontracting_columns(frm) {
 		}
 	}
 	frm.get_field('subcontracting').refresh()
+}
+
+function fetch_supplier_warehouse(frm) {
+	if (!frm.doc.company || !frm.doc.supplier) {
+		return
+	}
+	frappe
+		.xcall('inventory_tools.inventory_tools.overrides.purchase_invoice.fetch_supplier_warehouse', {
+			company: frm.doc.company,
+			supplier: frm.doc.supplier,
+		})
+		.then(r => {
+			frm.set_value('supplier_warehouse', r.message.supplier_warehouse)
+		})
 }
