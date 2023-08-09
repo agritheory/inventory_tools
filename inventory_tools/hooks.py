@@ -111,13 +111,11 @@ override_doctype_class = {
 
 doc_events = {
 	"Company": {
-		"validate": [
-			"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.create_inventory_tools_settings",
-		],
-		"after_insert": [
-			"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.create_inventory_tools_settings",
-		],
-	}
+		"after_insert": "inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.create_inventory_tools_settings",
+	},
+	"Warehouse": {
+		"validate": ["inventory_tools.inventory_tools.overrides.warehouse.update_warehouse_path"]
+	},
 }
 
 # Scheduled Tasks
