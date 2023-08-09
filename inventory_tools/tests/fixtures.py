@@ -666,3 +666,26 @@ boms = [
 		],
 	},
 ]
+
+customers = [
+	"Almacs Food Group",
+	"Beans and Dreams Roasters",
+	"Cafe 27 Cafeteria",
+	"Capital Grille Restaurant Group",
+	"Downtown Deli",
+	"Draws Groceries",
+	"Grab n Go Bodega",
+	"Grand North Station Baking Co",
+	"Happy Basket Food Distribution Group",
+	"Jitter Cafe",
+	"Longwoods Sandwich Shop",
+	"Midtown Munchies Inc",
+	"My Way Cup Coffee",
+	"Nom Nom Cafe",
+	"Round the World Donut Shop",
+	"Sand Street Deli",
+	"Starfood Cafe",
+	"Terrywood Terminal Bakery Inc",
+	"TransAmerica Bank Cafeteria",
+	"Whole Harvest Grocery Group",
+]
