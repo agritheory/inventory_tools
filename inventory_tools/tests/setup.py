@@ -11,7 +11,14 @@ from erpnext.setup.utils import enable_all_roles_and_domains, set_defaults_for_t
 from erpnext.stock.get_item_details import get_item_details
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 
-from inventory_tools.tests.fixtures import boms, items, operations, suppliers, workstations
+from inventory_tools.tests.fixtures import (
+	boms,
+	customers,
+	items,
+	operations,
+	suppliers,
+	workstations,
+)
 
 
 def before_test():
@@ -79,10 +86,15 @@ def create_test_data():
 	create_item_groups(settings)
 	create_price_lists(settings)
 	create_suppliers(settings)
+	create_customers(settings)
 	create_items(settings)
 	create_boms(settings)
-	create_material_request(settings)
-	create_production_plan(settings)
+	prod_plan_from_doc = "Sales Order"
+	if prod_plan_from_doc == "Sales Order":
+		create_sales_order(settings)
+	else:
+		create_material_request(settings)
+	create_production_plan(settings, prod_plan_from_doc)
 
 
 def create_suppliers(settings):
@@ -120,6 +132,16 @@ def create_suppliers(settings):
 			addr = frappe.get_doc("Address", existing_address)
 		addr.append("links", {"link_doctype": "Supplier", "link_name": supplier[0]})
 		addr.save()
+
+
+def create_customers(settings):
+	for customer_name in customers:
+		customer = frappe.new_doc("Customer")
+		customer.customer_name = customer_name
+		customer.customer_group = "Commercial"
+		customer.customer_type = "Company"
+		customer.territory = "United States"
+		customer.save()
 
 
 def setup_manufacturing_settings(settings):
@@ -315,6 +337,53 @@ def create_boms(settings):
 		b.submit()
 
 
+def create_sales_order(settings):
+	so = frappe.new_doc("Sales Order")
+	so.transaction_date = settings.day
+	so.customer = customers[0]
+	so.order_type = "Sales"
+	so.currency = "USD"
+	so.selling_price_list = "Bakery Wholesale"
+	so.append(
+		"items",
+		{
+			"item_code": "Ambrosia Pie",
+			"delivery_date": so.transaction_date,
+			"qty": 40,
+			"warehouse": "Baked Goods - APC",
+		},
+	)
+	so.append(
+		"items",
+		{
+			"item_code": "Double Plum Pie",
+			"delivery_date": so.transaction_date,
+			"qty": 40,
+			"warehouse": "Baked Goods - APC",
+		},
+	)
+	so.append(
+		"items",
+		{
+			"item_code": "Gooseberry Pie",
+			"delivery_date": so.transaction_date,
+			"qty": 10,
+			"warehouse": "Baked Goods - APC",
+		},
+	)
+	so.append(
+		"items",
+		{
+			"item_code": "Kaduka Key Lime Pie",
+			"delivery_date": so.transaction_date,
+			"qty": 10,
+			"warehouse": "Baked Goods - APC",
+		},
+	)
+	so.save()
+	so.submit()
+
+
 def create_material_request(settings):
 	mr = frappe.new_doc("Material Request")
 	mr.material_request_type = "Manufacture"
@@ -361,19 +430,29 @@ def create_material_request(settings):
 	mr.submit()
 
 
-def create_production_plan(settings):
+def create_production_plan(settings, prod_plan_from_doc):
 	pp = frappe.new_doc("Production Plan")
 	pp.posting_date = settings.day
 	pp.company = settings.company
-	pp.get_items_from = "Material Request"
-	pp.append(
-		"material_requests",
-		{
-			"material_request": frappe.get_last_doc("Material Request").name,
-		},
-	)
 	pp.combine_sub_items = 1
-	pp.get_mr_items()
+	if prod_plan_from_doc == "Sales Order":
+		pp.get_items_from = "Sales Order"
+		pp.append(
+			"sales_orders",
+			{
+				"sales_order": frappe.get_last_doc("Sales Order").name,
+			},
+		)
+		pp.get_items()
+	else:
+		pp.get_items_from = "Material Request"
+		pp.append(
+			"material_requests",
+			{
+				"material_request": frappe.get_last_doc("Material Request").name,
+			},
+		)
+		pp.get_mr_items()
 	for item in pp.po_items:
 		item.planned_start_date = settings.day
 	pp.get_sub_assembly_items()
