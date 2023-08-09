@@ -13,6 +13,12 @@ class InventoryToolsSettings(Document):
 		if frappe.db.exists("Custom Field", "Warehouse-warehouse_path"):
 			if not self.update_warehouse_path:
 				frappe.set_value("Custom Field", "Warehouse-warehouse_path", "hidden", 1)
+				frappe.set_value(
+					"Property Setter",
+					{"doctype_or_field": "DocType", "doc_type": "Warehouse", "property": "search_fields"},
+					"search_fields",
+					"",
+				)
 			return
 		cf = frappe.new_doc("Custom Field")
 		cf.dt = "Warehouse"

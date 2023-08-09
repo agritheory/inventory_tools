@@ -72,8 +72,8 @@ def create_test_data():
 	company_address.append("links", {"link_doctype": "Company", "link_name": settings.company})
 	company_address.save()
 	frappe.set_value("Company", settings.company, "tax_id", "04-1871930")
-	setup_manufacturing_settings(settings)
 	create_warehouses(settings)
+	setup_manufacturing_settings(settings)
 	create_workstations()
 	create_operations()
 	create_item_groups(settings)
@@ -145,12 +145,6 @@ def setup_manufacturing_settings(settings):
 		wip.save()
 
 	frappe.set_value("Warehouse", "Kitchen - APC", "account", wip.name)
-
-	inventory_tools_settings = frappe.get_doc("Inventory Tools Settings", settings.company)
-	inventory_tools_settings.enable_work_order_subcontracting = 1
-	inventory_tools_settings.create_purchase_orders = 0
-	inventory_tools_settings.update_warehouse_path = 1
-	inventory_tools_settings.save()
 
 
 def create_workstations():
@@ -263,6 +257,11 @@ def create_items(settings):
 
 
 def create_warehouses(settings):
+	inventory_tools_settings = frappe.get_doc("Inventory Tools Settings", settings.company)
+	inventory_tools_settings.enable_work_order_subcontracting = 1
+	inventory_tools_settings.create_purchase_orders = 0
+	inventory_tools_settings.update_warehouse_path = 1
+	inventory_tools_settings.save()
 
 	warehouses = [item.get("default_warehouse") for item in items]
 	root_wh = frappe.get_value("Warehouse", {"company": settings.company, "is_group": 1})
