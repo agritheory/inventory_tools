@@ -5,11 +5,17 @@ frappe.ui.form.on('Purchase Invoice', {
 		fetch_stock_entry_dialog(frm)
 		fetch_supplier_warehouse(frm)
 	},
-
 	is_subcontracted: function (frm) {
 		if (frm.doc.is_subcontracted) {
 			show_subcontracting_fields(frm)
 		}
+	},
+	company: frm => {
+		setup_item_queries(frm)
+		fetch_supplier_warehouse(frm)
+	},
+	supplier: frm => {
+		fetch_supplier_warehouse(frm)
 	},
 })
 
@@ -181,4 +187,12 @@ function fetch_supplier_warehouse(frm) {
 		.then(r => {
 			frm.set_value('supplier_warehouse', r.message.supplier_warehouse)
 		})
+}
+
+function setup_supplier_warehouse_query(frm) {
+	frm.set_query('supplier_warehouse', () => {
+		return {
+			filters: { is_group: 0 },
+		}
+	})
 }

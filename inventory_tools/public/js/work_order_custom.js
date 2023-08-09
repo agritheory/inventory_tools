@@ -45,10 +45,14 @@ function make_subcontracting_po(frm) {
 		],
 		primary_action: async () => {
 			let data = await d.get_values()
-			frappe.xcall('inventory_tools.inventory_tools.overrides.work_order.make_subcontracted_purchase_order', {
-				wo_name: frm.doc.name,
-				supplier: data.supplier,
-			})
+			frappe
+				.xcall('inventory_tools.inventory_tools.overrides.work_order.make_subcontracted_purchase_order', {
+					wo_name: frm.doc.name,
+					supplier: data.supplier,
+				})
+				.then(r => {
+					d.hide()
+				})
 		},
 		primary_action_label: __('Create PO'),
 	})

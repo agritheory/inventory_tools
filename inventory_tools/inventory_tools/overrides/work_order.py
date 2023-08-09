@@ -135,8 +135,9 @@ def in_existing_po(wo_name):
 
 def create_po_table_data(wo_name):
 	wo = frappe.get_doc("Work Order", wo_name)
+
 	item_row_data = {
-		# "item_code": wo.production_item,
+		"item_code": wo.production_item,
 		"fg_item": wo.production_item,
 		"fg_item_qty": wo.qty,
 		"warehouse": wo.fg_warehouse,
@@ -145,7 +146,7 @@ def create_po_table_data(wo_name):
 		"qty": wo.qty,
 		"description": wo.description,
 	}
-	# supplier_wip_warehouse = frappe.get
+
 	subc_row_data = {
 		"work_order": wo_name,
 		"warehouse": wo.fg_warehouse,
@@ -179,13 +180,18 @@ def make_purchase_order(wo_name, supplier=None):
 						f"Default Supplier or Item Supplier must be set for subcontracted item {production_item}"
 					)
 				)
-
+	wip_warehouse = frappe.db.get_value(
+		"Subcontracting Default",
+		{"parent": supplier, "company": company},
+		["wip_warehouse"],
+	)
 	# Make Purchase Order
 	po = frappe.new_doc("Purchase Order")
 	po.company = company
 	po.supplier = supplier
 	po.schedule_date = max(getdate(planned_start_date), getdate())
 	po.posting_date = getdate()
+	po.supplier_warehouse = wip_warehouse
 	po.is_subcontracted = 1
 	item_row_data, subc_row_data = create_po_table_data(wo_name)
 	po.append("items", item_row_data)
