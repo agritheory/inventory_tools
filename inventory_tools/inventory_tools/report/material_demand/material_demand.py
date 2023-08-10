@@ -7,6 +7,7 @@ from itertools import groupby
 import frappe
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.get_item_details import get_price_list_rate_for
+from frappe import _
 from frappe.utils.data import fmt_money, getdate
 
 
@@ -198,18 +199,18 @@ def get_item_price(filters, r):
 
 
 @frappe.whitelist()
-def create(company, filters, creation_type, rows):
+def create(company, email_template, filters, creation_type, rows):
 	if creation_type == "po":
 		message = create_pos(company, filters, rows)
 	elif creation_type == "rfq":
-		message = create_rfqs(company, filters, rows)
+		message = create_rfqs(company, email_template, filters, rows)
 	elif creation_type == "item_based":
-		message = create_item_based(company, filters, rows)
+		message = create_item_based(company, email_template, filters, rows)
 	frappe.msgprint(message, alert=True, indicator="green")
 
 
 @frappe.whitelist()
-def create_item_based(company, filters, rows):
+def create_item_based(company, email_template, filters, rows):
 	filters = frappe._dict(json.loads(filters)) if isinstance(filters, str) else filters
 	rows = json.loads(rows) if isinstance(rows, str) else rows
 	if not rows:
@@ -232,13 +233,13 @@ def create_item_based(company, filters, rows):
 		po_message = create_pos(company, filters, po_rows)
 
 	if rfq_rows:
-		rfqs_message = create_rfqs(company, filters, rfq_rows)
+		rfqs_message = create_rfqs(company, email_template, filters, rfq_rows)
 
 	return f"{po_message} {rfqs_message}"
 
 
 @frappe.whitelist()
-def create_rfqs(company, filters, rows):
+def create_rfqs(company, email_template, filters, rows):
 	filters = frappe._dict(json.loads(filters)) if isinstance(filters, str) else filters
 	rows = json.loads(rows) if isinstance(rows, str) else rows
 	if not rows:
@@ -288,6 +289,7 @@ def create_rfqs(company, filters, rows):
 		rfq = frappe.new_doc("Request for Quotation")
 		rfq.transaction_date = getdate()
 		rfq.company = company
+		rfq.email_template = email_template
 
 		for supplier in rfq_data["suppliers"]:
 			rfq.append(
@@ -322,17 +324,6 @@ def create_rfqs(company, filters, rows):
 					else row.get("warehouse"),
 				},
 			)
-
-		rfq.message_for_supplier = """
-			<p>Dear,</p>
-			<p>Please find attached the RFQ for the following items:</p>
-			<ul>
-			{% for item in items %}
-				<li>{{ item.item_name }} qty: {{ item.qty }}</li>
-			{% endfor %}
-			</ul>
-			<p>Greetings</p>
-		"""
 		rfq.set_missing_values()
 		rfq.save()
 
