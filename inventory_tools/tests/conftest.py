@@ -1,5 +1,6 @@
+import os
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import frappe
 import pytest
@@ -13,7 +14,13 @@ def monkeymodule():
 
 
 @pytest.fixture(scope="session", autouse=True)
-def db_instance():
+def mock_settings_env_vars():
+	with patch.dict(os.environ, {"FRAPPE_STREAM_LOGGING": "True"}):
+		yield
+
+
+@pytest.fixture(scope="session", autouse=True)
+def db_instance(mock_settings_env_vars):
 	currentsite = "test_site"
 	sites = Path(get_bench_path()) / "sites"
 	if (sites / "currentsite.txt").is_file():
