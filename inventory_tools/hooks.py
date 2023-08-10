@@ -110,6 +110,9 @@ override_doctype_class = {
 # Hook on document methods and events
 
 doc_events = {
+	"*": {
+		"validate": ["inventory_tools.inventory_tools.overrides.uom.validate_uom_has_conversion"],
+	},
 	"Company": {
 		"validate": [
 			"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.create_inventory_tools_settings",
@@ -117,7 +120,10 @@ doc_events = {
 		"after_insert": [
 			"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.create_inventory_tools_settings",
 		],
-	}
+	},
+	"Item": {
+		"validate": ["inventory_tools.inventory_tools.overrides.uom.duplicate_weight_to_uom_conversion"],
+	},
 }
 
 # Scheduled Tasks
@@ -152,7 +158,11 @@ doc_events = {
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "inventory_tools.event.get_events"
 # }
-#
+
+standard_queries = {
+	"UOM": "inventory_tools.inventory_tools.overrides.uom.uom_restricted_query",
+}
+
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
