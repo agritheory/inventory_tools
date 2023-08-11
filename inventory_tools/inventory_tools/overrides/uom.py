@@ -9,11 +9,11 @@ from frappe.desk.search import search_link
 @frappe.whitelist()
 def uom_restricted_query(doctype, txt, searchfield, start, page_len, filters):
 	company = frappe.defaults.get_defaults().get("company")
-	if frappe.get_cached_value("Inventory Tools", company, "enforce_uoms"):
+	if frappe.get_cached_value("Inventory Tools Settings", company, "enforce_uoms"):
 		return execute(
 			"UOM Conversion Detail",
 			filters=filters,
-			fields=["uom"],
+			fields=["uom", "conversion_factor"],
 			limit_start=start,
 			limit_page_length=page_len,
 			as_list=True,
@@ -23,22 +23,22 @@ def uom_restricted_query(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def validate_uom_has_conversion(doc, method=None):
-	company = doc.company if doc.company else frappe.defaults.get_defaults().get("company")
-	if not frappe.get_cached_value("Inventory Tools", company, "enforce_uoms"):
+	company = doc.company if doc.get("company") else frappe.defaults.get_defaults().get("company")
+	if not frappe.get_cached_value("Inventory Tools Settings", company, "enforce_uoms"):
 		return
-	# TODO: make UOM enforcement doctypes and fields hookable
-	# _uom_enforcement = frappe.get_hooks()
+	uom_enforcement = get_uom_enforcement()
 	if doc.doctype not in uom_enforcement:
 		return
 	invalid_data = []
-	for field in uom_enforcement.get(doc.doctype):
-		if "." in field:
-			table = field.split(".")[0]
-			field = field.split(".")[1]
-			for row in doc.get(table):
-				invalid_data.append(validate_uom_conversion(row, field))
+	for form_doctype, config in uom_enforcement.get(doc.doctype).items():
+		if doc.doctype == form_doctype:
+			for field in config:
+				invalid_data.append(validate_uom_conversion(doc, field))
 		else:
-			invalid_data.append(validate_uom_conversion(doc, field))
+			for child_table_field, fields in config.items():
+				for row in doc.get(child_table_field):
+					for field in fields:
+						invalid_data.append(validate_uom_conversion(row, field))
 
 	if not any(invalid_data):
 		return
@@ -111,70 +111,6 @@ def duplicate_weight_to_uom_conversion(doc, method=None):
 	)
 
 
-uom_enforcement = {
-	"BOM": [
-		"items.uom",
-	],
-	"Delivery Note": [
-		"items.uom",
-		"items.weight_uom",
-	],
-	"Item Price": [
-		"uom",
-	],
-	"Item": [
-		"sales_uom",
-		"purchase_uom",
-		"weight_uom",
-		"barcodes.uom",
-	],
-	"Job Card": ["items.uom", "items.stock_uom"],
-	"Material Request": [
-		"items.uom",
-	],
-	"Opportunity": [
-		"items.uom",
-	],
-	"Pick List": [
-		"locations.uom",
-	],
-	"POS Invoice": [
-		"items.uom",
-	],
-	"Production Plan": [
-		"po_items.planned_uom",
-	],
-	"Purchase Invoice": [
-		"items.uom",
-		"items.weight_uom",
-	],
-	"Purchase Order": [
-		"items.uom",
-	],
-	"Purchase Receipt": [
-		"items.uom",
-		"items.weight_uom",
-	],
-	"Putaway Rule": [
-		"uom",
-	],
-	"Quotation": [
-		"items.uom",
-	],
-	"Request for Quotation": [
-		"items.uom",
-	],
-	"Sales Invoice": [
-		"items.uom",
-	],
-	"Sales Order": [
-		"items.uom",
-		"items.weight_uom",
-	],
-	"Stock Entry": [
-		"items.uom",
-	],
-	"Supplier Quotation": [
-		"items.uom",
-	],
-}
+@frappe.whitelist()
+def get_uom_enforcement():
+	return frappe.get_hooks("inventory_tools_uom_enforcement")
