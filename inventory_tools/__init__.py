@@ -1,4 +1,4 @@
-__version__ = "0.0.1"
+__version__ = "14.0.1"
 
 import erpnext.stock.get_item_details
 

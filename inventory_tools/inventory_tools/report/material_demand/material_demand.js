@@ -115,11 +115,11 @@ function update_selected_qty() {
 				total_selected = `<span style="color: red">${total_selected}</span>`
 				selected_price = `<span style="color: red">${selected_price}</span>`
 			}
-			frappe.query_report.datatable.cellmanager.updateCell(8, index, total_selected, true)
-			frappe.query_report.datatable.cellmanager.updateCell(11, index, selected_price, true)
+			frappe.query_report.datatable.cellmanager.updateCell(9, index, total_selected, true)
+			frappe.query_report.datatable.cellmanager.updateCell(12, index, selected_price, true)
 		} else {
-			frappe.query_report.datatable.cellmanager.updateCell(8, index, '', true)
-			frappe.query_report.datatable.cellmanager.updateCell(11, index, '', true)
+			frappe.query_report.datatable.cellmanager.updateCell(9, index, '', true)
+			frappe.query_report.datatable.cellmanager.updateCell(12, index, '', true)
 		}
 	})
 }
