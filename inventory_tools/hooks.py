@@ -154,7 +154,8 @@ doc_events = {
 # ------------------------------
 #
 override_whitelisted_methods = {
-	"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry": "inventory_tools.inventory_tools.overrides.work_order.make_stock_entry"
+	"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry": "inventory_tools.inventory_tools.overrides.work_order.make_stock_entry",
+	"erpnext.stock.get_item_details.get_item_details": "inventory_tools.inventory_tools.overrides.purchase_order.get_item_details",
 }
 #
 # each overriding function accepts a `data` argument;

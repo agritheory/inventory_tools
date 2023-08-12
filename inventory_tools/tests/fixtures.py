@@ -218,6 +218,7 @@ items = [
 		"item_group": "Sub Assemblies",
 		"default_warehouse": "Refrigerator - APC",
 		"is_sub_contracted_item": 1,
+		"item_price": 2.00,
 		"default_supplier": "",
 		"supplier": "",
 		"valuation_rate": 3.0196,

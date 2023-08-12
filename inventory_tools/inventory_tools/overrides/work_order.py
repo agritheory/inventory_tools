@@ -197,8 +197,6 @@ def make_purchase_order(wo_name, supplier=None):
 	po.append("items", item_row_data)
 	po.append("subcontracting", subc_row_data)
 	po.set_missing_values()
-	po.flags.ignore_mandatory = True
-	po.flags.ignore_validate = True
 	po.save()
 	return po.name
 

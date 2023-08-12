@@ -14,7 +14,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 	make_purchase_receipt,
 )
 from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
-from frappe import _
+from frappe import _, throw
 
 
 def _bypass(*args, **kwargs):
@@ -77,7 +77,6 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 	def validate(self):
 		if self.is_work_order_subcontracting_enabled():
 			self.validate_subcontracting_fg_qty()
-			# TODO: modify the existing subcontracting checks?
 			for row in self.subcontracting:
 				# TODO: set work order supplier to empty string in on_cancel
 				frappe.set_value("Work Order", row.work_order, "supplier", self.supplier)
@@ -219,3 +218,41 @@ def make_sales_invoices(docname: str, rows: list) -> None:
 		pi.inter_company_invoice_reference = si.name
 		pi.title = f"Transfer {doc.supplier} to {pi.company}"
 		pi.save()
+
+
+@frappe.whitelist()
+def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=True):
+	import erpnext.stock.get_item_details
+
+	erpnext.stock.get_item_details.validate_item_details = validate_item_details
+	out = erpnext.stock.get_item_details.get_item_details(
+		args, doc, for_validate, overwrite_warehouse
+	)
+	return out
+
+
+@frappe.whitelist()
+def validate_item_details(args, item):
+	if not args.company:
+		throw(_("Please specify Company"))
+
+	settings = frappe.get_doc("Inventory Tools Settings", {"company": args.company})
+
+	from erpnext.stock.doctype.item.item import validate_end_of_life
+
+	validate_end_of_life(item.name, item.end_of_life, item.disabled)
+
+	if frappe.utils.cint(item.has_variants):
+		msg = f"Item {item.name} is a template, please select one of its variants"
+
+		throw(_(msg), title=_("Template Item Selected"))
+
+	elif args.transaction_type == "buying" and args.doctype != "Material Request":
+		if not (settings and settings.enable_work_order_subcontracting):
+			if args.get("is_subcontracted"):
+				if args.get("is_old_subcontracting_flow"):
+					if item.is_sub_contracted_item != 1:
+						throw(_("Item {0} must be a Sub-contracted Item").format(item.name))
+				else:
+					if item.is_stock_item:
+						throw(_("Item {0} must be a Non-Stock Item").format(item.name))
