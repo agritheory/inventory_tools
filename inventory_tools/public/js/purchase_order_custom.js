@@ -32,6 +32,10 @@ function show_subcontracting_fields(frm) {
 		.then(r => {
 			if (r && r.message && r.message.enable_work_order_subcontracting) {
 				unhide_field('subcontracting')
+				setTimeout(() => {
+					frm.remove_custom_button('Purchase Receipt', 'Create')
+					frm.remove_custom_button('Subcontracting Order', 'Create')
+				}, 1000)
 			} else {
 				hide_field('subcontracting')
 			}
@@ -45,7 +49,7 @@ function setup_item_queries(frm) {
 			if (me.frm.doc.is_old_subcontracting_flow) {
 				filters['is_sub_contracted_item'] = 1
 			} else {
-				frappe.db.get_value('Inventory Tools', frm.doc.company, 'enable_work_order_subcontracting').then(r => {
+				frappe.db.get_value('Inventory Tools Settings', frm.doc.company, 'enable_work_order_subcontracting').then(r => {
 					if (!r.message.enable_work_order_subcontracting) {
 						filters['is_stock_item'] = 0
 					}
@@ -82,6 +86,8 @@ function fetch_supplier_warehouse(frm) {
 			supplier: frm.doc.supplier,
 		})
 		.then(r => {
-			frm.set_value('supplier_warehouse', r.message.supplier_warehouse)
+			if (r && r.message) {
+				frm.set_value('supplier_warehouse', r.message.supplier_warehouse)
+			}
 		})
 }
