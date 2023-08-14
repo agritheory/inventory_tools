@@ -13,7 +13,7 @@ required_apps = ["erpnext", "hrms"]
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/inventory_tools/css/inventory_tools.css"
-# app_include_js = "/assets/inventory_tools/js/inventory_tools.js"
+app_include_js = ["inventory_tools.bundle.js"]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/inventory_tools/css/inventory_tools.css"
@@ -76,6 +76,11 @@ after_migrate = "inventory_tools.customize.load_customizations"
 # before_uninstall = "inventory_tools.uninstall.before_uninstall"
 # after_uninstall = "inventory_tools.uninstall.after_uninstall"
 
+# Boot
+# ------------
+extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
+
+
 # Desk Notifications
 # ------------------
 # See frappe.core.notifications.get_notification_config
@@ -110,6 +115,9 @@ override_doctype_class = {
 # Hook on document methods and events
 
 doc_events = {
+	"*": {
+		"validate": ["inventory_tools.inventory_tools.overrides.uom.validate_uom_has_conversion"],
+	},
 	"Company": {
 		"validate": [
 			"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.create_inventory_tools_settings",
@@ -117,7 +125,10 @@ doc_events = {
 		"after_insert": [
 			"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.create_inventory_tools_settings",
 		],
-	}
+	},
+	"Item": {
+		"validate": ["inventory_tools.inventory_tools.overrides.uom.duplicate_weight_to_uom_conversion"],
+	},
 }
 
 # Scheduled Tasks
@@ -152,7 +163,7 @@ doc_events = {
 # override_whitelisted_methods = {
 # 	"frappe.desk.doctype.event.event.get_events": "inventory_tools.event.get_events"
 # }
-#
+
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
@@ -209,3 +220,39 @@ doc_events = {
 # auth_hooks = [
 # 	"inventory_tools.auth.validate"
 # ]
+
+# Inventory Tools UOM Enforcement
+# --------------------------------
+
+inventory_tools_uom_enforcement = {
+	"BOM": {
+		"BOM Item": {"items": ["uom"]},
+	},
+	"Delivery Note": {
+		"Delivery Note Item": {"items": ["uom", "weight_uom"]},
+	},
+	"Item Price": {"Item Price": ["uom"]},
+	"Item": {"Item": ["sales_uom", "purchase_uom", "weight_uom"]},
+	"Job Card": {"Job Card Item": {"items": ["uom"]}},
+	"Material Request": {"Material Request Item": {"items": ["uom"]}},
+	"Opportunity": {"Opportunity Item": {"items": ["uom"]}},
+	"Pick List": {"Pick List Item": {"locations": ["uom"]}},
+	"POS Invoice": {"POS Invoice Item": {"items": ["uom"]}},
+	"Production Plan": {"Production Plan Item": {"po_items": ["planned_uom"]}},
+	"Purchase Invoice": {
+		"Purchase Invoice Item": {"items": ["uom", "weight_uom"]},
+	},
+	"Purchase Order": {"Purchase Order Item": {"items": ["uom"]}},
+	"Purchase Receipt": {
+		"Purchase Receipt Item": {"items": ["uom", "weight_uom"]},
+	},
+	"Putaway Rule": {"Putaway Rule Item": ["uom"]},
+	"Quotation": {"Quotation Item": {"items": ["uom"]}},
+	"Request for Quotation": {"Request for Quotation Item": {"items": ["uom"]}},
+	"Sales Invoice": {"Sales Invoice Item": {"items": ["uom"]}},
+	"Sales Order": {
+		"Sales Order Item": {"items": ["uom", "weight_uom"]},
+	},
+	"Stock Entry": {"Stock Entry Detail": {"items": ["uom"]}},
+	"Supplier Quotation": {"Supplier Quotation Item": {"items": ["uom"]}},
+}
