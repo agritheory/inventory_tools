@@ -129,6 +129,9 @@ doc_events = {
 	"Item": {
 		"validate": ["inventory_tools.inventory_tools.overrides.uom.duplicate_weight_to_uom_conversion"],
 	},
+  "Warehouse": {
+		"validate": ["inventory_tools.inventory_tools.overrides.warehouse.update_warehouse_path"]
+  },
 }
 
 # Scheduled Tasks
@@ -170,6 +173,10 @@ doc_events = {
 # override_doctype_dashboards = {
 # 	"Task": "inventory_tools.task.get_dashboard_data"
 # }
+
+standard_queries = {
+	"Warehouse": "inventory_tools.inventory_tools.overrides.warehouse.warehouse_query",
+}
 
 # exempt linked doctypes from being automatically cancelled
 #

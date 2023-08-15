@@ -20,7 +20,7 @@ suppliers = [
 		None,
 		"Net 30",
 		{
-			"address_line1": "34 Pinar St",  # TODO: randomize this address
+			"address_line1": "34 Pinar St",
 			"city": "Unity",
 			"state": "RI",
 			"country": "United States",
@@ -142,14 +142,14 @@ items = [
 		"item_group": "Baked Goods",
 		"uom": "Nos",
 		"item_price": 10.00,
-		"default_warehouse": "Baked Goods - APC",
+		"default_warehouse": "Refrigerated Display - APC",
 		"description": "<div><p>Ambrosia Pie is the marquee product of Ambrosia Pie Company. A filling of heavenly cloudberries pair perfectly with the tart hairless rambutan, finished with drizzles of tayberry nectar. It's a feast fit for Mt Olympus!</p></div>",
 	},
 	{
 		"item_code": "Double Plum Pie",
 		"uom": "Nos",
 		"item_group": "Baked Goods",
-		"default_warehouse": "Baked Goods - APC",
+		"default_warehouse": "Refrigerated Display - APC",
 		"item_price": 9.00,
 		"description": "<div><p>Double the fun and double the flavor with our Double Plum Pie! We combine damson and cocoplums in a daring tropical-meets-temperate filling. Forbidden fruit never tasted this good.</p></div>",
 	},
@@ -158,7 +158,7 @@ items = [
 		"uom": "Nos",
 		"item_group": "Baked Goods",
 		"item_price": 12.00,
-		"default_warehouse": "Baked Goods - APC",
+		"default_warehouse": "Refrigerated Display - APC",
 		"description": "<div><p>Our delicious take on the traditional gooseberry pie that tastes like the holidays. This classic pie is best shared with the ones you love.</p></div>",
 	},
 	{
@@ -166,7 +166,7 @@ items = [
 		"item_group": "Baked Goods",
 		"uom": "Nos",
 		"item_price": 9.00,
-		"default_warehouse": "Baked Goods - APC",
+		"default_warehouse": "Refrigerated Display - APC",
 		"description": "<div><p>Take your tastebuds on an adventure with this whimsical twist on the classic Key Lime pie. Made with kaduka limes and the exotic limequat, this seasonal pie is sure to satisfy even the most weary culinary explorer. Grab it when you can - it's only available April through September.</p></div>",
 	},
 	{
