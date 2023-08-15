@@ -43,14 +43,12 @@ def before_test():
 			"bank_account": "Primary Checking",
 		}
 	)
-	enable_all_roles_and_domains()
 	set_defaults_for_tests()
-	frappe.db.commit()
-	create_test_data()
 	for modu in frappe.get_all("Module Onboarding"):
 		frappe.db.set_value("Module Onboarding", modu, "is_complete", 1)
 	frappe.set_value("Website Settings", "Website Settings", "home_page", "login")
 	frappe.db.commit()
+	create_test_data()
 
 
 def create_test_data():
