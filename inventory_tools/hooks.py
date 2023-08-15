@@ -172,6 +172,7 @@ override_whitelisted_methods = {
 	"erpnext.stock.get_item_details.get_item_details": "inventory_tools.inventory_tools.overrides.purchase_order.get_item_details",
 }
 
+
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
