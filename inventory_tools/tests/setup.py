@@ -56,10 +56,8 @@ def before_test():
 def create_test_data():
 	settings = frappe._dict(
 		{
-			"day": datetime.date(
-				int(frappe.defaults.get_defaults().get("fiscal_year", datetime.datetime.now().year)), 1, 1
-			),
-			"company": frappe.defaults.get_defaults().get("company"),
+			"day": frappe.utils.getdate().replace(month=1, day=1),
+			"company": "Ambrosia Pie Company",
 			"company_account": frappe.get_value(
 				"Account",
 				{
@@ -86,6 +84,7 @@ def create_test_data():
 	create_workstations()
 	create_operations()
 	create_item_groups(settings)
+	create_price_lists(settings)
 	create_suppliers(settings)
 	create_customers(settings)
 	create_items(settings)
@@ -116,7 +115,6 @@ def create_suppliers(settings):
 			biz.bank = "Local Bank"
 			biz.bank_account = "123456789"
 		biz.currency = "USD"
-		biz.default_price_list = "Standard Buying"
 		if biz.supplier_name == "Credible Contract Baking":
 			biz.append(
 				"subcontracting_defaults",
@@ -126,6 +124,7 @@ def create_suppliers(settings):
 					"return_warehouse": "Baked Goods - APC",
 				},
 			)
+		biz.default_price_list = "Bakery Buying"
 		biz.save()
 
 		existing_address = frappe.get_value("Address", {"address_line1": supplier[5]["address_line1"]})
@@ -158,7 +157,7 @@ def setup_manufacturing_settings(settings):
 	mfg_settings = frappe.get_doc("Manufacturing Settings", "Manufacturing Settings")
 	mfg_settings.material_consumption = 1
 	mfg_settings.default_wip_warehouse = "Kitchen - APC"
-	mfg_settings.default_fg_warehouse = "Baked Goods - APC"
+	mfg_settings.default_fg_warehouse = "Refrigerated Display - APC"
 	mfg_settings.overproduction_percentage_for_work_order = 5.00
 	mfg_settings.job_card_excess_transfer = 1
 	mfg_settings.save()
@@ -170,19 +169,6 @@ def setup_manufacturing_settings(settings):
 		wip.account_name = "Work in Progress"
 		wip.parent_account = "1400 - Stock Assets - APC"
 		wip.account_number = "1420"
-		wip.company = settings.company
-		wip.currency = "USD"
-		wip.report_type = "Balance Sheet"
-		wip.root_type = "Asset"
-		wip.save()
-
-	if not frappe.db.exists(
-		"Account", {"account_name": "Work In Progress", "company": settings.company}
-	):
-		wip = frappe.new_doc("Account")
-		wip.account_name = "Standard Costing Reconciliation"
-		wip.parent_account = "1400 - Stock Assets - APC"
-		wip.account_number = "1430"
 		wip.company = settings.company
 		wip.currency = "USD"
 		wip.report_type = "Balance Sheet"
@@ -234,10 +220,11 @@ def create_item_groups(settings):
 		ig.save()
 
 
-def create_items(settings):
+def create_price_lists(settings):
 	if not frappe.db.exists("Price List", "Bakery Buying"):
 		pl = frappe.new_doc("Price List")
 		pl.price_list_name = "Bakery Buying"
+		pl.currency = "USD"
 		pl.buying = 1
 		pl.append("countries", {"country": "United States"})
 		pl.save()
@@ -245,6 +232,7 @@ def create_items(settings):
 	if not frappe.db.exists("Price List", "Bakery Wholesale"):
 		pl = frappe.new_doc("Price List")
 		pl.price_list_name = "Bakery Wholesale"
+		pl.currency = "USD"
 		pl.selling = 1
 		pl.append("countries", {"country": "United States"})
 		pl.save()
@@ -259,13 +247,12 @@ def create_items(settings):
 		pr.margin_rate_or_amount = 2.00
 		pr.valid_from = settings.day
 		pr.for_price_list = "Bakery Wholesale"
+		pr.currency = "USD"
 		pr.append("item_groups", {"item_group": "Baked Goods"})
 		pr.save()
 
-	supps = frappe.get_all("Supplier")
-	for s in supps:
-		frappe.set_value("Supplier", s, "default_price_list", "Bakery Buying")
 
+def create_items(settings):
 	for item in items:
 		if frappe.db.exists("Item", item.get("item_code")):
 			continue
@@ -342,10 +329,19 @@ def create_items(settings):
 
 
 def create_warehouses(settings):
+	inventory_tools_settings = frappe.get_doc("Inventory Tools Settings", settings.company)
+	inventory_tools_settings.enable_work_order_subcontracting = 1
+	inventory_tools_settings.create_purchase_orders = 0
+	inventory_tools_settings.update_warehouse_path = 1
+	inventory_tools_settings.save()
+
 	warehouses = [item.get("default_warehouse") for item in items]
 	root_wh = frappe.get_value("Warehouse", {"company": settings.company, "is_group": 1})
 	if frappe.db.exists("Warehouse", "Stores - APC"):
 		frappe.rename_doc("Warehouse", "Stores - APC", "Storeroom - APC", force=True)
+	if frappe.db.exists("Warehouse", "Finished Goods - APC"):
+		frappe.rename_doc("Warehouse", "Finished Goods - APC", "Baked Goods - APC", force=True)
+		frappe.set_value("Warehouse", "Baked Goods - APC", "is_group", 1)
 	for wh in frappe.get_all("Warehouse", {"company": settings.company}, ["name", "is_group"]):
 		if wh.name not in warehouses and not wh.is_group:
 			frappe.delete_doc("Warehouse", wh.name)
@@ -357,6 +353,16 @@ def create_warehouses(settings):
 		wh.parent_warehouse = root_wh
 		wh.company = settings.company
 		wh.save()
+
+	wh = frappe.new_doc("Warehouse")
+	wh.warehouse_name = "Bakery Display"
+	wh.parent_warehouse = "Baked Goods - APC"
+	wh.company = settings.company
+	wh.save()
+
+	wh = frappe.get_doc("Warehouse", "Refrigerated Display - APC")
+	wh.parent_warehouse = "Baked Goods - APC"
+	wh.save()
 
 
 def create_boms(settings):
@@ -435,13 +441,14 @@ def create_material_request(settings):
 	mr.material_request_type = "Manufacture"
 	mr.schedule_date = mr.transaction_date = settings.day
 	mr.title = "Pies"
+	mr.company = settings.company
 	mr.append(
 		"items",
 		{
 			"item_code": "Ambrosia Pie",
 			"schedule_date": mr.schedule_date,
 			"qty": 40,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	mr.append(
@@ -450,7 +457,7 @@ def create_material_request(settings):
 			"item_code": "Double Plum Pie",
 			"schedule_date": mr.schedule_date,
 			"qty": 40,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	mr.append(
@@ -459,7 +466,7 @@ def create_material_request(settings):
 			"item_code": "Gooseberry Pie",
 			"schedule_date": mr.schedule_date,
 			"qty": 10,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	mr.append(
@@ -468,7 +475,7 @@ def create_material_request(settings):
 			"item_code": "Kaduka Key Lime Pie",
 			"schedule_date": mr.schedule_date,
 			"qty": 10,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	mr.save()
@@ -532,6 +539,7 @@ def create_production_plan(settings, prod_plan_from_doc):
 	pp.make_material_request()
 	mr = frappe.get_last_doc("Material Request")
 	mr.schedule_date = mr.transaction_date = settings.day
+	mr.company = settings.company
 	mr.save()
 	mr.submit()
 

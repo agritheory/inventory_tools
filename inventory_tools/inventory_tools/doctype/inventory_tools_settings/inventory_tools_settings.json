@@ -15,8 +15,9 @@
   "work_order_subcontracting_section",
   "enable_work_order_subcontracting",
   "create_purchase_orders",
-  "section_break_gzcbr",
+  "section_break_0",
   "update_warehouse_path",
+  "section_break_gzcbr",
   "uoms_section",
   "enforce_uoms"
  ],
@@ -69,6 +70,10 @@
    "label": "Create Purchase Orders in Production Plan"
   },
   {
+   "fieldname": "section_break_0",
+   "fieldtype": "Section Break"
+  },
+  {
    "default": "0",
    "fieldname": "update_warehouse_path",
    "fieldtype": "Check",
@@ -94,6 +99,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2023-08-09 20:12:09.274841",
+
  "modified_by": "Administrator",
  "module": "Inventory Tools",
  "name": "Inventory Tools Settings",

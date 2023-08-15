@@ -9,7 +9,11 @@ readme = "README.md"
 dynamic = ["version"]
 dependencies = [
     "pytest",
+<<<<<<< HEAD
     "pytest-order"
+=======
+    "mypy"
+>>>>>>> e3fb9c7 (Warehouse path (#25))
 ]
 
 [build-system]

@@ -1,0 +1,140 @@
+name: Linters
+
+on:
+  push:
+    branches:
+      - version-14
+  pull_request:
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  mypy:
+    needs: [ py_json_merge ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 2
+
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+
+      - name: Install mypy
+        run: pip install mypy
+
+      # - name: Install mypy types
+      #   run: mypy ./aterp/. --install-types
+
+      - name: Run mypy
+        uses: sasanquaneuf/mypy-github-action@releases/v1
+        with:
+          checkName: 'mypy'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  prettier:
+    needs: [ py_json_merge ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 2
+
+      - name: Prettify code
+        uses: rutajdash/prettier-cli-action@v1.0.0
+        with:
+          config_path: ./.prettierrc.js
+          ignore_path: ./.prettierignore
+
+      - name: Prettier Output
+        if: ${{ failure() }}
+        shell: bash
+        run: |
+          echo "The following files are not formatted:"
+          echo "${{steps.prettier-run.outputs.prettier_output}}"
+
+  json_diff:
+    needs: [ py_json_merge ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 2
+
+      - name: Find JSON changes
+        id: changed-json
+        uses: tj-actions/changed-files@v36
+        with:
+          files: |
+            **/*.json
+          include_all_old_new_renamed_files: true
+
+      - name: Copy head paths files
+        run: |
+          mkdir head
+          touch head/acmr.txt
+          for file in ${{ steps.changed-json.outputs.added_files }}; do
+            echo "A,head/${file}" >> head/acmr.txt
+            cp --parents $file head/
+          done
+          for file in ${{ steps.changed-json.outputs.copied_files }}; do
+            echo "C,head/${file}" >> head/acmr.txt
+            cp --parents $file head/
+          done
+          for file in ${{ steps.changed-json.outputs.modified_files }}; do
+            echo "M,head/${file}" >> head/acmr.txt
+            cp --parents $file head/
+          done
+          for file in ${{ steps.changed-json.outputs.renamed_files }}; do
+            echo "R,head/${file}" >> head/acmr.txt
+            cp --parents $file head/
+          done
+
+      - name: Checkout base
+        run: git checkout $(git --no-pager log --oneline -n 2 | awk 'NR==2 {print $1}')
+
+      - name: Copy base paths
+        run: |
+          mkdir base
+          touch base/mrd.txt
+          for file in ${{ steps.changed-json.outputs.modified_files }}; do
+            echo "M,${file}" >> base/mrd.txt
+          done
+          for file in ${{ steps.changed-json.outputs.all_old_new_renamed_files }}; do
+            echo "R,${file}" >> base/mrd.txt
+          done
+          for file in ${{ steps.changed-json.outputs.deleted_files }}; do
+            echo "D,${file}" >> base/mrd.txt
+          done
+
+
+  py_json_merge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Fetch validator
+        run: git clone --depth 1 https://gist.github.com/f1bf2c11f78331b2417189c385022c28.git validate_json
+
+      - name: Validate JSON
+        run: python3 validate_json/validate_json.py ./aterp/aterp/
+
+      - name: Compile
+        run: python3 -m compileall -q ./
+
+      - name: Check merge
+        run: |
+          if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
+              then echo "Found merge conflicts"
+              exit 1
+          fi
