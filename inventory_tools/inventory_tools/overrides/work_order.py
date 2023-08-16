@@ -226,7 +226,6 @@ def get_uom_cf(fg_item_code, from_uom, to_uom):
 
 @frappe.whitelist()
 def add_to_existing_purchase_order(wo_name, po_name):
-	print("IN ADD_TO_EXISTING_PO")
 	po = frappe.get_doc("Purchase Order", po_name)
 	company, production_item, wo_qty, wo_stock_uom = frappe.get_value(
 		"Work Order", wo_name, ["company", "production_item", "qty", "stock_uom"]
@@ -245,7 +244,6 @@ def add_to_existing_purchase_order(wo_name, po_name):
 			if po.docstatus == 2:
 				frappe.throw(frappe._("Unable to add to the selected Purchase Order because it is cancelled."))
 			elif po.docstatus == 0:  # amend draft PO workflow
-				print("IN AMEND DRAFT PO")
 				for item in po.get("items"):
 					if item.get("fg_item") == production_item:
 						item.fg_item_qty += wo_qty
@@ -270,7 +268,6 @@ def add_to_existing_purchase_order(wo_name, po_name):
 				)
 				return
 			else:  # cancel / amend submitted PO workflow. Leaves amended PO in Draft status so user can make adjustments as needed to Items table
-				print("IN CANCEL/AMEND SUBMITTED PO")
 				po.cancel()
 				new_po = frappe.copy_doc(po)
 				new_po.amended_from = po.name

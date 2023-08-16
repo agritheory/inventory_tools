@@ -400,7 +400,7 @@ def create_sales_order(settings):
 			"item_code": "Ambrosia Pie",
 			"delivery_date": so.transaction_date,
 			"qty": 40,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	so.append(
@@ -409,7 +409,7 @@ def create_sales_order(settings):
 			"item_code": "Double Plum Pie",
 			"delivery_date": so.transaction_date,
 			"qty": 40,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	so.append(
@@ -418,7 +418,7 @@ def create_sales_order(settings):
 			"item_code": "Gooseberry Pie",
 			"delivery_date": so.transaction_date,
 			"qty": 10,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	so.append(
@@ -427,7 +427,7 @@ def create_sales_order(settings):
 			"item_code": "Kaduka Key Lime Pie",
 			"delivery_date": so.transaction_date,
 			"qty": 10,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	so.save()

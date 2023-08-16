@@ -126,6 +126,7 @@ def get_stock_entries(purchase_orders, from_date=None, to_date=None):
 	stock_entry = frappe.qb.DocType("Stock Entry")
 	se_detail = frappe.qb.DocType("Stock Entry Detail")
 	po_sub = frappe.qb.DocType("Purchase Order Subcontracting Detail")
+	po = frappe.qb.DocType("Purchase Order")
 	item = frappe.qb.DocType("Item")
 
 	query = (
@@ -136,6 +137,8 @@ def get_stock_entries(purchase_orders, from_date=None, to_date=None):
 		.on(stock_entry.work_order == po_sub.work_order)
 		.left_join(item)
 		.on(se_detail.item_code == item.item_code)
+		.left_join(po)
+		.on(po_sub.parent == po.name)
 		.select(
 			stock_entry.work_order,
 			(stock_entry.name).as_("stock_entry"),
@@ -160,6 +163,7 @@ def get_stock_entries(purchase_orders, from_date=None, to_date=None):
 		.where(se_detail.is_finished_item == 1)
 		.where(se_detail.paid_qty < se_detail.qty)
 		.where(item.is_sub_contracted_item == 1)
+		.where(po.docstatus != 2)
 	)
 
 	return frappe.db.sql(
