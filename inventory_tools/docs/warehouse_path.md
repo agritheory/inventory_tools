@@ -12,4 +12,4 @@ In the Link dropdown, the full path is given, omitting the root "All Warehouses 
 
 ![warehouse dropdown](assets/fridge.png)
 
-This view shows the the "ref..." the user has provided as search text includes the warehouses hierarchy.
+This view shows the user-provided search text of "Refr..." matches the two similarly-named warehouses. The warehouse path under each option's name clearly distinguishes the choices by specifying each warehouse's hierarchy.
