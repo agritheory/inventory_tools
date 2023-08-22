@@ -1,12 +1,12 @@
 # UOM Enforcement
 
-By default ERPNext allows a user to select any Unit of Measure (UOM) for any item. If no conversion ratio exists between the UOM selected and the Item's stock UOM, ERPNext assumes it should be 1:1. This feature enforces that a user is only able to select and use valid UOMs. If an item has no way to be understood in "Linear Feet" or "Volts", those UOMs will not be included as options in any UOM field for that item.
+By default, ERPNext allows its users to select any Unit of Measure (UOM) for any Item. If no conversion ratio exists between the UOM selected and the Item's stock UOM, ERPNext assumes it should be 1:1. This feature enforces that a user is only able to select and use valid UOMs. If an Item has no way to be understood in "Linear Feet" or "Volts", those UOMs will not be included as options in any UOM field for that Item.
 
-The following example shows the Parchment Paper item has two defined UOMs in the Item master.
+The following example shows the Parchment Paper Item has two defined UOMs in the Item master.
 
 ![Screen shot of the Item master Inventory section for Parchment Paper showing two defined Units of Measure in the UOMs table. There is Nos with a conversion factor of 1 and Box with a conversion factor of 100](./assets/uom_item.png)
 
-In a Purchase Order, the Edit Item form for Parchment Paper has only two options in the UOM field - the two defined UOMs from the item master.
+In a Purchase Order, the Edit Item form for Parchment Paper has only two options in the UOM field - the two defined UOMs from the Item master.
 
 ![Screen shot of a Purchase Order Edit Item form for Parchment Paper where the dropdown selections for the UOM field only shows Nos and Box as options](./assets/uom_options.png)
 
