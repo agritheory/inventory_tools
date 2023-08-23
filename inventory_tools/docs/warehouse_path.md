@@ -1,15 +1,18 @@
 # Warehouse Path
-ERPNext allows its user to construct hierarchial abstractions for their physical facilities. This can make it difficult to know when you are selecting a warehouse if it is "Bin A" in the "Storage Closet" or if is "Bin A" from the "Repair Supplies" warehouse.
+ERPNext allows its user to construct hierarchial abstractions for their physical facilities. This can make it difficult to know when you are selecting a Warehouse if it is "Bin A" in the "Storage Closet" or if is "Bin A" from the "Repair Supplies" Warehouse.
 
-This feature encodes the warehouse hierarchy into a string, which becomes searchable, and allows the user to more easily understand which warehouse they are selecting.
+This feature encodes the Warehouse hierarchy into a string, which becomes searchable, and allows the user to more easily understand which Warehouse they are selecting.
 
 ## Example
-In this example there are two warehouses that start with "Refridger..." and while they are different, they could be mixed up.
+In this example there are two Warehouses that start with "Refridger..." and while they are different, they could be mixed up.
 
-![warehouse tree](assets/warehouse_tree.png)
+![Screen shot of the example company's Warehouse Tree. It includes a Refrigerated Display Warehouse (under the Baked Goods group) and a Refrigerator Warehouse](assets/warehouse_tree.png)
 
 In the Link dropdown, the full path is given, omitting the root "All Warehouses - APC" and the company abbreviation at each level. 
 
-![warehouse dropdown](assets/fridge.png)
+![Screen shot of a Target Warehouse field with "Refr" typed in, and two Warehouse options in the dropdown. The Refrigerated Display option has "Baked Goods -> Refrigerated Display" under its name, and the Refrigerator option has "Refrigerator" under its name](assets/fridge.png)
 
-This view shows the the "ref..." the user has provided as search text includes the warehouses hierarchy.
+This view shows the user-provided search text of "Refr..." matches the two similarly-named Warehouses. The Warehouse path under each option's name clearly distinguishes the choices by specifying each Warehouse's hierarchy.
+
+## Configuration
+To enable this feature, check the "Update Warehouse Path" box in Inventory Tools Settings.
