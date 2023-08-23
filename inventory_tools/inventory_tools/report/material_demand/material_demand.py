@@ -249,6 +249,8 @@ def create_rfqs(company, email_template, filters, rows):
 	rfqs = []
 
 	for row in rows:
+		if not row.get("item_code"):
+			continue
 		if row["item_code"] not in items:
 			items[row["item_code"]] = {"suppliers": [row["supplier"]], "rows": [row]}
 		else:

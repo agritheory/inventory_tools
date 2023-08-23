@@ -104,7 +104,7 @@ async function create(type) {
 		await frappe
 			.xcall('inventory_tools.inventory_tools.report.material_demand.material_demand.create', {
 				company: company,
-				email_template: email_template,
+				email_template: email_template || '',
 				filters: values,
 				creation_type: type,
 				rows: selected_items,
