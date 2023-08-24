@@ -2,6 +2,291 @@
 
 
 
+## v14.1.0 (2023-08-24)
+
+### Chore
+
+* chore: update test data for erpnext codebase changes (#24) ([`b7dfc02`](https://github.com/agritheory/inventory_tools/commit/b7dfc02e228c4ebdca86000dac65d1a903640b15))
+
+### Ci
+
+* ci: update remote name ([`021b8a4`](https://github.com/agritheory/inventory_tools/commit/021b8a47355cb9028bac7ac8e60d224247d5b0e8))
+
+* ci: update version number ([`9d82150`](https://github.com/agritheory/inventory_tools/commit/9d821506af9d6eb72e3bfb1345ac652aa86896dc))
+
+* ci: add python semantic release ([`703803d`](https://github.com/agritheory/inventory_tools/commit/703803df7949fb0cb43699482425ec31595dd1b9))
+
+### Documentation
+
+* docs: update material demand section for expanded functionality ([`1af88f6`](https://github.com/agritheory/inventory_tools/commit/1af88f6d06fdc8e6908381f9dd9011fe470dd9d7))
+
+### Feature
+
+* feat: select email template ([`02196e3`](https://github.com/agritheory/inventory_tools/commit/02196e37c7234982c5dafda9e814117d374565a9))
+
+### Fix
+
+* fix: blank email template for PO; skip supplier-only rows for RFQ ([`2a0e8cd`](https://github.com/agritheory/inventory_tools/commit/2a0e8cd6c6aefdd1a0d7b978652f97ddc755523f))
+
+* fix: fix JS after adding draft PO column (#26) ([`e0d3229`](https://github.com/agritheory/inventory_tools/commit/e0d322950e87dcf09f13441859e273a0e44a1192))
+
+### Unknown
+
+* Merge pull request #23 from agritheory/issue_19
+
+Allow Creation of RFQ from Material Demand report ([`8a0e350`](https://github.com/agritheory/inventory_tools/commit/8a0e35024968ce5a0f6da05e71f62c091bf2b38f))
+
+* Work Order Subcontracting (#13)
+
+* tests: update test data for additional manufacturing workflow
+
+* feat: work order subcontracting validations
+
+* tests: add valuation rate for subcontracted item
+
+* feat: start wo subcontracting feat
+
+* feat: make subcontracting section visible by check and settings
+
+* feat: add ste detail paid field and new pi cols
+
+* feat: setup hooks and custom po
+
+* tests: update data for default supplier and price lists
+
+* feat: include doctype js
+
+* feat: add work order customizations
+
+* feat: add purchase order customizations
+
+* feat: update purchase invoice customizations
+
+* feat: remove unused code blocks
+
+* fix: add module to json
+
+* fix: update custom doc path
+
+* feat: consolidate custom PI code and modularize class functions
+
+* feat: combine and refactor PO code
+
+* feat: update server function paths
+
+* feat: add BOM field default
+
+* feat: update to use BOM field vs Item for is_subcontracted
+
+* feat: code cleanup and refactoring for BOM field
+
+* feat: update for uom conversion and new svc item
+
+* fix: move UOM conversions to item
+
+* add todos in JS
+
+* feat: rewire item adjustments for conversion factor
+
+* wip: integrate with production plan
+
+* feat: add supplier field in WO, allow selection of supplier in dialog
+
+* chore: add comment explaining precision code
+
+* wip: subcontractor workflow
+
+* feat: subcontracting workflow with correct warehouses
+
+* feat: show/hide subcontracting columns
+
+* feat: colorize fetach stock entries button
+
+* fix: text artifacts, new PO errors
+
+* feat: fetch supplier warehouse, added connectiosn to PI and PO from WO
+
+* feat: add filters and looks to both PI and PO
+
+* fix: monkey patch validate_item_details
+
+* feat: remove buttons and update stockfield in WO subc workflow
+
+* Enforce UOMs to those that exist in the Item&#39;s conversion detail (#27)
+
+* wip: uom restricted query
+
+* feat: refactor UOM enforcement validation to be hookable
+
+* docs: add docs for UOM enforcement
+
+* tests: fix test logger problem, add xfail uom test
+
+* Warehouse path (#25)
+
+* wip: warehouse path
+
+* wip: warehouse path
+
+* wip: warehouse path feature
+
+* feat: warehouse path builder
+
+* feat: undo query when not configured; setup tweaks
+
+* chore: update test data for erpnext codebase changes (#24)
+
+* wip: warehouse path feature
+
+* wip: test setup
+
+* chore: update yarn
+
+* tests: trying to defaeat logger problem
+
+* test: fix conftest logger issue
+
+* docs: add docs for warehouse path
+
+* chore: union types for whitelisted function
+
+---------
+
+Co-authored-by: Heather Kusmierz &lt;heather.kusmierz@gmail.com&gt;
+
+* tests: test cadence (#28)
+
+* fix: no cancelled PO in se query, code clean up
+
+* chore: add comment to explain monkey patch rationale
+
+---------
+
+Co-authored-by: Tyler Matteson &lt;tyler@agritheory.com&gt; ([`ac11c1d`](https://github.com/agritheory/inventory_tools/commit/ac11c1df4daad2189916ca9841480aa1796e42e3))
+
+* Merge branch &#39;version-14&#39; into issue_19 ([`ee0a27f`](https://github.com/agritheory/inventory_tools/commit/ee0a27f0f03a8e3c9e9fa54011d02e44554b8bbb))
+
+* Documentation (#29)
+
+* docs: add index page
+
+* docs: add screen shots and workflow
+
+* docs: add screen shots, text edits
+
+* docs: add example data page
+
+* docs: add placeholder pages
+
+* docs: add subcontracting via WO section
+
+* docs: edits, conform text conventions ([`2fc980d`](https://github.com/agritheory/inventory_tools/commit/2fc980d41105759cffa33e610b779b6d464cf24c))
+
+* tests: test cadence (#28) ([`6b5bd47`](https://github.com/agritheory/inventory_tools/commit/6b5bd47089fb2f8a09159635e618425743cc9dff))
+
+* Warehouse path (#25)
+
+* wip: warehouse path
+
+* wip: warehouse path
+
+* wip: warehouse path feature
+
+* feat: warehouse path builder
+
+* feat: undo query when not configured; setup tweaks
+
+* chore: update test data for erpnext codebase changes (#24)
+
+* wip: warehouse path feature
+
+* wip: test setup
+
+* chore: update yarn
+
+* tests: trying to defaeat logger problem
+
+* test: fix conftest logger issue
+
+* docs: add docs for warehouse path
+
+* chore: union types for whitelisted function
+
+---------
+
+Co-authored-by: Heather Kusmierz &lt;heather.kusmierz@gmail.com&gt; ([`370dd6f`](https://github.com/agritheory/inventory_tools/commit/370dd6f9789156ebcbbe7b111d891a74731a477b))
+
+* Enforce UOMs to those that exist in the Item&#39;s conversion detail (#27)
+
+* wip: uom restricted query
+
+* feat: refactor UOM enforcement validation to be hookable
+
+* docs: add docs for UOM enforcement
+
+* tests: fix test logger problem, add xfail uom test ([`d4c145a`](https://github.com/agritheory/inventory_tools/commit/d4c145a94d8402fa441619289b4cc6438b7d5c45))
+
+* Documentation (#29)
+
+* docs: add index page
+
+* docs: add screen shots and workflow
+
+* docs: add screen shots, text edits
+
+* docs: add example data page
+
+* docs: add placeholder pages
+
+* docs: add subcontracting via WO section
+
+* docs: edits, conform text conventions ([`198e110`](https://github.com/agritheory/inventory_tools/commit/198e110ab0c5461b9c46925fc05af351151abd38))
+
+* tests: test cadence (#28) ([`b91e024`](https://github.com/agritheory/inventory_tools/commit/b91e0246f6e384f40685af40d3a249daa9d03a8c))
+
+* Warehouse path (#25)
+
+* wip: warehouse path
+
+* wip: warehouse path
+
+* wip: warehouse path feature
+
+* feat: warehouse path builder
+
+* feat: undo query when not configured; setup tweaks
+
+* chore: update test data for erpnext codebase changes (#24)
+
+* wip: warehouse path feature
+
+* wip: test setup
+
+* chore: update yarn
+
+* tests: trying to defaeat logger problem
+
+* test: fix conftest logger issue
+
+* docs: add docs for warehouse path
+
+* chore: union types for whitelisted function
+
+---------
+
+Co-authored-by: Heather Kusmierz &lt;heather.kusmierz@gmail.com&gt; ([`e3fb9c7`](https://github.com/agritheory/inventory_tools/commit/e3fb9c7f2a8ed3c42f4cb47078086bcdd60f91c7))
+
+* Enforce UOMs to those that exist in the Item&#39;s conversion detail (#27)
+
+* wip: uom restricted query
+
+* feat: refactor UOM enforcement validation to be hookable
+
+* docs: add docs for UOM enforcement
+
+* tests: fix test logger problem, add xfail uom test ([`65d42e1`](https://github.com/agritheory/inventory_tools/commit/65d42e126d81f3ed1b98178f7b6c68c6a070986e))
+
+
 ## v14.0.1 (2023-08-10)
 
 ### Chore
@@ -15,6 +300,16 @@
 * ci: update version number ([`6e0c194`](https://github.com/agritheory/inventory_tools/commit/6e0c194235a19011b0c7db5adb8ed7e5954ba5eb))
 
 * ci: add python semantic release ([`3382787`](https://github.com/agritheory/inventory_tools/commit/3382787d4726d7483a7243eafff03eb775d0ac3e))
+
+### Feature
+
+* feat: based on item option ([`cc90229`](https://github.com/agritheory/inventory_tools/commit/cc90229b9ccf27cb5a872b24109dc7071f146802))
+
+* feat: wip, make rfqs ([`c5a8867`](https://github.com/agritheory/inventory_tools/commit/c5a88673c3d57480a10ec68091e04a75488e18cb))
+
+* feat: wip material demand options ([`bedd3d4`](https://github.com/agritheory/inventory_tools/commit/bedd3d42f299c73c1c1fa80c3a4928316d1428a2))
+
+* feat: requires_rfq custom field, creation options in report ([`cd4ec42`](https://github.com/agritheory/inventory_tools/commit/cd4ec42e15fdbfa2cc24dc41b16562e74daf6124))
 
 ### Fix
 
