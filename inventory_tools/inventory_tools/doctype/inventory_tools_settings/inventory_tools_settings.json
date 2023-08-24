@@ -15,11 +15,12 @@
   "work_order_subcontracting_section",
   "enable_work_order_subcontracting",
   "create_purchase_orders",
-  "section_break_0",
-  "update_warehouse_path",
   "section_break_gzcbr",
+  "update_warehouse_path",
   "uoms_section",
-  "enforce_uoms"
+  "enforce_uoms",
+  "landed_costing_section",
+  "enable_inline_landed_costing"
  ],
  "fields": [
   {
@@ -70,19 +71,15 @@
    "label": "Create Purchase Orders in Production Plan"
   },
   {
-   "fieldname": "section_break_0",
-   "fieldtype": "Section Break"
-  },
+    "fieldname": "section_break_gzcbr",
+    "fieldtype": "Section Break",
+    "label": "Warehouses"
+   },
   {
    "default": "0",
    "fieldname": "update_warehouse_path",
    "fieldtype": "Check",
    "label": "Update Warehouse Path"
-  },
-  {
-   "fieldname": "section_break_gzcbr",
-   "fieldtype": "Section Break",
-   "label": "Warehouses"
   },
   {
    "fieldname": "uoms_section",
@@ -94,12 +91,22 @@
    "fieldname": "enforce_uoms",
    "fieldtype": "Check",
    "label": "Enforce UOMs"
+  },
+  {
+   "fieldname": "landed_costing_section",
+   "fieldtype": "Section Break",
+   "label": "Landed Costing"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_inline_landed_costing",
+   "fieldtype": "Check",
+   "label": "Enable Inline Landed Costing"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-08-09 20:12:09.274841",
-
+ "modified": "2023-08-24 15:52:38.320728",
  "modified_by": "Administrator",
  "module": "Inventory Tools",
  "name": "Inventory Tools Settings",
