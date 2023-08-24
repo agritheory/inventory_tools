@@ -15,6 +15,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 	make_purchase_receipt,
 )
 from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
+from frappe import _, throw
 
 
 def _bypass(*args, **kwargs):
@@ -73,6 +74,36 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 			validate_disabled_warehouse(w)
 			if not self.multi_company_purchase_order:
 				validate_warehouse_company(w, self.company)
+
+	def validate(self):
+		if self.is_work_order_subcontracting_enabled():
+			self.validate_subcontracting_fg_qty()
+			for row in self.subcontracting:
+				# TODO: set work order supplier to empty string in on_cancel
+				frappe.set_value("Work Order", row.work_order, "supplier", self.supplier)
+
+		super().validate()
+
+	def is_work_order_subcontracting_enabled(self):
+		settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
+		return bool(settings and settings.enable_work_order_subcontracting)
+
+	def validate_subcontracting_fg_qty(self):
+		sub_wo = self.get("subcontracting")
+		if self.is_subcontracted and sub_wo:
+			items_fg_qty = sum(item.get("fg_item_qty") or 0 for item in self.get("items"))
+			subc_fg_qty = sum(row.get("fg_item_qty") or 0 for row in sub_wo)
+			# Check that the item finished good qty and the subcontracting qty are within the item's stock_qty field's precision number of decimals
+			precision = int(frappe.get_precision("Purchase Order Item", "stock_qty"))
+			diff = abs(items_fg_qty - subc_fg_qty)
+			if diff > (1 / (10**precision)):
+				frappe.msgprint(  # Just a warning in the case: PO is created before WO's exist, several WOs needed to complete the work (each one has less than PO)
+					msg=_(
+						f"The total of Finished Good Item Qty for all items does not match the total Finished Good Item Qty in the Subcontracting table. There is a difference of {diff}."
+					),
+					title=_("Warning"),
+					indicator="red",
+				)
 
 
 @frappe.whitelist()
@@ -162,7 +193,6 @@ def make_sales_invoices(docname: str, rows: Union[list, str]) -> None:
 		taxes_and_charges = get_default_taxes_and_charges(
 			"Sales Taxes and Charges Template", company=si.company
 		)
-		print(taxes_and_charges)
 		si.taxes_and_charges = taxes_and_charges.get("taxes_and_charges")
 		for tax in taxes_and_charges.get("taxes"):
 			si.append("taxes", tax)
@@ -189,3 +219,41 @@ def make_sales_invoices(docname: str, rows: Union[list, str]) -> None:
 		pi.inter_company_invoice_reference = si.name
 		pi.title = f"Transfer {doc.supplier} to {pi.company}"
 		pi.save()
+
+
+@frappe.whitelist()
+def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=True):
+	import erpnext.stock.get_item_details
+
+	erpnext.stock.get_item_details.validate_item_details = validate_item_details
+	out = erpnext.stock.get_item_details.get_item_details(
+		args, doc, for_validate, overwrite_warehouse
+	)
+	return out
+
+
+@frappe.whitelist()
+def validate_item_details(args, item):
+	if not args.company:
+		throw(_("Please specify Company"))
+
+	settings = frappe.get_doc("Inventory Tools Settings", {"company": args.company})
+
+	from erpnext.stock.doctype.item.item import validate_end_of_life
+
+	validate_end_of_life(item.name, item.end_of_life, item.disabled)
+
+	if frappe.utils.cint(item.has_variants):
+		msg = f"Item {item.name} is a template, please select one of its variants"
+
+		throw(_(msg), title=_("Template Item Selected"))
+
+	elif args.transaction_type == "buying" and args.doctype != "Material Request":
+		if not (settings and settings.enable_work_order_subcontracting):
+			if args.get("is_subcontracted"):
+				if args.get("is_old_subcontracting_flow"):
+					if item.is_sub_contracted_item != 1:
+						throw(_("Item {0} must be a Sub-contracted Item").format(item.name))
+				else:
+					if item.is_stock_item:
+						throw(_("Item {0} must be a Non-Stock Item").format(item.name))

@@ -113,6 +113,15 @@ def create_suppliers(settings):
 			biz.bank = "Local Bank"
 			biz.bank_account = "123456789"
 		biz.currency = "USD"
+		if biz.supplier_name == "Credible Contract Baking":
+			biz.append(
+				"subcontracting_defaults",
+				{
+					"company": settings.company,
+					"wip_warehouse": "Credible Contract Baking - APC",
+					"return_warehouse": "Baked Goods - APC",
+				},
+			)
 		biz.default_price_list = "Bakery Buying"
 		biz.save()
 
@@ -148,7 +157,7 @@ def setup_manufacturing_settings(settings):
 	mfg_settings.default_wip_warehouse = "Kitchen - APC"
 	mfg_settings.default_fg_warehouse = "Refrigerated Display - APC"
 	mfg_settings.overproduction_percentage_for_work_order = 5.00
-	mfg_settings.job_Card_excess_transfer = 1
+	mfg_settings.job_card_excess_transfer = 1
 	mfg_settings.save()
 
 	if not frappe.db.exists(
@@ -165,6 +174,10 @@ def setup_manufacturing_settings(settings):
 		wip.save()
 
 	frappe.set_value("Warehouse", "Kitchen - APC", "account", wip.name)
+	frappe.set_value(
+		"Inventory Tools Settings", settings.company, "enable_work_order_subcontracting", 1
+	)
+	frappe.set_value("Inventory Tools Settings", settings.company, "create_purchase_orders", 0)
 
 
 def create_workstations():
@@ -246,18 +259,35 @@ def create_items(settings):
 		i.item_group = item.get("item_group")
 		i.stock_uom = item.get("uom")
 		i.description = item.get("description")
-		i.maintain_stock = 1
+		i.is_stock_item = 0 if item.get("is_stock_item") == 0 else 1
 		i.include_item_in_manufacturing = 1
+		i.valuation_rate = item.get("valuation_rate") or 0
+		i.is_sub_contracted_item = item.get("is_sub_contracted_item") or 0
 		i.default_warehouse = settings.get("warehouse")
 		i.default_material_request_type = (
-			"Purchase" if item.get("item_group") in ("Bakery Supplies", "Ingredients") else "Manufacture"
+			"Purchase"
+			if item.get("item_group") in ("Bakery Supplies", "Ingredients")
+			or item.get("is_sub_contracted_item")
+			else "Manufacture"
 		)
 		i.valuation_method = "FIFO"
-		i.is_purchase_item = 1 if item.get("item_group") in ("Bakery Supplies", "Ingredients") else 0
+		if item.get("uom_conversion_detail"):
+			for uom, cf in item.get("uom_conversion_detail").items():
+				i.append("uoms", {"uom": uom, "conversion_factor": cf})
+		i.is_purchase_item = (
+			1
+			if item.get("item_group") in ("Bakery Supplies", "Ingredients")
+			or item.get("is_sub_contracted_item")
+			else 0
+		)
 		i.is_sales_item = 1 if item.get("item_group") == "Baked Goods" else 0
 		i.append(
 			"item_defaults",
-			{"company": settings.company, "default_warehouse": item.get("default_warehouse")},
+			{
+				"company": settings.company,
+				"default_warehouse": item.get("default_warehouse"),
+				"default_supplier": item.get("default_supplier"),
+			},
 		)
 		if i.is_purchase_item and item.get("supplier"):
 			if isinstance(item.get("supplier"), list):
@@ -274,6 +304,26 @@ def create_items(settings):
 			ip.valid_from = "2018-1-1"
 			ip.price_list_rate = item.get("item_price")
 			ip.save()
+		if item.get("available_in_house"):
+			se = frappe.new_doc("Stock Entry")
+			se.posting_date = settings.day
+			se.set_posting_time = 1
+			se.stock_entry_type = "Material Receipt"
+			se.append(
+				"items",
+				{
+					"item_code": item.get("item_code"),
+					"t_warehouse": item.get("default_warehouse"),
+					"qty": item.get("opening_qty"),
+					"uom": item.get("uom"),
+					"stock_uom": item.get("uom"),
+					"conversion_factor": 1,
+					"basic_rate": item.get("item_price"),
+					"expense_account": "1910 - Temporary Opening - APC",
+				},
+			)
+			se.save()
+			se.submit()
 
 
 def create_warehouses(settings):
@@ -315,17 +365,19 @@ def create_warehouses(settings):
 
 def create_boms(settings):
 	for bom in boms[::-1]:  # reversed
-		if frappe.db.exists("BOM", {"item": bom.get("item")}):
+		if frappe.db.exists("BOM", {"item": bom.get("item")}) and bom.get("item") != "Pie Crust":
 			continue
 		b = frappe.new_doc("BOM")
 		b.item = bom.get("item")
 		b.quantity = bom.get("quantity")
 		b.uom = bom.get("uom")
 		b.company = settings.company
+		b.is_default = 0 if bom.get("is_default") == 0 else 1
+		b.is_subcontracted = bom.get("is_subcontracted") or 0
 		b.rm_cost_as_per = "Price List"
 		b.buying_price_list = "Bakery Buying"
 		b.currency = "USD"
-		b.with_operations = 1
+		b.with_operations = 0 if bom.get("with_operations") == 0 else 1
 		for item in bom.get("items"):
 			b.append("items", {**item, "stock_uom": item.get("uom")})
 			b.items[-1].bom_no = frappe.get_value("BOM", {"item": item.get("item_code")})
@@ -348,7 +400,7 @@ def create_sales_order(settings):
 			"item_code": "Ambrosia Pie",
 			"delivery_date": so.transaction_date,
 			"qty": 40,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	so.append(
@@ -357,7 +409,7 @@ def create_sales_order(settings):
 			"item_code": "Double Plum Pie",
 			"delivery_date": so.transaction_date,
 			"qty": 40,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	so.append(
@@ -366,7 +418,7 @@ def create_sales_order(settings):
 			"item_code": "Gooseberry Pie",
 			"delivery_date": so.transaction_date,
 			"qty": 10,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	so.append(
@@ -375,7 +427,7 @@ def create_sales_order(settings):
 			"item_code": "Kaduka Key Lime Pie",
 			"delivery_date": so.transaction_date,
 			"qty": 10,
-			"warehouse": "Baked Goods - APC",
+			"warehouse": "Refrigerated Display - APC",
 		},
 	)
 	so.save()
@@ -456,6 +508,15 @@ def create_production_plan(settings, prod_plan_from_doc):
 	pp.get_sub_assembly_items()
 	for item in pp.sub_assembly_items:
 		item.schedule_date = settings.day
+		if item.production_item == "Pie Crust":
+			item.type_of_manufacturing = "Subcontract"
+			item.supplier = "Credible Contract Baking"
+			item.qty = 50
+	pp.append("sub_assembly_items", pp.sub_assembly_items[0].as_dict())
+	pp.sub_assembly_items[-1].name = None
+	pp.sub_assembly_items[-1].type_of_manufacturing = "In House"
+	pp.sub_assembly_items[-1].bom_no = "BOM-Pie Crust-001"
+	pp.sub_assembly_items[-1].supplier = None
 	pp.for_warehouse = "Storeroom - APC"
 	raw_materials = get_items_for_material_requests(
 		pp.as_dict(), warehouses=None, get_parent_warehouse_data=None
@@ -479,40 +540,6 @@ def create_production_plan(settings, prod_plan_from_doc):
 	mr.company = settings.company
 	mr.save()
 	mr.submit()
-
-	# TODO: this should test the material demand report instead
-	# for item in mr.items:
-	# 	supplier = frappe.get_value("Item Supplier", {"parent": item.get("item_code")}, "supplier")
-	# 	item.supplier = supplier
-
-	# for supplier, _items in groupby(
-	# 	sorted((m for m in mr.items if m.supplier), key=lambda d: d.supplier),
-	# 	lambda x: x.get("supplier"),
-	# ):
-	# 	items = list(_items)
-	# 	if not supplier:
-	# 		continue
-	# 	pr = frappe.new_doc("Purchase Receipt")
-	# 	pr.company = settings.company
-	# 	pr.supplier = supplier
-	# 	pr.posting_date = settings.day
-	# 	pr.set_posting_time = 1
-	# 	pr.buying_price_list = "Bakery Buying"
-	# 	for item in items:
-	# 		item_details = get_item_details(
-	# 			{
-	# 				"item_code": item.item_code,
-	# 				"qty": item.qty,
-	# 				"supplier": pr.supplier,
-	# 				"company": pr.company,
-	# 				"doctype": pr.doctype,
-	# 				"currency": pr.currency,
-	# 				"buying_price_list": pr.buying_price_list,
-	# 			}
-	# 		)
-	# 		pr.append("items", {**item_details})
-	# 	pr.save()
-	# 	pr.submit()
 
 	pp.make_work_order()
 	wos = frappe.get_all("Work Order", {"production_plan": pp.name})
