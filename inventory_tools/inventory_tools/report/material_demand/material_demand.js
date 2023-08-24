@@ -49,22 +49,51 @@ frappe.query_reports['Material Demand'] = {
 }
 
 function manage_buttons(reportview) {
-	reportview.page.set_primary_action('Create PO(s)', () => {
-		create_pos()
-	})
+	reportview.page.add_inner_button(
+		'Create PO(s)',
+		function () {
+			create('po')
+		},
+		'Create'
+	)
+
+	reportview.page.add_inner_button(
+		'Create RFQ(s)',
+		function () {
+			create('rfq')
+		},
+		'Create'
+	)
+
+	reportview.page.add_inner_button(
+		'Create based on Item',
+		function () {
+			create('item_based')
+		},
+		'Create'
+	)
+
 	// these don't seem to be working
 	$(".btn-default:contains('Create Card')").addClass('hidden')
 	$(".btn-default:contains('Set Chart')").addClass('hidden')
 }
 
-async function create_pos() {
+async function create(type) {
 	let values = frappe.query_report.get_filter_values()
 	let company = undefined
-	if (!values.company) {
-		company = await select_company()
+	let email_template = undefined
+	if (type != 'po') {
+		values = await select_company_and_email_template(values.company)
+		company = values['company']
+		email_template = values['email_template']
 	} else {
-		company = values.company
+		if (!values.company) {
+			company = await select_company()
+		} else {
+			company = values.company
+		}
 	}
+
 	let selected_rows = frappe.query_report.datatable.rowmanager.getCheckedRows()
 	let selected_items = frappe.query_report.datatable.datamanager.data.filter((row, index) => {
 		return selected_rows.includes(String(index)) ? row : false
@@ -73,9 +102,11 @@ async function create_pos() {
 		frappe.show_alert({ message: 'Please select one or more rows.', seconds: 5, indicator: 'red' })
 	} else {
 		await frappe
-			.xcall('inventory_tools.inventory_tools.report.material_demand.material_demand.create_pos', {
+			.xcall('inventory_tools.inventory_tools.report.material_demand.material_demand.create', {
 				company: company,
+				email_template: email_template || '',
 				filters: values,
+				creation_type: type,
 				rows: selected_items,
 			})
 			.then(r => {})
@@ -169,6 +200,39 @@ async function select_company() {
 				let values = dialog.get_values()
 				dialog.hide()
 				return resolve(values.company)
+			},
+			primary_action_label: __('Select'),
+		})
+		dialog.show()
+		dialog.get_close_btn()
+	})
+}
+
+async function select_company_and_email_template(company) {
+	return new Promise(resolve => {
+		let dialog = new frappe.ui.Dialog({
+			title: __('Select Company and Email Template'),
+			fields: [
+				{
+					fieldtype: 'Link',
+					fieldname: 'company',
+					label: 'Company',
+					options: 'Company',
+					reqd: 1,
+					default: company,
+				},
+				{
+					fieldtype: 'Link',
+					fieldname: 'email_template',
+					label: 'Email Template',
+					options: 'Email Template',
+					reqd: 1,
+				},
+			],
+			primary_action: () => {
+				let values = dialog.get_values()
+				dialog.hide()
+				return resolve(values)
 			},
 			primary_action_label: __('Select'),
 		})

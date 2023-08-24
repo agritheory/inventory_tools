@@ -2,7 +2,7 @@
 
 The Inventory Tools application enhances and extends inventory-related functionality and workflows in ERPNext. It includes the following features:
 
-- **[Material Demand](./material_demand.md)**: a report-based interface to aggregate required Items across multiple sources, then optionally create Purchase Orders
+- **[Material Demand](./material_demand.md)**: a report-based interface to aggregate required Items across multiple sources, then optionally create Purchase Orders or Request for Quotations
 - **[UOM Enforcement](./uom_enforcement.md)**: for doctypes that have an Items table or Unit of Measure (UOM) fields, this feature restricts the user's options from arbitrary selections to only UOMs defined in the Item master with a specified conversion factor
 - **[Warehouse Path](./warehouse_path.md)**: for any warehouse selection field, this features helps clearly identify warehouses by creating a warehouse path and adding a human-readable string under the warehouse name in the format "parent warehouse(s)->warehouse"
 - **[Subcontracting Workflow via Work Order](./wo_subcontracting.md)**: an alternative to ERPNext's subcontracting workflow that enables a user to employ Work Orders, subcontracting Purchase Orders, and manufacturing Stock Entries in lieu of Purchase Receipts or Subcontracting Orders/Receipts. Enhancements to the subcontracting Purchase Invoice allow a user to quickly reconcile what Items have been received with what is being invoiced

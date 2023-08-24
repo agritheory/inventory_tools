@@ -7,6 +7,7 @@ from itertools import groupby
 import frappe
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.get_item_details import get_price_list_rate_for
+from frappe import _
 from frappe.utils.data import fmt_money, getdate
 
 
@@ -198,6 +199,140 @@ def get_item_price(filters, r):
 
 
 @frappe.whitelist()
+def create(company, email_template, filters, creation_type, rows):
+	if creation_type == "po":
+		message = create_pos(company, filters, rows)
+	elif creation_type == "rfq":
+		message = create_rfqs(company, email_template, filters, rows)
+	elif creation_type == "item_based":
+		message = create_item_based(company, email_template, filters, rows)
+	frappe.msgprint(message, alert=True, indicator="green")
+
+
+@frappe.whitelist()
+def create_item_based(company, email_template, filters, rows):
+	filters = frappe._dict(json.loads(filters)) if isinstance(filters, str) else filters
+	rows = json.loads(rows) if isinstance(rows, str) else rows
+	if not rows:
+		return
+
+	rfq_rows = []
+	po_rows = []
+	rfqs_message = frappe._("0 Request For Quotation created")
+	po_message = frappe._("0 Purchase Orders created")
+
+	for row in rows:
+		if frappe.get_value(
+			"Item Supplier", {"parent": row["item_code"], "supplier": row["supplier"]}, "requires_rfq"
+		):
+			rfq_rows.append(row)
+		else:
+			po_rows.append(row)
+
+	if po_rows:
+		po_message = create_pos(company, filters, po_rows)
+
+	if rfq_rows:
+		rfqs_message = create_rfqs(company, email_template, filters, rfq_rows)
+
+	return f"{po_message} {rfqs_message}"
+
+
+@frappe.whitelist()
+def create_rfqs(company, email_template, filters, rows):
+	filters = frappe._dict(json.loads(filters)) if isinstance(filters, str) else filters
+	rows = json.loads(rows) if isinstance(rows, str) else rows
+	if not rows:
+		return
+
+	items = {}
+	rfqs = []
+
+	for row in rows:
+		if not row.get("item_code"):
+			continue
+		if row["item_code"] not in items:
+			items[row["item_code"]] = {"suppliers": [row["supplier"]], "rows": [row]}
+		else:
+			items[row["item_code"]]["suppliers"].append(row["supplier"])
+			items[row["item_code"]]["rows"].append(row)
+
+	for item_code, data in items.items():
+		if len(rfqs) == 0:
+			rfqs.append(
+				{
+					"suppliers": data["suppliers"],
+					"items": [item_code],
+					"rows": data["rows"],
+				}
+			)
+		else:
+			exists = False
+			for rfq in rfqs:
+				if rfq["suppliers"] == data["suppliers"]:
+					exists = True
+					break
+
+			if exists:
+				rfq["items"].append(item_code)
+				rfq["rows"] = rfq["rows"] + data["rows"]
+			else:
+				rfqs.append(
+					{
+						"suppliers": data["suppliers"],
+						"items": [item_code],
+						"rows": data["rows"],
+					}
+				)
+
+	settings = frappe.get_doc("Inventory Tools Settings", company)
+
+	for rfq_data in rfqs:
+		rfq = frappe.new_doc("Request for Quotation")
+		rfq.transaction_date = getdate()
+		rfq.company = company
+		rfq.email_template = email_template
+
+		for supplier in rfq_data["suppliers"]:
+			rfq.append(
+				"suppliers",
+				{
+					"supplier": supplier,
+				},
+			)
+
+		for row in rfq_data["rows"]:
+			if not row.get("item_code"):
+				continue
+
+			if rfq.items and list(filter(lambda i: i.item_code == row.get("item_code"), rfq.items)):
+				continue
+
+			rfq.append(
+				"items",
+				{
+					"item_code": row.get("item_code"),
+					"item_name": row.get("item_name"),
+					"required_date": max(getdate(), getdate(row.get("schedule_date"))),
+					"conversion_factor": frappe.get_value(
+						"Material Request Item", row.get("material_request_item"), "conversion_factor"
+					),
+					"qty": row.get("qty"),
+					"uom": row.get("uom"),
+					"material_request": row.get("material_request"),
+					"material_request_item": row.get("material_request_item"),
+					"warehouse": settings.aggregated_purchasing_warehouse
+					if settings.aggregated_purchasing_warehouse
+					else row.get("warehouse"),
+				},
+			)
+		rfq.set_missing_values()
+		rfq.save()
+
+	return frappe._(f"{len(rfqs)} Request For Quotation created")
+
+
+@frappe.whitelist()
 def create_pos(company, filters, rows):
 	filters = frappe._dict(json.loads(filters)) if isinstance(filters, str) else filters
 	rows = json.loads(rows) if isinstance(rows, str) else rows
@@ -241,4 +376,4 @@ def create_pos(company, filters, rows):
 		po.save()
 		counter += 1
 
-	frappe.msgprint(frappe._(f"{counter} Purchase Orders created"), alert=True, indicator="green")
+	return frappe._(f"{counter} Purchase Orders created")
