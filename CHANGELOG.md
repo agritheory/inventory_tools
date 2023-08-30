@@ -2,6 +2,19 @@
 
 
 
+## v14.1.1 (2023-08-30)
+
+### Fix
+
+* fix: add is_subcontracted check for additional validation/submit/cancel code ([`8182dac`](https://github.com/agritheory/inventory_tools/commit/8182dacfd35d2a2ee4c5ee94211cbfc7ac00abfd))
+
+### Unknown
+
+* Merge pull request #30 from agritheory/fix_subc_validation
+
+fix: add is_subcontracted check for additional validation/submit/cancel code ([`c4e7b83`](https://github.com/agritheory/inventory_tools/commit/c4e7b83fd1700d08e8f711e10f1a77c81da0de32))
+
+
 ## v14.1.0 (2023-08-24)
 
 ### Chore
