@@ -76,7 +76,7 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 				validate_warehouse_company(w, self.company)
 
 	def validate(self):
-		if self.is_work_order_subcontracting_enabled():
+		if self.is_work_order_subcontracting_enabled() and self.is_subcontracted:
 			self.validate_subcontracting_fg_qty()
 			for row in self.subcontracting:
 				# TODO: set work order supplier to empty string in on_cancel
@@ -90,7 +90,7 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 
 	def validate_subcontracting_fg_qty(self):
 		sub_wo = self.get("subcontracting")
-		if self.is_subcontracted and sub_wo:
+		if sub_wo:
 			items_fg_qty = sum(item.get("fg_item_qty") or 0 for item in self.get("items"))
 			subc_fg_qty = sum(row.get("fg_item_qty") or 0 for row in sub_wo)
 			# Check that the item finished good qty and the subcontracting qty are within the item's stock_qty field's precision number of decimals
