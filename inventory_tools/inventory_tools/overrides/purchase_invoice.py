@@ -52,19 +52,19 @@ class InventoryToolsPurchaseInvoice(PurchaseInvoice):
 			)
 
 	def validate(self):
-		if self.is_work_order_subcontracting_enabled():
+		if self.is_work_order_subcontracting_enabled() and self.is_subcontracted:
 			if not self.supplier_warehouse:
 				self.supplier_warehouse = fetch_supplier_warehouse(self.company, self.supplier)
 			self.validate_subcontracting_to_pay_qty()
 		return super().validate()
 
 	def on_submit(self):
-		if self.is_work_order_subcontracting_enabled():
+		if self.is_work_order_subcontracting_enabled() and self.is_subcontracted:
 			self.on_submit_save_se_paid_qty()
 		return super().on_submit()
 
 	def on_cancel(self):
-		if self.is_work_order_subcontracting_enabled():
+		if self.is_work_order_subcontracting_enabled() and self.is_subcontracted:
 			self.on_cancel_revert_se_paid_qty()
 		return super().on_cancel()
 
