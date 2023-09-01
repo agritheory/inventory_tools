@@ -21,6 +21,7 @@ def update_valuation_rate(self, reset_outgoing_rate=True):
 	:param reset_outgoing_rate: bool
 	:return: Nonetype
 	"""
+	print("IN OVERRIDES UPDATE_VALUATION_RATE (FOR INLINE LANDED COSTING)")
 	stock_and_asset_items = []
 	stock_and_asset_items = self.get_stock_items() + self.get_asset_items()
 
@@ -79,19 +80,17 @@ def update_valuation_rate(self, reset_outgoing_rate=True):
 				)
 
 			qty_in_stock_uom = flt(item.qty * item.conversion_factor)
-			# TODO: review following code (the only change from v-13 to v-14) - determine if changes needed
-			settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
-			if self.get("is_old_subcontracting_flow") and not (
-				settings and settings.enable_work_order_subcontracting
-			):
-				item.rm_supp_cost = self.get_supplied_items_cost(item.name, reset_outgoing_rate)
+			if self.get("is_old_subcontracting_flow"):
+				item.rm_supp_cost = self.get_supplied_items_cost(
+					item.name, reset_outgoing_rate
+				)  # in subcontracting_controller.py
 				item.valuation_rate = (
 					item.base_net_amount
 					+ item.item_tax_amount
 					+ item.rm_supp_cost
 					+ flt(item.landed_cost_voucher_amount)
 				) / qty_in_stock_uom
-			# TODO: add branch to handle subcontracting workflow to update valuation depending on settings
+			# TODO: add branch to handle subcontracting workflow to update valuation depending on settings [include raw materials value / get from stock entry?]
 			# CUSTOM CODE END
 			else:
 				item.valuation_rate = (
