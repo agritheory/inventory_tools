@@ -31,7 +31,6 @@ function page_changed() {
 
 function setup_uom_enforcement(frm) {
 	for (const [form_doctype, config] of Object.entries(frappe.uom_enforcement[frm.doc.doctype])) {
-		console.log(form_doctype)
 		// form setup
 		if (frm.doc.doctype == form_doctype) {
 			config.forEach(field => {
