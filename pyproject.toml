@@ -1,7 +1,7 @@
 [project]
 name = "inventory_tools"
 authors = [
-    { name = "AgriTheory", email = "support@agritheory.com"}
+    { name = "AgriTheory", email = "support@agritheory.dev"}
 ]
 description = "Inventory Tools for ERPNext"
 requires-python = ">=3.10"

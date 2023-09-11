@@ -20,3 +20,5 @@ jobs:
         uses: python-semantic-release/python-semantic-release@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          git_committer_name: AgriTheory
+          git_committer_email: support@agritheory.dev
