@@ -18,7 +18,16 @@ def uom_restricted_query(doctype, txt, searchfield, start, page_len, filters):
 			limit_page_length=page_len,
 			as_list=True,
 		)
-	return search_link(doctype, txt, searchfield, start, page_len, filters)
+	if "parent" in filters:
+		filters.pop("parent")
+	return execute(
+		"UOM",
+		filters=filters,
+		fields=[searchfield],
+		limit_start=start,
+		limit_page_length=page_len,
+		as_list=True,
+	)
 
 
 @frappe.whitelist()
