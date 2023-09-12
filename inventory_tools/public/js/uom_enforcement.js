@@ -1,9 +1,6 @@
 // Copyright(c) 2023, AgriTheory and contributors
 // For license information, please see license.txt
 
-// if the route == "Form" check if it's in the uom_enforcement object
-// then apply
-
 frappe.provide('frappe.ui.form')
 
 $(document).on('page-change', () => {
@@ -13,23 +10,27 @@ $(document).on('page-change', () => {
 function page_changed() {
 	frappe.after_ajax(() => {
 		const route = frappe.get_route()
-		if (route[0] == 'Form' && Object.keys(frappe.boot.inventory_tools.uom_enforcement).includes(route[1])) {
-			frappe.ui.form.on(route[1], {
-				onload: frm => {
-					setup_uom_enforcement(frm)
-				},
-			})
-			frappe.ui.form.on(route[1], {
-				refresh: frm => {
-					setup_uom_enforcement(frm)
-				},
-			})
-		}
+		frappe.call('inventory_tools.inventory_tools.overrides.uom.get_uom_enforcement').then(r => {
+			frappe.uom_enforcement = r.message
+			if (route[0] == 'Form' && Object.keys(frappe.uom_enforcement).includes(route[1])) {
+				frappe.ui.form.on(route[1], {
+					onload_post_render: frm => {
+						// onload runs too soon
+						setup_uom_enforcement(frm)
+					},
+				})
+				frappe.ui.form.on(route[1], {
+					refresh: frm => {
+						setup_uom_enforcement(frm)
+					},
+				})
+			}
+		})
 	})
 }
 
 function setup_uom_enforcement(frm) {
-	for (const [form_doctype, config] of Object.entries(frappe.boot.inventory_tools.uom_enforcement[frm.doc.doctype])) {
+	for (const [form_doctype, config] of Object.entries(frappe.uom_enforcement[frm.doc.doctype])) {
 		// form setup
 		if (frm.doc.doctype == form_doctype) {
 			config.forEach(field => {

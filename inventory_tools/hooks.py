@@ -80,7 +80,7 @@ after_migrate = "inventory_tools.customize.load_customizations"
 
 # Boot
 # ------------
-extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
+# extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
 
 
 # Desk Notifications
@@ -133,9 +133,9 @@ doc_events = {
 	"Item": {
 		"validate": ["inventory_tools.inventory_tools.overrides.uom.duplicate_weight_to_uom_conversion"],
 	},
-  "Warehouse": {
+	"Warehouse": {
 		"validate": ["inventory_tools.inventory_tools.overrides.warehouse.update_warehouse_path"]
-  },
+	},
 }
 
 # Scheduled Tasks
