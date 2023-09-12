@@ -2,6 +2,27 @@
 
 
 
+## v14.1.2 (2023-09-12)
+
+### Chore
+
+* chore: remove console.log ([`f82b590`](https://github.com/agritheory/inventory_tools/commit/f82b590d061608818170092f07e3da8d9153b756))
+
+### Ci
+
+* ci: update release action user and email (#32) ([`4264bdd`](https://github.com/agritheory/inventory_tools/commit/4264bdde25c0bff1390923e7f18fce7c353844db))
+
+### Fix
+
+* fix: make uom enforcement respond better to toggle on/off ([`3734cb4`](https://github.com/agritheory/inventory_tools/commit/3734cb42e880168bb4c4a71c67820da63857e0bf))
+
+### Unknown
+
+* Merge pull request #33 from agritheory/uom_enforcement_fix
+
+fix: make uom enforcement respond better to toggle on/off ([`13ad883`](https://github.com/agritheory/inventory_tools/commit/13ad8832a346799563e0f7ae2f1b20c457d10d5c))
+
+
 ## v14.1.1 (2023-08-30)
 
 ### Fix
