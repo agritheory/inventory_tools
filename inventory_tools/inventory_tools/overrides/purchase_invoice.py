@@ -6,8 +6,16 @@ import json
 
 import frappe
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import PurchaseInvoice
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+	check_if_return_invoice_linked_with_payment_entry,
+	unlink_inter_company_doc,
+	update_linked_doc,
+)
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from frappe import _
 from frappe.utils.data import cint
+
+from inventory_tools.inventory_tools.overrides.landed_costing import update_valuation_rate
 
 
 class InventoryToolsPurchaseInvoice(PurchaseInvoice):
@@ -61,16 +69,26 @@ class InventoryToolsPurchaseInvoice(PurchaseInvoice):
 	def on_submit(self):
 		if self.is_work_order_subcontracting_enabled() and self.is_subcontracted:
 			self.on_submit_save_se_paid_qty()
-		return super().on_submit()
+		if not self.is_inline_lc_enabled():
+			return super().on_submit()
+		else:
+			self.on_submit_parent_with_lc_changes()
 
 	def on_cancel(self):
 		if self.is_work_order_subcontracting_enabled() and self.is_subcontracted:
 			self.on_cancel_revert_se_paid_qty()
-		return super().on_cancel()
+		if not self.is_inline_lc_enabled():
+			return super().on_cancel()
+		else:
+			self.on_cancel_parent_with_lc_changes()
 
 	def is_work_order_subcontracting_enabled(self):
 		settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
 		return bool(settings and settings.enable_work_order_subcontracting)
+
+	def is_inline_lc_enabled(self):
+		settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
+		return bool(settings and settings.enable_inline_landed_costing)
 
 	def validate_subcontracting_to_pay_qty(self):
 		# Checks the qty the invoice will cover is not more than the outstanding qty
@@ -89,6 +107,68 @@ class InventoryToolsPurchaseInvoice(PurchaseInvoice):
 				"Stock Entry Detail", ste.se_detail_name, "paid_qty", ste.paid_qty + ste.to_pay_qty
 			)
 
+	def on_submit_parent_with_lc_changes(self):
+		"""
+		Function is a copy/modification of ERPNext's PurchaseInvoice on_submit class function
+		        (to accommodate the Inline Landed Costing feature changes) and why super calls
+		        the current class's parent
+		"""
+		print("IN OVERRIDES ON_SUBMIT_PARENT_WITH_LC_CHANGES (FOR INLINE LANDED COSTING)")
+		super(PurchaseInvoice, self).on_submit()
+
+		self.check_prev_docstatus()
+		self.update_status_updater_args()
+		self.update_prevdoc_status()
+
+		frappe.get_doc("Authorization Control").validate_approving_authority(
+			self.doctype, self.company, self.base_grand_total
+		)
+
+		if not self.is_return:
+			self.update_against_document_in_jv()
+			self.update_billing_status_for_zero_amount_refdoc("Purchase Receipt")
+			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
+
+		self.update_billing_status_in_pr()
+
+		# Updating stock ledger should always be called after updating prevdoc status,
+		# because updating ordered qty in bin depends upon updated ordered qty in PO
+		if self.update_stock == 1:
+			self.update_stock_ledger()
+
+			if self.is_old_subcontracting_flow:
+				self.set_consumed_qty_in_subcontract_order()
+
+			from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
+
+			update_serial_nos_after_submit(self, "items")
+
+		# CUSTOM CODE START
+		# There are additional landed costs to update item valuations, but 'Update Stock' is unchecked
+		#    (because items were received via Purchase Receipts)
+		# Collect unique purchase receipt names from items (in case more than one PR covered by PI)
+		prs = {item.purchase_receipt for item in self.get("items") if item.purchase_receipt}
+		if (
+			(not self.update_stock)
+			and prs
+			and (self.distribute_charges_based_on != "Don't Distribute")
+			and (self.total_taxes_and_charges)
+		):
+			self.update_landed_cost(prs)
+		# CUSTOM CODE END
+
+		# this sequence because outstanding may get -negative
+		self.make_gl_entries()
+
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
+
+		self.update_project()
+		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
+		self.update_advance_tax_references()
+
+		self.process_common_party_accounting()
+
 	def on_cancel_revert_se_paid_qty(self):
 		# Reduces the Stock Entry Detail item's paid_qty by the to_pay_qty amount in the invoice
 		for ste in self.get("subcontracting"):
@@ -96,6 +176,208 @@ class InventoryToolsPurchaseInvoice(PurchaseInvoice):
 			frappe.db.set_value(
 				"Stock Entry Detail", ste.se_detail_name, "paid_qty", cur_paid - ste.to_pay_qty
 			)
+
+	def on_cancel_parent_with_lc_changes(self):
+		"""
+		Function is a copy/modification of ERPNext's PurchaseInvoice on_cancel class function
+		        (to accommodate the Inline Landed Costing feature changes) and why super calls
+		        the current class's parent
+		"""
+		print("IN OVERRIDES ON_CANCEL_PARENT_WITH_LC_CHANGES (FOR INLINE LANDED COSTING)")
+		check_if_return_invoice_linked_with_payment_entry(self)
+
+		super(PurchaseInvoice, self).on_cancel()
+
+		self.check_on_hold_or_closed_status()
+
+		self.update_status_updater_args()
+		self.update_prevdoc_status()
+
+		if not self.is_return:
+			self.update_billing_status_for_zero_amount_refdoc("Purchase Receipt")
+			self.update_billing_status_for_zero_amount_refdoc("Purchase Order")
+
+		self.update_billing_status_in_pr()
+
+		# Updating stock ledger should always be called after updating prevdoc status,
+		# because updating ordered qty in bin depends upon updated ordered qty in PO
+		if self.update_stock == 1:
+			self.update_stock_ledger()
+			self.delete_auto_created_batches()
+
+			if self.is_old_subcontracting_flow:
+				self.set_consumed_qty_in_subcontract_order()
+
+		# CUSTOM CODE START
+		prs = {item.purchase_receipt for item in self.get("items") if item.purchase_receipt}
+		if (
+			(not self.update_stock)
+			and prs
+			and (self.distribute_charges_based_on != "Don't Distribute")
+			and (self.total_taxes_and_charges)
+		):
+			self.update_landed_cost(prs, on_cancel=True)
+		# CUSTOM CODE END
+
+		self.make_gl_entries_on_cancel()
+
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
+
+		self.update_project()
+		self.db_set("status", "Cancelled")
+
+		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Repost Payment Ledger",
+			"Repost Payment Ledger Items",
+			"Payment Ledger Entry",
+			"Tax Withheld Vouchers",
+		)
+		self.update_advance_tax_references(cancel=1)
+
+	def update_valuation_rate(self, reset_outgoing_rate=True):
+		if self.is_inline_lc_enabled():
+			update_valuation_rate(self, reset_outgoing_rate)
+		else:
+			super().update_valuation_rate(reset_outgoing_rate)
+
+	def update_landed_cost(self, prs, on_cancel=False):
+		"""
+		Function is a copy/modification of ERPNext's LandedCostVoucher update_landed_cost
+		        class function (to accommodate the Inline Landed Costing feature changes).
+		        Adds landed costs to underlying Purchase Receipts
+		"""
+		print("IN OVERRIDES PURCHASE_INVOICE.PY UPDATE_LANDED_COST (FOR INLINE LANDED COSTING)")
+		# Create a lookup dictionary by PR and item code to tax amount (field used to save LC/item): {PR_name: {item_code: item.item_tax_amount}}
+		lc_per_item_dict = {pr: {} for pr in prs}
+		for item in self.get("items"):
+			if item.purchase_receipt:
+				lc_per_item_dict[item.purchase_receipt][item.item_code] = item.item_tax_amount
+
+		# Save LC/item into each PR item, update item valuation rate, update database
+		for pr in prs:
+			doc = frappe.get_doc("Purchase Receipt", pr)
+			# Set (on_submit) or remove (on_cancel) landed_cost_voucher_amount in item
+			for item in doc.get("items"):
+				lcvamt = lc_per_item_dict[pr][item.item_code]
+				if not on_cancel:
+					item.landed_cost_voucher_amount = lc_per_item_dict[pr][item.item_code]
+					print(
+						f"Setting LCV to item {item.item_code} of {lcvamt} for LCV on item of {item.landed_cost_voucher_amount}"
+					)
+				else:
+					item.landed_cost_voucher_amount = 0.0
+					print(
+						f"On cancel, item {item.item_code} has LCV amount of {lcvamt} setting to zero :{item.landed_cost_voucher_amount}"
+					)
+
+			doc.update_valuation_rate(reset_outgoing_rate=False)
+
+			for item in doc.get("items"):
+				item.db_update()
+
+			# update latest valuation rate in serial no
+			self.update_rate_in_serial_no_for_non_asset_items(doc)
+
+		# Store landed cost charges in GL dict for PR
+		lc_from_pi = self.get_pr_lc_gl_entries(prs, on_cancel=on_cancel)
+
+		# Update stock ledger and GL entries
+		for pr in prs:
+			# Replicate LCV flow
+			doc = frappe.get_doc("Purchase Receipt", pr)
+			# update stock & gl entries for cancelled state of PR
+			doc.docstatus = 2
+			doc.update_stock_ledger(
+				allow_negative_stock=True, via_landed_cost_voucher=False
+			)  # In buying_controller.py, ultimately calls make_sl_entries in stock_ledger.py
+			doc.make_gl_entries_on_cancel()
+
+			# update stock & gl entries for submit state of PR
+			doc.docstatus = 1
+			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=False)
+			doc.make_gl_entries(lc_from_pi=lc_from_pi[pr])
+			doc.repost_future_sle_and_gle()
+
+	def get_pr_lc_gl_entries(self, prs, on_cancel=False):
+		"""
+		Builds dict to hold GL-formatted entries for the landed costs to pass along to PR
+		        to properly capture tax account credit(s) against the debit to Stock on Hand
+
+		:param pr_dict: dict, holds names of purchase receipt documents covered by invoice
+		return: dict, formatted as follows:
+
+		{
+		        pr1_name: {lc_gl_format},
+		        pr2_name: {lc_gl_format}
+		}
+
+		Where lc_gl_format matches what's returned by PR's get_item_account_wise_additional_cost:
+		{
+		        ('item code', 'item name'): {'Account for LC charges': {'amount': 10.0, 'base_amount': 10.0}}
+		}
+		amount and base_amount per item is prorated for each account used in the taxes table
+
+		Example:
+		{'PREC-RET-10000': {('6201', '6f89743482'): {'Expenses Included In Valuation - *': {'amount': 10.0, 'base_amount': 10.0}}}}
+		"""
+		if on_cancel:
+			return {pr: {} for pr in prs}
+
+		lc_from_pi = {}
+		based_on_field = frappe.scrub(self.distribute_charges_based_on)
+
+		# Collect total Amount or Qty from PI to prorate LC charges by account head (if multiple) by PR
+		total_item_cost = sum(
+			item.get(based_on_field) for item in self.get("items") if item.item_tax_amount
+		)
+
+		for pr in prs:
+			doc = frappe.get_doc("Purchase Receipt", pr)
+			item_account_wise_cost = {}
+
+			for item in doc.items:  # Loop over PR items but then PI taxes
+				if not item.landed_cost_voucher_amount:
+					continue
+
+				for account in self.taxes:
+					# For each tax account in PI taxes, allocate same ratio as how total LCs were split by item
+					item_account_wise_cost.setdefault((item.item_code, item.name), {})
+					item_account_wise_cost[(item.item_code, item.name)].setdefault(
+						account.account_head, {"amount": 0.0, "base_amount": 0.0}
+					)
+
+					item_account_wise_cost[(item.item_code, item.name)][account.account_head]["amount"] += (
+						account.tax_amount_after_discount_amount * item.get(based_on_field) / total_item_cost
+					)
+
+					item_account_wise_cost[(item.item_code, item.name)][account.account_head]["base_amount"] += (
+						account.base_tax_amount_after_discount_amount * item.get(based_on_field) / total_item_cost
+					)
+
+			lc_from_pi[pr] = item_account_wise_cost
+
+		return lc_from_pi
+
+	def update_rate_in_serial_no_for_non_asset_items(self, receipt_document):
+		"""
+		Function copied from LandedCostVoucher class in landed_cost_voucher.py
+		        to to accommodate inline landed costs in a Purchase Invoice
+		"""
+		for item in receipt_document.get("items"):
+			if not item.is_fixed_asset and item.serial_no:
+				serial_nos = get_serial_nos(item.serial_no)
+				if serial_nos:
+					frappe.db.sql(
+						"update `tabSerial No` set purchase_rate=%s where name in ({})".format(
+							", ".join(["%s"] * len(serial_nos))
+						),
+						tuple([item.valuation_rate] + serial_nos),
+					)
 
 
 @frappe.whitelist()
