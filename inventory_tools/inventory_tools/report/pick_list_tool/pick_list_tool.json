@@ -1,0 +1,35 @@
+{
+	"add_total_row": 0,
+	"columns": [],
+	"creation": "2023-10-13 08:52:27.178388",
+	"disable_prepared_report": 0,
+	"disabled": 0,
+	"docstatus": 0,
+	"doctype": "Report",
+	"filters": [],
+	"idx": 0,
+	"is_standard": "Yes",
+	"modified": "2023-10-13 08:52:27.178388",
+	"modified_by": "Administrator",
+	"module": "Inventory Tools",
+	"name": "Pick List Tool",
+	"owner": "Administrator",
+	"prepared_report": 0,
+	"ref_doctype": "Pick List",
+	"report_name": "Pick List Tool",
+	"report_type": "Script Report",
+	"roles": [
+		{
+			"role": "Stock Manager"
+		},
+		{
+			"role": "Stock User"
+		},
+		{
+			"role": "Manufacturing Manager"
+		},
+		{
+			"role": "Manufacturing User"
+		}
+	]
+}
