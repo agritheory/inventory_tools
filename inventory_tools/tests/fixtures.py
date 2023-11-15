@@ -753,3 +753,37 @@ customers = [
 	"TransAmerica Bank Cafeteria",
 	"Whole Harvest Grocery Group",
 ]
+
+specifications = [
+	{
+		"dt": "Item Group",
+		"apply_on": "Item",
+		"enabled": 1,
+		"attributes": [
+			{
+				"attribute_name": "Shelf Life",
+				"applied_on": "Item",
+				"field": "shelf_life_in_days",
+				"numeric_values": 1,
+			},
+			{
+				"attribute_name": "Weight",
+				"applied_on": "Item",
+				"field": "weight_per_unit",
+				"numeric_values": 1,
+			},
+			{"attribute_name": "Fruits", "applied_on": "Item"},
+			{"attribute_name": "Brand", "applied_on": "Item", "field": "brand"},
+		],
+	}
+]
+
+
+attributes = {
+	{"Ambrosia Pie": []},
+	{"Double Plum Pie": []},
+	{
+		"Gooseberry Pie": [],
+	},
+	{"Kaduka Key Lime Pie": []},
+}

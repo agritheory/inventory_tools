@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-11-13 16:45:20.279292",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "dt",
+  "enabled",
+  "column_break_conqh",
+  "apply_on",
+  "section_break_5",
+  "attributes"
+ ],
+ "fields": [
+  {
+   "fieldname": "dt",
+   "fieldtype": "Link",
+   "label": "DocType",
+   "options": "DocType"
+  },
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "apply_on",
+   "fieldtype": "Dynamic Link",
+   "label": "Apply On",
+   "options": "dt"
+  },
+  {
+   "fieldname": "column_break_conqh",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break",
+   "label": "Attributes"
+  },
+  {
+   "fieldname": "attributes",
+   "fieldtype": "Table",
+   "options": "Specification Attribute"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-11-14 16:44:58.895071",
+ "modified_by": "Administrator",
+ "module": "Inventory Tools",
+ "name": "Specification",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "title"
+}

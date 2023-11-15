@@ -4,6 +4,7 @@ from itertools import groupby
 
 import frappe
 from erpnext.accounts.doctype.account.account import update_account_number
+from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 )
@@ -217,6 +218,11 @@ def create_item_groups(settings):
 		ig.parent_item_group = "All Item Groups"
 		ig.save()
 
+	if not frappe.db.exists("Brand", "Ambrosia Pie Co"):
+		brand = frappe.new_doc("Brand")
+		brand.brand = "Ambrosia Pie Co"
+		brand.save()
+
 
 def create_price_lists(settings):
 	if not frappe.db.exists("Price List", "Bakery Buying"):
@@ -264,6 +270,7 @@ def create_items(settings):
 		i.valuation_rate = item.get("valuation_rate") or 0
 		i.is_sub_contracted_item = item.get("is_sub_contracted_item") or 0
 		i.default_warehouse = settings.get("warehouse")
+		i.weight_uom = "Pound" if i.is_stock_item else None
 		i.default_material_request_type = (
 			"Purchase"
 			if item.get("item_group") in ("Bakery Supplies", "Ingredients")
@@ -281,6 +288,8 @@ def create_items(settings):
 			else 0
 		)
 		i.is_sales_item = 1 if item.get("item_group") == "Baked Goods" else 0
+		i.sales_uom = "Each" if i.is_sales_item else None
+		i.brand = "Ambrosia Pie Co" if i.is_sales_item else None
 		i.append(
 			"item_defaults",
 			{
@@ -324,6 +333,11 @@ def create_items(settings):
 			)
 			se.save()
 			se.submit()
+		if i.is_sales_item:
+			website_item = make_website_item(i, True)
+			website_item = frappe.get_doc("Website Item", website_item[0])
+			website_item.route = f"products/{frappe.scrub(i.name)}"
+			website_item.save()
 
 
 def create_warehouses(settings):

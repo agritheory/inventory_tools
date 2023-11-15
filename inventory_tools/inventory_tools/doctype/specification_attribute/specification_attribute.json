@@ -1,0 +1,76 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:attribute_name",
+ "creation": "2023-11-13 16:49:36.888483",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "attribute_name",
+  "numeric_values",
+  "required",
+  "column_break_k0wzm",
+  "applied_on",
+  "field"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "attribute_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Attribute Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "numeric_values",
+   "fieldtype": "Check",
+   "label": "Numeric Values"
+  },
+  {
+   "fieldname": "column_break_k0wzm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "required",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Required"
+  },
+  {
+   "columns": 2,
+   "fieldname": "field",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Field"
+  },
+  {
+   "columns": 2,
+   "fieldname": "applied_on",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Applied On",
+   "options": "DocType"
+  }
+ ],
+ "icon": "fa fa-edit",
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-11-14 18:28:38.869757",
+ "modified_by": "Administrator",
+ "module": "Inventory Tools",
+ "name": "Specification Attribute",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
