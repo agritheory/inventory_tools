@@ -757,33 +757,56 @@ customers = [
 specifications = [
 	{
 		"dt": "Item Group",
-		"apply_on": "Item",
+		"apply_on": "Baked Goods",
 		"enabled": 1,
 		"attributes": [
 			{
-				"attribute_name": "Shelf Life",
+				"attribute_name": "Price",
 				"applied_on": "Item",
-				"field": "shelf_life_in_days",
 				"numeric_values": 1,
+				"component": "FacetedSearchNumericRange",
 			},
+			{"attribute_name": "Fruits", "applied_on": "Item", "component": "AttributeFilter"},
 			{
 				"attribute_name": "Weight",
 				"applied_on": "Item",
 				"field": "weight_per_unit",
 				"numeric_values": 1,
+				"component": "FacetedSearchNumericRange",
 			},
-			{"attribute_name": "Fruits", "applied_on": "Item"},
-			{"attribute_name": "Brand", "applied_on": "Item", "field": "brand"},
+			{
+				"attribute_name": "Brand",
+				"applied_on": "Item",
+				"field": "brand",
+				"component": "AttributeFilter",
+			},
+			{
+				"attribute_name": "Shelf Life",
+				"applied_on": "Item",
+				"field": "shelf_life_in_days",
+				"numeric_values": 1,
+				"component": "FacetedSearchNumericRange",
+			},
 		],
 	}
 ]
 
 
-attributes = [
-	{"Ambrosia Pie": []},
-	{"Double Plum Pie": []},
-	{
-		"Gooseberry Pie": [],
+attributes = {
+	"Ambrosia Pie": {
+		"Fruits": ["Hairless Rambutan", "Cloudberry", "Tayberry"],
+		"Weight": 120,
+		"Price": 11.00,
 	},
-	{"Kaduka Key Lime Pie": []},
-]
+	"Double Plum Pie": {"Fruits": ["Cocoplum", "Damson Plum"], "Weight": 124, "Price": 10.50},
+	"Gooseberry Pie": {
+		"Fruits": "Gooseberry",
+		"Weight": 128,
+		"Price": 12.00,
+	},
+	"Kaduka Key Lime Pie": {
+		"Fruits": ["Kaduka Lime", "Limequat"],
+		"Weight": 132,
+		"Price": 11.50,
+	},
+}

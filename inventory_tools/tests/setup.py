@@ -13,10 +13,12 @@ from erpnext.stock.get_item_details import get_item_details
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 
 from inventory_tools.tests.fixtures import (
+	attributes,
 	boms,
 	customers,
 	items,
 	operations,
+	specifications,
 	suppliers,
 	workstations,
 )
@@ -87,6 +89,7 @@ def create_test_data():
 	create_suppliers(settings)
 	create_customers(settings)
 	create_items(settings)
+	create_specifications(settings)
 	create_boms(settings)
 	prod_plan_from_doc = "Sales Order"
 	if prod_plan_from_doc == "Sales Order":
@@ -289,7 +292,10 @@ def create_items(settings):
 		)
 		i.is_sales_item = 1 if item.get("item_group") == "Baked Goods" else 0
 		i.sales_uom = "Nos" if i.is_sales_item else None
+		i.shelf_life_in_days = 7 if i.is_sales_item else None
 		i.brand = "Ambrosia Pie Co" if i.is_sales_item else None
+		i.weight_per_unit = 32 * 4 if i.is_sales_item else None
+		i.weight_uom = "Ounce" if i.is_sales_item else None
 		i.append(
 			"item_defaults",
 			{
@@ -568,3 +574,22 @@ def create_production_plan(settings, prod_plan_from_doc):
 			job_card.time_logs[0].completed_qty = wo.qty
 			job_card.save()
 			job_card.submit()
+
+
+def create_specifications(settings=None):
+	for spec in specifications:
+		if frappe.db.exists("Specification", {"title": f"{spec.get('dt')} - {spec.get('apply_on')}"}):
+			s = frappe.get_doc("Specification", {"title": f"{spec.get('dt')} - {spec.get('apply_on')}"})
+		else:
+			s = frappe.new_doc("Specification")
+			s.dt = spec.get("dt")
+			s.apply_on = spec.get("apply_on")
+			s.enabled = spec.get("enabled")
+			for at in spec.get("attributes"):
+				s.append("attributes", at)
+			s.save()
+
+		spec_items = frappe.get_all("Item", {"item_group": "Baked Goods"})
+		for spec_item in spec_items:
+			spec_item = frappe.get_doc("Item", spec_item)
+			s.create_linked_values(spec_item, attributes[spec_item.name])
