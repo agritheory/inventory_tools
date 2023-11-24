@@ -779,11 +779,11 @@ specifications = [
 ]
 
 
-attributes = {
+attributes = [
 	{"Ambrosia Pie": []},
 	{"Double Plum Pie": []},
 	{
 		"Gooseberry Pie": [],
 	},
 	{"Kaduka Key Lime Pie": []},
-}
+]

@@ -288,7 +288,7 @@ def create_items(settings):
 			else 0
 		)
 		i.is_sales_item = 1 if item.get("item_group") == "Baked Goods" else 0
-		i.sales_uom = "Each" if i.is_sales_item else None
+		i.sales_uom = "Nos" if i.is_sales_item else None
 		i.brand = "Ambrosia Pie Co" if i.is_sales_item else None
 		i.append(
 			"item_defaults",
