@@ -1,109 +1,78 @@
 # Copyright (c) 2023, AgriTheory and contributors
 # For license information, please see license.txt
 
+from itertools import groupby
+
 import frappe
 
 
 def execute(filters=None):
-	columns, data = [], []
-	return get_columns(filters), data
+	specification = frappe.get_doc("Specification", filters.specification)
+	return get_columns(filters, specification), get_data(filters, specification)
 
 
-def get_columns(filters):
-	file_export = True if frappe.form_dict.cmd == "frappe.desk.query_report.export_query" else False
-	doc = frappe.get_doc("Specification", filters.specification)
+def get_data(filters, specification):
+	doctypes = [row.applied_on for row in specification.attributes]
+	attributes = [row.attribute_name for row in specification.attributes]
+	fields = {row.attribute_name: row.field for row in specification.attributes if row.field}
+	_data = frappe.get_all(
+		"Specification Value",
+		{"reference_doctype": ["in", doctypes], "attribute": ["in", attributes]},
+		["reference_doctype", "reference_name", "attribute", "value", "name"],
+		order_by="reference_name",
+	)
+	data = []
+	for ref, d in groupby(_data, key=lambda x: x.get("reference_name")):
+		_d = sorted(sorted(list(d), key=lambda x: x.get("value")), key=lambda x: x.get("attribute"))
+		data.append(
+			{
+				"reference_name": frappe.bold(ref),
+				"indent": 0,
+			}
+		)
+		for __d in _d:
+			if __d.attribute in fields:
+				__d.field = fields[__d.attribute]
+			__d.indent = 1
+			data.append(__d)
+	return data
 
-	# name w/ indent 0
-	# attributes w/ indent 1
 
+def get_columns(filters, specification):
 	return [
 		{
-			"label": "Supplier",
-			"fieldname": "supplier",
+			"label": f"{specification.dt} - {specification.apply_on}"
+			if specification.apply_on
+			else specification.dt,
+			"fieldname": "reference_name",
 			"fieldtype": "Link",
-			"options": "Supplier",
+			"options": "Doctype",
 			"width": "250px",
 		},
 		{
-			"fieldname": "material_request",
-			"fieldtype": "Link",
-			"options": "Material Request",
-			"label": "Material Request",
+			"label": "DocType",
+			"fieldname": "reference_doctype",
+			"fieldtype": "Data",
+			"width": "250px",
+		},
+		{
+			"fieldname": "attribute",
+			"fieldtype": "Data",
+			"label": "Attribute",
 			"width": "200px",
 		},
 		{
-			"fieldname": "schedule_date",
-			"label": "Required By",
-			"fieldtype": "Date",
-			"width": "120px",
-		},
-		{
-			"fieldname": "material_request_item",
+			"fieldname": "value",
+			"label": "Value",
 			"fieldtype": "Data",
-			"hidden": 1,
-		},
-		{
-			"fieldname": "warehouse",
-			"fieldtype": "Link",
-			"options": "Warehouse",
-			"hidden": 1,
-		},
-		{
-			"fieldname": "item_code",
-			"label": "Item",
-			"fieldtype": "Link",
-			"options": "Item",
 			"width": "250px",
 		},
-		{"fieldname": "item_name", "fieldtype": "Data", "hidden": 1},  # unset for export
-		{
-			"label": "MR Qty",
-			"fieldname": "qty",
-			"fieldtype": "Data",
-			"width": "90px",
-			"align": "right",
-		},
-		{
-			"label": "Total Demand",
-			"fieldname": "total_demand",
-			"fieldtype": "Data",
-			"width": "90px",
-			"align": "right",
-		},
-		{
-			"label": "Draft POs",
-			"fieldname": "draft_po",
-			"fieldtype": "Data",
-			"width": "90px",
-			"align": "right",
-		},
-		{
-			"label": "Total Selected",
-			"fieldname": "total_selected",
-			"fieldtype": "Data",
-			"width": "90px",
-			"align": "right",
-		},
-		{
-			"label": "UOM",
-			"fieldname": "uom",
-			"fieldtype": "Link",
-			"options": "UOM",
-			"width": "90px",
-		},
-		{
-			"label": "Price",
-			"fieldname": "supplier_price",
-			"fieldtype": "Data",
-			"width": "90px",
-			"align": "right",
-		},
-		{
-			"label": "Selected Amount",
-			"fieldname": "amount",
-			"fieldtype": "Data",
-			"width": "120px",
-			"align": "right",
-		},
-		{"fieldname": "currency", "fieldtype": "Link", "options": "Currency", "hidden": 1},
+		{"fieldname": "field", "fieldtype": "Data", "hidden": 1},
+		{"fieldname": "name", "fieldtype": "Data", "hidden": 1},
 	]
+
+
+@frappe.whitelist()
+def set_value(docname, value):
+	frappe.set_value("Specification Value", docname, "value", value)
+	frappe.msgprint("Updated", alert=True)

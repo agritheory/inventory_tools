@@ -2,7 +2,9 @@
 <div>
 	<h5> {{ attribute_name }}</h5>
 	<div v-for="(attr, idx) in selectedValues" :key="idx">
-		<input type="checkbox" v-model="attr.isChecked"/>
+		<input type="checkbox" v-model="attr.isChecked"
+		@change="change"
+		/>
 		<span> {{ attr.attribute }}</span>
 	</div>
 </div>
@@ -14,9 +16,16 @@ export default {
 	data() {
 		return { selectedValues: [] }
 	},
-	watch: {
-		'selectedValues': function (oldValue, newValue) {
-			console.log(oldValue, newValue)
+	methods: {
+		change() {
+			this.$emit(
+				'update_filters',
+				{
+					'attribute_name': this.attribute_name,
+					'values': this.selectedValues
+						.map(r => {return r.isChecked ? r.attribute : null})
+						.filter(r => {return r != null})
+				})
 		}
 	},
 	mounted() {

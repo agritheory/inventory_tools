@@ -9,6 +9,7 @@
  "field_order": [
   "reference_doctype",
   "reference_name",
+  "field",
   "attribute",
   "value"
  ],
@@ -16,7 +17,8 @@
   {
    "fieldname": "attribute",
    "fieldtype": "Data",
-   "label": "Attribute"
+   "label": "Attribute",
+   "read_only": 1
   },
   {
    "fieldname": "value",
@@ -27,18 +29,26 @@
    "fieldname": "reference_doctype",
    "fieldtype": "Link",
    "label": "Reference Doctype",
-   "options": "DocType"
+   "options": "DocType",
+   "read_only": 1
   },
   {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "label": "Reference Name",
-   "options": "reference_doctype"
+   "options": "reference_doctype",
+   "read_only": 1
+  },
+  {
+   "fieldname": "field",
+   "fieldtype": "Data",
+   "label": "Field",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-16 09:53:33.634050",
+ "modified": "2023-11-30 13:08:00.287837",
  "modified_by": "Administrator",
  "module": "Inventory Tools",
  "name": "Specification Value",

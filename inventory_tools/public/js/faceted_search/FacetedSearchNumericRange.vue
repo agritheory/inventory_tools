@@ -3,8 +3,8 @@
 	<h5> {{ attribute_name }}</h5>
 	<div>
 		<div class="min-max-inputs">
-			<input class="form-input" type="text" v-model="minFilterValue">
-			<input class="form-input" type="text" v-model="maxFilterValue">
+			<input class="form-control form-input" type="text" v-model="minFilterValue">
+			<input class="form-control form-input" type="text" v-model="maxFilterValue">
 		</div>
 	</div>
 </div>
@@ -32,6 +32,7 @@ export default {
 	white-space:nowrap;
 }
 .min-max-inputs input{
+	display: inline;
 	max-width: 10ch;
 	text-align: right;
 }

@@ -4,26 +4,46 @@ import FacetedSearchNumericRange from './FacetedSearchNumericRange.vue'
 
 frappe.provide('faceted_search')
 
-faceted_search.mount = () => {
-	if (cur_list && ['Item', 'Website Item', 'BOM'].includes(cur_list.doctype)) {
-		// refactor to handle config object
-		if (faceted_search.$search) {
-			return
-		}
-		if (faceted_search.$search == undefined && !$('#faceted-search').length) {
-			$('.filter-section').prepend('<li id="faceted-search"></li>')
-			waitForElement('#faceted-search').then(() => {
-				faceted_search.$search = new window.Vue({
-					el: '#faceted-search',
-					render: h => h(FacetedSearch, { props: {} }),
-					props: { doctype: 'Item' },
-				})
-				window.Vue.component('AttributeFilter', AttributeFilter)
-				window.Vue.component('FacetedSearchNumericRange', FacetedSearchNumericRange)
-			})
-		}
-	}
+faceted_search.mount = el => {
+	// if (faceted_search.$search && faceted_search.$search._isVue) {
+	// 	return
+	// }
+	console.log(el)
+	faceted_search.$search = new window.Vue({
+		el: el,
+		render: h => h(FacetedSearch, { props: { doctype: 'Item' } }),
+		props: { doctype: 'Item' },
+	})
+	window.Vue.component('AttributeFilter', AttributeFilter)
+	window.Vue.component('FacetedSearchNumericRange', FacetedSearchNumericRange)
 }
+// if (faceted_search.$search == undefined) {
+// 	await waitForElement('#product-filters').then(el => {
+// 		console.log(el)
+// 		faceted_search.$search = new window.Vue({
+// 			el: el,
+// 			render: h => h(FacetedSearch, { props: { doctype: 'Item' }}),
+// 		})
+// 		window.Vue.component('AttributeFilter', AttributeFilter)
+// 		window.Vue.component('FacetedSearchNumericRange', FacetedSearchNumericRange)
+// 	})
+// }
+// if (faceted_search.$search == undefined && window.cur_list && ['Item', 'Website Item', 'BOM'].includes(cur_list.doctype)) {
+// 	// refactor to handle config object
+// 	if (faceted_search.$search == undefined && !$('#faceted-search').length) {
+// 		$('.filter-section').prepend('<li id="faceted-search"></li>')
+// 		waitForElement('#faceted-search').then(el => {
+// 			faceted_search.$search = new window.Vue({
+// 				el: el,
+// 				render: h => h(FacetedSearch, { props: { doctype: 'Item' } }),
+// 				props: { doctype: 'Item' },
+// 			})
+// 			window.Vue.component('AttributeFilter', AttributeFilter)
+// 			window.Vue.component('FacetedSearchNumericRange', FacetedSearchNumericRange)
+// 		})
+// 	}
+// }
+// }
 
 function waitForElement(selector) {
 	return new Promise(resolve => {
@@ -43,17 +63,27 @@ function waitForElement(selector) {
 	})
 }
 
+function mount_list_view() {
+	if (faceted_search.$search == undefined && !$('#faceted-search').length) {
+		$('.filter-section').prepend('<li id="faceted-search"></li>')
+		waitForElement('#faceted-search').then(el => {
+			faceted_search.mount(el)
+		})
+	}
+}
+
+function mount_all_products_view(el) {
+	faceted_search.mount(el)
+}
+
 waitForElement('[data-route]').then(element => {
 	let observer = new MutationObserver(() => {
-		faceted_search.mount()
+		mount_list_view()
 	})
 	const config = { attributes: true, childList: false, characterData: true }
 	observer.observe(element, config)
 })
 
-if (document.querySelector('#product-filters')) {
-	faceted_search.$search = new window.Vue({
-		el: '#product-filters',
-		render: h => h(FacetedSearch, { props: {} }),
-	})
-}
+waitForElement('#product-filters').then(element => {
+	mount_all_products_view(element)
+})
