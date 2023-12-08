@@ -77,7 +77,7 @@ function mount_all_products_view(el) {
 }
 
 waitForElement('[data-route]').then(element => {
-	let observer = new MutationObserver(() => {
+	const observer = new MutationObserver(() => {
 		mount_list_view()
 	})
 	const config = { attributes: true, childList: false, characterData: true }

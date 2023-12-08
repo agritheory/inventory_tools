@@ -12,7 +12,12 @@ class Specification(Document):
 		if self.apply_on:
 			self.title += f" - {self.apply_on}"
 
+		self.create_linked_values(frappe.get_doc(self.dt, self.apply_on))
+
 	def create_linked_values(self, doc, extra_attributes=None):
+		if not extra_attributes:
+			extra_attributes = {}
+
 		for at in self.attributes:
 			if at.field:
 				existing_attribute_value = frappe.db.get_value(

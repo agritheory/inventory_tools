@@ -9,7 +9,7 @@ def show_faceted_search_components(doctype="Item", filters=None):
 	attributes = frappe.get_all(
 		"Specification Attribute",
 		{"applied_on": doctype},
-		["component", "attribute_name", "numeric_values"],
+		["component", "attribute_name", "numeric_values", "field"],
 		order_by="idx ASC",
 	)
 
