@@ -29,13 +29,13 @@ export default {
 		update_filters(values){
 			console.log('update_filters', values)
 			this.filterValues[values['attribute_name']] = values['values']
+			console.log(this.filterValues)
+			// need to debounce here instead of timeout
 			setTimeout(() => {
-				this.load() 
-				// need to debounce here
+				this.setFilterValues() 
 			}, 300)
 		},
 		loadAttributeFilters(){
-			console.log('reload', JSON.stringify(this.filterValues))
 			frappe.call({
 				method: 'inventory_tools.inventory_tools.faceted_search.show_faceted_search_components',
 				args: { 'doctype': 'Item', 'filters': this.filterValues },
@@ -48,27 +48,31 @@ export default {
 				})
 			})
 		},
-		load(){
-			frappe.xcall('erpnext.e_commerce.api.get_product_filter_data', {
-				query_args: { attributes: this.filterValues }
-			}).then(r => {
-				let view_type = localStorage.getItem("product_view") || "List View";
-				if(view_type == 'List View'){
-					new erpnext.ProductList({
-						items: r.items,
-						products_section: $("#products-list-area"),
-						settings: r.settings,
-						preference: view_type
-					})
-				} else {
-					new erpnext.ProductGrid({
-						items: r.items,
-						products_section: $("#products-grid-area"),
-						settings: r.settings,
-						preference: view_type
-					})
-				}
-			})
+		setFilterValues(){
+			if(true){ // TODO: change this to test for portal view or != list view
+				frappe.xcall('erpnext.e_commerce.api.get_product_filter_data', {
+					query_args: { attributes: this.filterValues }
+				}).then(r => {
+					let view_type = localStorage.getItem("product_view") || "List View";
+					if(view_type == 'List View'){
+						new erpnext.ProductList({
+							items: r.items,
+							products_section: $("#products-list-area"),
+							settings: r.settings,
+							preference: view_type
+						})
+					} else {
+						new erpnext.ProductGrid({
+							items: r.items,
+							products_section: $("#products-grid-area"),
+							settings: r.settings,
+							preference: view_type
+						})
+					}
+				})
+			} else {
+				// this is where the filters should be set in the list view 
+			}
 		}
 	}
 }

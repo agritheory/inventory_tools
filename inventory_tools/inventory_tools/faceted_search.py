@@ -36,7 +36,6 @@ def show_faceted_search_components(doctype="Item", filters=None):
 
 class FacetedSearchQuery(ProductQuery):
 	def query_items_with_attributes(self, attributes, start=0):
-		print(attributes)
 		item_codes = []
 
 		attributes_in_use = {k: v for (k, v) in attributes.items() if v}
@@ -53,6 +52,7 @@ class FacetedSearchQuery(ProductQuery):
 				],
 			)
 			item_codes.append({x.reference_name for x in item_code_list})
+			print(attribute, item_codes)
 
 		if item_codes:
 			item_codes = list(set.intersection(*item_codes))
