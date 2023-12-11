@@ -8,7 +8,6 @@ faceted_search.mount = el => {
 	// if (faceted_search.$search && faceted_search.$search._isVue) {
 	// 	return
 	// }
-	console.log(el)
 	faceted_search.$search = new window.Vue({
 		el: el,
 		render: h => h(FacetedSearch, { props: { doctype: 'Item' } }),

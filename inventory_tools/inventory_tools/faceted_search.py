@@ -1,6 +1,7 @@
 import json
 
 import frappe
+from erpnext.e_commerce.api import *
 from frappe.utils.data import flt
 
 
@@ -9,7 +10,7 @@ def show_faceted_search_components(doctype="Item", filters=None):
 	attributes = frappe.get_all(
 		"Specification Attribute",
 		{"applied_on": doctype},
-		["component", "attribute_name", "numeric_values", "field"],
+		["component", "attribute_name", "numeric_values"],
 		order_by="idx ASC",
 	)
 
@@ -33,46 +34,79 @@ def show_faceted_search_components(doctype="Item", filters=None):
 	return attributes
 
 
-# @frappe.whitelist()
-# def update_or_create_search_attributes(doc, method=None) --> None:
-# 	pass
+class FacetedSearchQuery(ProductQuery):
+	def query_items_with_attributes(self, attributes, start=0):
+		print(attributes)
+		item_codes = []
+
+		attributes_in_use = {k: v for (k, v) in attributes.items() if v}
+		for attribute, values in attributes_in_use.items():
+			if not isinstance(values, list):
+				values = [values]
+
+			item_code_list = frappe.get_all(
+				"Specification Value",
+				fields=["reference_name"],
+				filters=[
+					["attribute", "=", attribute],
+					["value", "in", values],
+				],
+			)
+			item_codes.append({x.reference_name for x in item_code_list})
+
+		if item_codes:
+			item_codes = list(set.intersection(*item_codes))
+			self.filters.append(["item_code", "in", item_codes])
+
+		return self.query_items(start=start)
 
 
-# @frappe.whitelist(allow_guest=True)
-# def get_product_list(search=None, start=0, limit=12, filters=None):
-# 	data = get_product_data(search, start, limit)
+@frappe.whitelist(allow_guest=True)
+def get_product_filter_data(query_args=None):
+	if isinstance(query_args, str):
+		query_args = json.loads(query_args)
 
-# 	for item in data:
-# 		set_product_info_for_website(item)
+	query_args = frappe._dict(query_args)
+	if query_args:
+		search = query_args.get("search")
+		field_filters = query_args.get("field_filters", {})
+		attribute_filters = query_args.get("attributes", {})
+		start = cint(query_args.start) if query_args.get("start") else 0
+		item_group = query_args.get("item_group")
+		from_filters = query_args.get("from_filters")
+	else:
+		search, attribute_filters, item_group, from_filters = None, None, None, None
+		field_filters = {}
+		start = 0
 
-# 	return [get_item_for_list_in_html(r) for r in data]
+	if from_filters:
+		start = 0
 
+	sub_categories = []
+	if item_group:
+		sub_categories = get_child_groups_for_website(item_group, immediate=True)
 
-# def get_product_data(search=None, start=0, limit=12):
-# 	# limit = 12 because we show 12 items in the grid view
-# 	# base query
-# 	query = """
-# 		SELECT
-# 			web_item_name, item_name, item_code, brand, route,
-# 			website_image, thumbnail, item_group,
-# 			description, web_long_description as website_description,
-# 			website_warehouse, ranking
-# 		FROM `tabWebsite Item`
-# 		WHERE published = 1
-# 		"""
+	engine = FacetedSearchQuery()
 
-# 	# search term condition
-# 	if search:
-# 		query += """ and (item_name like %(search)s
-# 				or web_item_name like %(search)s
-# 				or brand like %(search)s
-# 				or web_long_description like %(search)s)"""
-# 		search = "%" + cstr(search) + "%"
+	try:
+		result = engine.query(
+			attribute_filters, field_filters, search_term=search, start=start, item_group=item_group
+		)
+	except Exception:
+		frappe.log_error("Product query with filter failed")
+		return {"exc": "Something went wrong!"}
 
-# 	# order by
-# 	query += """ ORDER BY ranking desc, modified desc limit {} offset {}""".format(
-# 		cint(limit),
-# 		cint(start),
-# 	)
+	filters = {}
+	discounts = result["discounts"]
 
-# 	return frappe.db.sql(query, {"search": search}, as_dict=1)  # nosemgrep
+	if discounts:
+		filter_engine = ProductFiltersBuilder()
+		filters["discount_filters"] = filter_engine.get_discount_filters(discounts)
+
+	return {
+		"items": result["items"] or [],
+		"filters": filters,
+		"settings": engine.settings,
+		"sub_categories": sub_categories,
+		"items_count": result["items_count"],
+	}

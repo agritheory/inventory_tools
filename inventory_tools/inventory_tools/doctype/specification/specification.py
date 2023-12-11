@@ -35,9 +35,9 @@ class Specification(Document):
 					av.reference_doctype = at.applied_on
 					av.reference_name = doc.name
 					av.attribute = at.attribute_name
-				av.value = frappe.get_value(av.reference_doctype, av.reference_name, at.field)
+				av.value = doc.get(at.field)
 				av.save()
-			if at.attribute_name in extra_attributes:
+			if extra_attributes and at.attribute_name in extra_attributes:
 				if isinstance(extra_attributes[at.attribute_name], (str, int, float)):
 					existing_attribute_value = frappe.db.get_value(
 						"Specification Value",
@@ -58,6 +58,9 @@ class Specification(Document):
 					av.save()
 					continue
 
+				if not extra_attributes:
+					continue
+
 				for value in extra_attributes[at.attribute_name]:  # list, tuple or set / not dict
 					existing_attribute_value = frappe.db.get_value(
 						"Specification Value",
@@ -76,6 +79,19 @@ class Specification(Document):
 						av.attribute = at.attribute_name
 					av.value = value
 					av.save()
+
+	@property
+	def applied_on_doctypes(self):
+		return [r.applied_on for r in self.attributes]
+
+	def applies_to(self, doc):
+		if doc.doctype not in self.applied_on_doctypes:
+			return
+		for field in doc.meta.fields:
+			if field.options == self.dt and not self.apply_on:
+				return True
+			if field.options == self.dt and doc.get(field.fieldname) == self.apply_on:
+				return True
 
 
 @frappe.whitelist()
