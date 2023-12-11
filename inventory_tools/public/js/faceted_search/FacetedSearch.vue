@@ -17,7 +17,6 @@ frappe.provide('erpnext')
 export default {
 	name: 'FacetedSearch',
 	props: ['doctype'],
-	// components: { AttributeFilter, FacetedSearchNumericRange },
 	data(){
 		return { searchComponents: [], filterValues: {} }
 	},
