@@ -17,7 +17,6 @@ class Specification(Document):
 	def create_linked_values(self, doc, extra_attributes=None):
 		if not extra_attributes:
 			extra_attributes = {}
-
 		for at in self.attributes:
 			if at.field:
 				existing_attribute_value = frappe.db.get_value(
@@ -37,7 +36,9 @@ class Specification(Document):
 					av.attribute = at.attribute_name
 				av.value = doc.get(at.field)
 				av.save()
-			if extra_attributes and at.attribute_name in extra_attributes:
+			if not extra_attributes:
+				continue
+			if at.attribute_name in extra_attributes:
 				if isinstance(extra_attributes[at.attribute_name], (str, int, float)):
 					existing_attribute_value = frappe.db.get_value(
 						"Specification Value",
@@ -57,10 +58,6 @@ class Specification(Document):
 					av.value = extra_attributes[at.attribute_name]
 					av.save()
 					continue
-
-				if not extra_attributes:
-					continue
-
 				for value in extra_attributes[at.attribute_name]:  # list, tuple or set / not dict
 					existing_attribute_value = frappe.db.get_value(
 						"Specification Value",

@@ -1,8 +1,10 @@
 import json
 
 import frappe
-from erpnext.e_commerce.api import *
-from frappe.utils.data import flt
+from erpnext.e_commerce.product_data_engine.filters import ProductFiltersBuilder
+from erpnext.e_commerce.product_data_engine.query import ProductQuery
+from erpnext.setup.doctype.item_group.item_group import get_child_groups_for_website
+from frappe.utils import cint, flt
 
 
 @frappe.whitelist(allow_guest=True)
@@ -10,7 +12,7 @@ def show_faceted_search_components(doctype="Item", filters=None):
 	attributes = frappe.get_all(
 		"Specification Attribute",
 		{"applied_on": doctype},
-		["component", "attribute_name", "numeric_values"],
+		["component", "attribute_name", "numeric_values", "field"],
 		order_by="idx ASC",
 	)
 
@@ -36,7 +38,7 @@ def show_faceted_search_components(doctype="Item", filters=None):
 
 class FacetedSearchQuery(ProductQuery):
 	def query_items_with_attributes(self, attributes, start=0):
-		item_codes = []
+		item_codes = set()
 
 		attributes_in_use = {k: v for (k, v) in attributes.items() if v}
 		for attribute, values in attributes_in_use.items():
@@ -51,12 +53,12 @@ class FacetedSearchQuery(ProductQuery):
 					["value", "in", values],
 				],
 			)
-			item_codes.append({x.reference_name for x in item_code_list})
-			print(attribute, item_codes)
+
+			for item_code in item_code_list:
+				item_codes.add(item_code.reference_name)
 
 		if item_codes:
-			item_codes = list(set.intersection(*item_codes))
-			self.filters.append(["item_code", "in", item_codes])
+			self.filters.append(["item_code", "in", list(item_codes)])
 
 		return self.query_items(start=start)
 
