@@ -1,21 +1,17 @@
 <template>
-<div>
-	<h5> {{ attribute_name }}</h5>
 	<div>
-		<div class="min-max-inputs">
-			<input class="form-control form-input" type="text" v-model="minFilterValue"
-			@change="change"
-			>
-			<input class="form-control form-input" type="text" v-model="maxFilterValue"
-			@change="change"
-			>
+		<h5> {{ attribute_name }}</h5>
+		<div>
+			<div class="min-max-inputs">
+				<input class="form-control form-input" type="date" v-model="minFilterValue" @change="change">
+				<input class="form-control form-input" type="date" v-model="maxFilterValue" @change="change">
+			</div>
 		</div>
 	</div>
-</div>
 </template>
 <script>
 export default {
-	name: 'FacetedSearchNumericRange',
+	name: 'FacetedSearchDateRange',
 	props: ['values', 'attribute_name', 'attribute_id'],
 	data() {
 		return {
@@ -35,7 +31,7 @@ export default {
 		}
 	},
 	mounted() {
-		if (this.values) {
+		if(this.values){
 			this.minFilterValue = this.values[0]
 			this.maxFilterValue = this.values[1]
 		}
@@ -45,29 +41,30 @@ export default {
 <style scoped>
 .min-max-inputs {
 	display: inline;
-	white-space:nowrap;
+	white-space: nowrap;
 }
-.min-max-inputs input{
-	display: inline;
-	max-width: 10ch;
+
+.min-max-inputs input {
+
+	width: 20ch;
 	text-align: right;
 }
 
 #slider-div {
-  display: flex;
-  flex-direction: row;
-  margin-top: 30px;
+	display: flex;
+	flex-direction: row;
+	margin-top: 30px;
 }
 
 #slider-div>div {
-  margin: 8px;
+	margin: 8px;
 }
 
 .slider-label {
-  position: absolute;
-  background-color: #eee;
-  padding: 4px;
-  font-size: 0.75rem;
+	position: absolute;
+	background-color: #eee;
+	padding: 4px;
+	font-size: 0.75rem;
 }
 </style>
 

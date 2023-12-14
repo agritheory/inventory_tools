@@ -131,7 +131,10 @@ doc_events = {
 		],
 	},
 	"Item": {
-		"validate": ["inventory_tools.inventory_tools.overrides.uom.duplicate_weight_to_uom_conversion"],
+		"validate": [
+			"inventory_tools.inventory_tools.overrides.uom.duplicate_weight_to_uom_conversion",
+			"inventory_tools.inventory_tools.faceted_search.update_specification_attribute_values",
+		],
 	},
 	"Warehouse": {
 		"validate": ["inventory_tools.inventory_tools.overrides.warehouse.update_warehouse_path"]
