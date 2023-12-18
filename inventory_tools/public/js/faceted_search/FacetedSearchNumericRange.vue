@@ -3,8 +3,8 @@
 		<h5>{{ attribute_name }}</h5>
 		<div>
 			<div class="min-max-inputs">
-				<input class="form-control form-input" type="text" v-model="minFilterValue" @change="change" />
-				<input class="form-control form-input" type="text" v-model="maxFilterValue" @change="change" />
+				<input class="form-control form-input" type="number" v-model="minFilterValue" @change="change" />
+				<input class="form-control form-input" type="number" v-model="maxFilterValue" @change="change" />
 			</div>
 		</div>
 	</div>
@@ -24,7 +24,7 @@ export default {
 		change() {
 			this.$emit('update_filters', {
 				attribute_name: this.attribute_name,
-				values: [this.minFilterValue, this.maxFilterValue],
+				values: [Number(this.minFilterValue), Number(this.maxFilterValue)],
 			})
 		},
 	},

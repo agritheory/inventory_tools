@@ -63,6 +63,21 @@ class FacetedSearchQuery(ProductQuery):
 		return self.query_items(start=start)
 
 
+@frappe.whitelist()
+def get_specification_items(doctype: str, attribute_name: str, attribute_values: list[str]):
+	attribute_values = json.loads(attribute_values)
+	return frappe.get_all(
+		"Specification Value",
+		filters=[
+			["reference_doctype", "=", doctype],
+			["attribute", "=", attribute_name],
+			["value", ">", attribute_values[0]],
+			["value", "<", attribute_values[1]],
+		],
+		pluck="reference_name",
+	)
+
+
 @frappe.whitelist(allow_guest=True)
 def get_product_filter_data(query_args=None):
 	if isinstance(query_args, str):

@@ -26,9 +26,8 @@ export default {
 	},
 	methods: {
 		update_filters(values) {
-			console.log('update_filters', values)
+			console.log('update_filters', values, this.filterValues)
 			this.filterValues[values['attribute_name']] = values['values']
-			console.log(this.filterValues)
 			// need to debounce here instead of timeout
 			setTimeout(() => {
 				this.setFilterValues()
@@ -81,6 +80,7 @@ export default {
 
 				for (const [key, value] of Object.entries(this.filterValues)) {
 					const attribute = this.searchComponents.find(comp => comp.attribute_name === key)
+
 					if (attribute.field) {
 						if (Array.isArray(value)) {
 							if (value.length > 0) {
@@ -88,16 +88,52 @@ export default {
 							} else {
 								filters = filters.filter(filter => filter[1] !== attribute.field)
 							}
+
+							this.refreshFilters(filters)
+						} else {
+							// TODO: handle edge-case?
+						}
+					} else {
+						if (Array.isArray(value)) {
+							if (!value[0] && !value[1]) {
+								// TODO: handle case where numeric range is unset
+							} else {
+								frappe
+									.xcall('inventory_tools.inventory_tools.faceted_search.get_specification_items', {
+										doctype: this.doctype,
+										attribute_name: key,
+										attribute_values: value,
+									})
+									.then(items => {
+										const existing_name_filter = filters.filter(filter => filter[1] === 'name')
+										if (existing_name_filter.length > 0) {
+											const existing_name_filter_value = existing_name_filter[3]
+											filters = filters.filter(filter => filter[1] !== 'name')
+											if (Array.isArray(existing_name_filter_value)) {
+												filters.push([this.doctype, 'name', 'in', [...existing_name_filter_value, ...items]])
+											} else {
+												filters.push([this.doctype, 'name', 'in', [existing_name_filter_value, ...items]])
+											}
+										} else {
+											filters.push([this.doctype, 'name', 'in', items])
+										}
+
+										this.refreshFilters(filters)
+									})
+							}
 						} else {
 							// TODO: handle edge-case?
 						}
 					}
-
-					listview.filter_area.clear(false)
-					listview.filter_area.set(filters)
-					listview.refresh()
 				}
 			}
+		},
+
+		refreshFilters(filters) {
+			const listview = frappe.get_list_view(this.doctype)
+			listview.filter_area.clear(false)
+			listview.filter_area.set(filters)
+			listview.refresh()
 		},
 	},
 }
