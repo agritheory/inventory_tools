@@ -4,6 +4,7 @@
 			<component
 				:is="comp.component"
 				:values="comp.values"
+				:attribute_id="comp.attribute_id"
 				:attribute_name="comp.attribute_name"
 				@update_filters="update_filters($event)"></component>
 		</li>
@@ -22,12 +23,12 @@ export default {
 	},
 	mounted() {
 		this.loadAttributeFilters()
-		this.search = erpnext.ProductSearch
+		// this.search = erpnext.ProductSearch
 	},
 	methods: {
 		update_filters(values) {
-			console.log('update_filters', values, this.filterValues)
-			this.filterValues[values['attribute_name']] = values['values']
+			console.log('update_filters', values)
+			this.filterValues[values.attribute_name] = { attribute_id: values.attribute_id, values: values.values }
 			// need to debounce here instead of timeout
 			setTimeout(() => {
 				this.setFilterValues()
@@ -48,7 +49,6 @@ export default {
 					})
 				})
 		},
-
 		setFilterValues() {
 			// TODO: improve check for portal view
 			if (erpnext.e_commerce) {
@@ -57,8 +57,10 @@ export default {
 						query_args: { attributes: this.filterValues },
 					})
 					.then(r => {
-						const view_type = localStorage.getItem('product_view') || 'List View'
-						if (view_type === 'List View') {
+						let view_type = localStorage.getItem('product_view') || 'List View'
+						if (!r.items) {
+							return
+						} else if (view_type == 'List View') {
 							new erpnext.ProductList({
 								items: r.items,
 								products_section: $('#products-list-area'),

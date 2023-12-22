@@ -11,7 +11,7 @@
 <script>
 export default {
 	name: 'AttributeFilter',
-	props: ['values', 'attribute_name'],
+	props: ['values', 'attribute_name', 'attribute_id'],
 	data() {
 		return { selectedValues: [] }
 	},
@@ -19,6 +19,7 @@ export default {
 		change() {
 			this.$emit('update_filters', {
 				attribute_name: this.attribute_name,
+				attribute_id: this.attribute_id,
 				values: this.selectedValues
 					.map(r => {
 						return r.isChecked ? r.attribute : null
@@ -30,9 +31,11 @@ export default {
 		},
 	},
 	mounted() {
-		this.selectedValues = this.values.map(v => {
-			return { attribute: v, isChecked: false }
-		})
+		if (this.values) {
+			this.selectedValues = this.values.map(v => {
+				return { attribute: v, isChecked: false }
+			})
+		}
 	},
 }
 </script>

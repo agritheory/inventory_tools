@@ -13,7 +13,7 @@
 <script>
 export default {
 	name: 'FacetedSearchNumericRange',
-	props: ['values', 'attribute_name'],
+	props: ['values', 'attribute_name', 'attribute_id'],
 	data() {
 		return {
 			minFilterValue: 0,
@@ -24,13 +24,16 @@ export default {
 		change() {
 			this.$emit('update_filters', {
 				attribute_name: this.attribute_name,
+				attribute_id: this.attribute_id,
 				values: [Number(this.minFilterValue), Number(this.maxFilterValue)],
 			})
 		},
 	},
 	mounted() {
-		this.minFilterValue = this.values[0]
-		this.maxFilterValue = this.values[1]
+		if (this.values) {
+			this.minFilterValue = this.values[0]
+			this.maxFilterValue = this.values[1]
+		}
 	},
 }
 </script>

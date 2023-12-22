@@ -1,6 +1,7 @@
 import FacetedSearch from './FacetedSearch.vue'
 import AttributeFilter from './AttributeFilter.vue'
 import FacetedSearchNumericRange from './FacetedSearchNumericRange.vue'
+import FacetedSearchDateRange from './FacetedSearchDateRange.vue'
 
 frappe.provide('faceted_search')
 
@@ -15,6 +16,7 @@ faceted_search.mount = el => {
 	})
 	window.Vue.component('AttributeFilter', AttributeFilter)
 	window.Vue.component('FacetedSearchNumericRange', FacetedSearchNumericRange)
+	window.Vue.component('FacetedSearchDateRange', FacetedSearchDateRange)
 }
 // if (faceted_search.$search == undefined) {
 // 	await waitForElement('#product-filters').then(el => {
