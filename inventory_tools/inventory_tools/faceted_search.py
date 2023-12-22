@@ -98,8 +98,8 @@ def get_specification_items(doctype: str, attribute_name: str, attribute_values:
 		filters=[
 			["reference_doctype", "=", doctype],
 			["attribute", "=", attribute_name],
-			["value", ">", attribute_values[0]],
-			["value", "<", attribute_values[1]],
+			["value", ">=", attribute_values[0]],
+			["value", "<=", attribute_values[1]],
 		],
 		pluck="reference_name",
 	)

@@ -29,6 +29,7 @@ export default {
 		update_filters(values) {
 			console.log('update_filters', values)
 			this.filterValues[values.attribute_name] = { attribute_id: values.attribute_id, values: values.values }
+
 			// need to debounce here instead of timeout
 			setTimeout(() => {
 				this.setFilterValues()
@@ -81,12 +82,17 @@ export default {
 				let filters = listview.filter_area.get()
 
 				for (const [key, value] of Object.entries(this.filterValues)) {
+					const values = value.values
 					const attribute = this.searchComponents.find(comp => comp.attribute_name === key)
 
 					if (attribute.field) {
-						if (Array.isArray(value)) {
-							if (value.length > 0) {
-								filters.push([this.doctype, attribute.field, 'in', value])
+						if (Array.isArray(values)) {
+							if (values.length > 0) {
+								if (!values[0] && !values[1]) {
+									// TODO: handle case where numeric range is unset
+								} else {
+									filters.push([this.doctype, attribute.field, 'in', values])
+								}
 							} else {
 								filters = filters.filter(filter => filter[1] !== attribute.field)
 							}
@@ -96,15 +102,15 @@ export default {
 							// TODO: handle edge-case?
 						}
 					} else {
-						if (Array.isArray(value)) {
-							if (!value[0] && !value[1]) {
+						if (Array.isArray(values)) {
+							if (!values[0] && !values[1]) {
 								// TODO: handle case where numeric range is unset
 							} else {
 								frappe
 									.xcall('inventory_tools.inventory_tools.faceted_search.get_specification_items', {
 										doctype: this.doctype,
 										attribute_name: key,
-										attribute_values: value,
+										attribute_values: values,
 									})
 									.then(items => {
 										const existing_name_filter = filters.filter(filter => filter[1] === 'name')
