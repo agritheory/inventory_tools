@@ -2,6 +2,17 @@
 
 
 
+## v14.1.3 (2024-01-04)
+
+### Fix
+
+* fix: validate customizations (#35)
+
+* fix: validate customizations
+
+* fix: only install inventory tools customizations ([`e1d86a0`](https://github.com/agritheory/inventory_tools/commit/e1d86a0739e56f3b987b599c275644ee5c29fc0a))
+
+
 ## v14.1.2 (2023-09-12)
 
 ### Chore
