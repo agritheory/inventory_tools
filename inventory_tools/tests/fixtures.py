@@ -787,6 +787,13 @@ specifications = [
 				"numeric_values": 1,
 				"component": "FacetedSearchNumericRange",
 			},
+			{
+				"attribute_name": "EOL",
+				"applied_on": "Item",
+				"field": "end_of_life",
+				"date_values": 1,
+				"component": "FacetedSearchDateRange",
+			},
 		],
 	}
 ]

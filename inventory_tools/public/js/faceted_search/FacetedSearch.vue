@@ -6,7 +6,7 @@
 				:values="comp.values"
 				:attribute_id="comp.attribute_id"
 				:attribute_name="comp.attribute_name"
-				@update_filters="update_filters($event)"
+				@update_filters="updateFilters($event)"
 			></component>
 	</li>
 </ul>
@@ -19,16 +19,18 @@ export default {
 	name: 'FacetedSearch',
 	props: ['doctype'],
 	data(){
-		return { searchComponents: [], filterValues: {} }
+		return { searchComponents: [], filterValues: {}, sortOrder: '' }
 	},
 	mounted(){
 		this.loadAttributeFilters()
-		// this.search = erpnext.ProductSearch
 	},
 	methods: {
-		update_filters(values){
-			console.log('update_filters', values)
-			this.filterValues[values.attribute_name] = { attribute_id: values.attribute_id, values: values.values}
+		updateFilters(values){
+			if('sort_order' in values){
+				this.sortOrder = values
+			} else {
+				this.filterValues[values.attribute_name] = { attribute_id: values.attribute_id, values: values.values}
+			}
 			// need to debounce here instead of timeout
 			setTimeout(() => {
 				this.setFilterValues()
@@ -50,7 +52,7 @@ export default {
 		setFilterValues(){
 			if(true){ // TODO: change this to test for portal view or != list view
 				frappe.xcall('erpnext.e_commerce.api.get_product_filter_data', {
-					query_args: { attributes: this.filterValues }
+					query_args: { attributes: this.filterValues, sort_order: this.sortOrder }
 				}).then(r => {
 					let view_type = localStorage.getItem("product_view") || "List View";
 					if(!r.items){

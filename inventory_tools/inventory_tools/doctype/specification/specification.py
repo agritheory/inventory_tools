@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import datetime
+import json
 import time
 
 import frappe
@@ -27,6 +28,7 @@ class Specification(Document):
 						"reference_doctype": at.applied_on,
 						"reference_name": doc.name,
 						"attribute": at.attribute_name,
+						"specification": self.name,
 					},
 				)
 				if existing_attribute_value:
@@ -36,7 +38,9 @@ class Specification(Document):
 					av = frappe.new_doc("Specification Value")
 					av.reference_doctype = at.applied_on
 					av.reference_name = doc.name
+					av.specification = self.name
 					av.attribute = at.attribute_name
+					av.field = at.field
 				if at.date_values:
 					av.value = convert_to_epoch(av.value)
 				av.save()
@@ -113,9 +117,67 @@ def convert_to_epoch(date):
 	).total_seconds()
 
 
+def convert_from_epoch(date):
+	system_settings = frappe.get_cached_doc("System Settings", "System Settings")
+	d = datetime.datetime.utcfromtimestamp(int(date))
+	utc_offset = d.utcoffset().total_seconds() if d.utcoffset() else 0
+	return (d + datetime.timedelta(hours=12, seconds=int(utc_offset))).date()
+
+
 @frappe.whitelist()
 def get_data_fieldnames(doctype):
 	meta = frappe.get_meta(doctype)
 	return sorted(
 		f.fieldname for f in meta.fields if f.fieldtype not in no_value_fields + table_fields
 	)
+
+
+@frappe.whitelist()
+def get_specification_values(reference_doctype, reference_name):
+	r = frappe.get_all(
+		"Specification Value",
+		filters={"reference_doctype": reference_doctype, "reference_name": reference_name},
+		fields=["name AS row_name", "attribute", "value", "field", "specification"],
+		order_by="attribute ASC, value ASC",
+	)
+	for row in r:
+		date_values = frappe.get_value(
+			"Specification Attribute",
+			{"parent": row.specification, "attribute_name": row.attribute},
+			["date_values"],
+		)
+		if date_values:
+			row.value = convert_from_epoch(row.value)
+	return r
+
+
+@frappe.whitelist()
+def update_specification_values(reference_doctype, reference_name, spec, specifications):
+	if isinstance(specifications, str):
+		specifications = json.loads(specifications)
+		specifications = [frappe._dict(**s) for s in specifications]
+	# convert dates to epoch
+	existing_values = get_specification_values(reference_doctype, reference_name)
+	for s in specifications:
+		for row in existing_values:
+			if row.row_name and row.row_name == s.row_name and row.value != s.value:
+				date_values = frappe.get_value(
+					"Specification Attribute", {"parent": spec, "attribute_name": s.attribute}, ["date_values"]
+				)
+				if date_values:
+					s.value = convert_to_epoch(s.value)
+				frappe.set_value("Specification Value", s.row_name, "value", s.value)
+		if not s.row_name:
+			av = frappe.new_doc("Specification Value")
+			av.reference_doctype = reference_doctype
+			av.reference_name = reference_name
+			av.attribute = s.attribute
+			av.specification = spec
+			av.value = s.value
+			# TODO:
+			date_values = frappe.get_value(
+				"Specification Attribute", {"parent": spec, "attribute_name": s.attribute}, ["date_values"]
+			)
+			if date_values:
+				av.value = convert_to_epoch(av.value)
+			av.save()

@@ -17,34 +17,10 @@ faceted_search.mount = el => {
 	window.Vue.component('AttributeFilter', AttributeFilter)
 	window.Vue.component('FacetedSearchNumericRange', FacetedSearchNumericRange)
 	window.Vue.component('FacetedSearchDateRange', FacetedSearchDateRange)
+	faceted_search.$search.updateSortOrder = sortOrder => {
+		console.log('updated sort order')
+	}
 }
-// if (faceted_search.$search == undefined) {
-// 	await waitForElement('#product-filters').then(el => {
-// 		console.log(el)
-// 		faceted_search.$search = new window.Vue({
-// 			el: el,
-// 			render: h => h(FacetedSearch, { props: { doctype: 'Item' }}),
-// 		})
-// 		window.Vue.component('AttributeFilter', AttributeFilter)
-// 		window.Vue.component('FacetedSearchNumericRange', FacetedSearchNumericRange)
-// 	})
-// }
-// if (faceted_search.$search == undefined && window.cur_list && ['Item', 'Website Item', 'BOM'].includes(cur_list.doctype)) {
-// 	// refactor to handle config object
-// 	if (faceted_search.$search == undefined && !$('#faceted-search').length) {
-// 		$('.filter-section').prepend('<li id="faceted-search"></li>')
-// 		waitForElement('#faceted-search').then(el => {
-// 			faceted_search.$search = new window.Vue({
-// 				el: el,
-// 				render: h => h(FacetedSearch, { props: { doctype: 'Item' } }),
-// 				props: { doctype: 'Item' },
-// 			})
-// 			window.Vue.component('AttributeFilter', AttributeFilter)
-// 			window.Vue.component('FacetedSearchNumericRange', FacetedSearchNumericRange)
-// 		})
-// 	}
-// }
-// }
 
 function waitForElement(selector) {
 	return new Promise(resolve => {
@@ -73,7 +49,7 @@ function mount_list_view() {
 	}
 }
 
-function mount_all_products_view(el) {
+function mount_ecommerce_view(el) {
 	faceted_search.mount(el)
 }
 
@@ -86,5 +62,21 @@ waitForElement('[data-route]').then(element => {
 })
 
 waitForElement('#product-filters').then(element => {
-	mount_all_products_view(element)
+	mount_ecommerce_view(element)
+	waitForElement('.toggle-container').then(element => {
+		let el = $(element)
+		el.prepend(
+			`<select class="form-control form-input"
+				style="width: 20ch; display: inline; margin-left: 1em; float: right;"
+			>
+			<option>Title A-Z</option>
+			<option>Title Z-A</option>
+			<option>Item Code A-Z</option>
+			<option>Item Code Z-A</option>
+			</select>`
+		)
+		el.on('change', e => {
+			faceted_search.$search.$children[0].updateFilters({ sort_order: e.target.value })
+		})
+	})
 })

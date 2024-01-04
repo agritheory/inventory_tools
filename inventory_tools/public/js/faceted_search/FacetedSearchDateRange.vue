@@ -32,8 +32,8 @@ export default {
 	},
 	mounted() {
 		if(this.values){
-			this.minFilterValue = this.values[0]
-			this.maxFilterValue = this.values[1]
+			this.minFilterValue = moment(this.values[0] * 1000).format('YYYY-MM-DD')
+			this.maxFilterValue = moment(this.values[1] * 1000).format('YYYY-MM-DD')
 		}
 	}
 }

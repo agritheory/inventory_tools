@@ -9,6 +9,7 @@
  "field_order": [
   "reference_doctype",
   "reference_name",
+  "specification",
   "field",
   "attribute",
   "value"
@@ -44,11 +45,17 @@
    "fieldtype": "Data",
    "label": "Field",
    "read_only": 1
+  },
+  {
+   "fieldname": "specification",
+   "fieldtype": "Link",
+   "label": "Specification",
+   "options": "Specification"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-30 13:08:00.287837",
+ "modified": "2023-12-21 13:48:04.067288",
  "modified_by": "Administrator",
  "module": "Inventory Tools",
  "name": "Specification Value",

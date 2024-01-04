@@ -31,9 +31,10 @@ web_include_js = ["faceted_search.bundle.js"]
 
 # include js in doctype views
 doctype_js = {
-	"Work Order": "public/js/work_order_custom.js",
-	"Purchase Order": "public/js/purchase_order_custom.js",
-	"Purchase Invoice": "public/js/purchase_invoice_custom.js",
+	"Item": "public/js/custom/item_custom.js",
+	"Purchase Invoice": "public/js/custom/purchase_invoice_custom.js",
+	"Purchase Order": "public/js/custom/purchase_order_custom.js",
+	"Work Order": "public/js/custom/work_order_custom.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
