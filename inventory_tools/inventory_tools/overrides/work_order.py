@@ -78,6 +78,19 @@ class InventoryToolsWorkOrder(WorkOrder):
 					indicator="green",
 				)
 
+	def create_job_card(self):
+		create_job_cards_automatically = (
+			frappe.db.get_value("BOM", self.bom_no, "create_job_cards_automatically")
+			or frappe.db.get_value(
+				"Inventory Tools Settings", {"company": self.company}, "create_job_cards_automatically"
+			)
+			or "Yes"
+		)
+
+		if create_job_cards_automatically == "No":
+			return
+		return super().create_job_card()
+
 
 @frappe.whitelist()
 def make_subcontracted_purchase_order(wo_name, supplier=None):

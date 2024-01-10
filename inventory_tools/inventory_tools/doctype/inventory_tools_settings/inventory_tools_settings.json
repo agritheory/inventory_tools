@@ -15,6 +15,8 @@
   "work_order_subcontracting_section",
   "enable_work_order_subcontracting",
   "create_purchase_orders",
+  "bom_column",
+  "create_job_cards_automatically",
   "section_break_0",
   "update_warehouse_path",
   "section_break_gzcbr",
@@ -94,12 +96,23 @@
    "fieldname": "enforce_uoms",
    "fieldtype": "Check",
    "label": "Enforce UOMs"
+  },
+  {
+   "fieldname": "bom_column",
+   "fieldtype": "Section Break",
+   "label": "Work Order"
+  },
+  {
+   "default": "Yes",
+   "fieldname": "create_job_cards_automatically",
+   "fieldtype": "Select",
+   "label": "Create Job Card(s) Automatically",
+   "options": "Yes\nNo"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-08-09 20:12:09.274841",
-
+ "modified": "2024-01-09 18:12:20.714002",
  "modified_by": "Administrator",
  "module": "Inventory Tools",
  "name": "Inventory Tools Settings",
