@@ -1,5 +1,3 @@
-import json
-
 import frappe
 from frappe import _
 from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry, FinishedGoodError

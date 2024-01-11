@@ -1,5 +1,3 @@
-import json
-
 import frappe
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard
 from frappe import _, bold
