@@ -1,14 +1,14 @@
 import json
 
 import frappe
-from frappe import _, bold
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard
+from frappe import _, bold
 from frappe.utils import get_link_to_form
+
 from inventory_tools.overrides.work_order import get_allowance_percentage
 
 
 class InventoryToolsJobCard(JobCard):
-
 	def validate_job_card(self):
 		if (
 			self.work_order
@@ -33,7 +33,6 @@ class InventoryToolsJobCard(JobCard):
 		if self.for_quantity and (self.total_completed_qty * allowance_percentage) <= self.for_quantity:
 			total_completed_qty = frappe.bold(frappe._("Total Completed Qty"))
 			qty_to_manufacture = frappe.bold(frappe._("Qty to Manufacture"))
-
 			frappe.throw(
 				frappe._("The {0} ({1}) must be equal to {2} ({3})").format(
 					total_completed_qty,
