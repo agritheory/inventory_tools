@@ -96,28 +96,10 @@ class InventoryToolsWorkOrder(WorkOrder):
 			return
 		return super().create_job_card()
 
-	def get_allowance_percentage(self):
-		bom_allowance_percentage = frappe.get_value(
-			"BOM", self.bom_no, "overproduction_percentage_for_work_order"
-		)
-		if bom_allowance_percentage:
-			return flt(bom_allowance_percentage)
-
-		settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
-		if settings:
-			settings_allowance_percentage = flt(settings.overproduction_percentage_for_work_order)
-		else:
-			settings_allowance_percentage = flt(
-				frappe.db.get_single_value(
-					"Manufacturing Settings", "overproduction_percentage_for_work_order"
-				)
-			)
-		return settings_allowance_percentage
-
 	def update_work_order_qty(self):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
 		based on Stock Entry"""
-		allowance_percentage = self.get_allowance_percentage()
+		allowance_percentage = get_allowance_percentage(self.company, self.bom_no)
 
 		for purpose, fieldname in (
 			("Manufacture", "produced_qty"),
@@ -153,7 +135,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 			self.update_production_plan_status()
 
 	def update_operation_status(self):
-		allowance_percentage = self.get_allowance_percentage()
+		allowance_percentage = get_allowance_percentage(self.company, self.bom_no)
 		max_allowed_qty_for_wo = flt(self.qty) + (allowance_percentage / 100 * flt(self.qty))
 
 		for d in self.get("operations"):
@@ -185,7 +167,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 			if not qty_dict:
 				return
 
-			allowance_qty = self.get_allowance_percentage() / 100 * qty_dict.get("planned_qty", 0)
+			allowance_qty = get_allowance_percentage(self.company, self.bom_no) / 100 * qty_dict.get("planned_qty", 0)
 
 			max_qty = qty_dict.get("planned_qty", 0) + allowance_qty - qty_dict.get("ordered_qty", 0)
 
@@ -488,3 +470,22 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 					row["s_warehouse"] = None
 					row["t_warehouse"] = return_warehouse
 	return se
+
+
+def get_allowance_percentage(company: str, bom_no: str):
+	bom_allowance_percentage = frappe.get_value(
+		"BOM", bom_no, "overproduction_percentage_for_work_order"
+	)
+	if bom_allowance_percentage:
+		return flt(bom_allowance_percentage)
+
+	settings = frappe.get_doc("Inventory Tools Settings", {"company": company})
+	if settings:
+		settings_allowance_percentage = flt(settings.overproduction_percentage_for_work_order)
+	else:
+		settings_allowance_percentage = flt(
+			frappe.db.get_single_value(
+				"Manufacturing Settings", "overproduction_percentage_for_work_order"
+			)
+		)
+	return settings_allowance_percentage
