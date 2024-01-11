@@ -1,9 +1,14 @@
 import frappe
 from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
-from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
+from erpnext.manufacturing.doctype.work_order.work_order import (
+	OverProductionError,
+	StockOverProductionError,
+	WorkOrder,
+)
 from erpnext.manufacturing.doctype.work_order.work_order import (
 	make_stock_entry as _make_stock_entry,
 )
+from frappe import _
 from frappe.utils import flt, get_link_to_form, getdate, nowdate
 
 
@@ -90,6 +95,109 @@ class InventoryToolsWorkOrder(WorkOrder):
 		if create_job_cards_automatically == "No":
 			return
 		return super().create_job_card()
+
+	def get_allowance_percentage(self):
+		bom_allowance_percentage = frappe.get_value(
+			"BOM", self.bom_no, "overproduction_percentage_for_work_order"
+		)
+		if bom_allowance_percentage:
+			return flt(bom_allowance_percentage)
+
+		settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
+		if settings:
+			settings_allowance_percentage = flt(settings.overproduction_percentage_for_work_order)
+		else:
+			settings_allowance_percentage = flt(
+				frappe.db.get_single_value(
+					"Manufacturing Settings", "overproduction_percentage_for_work_order"
+				)
+			)
+		return settings_allowance_percentage
+
+	def update_work_order_qty(self):
+		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
+		based on Stock Entry"""
+		allowance_percentage = self.get_allowance_percentage()
+
+		for purpose, fieldname in (
+			("Manufacture", "produced_qty"),
+			("Material Transfer for Manufacture", "material_transferred_for_manufacturing"),
+		):
+			if (
+				purpose == "Material Transfer for Manufacture"
+				and self.operations
+				and self.transfer_material_against == "Job Card"
+			):
+				continue
+
+			qty = self.get_transferred_or_manufactured_qty(purpose)
+
+			completed_qty = self.qty + (allowance_percentage / 100 * self.qty)
+			if qty > completed_qty:
+				frappe.throw(
+					_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(
+						self.meta.get_label(fieldname), qty, completed_qty, self.name
+					),
+					StockOverProductionError,
+				)
+
+			self.db_set(fieldname, qty)
+			self.set_process_loss_qty()
+
+			from erpnext.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
+
+			if self.sales_order and self.sales_order_item:
+				update_produced_qty_in_so_item(self.sales_order, self.sales_order_item)
+
+		if self.production_plan:
+			self.update_production_plan_status()
+
+	def update_operation_status(self):
+		allowance_percentage = self.get_allowance_percentage()
+		max_allowed_qty_for_wo = flt(self.qty) + (allowance_percentage / 100 * flt(self.qty))
+
+		for d in self.get("operations"):
+			if not d.completed_qty:
+				d.status = "Pending"
+			elif flt(d.completed_qty) < flt(self.qty):
+				d.status = "Work in Progress"
+			elif flt(d.completed_qty) == flt(self.qty):
+				d.status = "Completed"
+			elif flt(d.completed_qty) <= max_allowed_qty_for_wo:
+				d.status = "Completed"
+			else:
+				frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))
+
+	def validate_qty(self):
+
+		if not self.qty > 0:
+			frappe.throw(_("Quantity to Manufacture must be greater than 0."))
+
+		if (
+			self.production_plan
+			and self.production_plan_item
+			and not self.production_plan_sub_assembly_item
+		):
+			qty_dict = frappe.db.get_value(
+				"Production Plan Item", self.production_plan_item, ["planned_qty", "ordered_qty"], as_dict=1
+			)
+
+			if not qty_dict:
+				return
+
+			allowance_qty = self.get_allowance_percentage() / 100 * qty_dict.get("planned_qty", 0)
+
+			max_qty = qty_dict.get("planned_qty", 0) + allowance_qty - qty_dict.get("ordered_qty", 0)
+
+			if not max_qty > 0:
+				frappe.throw(
+					_("Cannot produce more item for {0}").format(self.production_item), OverProductionError
+				)
+			elif self.qty > max_qty:
+				frappe.throw(
+					_("Cannot produce more than {0} items for {1}").format(max_qty, self.production_item),
+					OverProductionError,
+				)
 
 
 @frappe.whitelist()
