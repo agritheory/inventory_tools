@@ -13,6 +13,12 @@ from frappe.utils import flt, get_link_to_form, getdate, nowdate
 
 
 class InventoryToolsWorkOrder(WorkOrder):
+	def onload(self):
+		ms = frappe.get_doc("Manufacturing Settings")
+		self.set_onload("material_consumption", ms.material_consumption)
+		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
+		self.set_onload("overproduction_percentage", get_allowance_percentage(self.company, self.bom_no))
+
 	def validate(self):
 		if self.is_work_order_subcontracting_enabled() and frappe.get_value(
 			"BOM", self.bom_no, "is_subcontracted"
@@ -167,7 +173,9 @@ class InventoryToolsWorkOrder(WorkOrder):
 			if not qty_dict:
 				return
 
-			allowance_qty = get_allowance_percentage(self.company, self.bom_no) / 100 * qty_dict.get("planned_qty", 0)
+			allowance_qty = (
+				get_allowance_percentage(self.company, self.bom_no) / 100 * qty_dict.get("planned_qty", 0)
+			)
 
 			max_qty = qty_dict.get("planned_qty", 0) + allowance_qty - qty_dict.get("ordered_qty", 0)
 
@@ -484,8 +492,6 @@ def get_allowance_percentage(company: str, bom_no: str):
 		settings_allowance_percentage = flt(settings.overproduction_percentage_for_work_order)
 	else:
 		settings_allowance_percentage = flt(
-			frappe.db.get_single_value(
-				"Manufacturing Settings", "overproduction_percentage_for_work_order"
-			)
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order")
 		)
 	return settings_allowance_percentage
