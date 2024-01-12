@@ -1,12 +1,12 @@
 import frappe
+from erpnext.stock.doctype.stock_entry.stock_entry import FinishedGoodError, StockEntry
 from frappe import _
-from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry, FinishedGoodError
 from frappe.utils import flt
+
 from inventory_tools.overrides.work_order import get_allowance_percentage
 
 
 class InventoryToolsStockEntry(StockEntry):
-
 	def check_if_operations_completed(self):
 		"""
 		Original code checks that the stock entry amount plus what's already produced in the WO
@@ -21,9 +21,7 @@ class InventoryToolsStockEntry(StockEntry):
 		jc_qty = flt(
 			self.fg_completed_qty
 		)  # quantity manufactured and being entered in stock entry for this JC
-		already_produced = flt(
-			prod_order.produced_qty
-		)  # quantity already manufactured for WO
+		already_produced = flt(prod_order.produced_qty)  # quantity already manufactured for WO
 		total_completed_qty = jc_qty + already_produced
 		# print(f'Total completed quantity (stock entry amount of {jc_qty} + WO already produced qty of {already_produced}): {total_completed_qty}')
 
@@ -55,9 +53,7 @@ class InventoryToolsStockEntry(StockEntry):
 		"""
 		production_item, wo_qty, finished_items = None, 0, []
 
-		wo_details = frappe.db.get_value(
-			"Work Order", self.work_order, ["production_item", "qty"]
-		)
+		wo_details = frappe.db.get_value("Work Order", self.work_order, ["production_item", "qty"])
 		if wo_details:
 			production_item, wo_qty = wo_details
 
@@ -85,9 +81,7 @@ class InventoryToolsStockEntry(StockEntry):
 
 		if not finished_items:
 			frappe.throw(
-				msg=_("There must be atleast 1 Finished Good in this Stock Entry").format(
-					self.name
-				),
+				msg=_("There must be atleast 1 Finished Good in this Stock Entry").format(self.name),
 				title=_("Missing Finished Good"),
 				exc=FinishedGoodError,
 			)
@@ -111,3 +105,52 @@ class InventoryToolsStockEntry(StockEntry):
 						flt(self.fg_completed_qty), wo_qty
 					)
 				)
+
+	def get_pending_raw_materials(self, backflush_based_on=None):
+		"""
+		issue (item quantity) that is pending to issue or desire to transfer,
+		whichever is less
+		"""
+		item_dict = self.get_pro_order_required_items(backflush_based_on)
+
+		max_qty = flt(self.pro_doc.qty)
+
+		allow_overproduction = False
+		overproduction_percentage = get_allowance_percentage(self.company, self.bom_no)
+
+		to_transfer_qty = flt(self.pro_doc.material_transferred_for_manufacturing) + flt(
+			self.fg_completed_qty
+		)
+		transfer_limit_qty = max_qty + ((max_qty * overproduction_percentage) / 100)
+
+		if transfer_limit_qty >= to_transfer_qty:
+			allow_overproduction = True
+
+		for item, item_details in item_dict.items():
+			pending_to_issue = flt(item_details.required_qty) - flt(item_details.transferred_qty)
+			desire_to_transfer = flt(self.fg_completed_qty) * flt(item_details.required_qty) / max_qty
+
+			if (
+				desire_to_transfer <= pending_to_issue
+				or (desire_to_transfer > 0 and backflush_based_on == "Material Transferred for Manufacture")
+				or allow_overproduction
+			):
+				# "No need for transfer but qty still pending to transfer" case can occur
+				# when transferring multiple RM in different Stock Entries
+				item_dict[item]["qty"] = desire_to_transfer if (desire_to_transfer > 0) else pending_to_issue
+			elif pending_to_issue > 0:
+				item_dict[item]["qty"] = pending_to_issue
+			else:
+				item_dict[item]["qty"] = 0
+
+		# delete items with 0 qty
+		list_of_items = list(item_dict.keys())
+		for item in list_of_items:
+			if not item_dict[item]["qty"]:
+				del item_dict[item]
+
+		# show some message
+		if not len(item_dict):
+			frappe.msgprint(_("""All items have already been transferred for this Work Order."""))
+
+		return item_dict
