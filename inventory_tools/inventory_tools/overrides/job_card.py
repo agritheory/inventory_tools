@@ -27,8 +27,9 @@ class InventoryToolsJobCard(JobCard):
 
 		# don't validate mfg qty so partial consumption can take place
 		# PATCH: use manufacturing settings overproduction percentage to allow overproduction on Job Card
-		allowance_percentage = get_allowance_percentage(self.company, self.bom_no)
-		if self.for_quantity and (self.total_completed_qty * allowance_percentage) <= self.for_quantity:
+		overproduction_percentage = get_allowance_percentage(self.company, self.bom_no)
+		allowed_qty = self.total_completed_qty * (1 + overproduction_percentage / 100) 
+		if self.for_quantity and allowed_qty <= self.for_quantity:
 			total_completed_qty = frappe.bold(frappe._("Total Completed Qty"))
 			qty_to_manufacture = frappe.bold(frappe._("Qty to Manufacture"))
 			frappe.throw(
