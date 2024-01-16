@@ -3,7 +3,7 @@ from erpnext.manufacturing.doctype.job_card.job_card import JobCard
 from frappe import _, bold
 from frappe.utils import get_link_to_form
 
-from inventory_tools.overrides.work_order import get_allowance_percentage
+from inventory_tools.inventory_tools.overrides.work_order import get_allowance_percentage
 
 
 class InventoryToolsJobCard(JobCard):
@@ -28,7 +28,7 @@ class InventoryToolsJobCard(JobCard):
 		# don't validate mfg qty so partial consumption can take place
 		# PATCH: use manufacturing settings overproduction percentage to allow overproduction on Job Card
 		overproduction_percentage = get_allowance_percentage(self.company, self.bom_no)
-		allowed_qty = self.total_completed_qty * (1 + overproduction_percentage / 100) 
+		allowed_qty = self.total_completed_qty * (1 + overproduction_percentage / 100)
 		if self.for_quantity and allowed_qty <= self.for_quantity:
 			total_completed_qty = frappe.bold(frappe._("Total Completed Qty"))
 			qty_to_manufacture = frappe.bold(frappe._("Qty to Manufacture"))

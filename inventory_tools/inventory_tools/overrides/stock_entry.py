@@ -3,7 +3,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry import FinishedGoodError, Sto
 from frappe import _
 from frappe.utils import flt
 
-from inventory_tools.overrides.work_order import get_allowance_percentage
+from inventory_tools.inventory_tools.overrides.work_order import get_allowance_percentage
 
 
 class InventoryToolsStockEntry(StockEntry):
@@ -23,13 +23,11 @@ class InventoryToolsStockEntry(StockEntry):
 		)  # quantity manufactured and being entered in stock entry for this JC
 		already_produced = flt(prod_order.produced_qty)  # quantity already manufactured for WO
 		total_completed_qty = jc_qty + already_produced
-		# print(f'Total completed quantity (stock entry amount of {jc_qty} + WO already produced qty of {already_produced}): {total_completed_qty}')
 
 		wo_to_man_qty = flt(prod_order.qty)
 		allowed_qty = wo_to_man_qty * (
 			1 + allowance_percentage / 100
 		)  # amount to be manufactured on the WO including the overallowance amount
-		# print(f'Allowed qty (WO to be manufactured of {wo_to_man_qty} * (1 + {allowance_percentage/100}%)): {allowed_qty}')
 
 		if total_completed_qty > allowed_qty:
 			work_order_link = frappe.utils.get_link_to_form("Work Order", self.work_order)
