@@ -93,7 +93,6 @@ class InventoryToolsStockEntry(StockEntry):
 				)
 
 			allowance_percentage = get_allowance_percentage(self.company, self.bom_no)
-
 			allowed_qty = wo_qty + ((allowance_percentage / 100) * wo_qty)
 
 			# No work order could mean independent Manufacture entry, if so skip validation

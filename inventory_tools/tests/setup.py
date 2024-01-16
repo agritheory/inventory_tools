@@ -178,7 +178,9 @@ def setup_manufacturing_settings(settings):
 		"Inventory Tools Settings", settings.company, "enable_work_order_subcontracting", 1
 	)
 	frappe.set_value("Inventory Tools Settings", settings.company, "create_purchase_orders", 0)
-	frappe.set_value("Inventory Tools Settings", settings.company, "overproduction_percentage_for_work_order", 50)
+	frappe.set_value(
+		"Inventory Tools Settings", settings.company, "overproduction_percentage_for_work_order", 50
+	)
 
 
 def create_workstations():
@@ -375,6 +377,9 @@ def create_boms(settings):
 		b.company = settings.company
 		b.is_default = 0 if bom.get("is_default") == 0 else 1
 		b.is_subcontracted = bom.get("is_subcontracted") or 0
+		b.overproduction_percentage_for_work_order = bom.get(
+			"overproduction_percentage_for_work_order", None
+		)
 		b.rm_cost_as_per = "Price List"
 		b.buying_price_list = "Bakery Buying"
 		b.currency = "USD"
