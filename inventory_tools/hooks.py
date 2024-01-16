@@ -111,8 +111,8 @@ override_doctype_class = {
 	"Purchase Order": "inventory_tools.inventory_tools.overrides.purchase_order.InventoryToolsPurchaseOrder",
 	"Purchase Receipt": "inventory_tools.inventory_tools.overrides.purchase_receipt.InventoryToolsPurchaseReceipt",
 	"Production Plan": "inventory_tools.inventory_tools.overrides.production_plan.InventoryToolsProductionPlan",
-    "Production Plan": "inventory_tools.inventory_tools.overrides.stock_entry.InventoryToolsStockEntry",
-    "Production Plan": "inventory_tools.inventory_tools.overrides.job_card.InventoryToolsJobCard",
+	"Production Plan": "inventory_tools.inventory_tools.overrides.stock_entry.InventoryToolsStockEntry",
+	"Production Plan": "inventory_tools.inventory_tools.overrides.job_card.InventoryToolsJobCard",
 }
 
 
