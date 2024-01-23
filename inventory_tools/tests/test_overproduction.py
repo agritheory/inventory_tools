@@ -4,8 +4,40 @@ from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
 from frappe.exceptions import ValidationError
 
 
+def test_get_allowance_percentage():
+	from inventory_tools.inventory_tools.overrides.work_order import get_allowance_percentage
+
+	work_order = frappe.get_doc("Work Order", {"item_name": "Gooseberry Pie"})
+	bom = frappe.get_doc("BOM", work_order.bom_no)
+
+	inventory_tools_settings = frappe.get_doc(
+		"Inventory Tools Settings", {"company": work_order.company}
+	)
+	# No value set
+	inventory_tools_settings.overproduction_percentage_for_work_order = 0.00
+	inventory_tools_settings.save()
+	bom.overproduction_percentage_for_work_order = 0.0
+	bom.save()
+	assert get_allowance_percentage(work_order.company, bom.name) == 0.0
+
+	# Uses value from inventory tools settings
+	inventory_tools_settings.overproduction_percentage_for_work_order = 50.0
+	inventory_tools_settings.save()
+	bom.overproduction_percentage_for_work_order = 0.0
+	bom.save()
+	assert get_allowance_percentage(work_order.company, bom.name) == 50.0
+
+	# Uses value from BOM
+	inventory_tools_settings.overproduction_percentage_for_work_order = 50.0
+	inventory_tools_settings.save()
+	bom.overproduction_percentage_for_work_order = 100.0
+	bom.save()
+	assert get_allowance_percentage(work_order.company, bom.name) == 100.0
+
+
 def test_overproduction():
-	# BOM with overproduction_percentage_for_work_order configures
+
+	# BOM with overproduction_percentage_for_work_order configured
 	work_order = frappe.get_doc("Work Order", {"item_name": "Ambrosia Pie"})
 	se = make_stock_entry(
 		work_order_id=work_order.name, purpose="Material Transfer for Manufacture", qty=work_order.qty
