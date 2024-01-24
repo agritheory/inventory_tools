@@ -1,5 +1,5 @@
 frappe.ui.form.on('Stock Entry', {
-	refresh: frm => {
+	on_submit: frm => {
 		if (frm.doc.docstatus === 1) {
 			frappe
 				.call(
