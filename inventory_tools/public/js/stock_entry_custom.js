@@ -15,7 +15,7 @@ frappe.ui.form.on('Stock Entry', {
 							primary_action: {
 								action(values) {
 									frappe.set_route('list', 'Work Order', {
-										'Work Order Item.item_code': 'Pie Crust',
+										'Work Order Item.item_code': r.message,
 										status: 'Not Started',
 									})
 								},
