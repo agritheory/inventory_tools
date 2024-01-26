@@ -527,7 +527,7 @@ boms = [
 		"item": "Ambrosia Pie",
 		"quantity": 5.0,
 		"uom": "Nos",
-        "overproduction_percentage_for_work_order": 100,
+		"overproduction_percentage_for_work_order": 100,
 		"items": [
 			{"item_code": "Pie Crust", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
 			{"item_code": "Ambrosia Pie Filling", "qty": 20.0, "qty_consumed_per_unit": 4.0, "uom": "Cup"},

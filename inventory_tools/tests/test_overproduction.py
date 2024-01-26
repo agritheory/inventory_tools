@@ -3,10 +3,10 @@ import pytest
 from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
 from frappe.exceptions import ValidationError
 
+from inventory_tools.inventory_tools.overrides.work_order import get_allowance_percentage
+
 
 def test_get_allowance_percentage():
-	from inventory_tools.inventory_tools.overrides.work_order import get_allowance_percentage
-
 	work_order = frappe.get_doc("Work Order", {"item_name": "Gooseberry Pie"})
 	bom = frappe.get_doc("BOM", work_order.bom_no)
 
@@ -35,7 +35,7 @@ def test_get_allowance_percentage():
 	assert get_allowance_percentage(work_order.company, bom.name) == 100.0
 
 
-def test_overproduction():
+def test_check_if_operations_completed():
 
 	# BOM with overproduction_percentage_for_work_order configured
 	work_order = frappe.get_doc("Work Order", {"item_name": "Ambrosia Pie"})
@@ -103,5 +103,22 @@ def test_overproduction():
 
 	assert (
 		f"is greater than the Work Order's quantity to manufacture of {work_order.qty} plus the overproduction allowance of {overproduction_percentage_for_work_order}%"
+		in exc_info.value.args[0]
+	)
+
+
+def test_validate_finished_goods():
+	work_order = frappe.get_doc("Work Order", {"item_name": "Ambrosia Pie"})
+	se = make_stock_entry(work_order_id=work_order.name, purpose="Manufacture", qty=work_order.qty)
+	stock_entry = frappe.new_doc("Stock Entry")
+	stock_entry.update(se)
+	assert stock_entry.validate_finished_goods() is None
+
+	with pytest.raises(ValidationError) as exc_info:
+		stock_entry.fg_completed_qty = work_order.qty * 10
+		stock_entry.validate_finished_goods()
+
+	assert (
+		f"For quantity {work_order.qty * 10} should not be greater than work order quantity {work_order.qty}"
 		in exc_info.value.args[0]
 	)
