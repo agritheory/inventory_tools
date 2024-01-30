@@ -1,7 +1,12 @@
 import frappe
 import pytest
-from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
+from erpnext.manufacturing.doctype.work_order.work_order import (
+	create_job_card,
+	make_stock_entry,
+	make_work_order,
+)
 from frappe.exceptions import ValidationError
+from frappe.utils import now
 
 from inventory_tools.inventory_tools.overrides.work_order import get_allowance_percentage
 
@@ -120,5 +125,56 @@ def test_validate_finished_goods():
 
 	assert (
 		f"For quantity {work_order.qty * 10} should not be greater than work order quantity {work_order.qty}"
+		in exc_info.value.args[0]
+	)
+
+
+def test_validate_job_card():
+	work_order = frappe.get_doc("Work Order", {"item_name": "Ambrosia Pie"})
+	job_card = create_job_card(work_order, work_order.operations[0].as_dict(), auto_create=True)
+	job_card.append(
+		"time_logs",
+		{
+			"from_time": now(),
+			"to_time": now(),
+			"completed_qty": work_order.qty,
+		},
+	)
+	job_card.save()
+	assert job_card.validate_job_card() == None
+
+	overproduction_percentage_for_work_order = frappe.db.get_value(
+		"BOM", work_order.bom_no, "overproduction_percentage_for_work_order"
+	)
+	over_production_qty = work_order.qty * (1 + overproduction_percentage_for_work_order / 100)
+	job_card = create_job_card(work_order, work_order.operations[0].as_dict(), auto_create=True)
+	job_card.append(
+		"time_logs",
+		{
+			"from_time": now(),
+			"to_time": now(),
+			"completed_qty": over_production_qty,
+		},
+	)
+	job_card.save()
+
+	assert job_card.validate_job_card() == None
+
+	job_card = create_job_card(work_order, work_order.operations[0].as_dict(), auto_create=True)
+	job_card.append(
+		"time_logs",
+		{
+			"from_time": now(),
+			"to_time": now(),
+			"completed_qty": over_production_qty + 10,
+		},
+	)
+	job_card.save()
+
+	with pytest.raises(ValidationError) as exc_info:
+		job_card.validate_job_card()
+
+	assert (
+		f"The Total Completed Qty ({over_production_qty + 10}) must be equal to Qty to Manufacture ({job_card.for_quantity})"
 		in exc_info.value.args[0]
 	)
