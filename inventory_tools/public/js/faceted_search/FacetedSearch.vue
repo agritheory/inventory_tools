@@ -50,7 +50,7 @@ export default {
 			})
 		},
 		setFilterValues(){
-			if(true){ // TODO: change this to test for portal view or != list view
+			if(erpnext.e_commerce){
 				frappe.xcall('erpnext.e_commerce.api.get_product_filter_data', {
 					query_args: { attributes: this.filterValues, sort_order: this.sortOrder }
 				}).then(r => {
@@ -74,9 +74,69 @@ export default {
 					}
 				})
 			} else {
-				// this is where the filters should be set in the list view
+				const listview = frappe.get_list_view(this.doctype)
+				let filters = listview.filter_area.get()
+
+				for (const [key, value] of Object.entries(this.filterValues)) {
+					const values = value.values
+					const attribute = this.searchComponents.find(comp => comp.attribute_name === key)
+
+					if (attribute.field) {
+						if (Array.isArray(values)) {
+							if (values.length > 0) {
+								if (!values[0] && !values[1]) {
+									// TODO: handle case where numeric range is unset
+								} else {
+									filters.push([this.doctype, attribute.field, 'in', values])
+								}
+							} else {
+								filters = filters.filter(filter => filter[1] !== attribute.field)
+							}
+
+							this.refreshFilters(filters)
+						} else {
+							// TODO: handle edge-case?
+						}
+					} else {
+						if (Array.isArray(values)) {
+							if (!values[0] && !values[1]) {
+								// TODO: handle case where numeric range is unset
+							} else {
+								frappe
+									.xcall('inventory_tools.inventory_tools.faceted_search.get_specification_items', {
+										doctype: this.doctype,
+										attributes: this.filterValues,
+									})
+									.then(items => {
+										const existing_name_filter = filters.filter(filter => filter[1] === 'name')
+										if (existing_name_filter.length > 0) {
+											const existing_name_filter_value = existing_name_filter[3]
+											filters = filters.filter(filter => filter[1] !== 'name')
+											if (Array.isArray(existing_name_filter_value)) {
+												filters.push([this.doctype, 'name', 'in', [...existing_name_filter_value, ...items]])
+											} else {
+												filters.push([this.doctype, 'name', 'in', [existing_name_filter_value, ...items]])
+											}
+										} else {
+											filters.push([this.doctype, 'name', 'in', items])
+										}
+
+										this.refreshFilters(filters)
+									})
+							}
+						} else {
+							// TODO: handle edge-case?
+						}
+					}
+				}
 			}
-		}
+		},
+		refreshFilters(filters) {
+			const listview = frappe.get_list_view(this.doctype)
+			listview.filter_area.clear(false)
+			listview.filter_area.set(filters)
+			listview.refresh()
+		},
 	}
 }
 </script>

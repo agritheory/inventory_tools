@@ -32,7 +32,7 @@ def show_faceted_search_components(doctype="Item", filters=None):
 			_min, _max = min(_values), max(_values)
 			attribute.values = [_min, _max]
 		elif attribute.date_values and values:
-			_values = [localtime(int(v)) for v in values]
+			_values = [localtime(int(flt(v))) for v in values]
 			_min, _max = min(_values), max(_values)
 		else:
 			attribute.values = values
@@ -52,7 +52,6 @@ class FacetedSearchQuery(ProductQuery):
 	def query(
 		self, attributes=None, fields=None, search_term=None, start=0, item_group=None, sort_order=""
 	):
-		print(attributes, fields, search_term, start, item_group, sort_order)
 		# track if discounts included in field filters
 		self.filter_with_discount = bool(fields.get("discount"))
 		result, discount_list, website_item_groups, cart_items, count = [], [], [], [], 0
@@ -66,7 +65,6 @@ class FacetedSearchQuery(ProductQuery):
 		if self.settings.hide_variants:
 			self.filters.append(["variant_of", "is", "not set"])
 
-		print("query", sort_order)
 		sort_order = sort_order_lookup.get(sort_order) if sort_order else "item_name ASC"
 
 		# query results
@@ -92,7 +90,6 @@ class FacetedSearchQuery(ProductQuery):
 		return {"items": result, "items_count": count, "discounts": discounts}
 
 	def query_items(self, start=0, sort_order=""):
-		print("query_items", sort_order)
 		"""Build a query to fetch Website Items based on field filters."""
 		# MySQL does not support offset without limit,
 		# frappe does not accept two parameters for limit
@@ -128,64 +125,7 @@ class FacetedSearchQuery(ProductQuery):
 		return items, count
 
 	def query_items_with_attributes(self, attributes, start=0, sort_order=""):
-		item_codes = []
-
-		attributes_in_use = {k: v for (k, v) in attributes.items() if v}
-		for attribute, spec_and_values in attributes_in_use.items():
-			spec = spec_and_values.get("attribute_id")
-			values = spec_and_values.get("values")
-			if not values:
-				continue
-			if not isinstance(values, list):
-				values = [values]
-			filters = None
-
-			date_or_numeric = frappe.get_value(
-				"Specification Attribute", spec, ["numeric_values", "date_values"]
-			)
-			if date_or_numeric[0] == 1:
-
-				if values[0] > values[-1]:
-					values[0], values[-1] = values[-1], values[0]
-				filters = [
-					["attribute", "=", attribute],
-				]
-				if values[0]:
-					filters.append(
-						["value", ">=", flt(values[0])],
-					)
-				if values[-1]:
-					filters.append(
-						["value", "<=", flt(values[-1])],
-					)
-
-			elif date_or_numeric[1] == 1:
-				filters = [
-					["attribute", "=", attribute],
-					[
-						"value",
-						">=",
-						convert_to_epoch(getdate(values[0])) if values[0] else convert_to_epoch(getdate("1900-1-1")),
-					],
-					[
-						"value",
-						"<=",
-						convert_to_epoch(getdate(values[-1]))
-						if values[-1]
-						else convert_to_epoch(getdate("2100-12-31")),
-					],
-				]
-			else:
-				filters = {
-					"attribute": attribute,
-					"value": ["in", values],
-				}
-			item_code_list = frappe.get_all(
-				"Specification Value",
-				fields=["reference_name"],
-				filters=filters,  # debug=True
-			)
-			item_codes.append({x.reference_name for x in item_code_list})
+		item_codes = get_specification_items(attributes)
 
 		if item_codes:
 			item_codes = list(set.intersection(*item_codes))
@@ -273,3 +213,72 @@ def update_specification_attribute_values(doc, method=None):
 		spec = frappe.get_doc("Specification", spec)
 		if spec.applies_to(doc):
 			spec.create_linked_values(doc)
+
+
+@frappe.whitelist()
+def get_specification_items(attributes, start=0, sort_order=""):
+	attributes = json.loads(attributes) if isinstance(attributes, str) else attributes
+	item_codes = []
+
+	attributes_in_use = {k: v for (k, v) in attributes.items() if v}
+	for attribute, spec_and_values in attributes_in_use.items():
+		spec = spec_and_values.get("attribute_id")
+		values = spec_and_values.get("values")
+		if not values:
+			continue
+		if not isinstance(values, list):
+			values = [values]
+		filters = None
+
+		date_or_numeric = frappe.get_value(
+			"Specification Attribute", spec, ["numeric_values", "date_values"]
+		)
+		if date_or_numeric[0] == 1:
+			values[0], values[-1] = (
+				flt(values[0]) if values[0] else None,
+				flt(values[-1]) if values[-1] else None,
+			)
+			if values[0] and values[-1] and values[0] > values[-1]:
+				values[0], values[-1] = values[-1], values[0]
+			filters = [
+				["attribute", "=", attribute],
+			]
+			if values[0]:
+				filters.append(
+					["value", ">=", flt(values[0])],
+				)
+			if values[-1]:
+				filters.append(
+					["value", "<=", flt(values[-1])],
+				)
+
+		elif date_or_numeric[1] == 1:
+			filters = [
+				["attribute", "=", attribute],
+				[
+					"value",
+					">=",
+					convert_to_epoch(getdate(values[0])) if values[0] else convert_to_epoch(getdate("1900-1-1")),
+				],
+				[
+					"value",
+					"<=",
+					convert_to_epoch(getdate(values[-1]))
+					if values[-1]
+					else convert_to_epoch(getdate("2100-12-31")),
+				],
+			]
+		else:
+			filters = {
+				"attribute": attribute,
+				"value": ["in", values],
+			}
+		item_code_list = frappe.get_all(
+			"Specification Value",
+			fields=["reference_name"],
+			filters=filters,  # debug=True
+		)
+		item_codes.append({x.reference_name for x in item_code_list})
+
+	if item_codes:
+		return list(item_codes)
