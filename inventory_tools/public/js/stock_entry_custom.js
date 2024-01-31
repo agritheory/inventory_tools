@@ -9,8 +9,8 @@ frappe.ui.form.on('Stock Entry', {
 				.then(r => {
 					if (r.message) {
 						frappe.msgprint({
-							title: __(`Open Work Orders requires ${r.message}`),
-							message: __(`View Work Orders that requires ${r.message}?`),
+							title: __(`There are open work orders that ${r.message} is in the BOM`),
+							message: __(`Do you want to view the work orders that use "${r.message}"?`),
 							primary_action_label: __('Yes'),
 							primary_action: {
 								action(values) {
