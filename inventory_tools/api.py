@@ -17,6 +17,7 @@ def get_alternative_workstations(operation):
 	workstation = frappe.db.sql(qb_data, as_dict=1)
 	return workstation
 
+
 # set alternative workstation in job card
 def set_alternative_workstations(self, method):
 	if self.operation and self.is_new():
