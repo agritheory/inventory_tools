@@ -131,6 +131,10 @@ def test_validate_finished_goods():
 
 def test_validate_job_card():
 	work_order = frappe.get_doc("Work Order", {"item_name": "Ambrosia Pie"})
+	jc = frappe.get_doc(
+		"Job Card", {"work_order": work_order.name, "operation": work_order.operations[0].operation}
+	)
+	jc.cancel()
 	job_card = create_job_card(work_order, work_order.operations[0].as_dict(), auto_create=True)
 	job_card.append(
 		"time_logs",
@@ -147,28 +151,12 @@ def test_validate_job_card():
 		"BOM", work_order.bom_no, "overproduction_percentage_for_work_order"
 	)
 	over_production_qty = work_order.qty * (1 + overproduction_percentage_for_work_order / 100)
-	job_card = create_job_card(work_order, work_order.operations[0].as_dict(), auto_create=True)
-	job_card.append(
-		"time_logs",
-		{
-			"from_time": now(),
-			"to_time": now(),
-			"completed_qty": over_production_qty,
-		},
-	)
+	job_card.time_logs[0].completed_qty = over_production_qty
 	job_card.save()
 
 	assert job_card.validate_job_card() == None
 
-	job_card = create_job_card(work_order, work_order.operations[0].as_dict(), auto_create=True)
-	job_card.append(
-		"time_logs",
-		{
-			"from_time": now(),
-			"to_time": now(),
-			"completed_qty": over_production_qty + 10,
-		},
-	)
+	job_card.time_logs[0].completed_qty = over_production_qty + 10
 	job_card.save()
 
 	with pytest.raises(ValidationError) as exc_info:
