@@ -113,6 +113,7 @@ override_doctype_class = {
 	"Production Plan": "inventory_tools.inventory_tools.overrides.production_plan.InventoryToolsProductionPlan",
 	"Stock Entry": "inventory_tools.inventory_tools.overrides.stock_entry.InventoryToolsStockEntry",
 	"Job Card": "inventory_tools.inventory_tools.overrides.job_card.InventoryToolsJobCard",
+	"Payment Entry": "inventory_tools.inventory_tools.overrides.payment_entry.InventoryToolsPaymentEntry",
 }
 
 
