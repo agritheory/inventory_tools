@@ -13,11 +13,11 @@ required_apps = ["erpnext", "hrms"]
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/inventory_tools/css/inventory_tools.css"
-app_include_js = ["inventory_tools.bundle.js"]
+app_include_js = ["inventory_tools.bundle.js", "faceted_search.bundle.js"]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/inventory_tools/css/inventory_tools.css"
-# web_include_js = "/assets/inventory_tools/js/inventory_tools.js"
+web_include_js = ["faceted_search.bundle.js"]
 
 # include custom scss in every website theme (without file extension ".scss")
 # website_theme_scss = "inventory_tools/public/scss/website"
@@ -31,9 +31,10 @@ app_include_js = ["inventory_tools.bundle.js"]
 
 # include js in doctype views
 doctype_js = {
-	"Work Order": "public/js/work_order_custom.js",
-	"Purchase Order": "public/js/purchase_order_custom.js",
-	"Purchase Invoice": "public/js/purchase_invoice_custom.js",
+	"Item": "public/js/custom/item_custom.js",
+	"Purchase Invoice": "public/js/custom/purchase_invoice_custom.js",
+	"Purchase Order": "public/js/custom/purchase_order_custom.js",
+	"Work Order": "public/js/custom/work_order_custom.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -133,7 +134,10 @@ doc_events = {
 		],
 	},
 	"Item": {
-		"validate": ["inventory_tools.inventory_tools.overrides.uom.duplicate_weight_to_uom_conversion"],
+		"validate": [
+			"inventory_tools.inventory_tools.overrides.uom.duplicate_weight_to_uom_conversion",
+			"inventory_tools.inventory_tools.faceted_search.update_specification_attribute_values",
+		],
 	},
 	"Warehouse": {
 		"validate": ["inventory_tools.inventory_tools.overrides.warehouse.update_warehouse_path"]
@@ -172,6 +176,7 @@ doc_events = {
 override_whitelisted_methods = {
 	"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry": "inventory_tools.inventory_tools.overrides.work_order.make_stock_entry",
 	"erpnext.stock.get_item_details.get_item_details": "inventory_tools.inventory_tools.overrides.purchase_order.get_item_details",
+	"erpnext.e_commerce.api.get_product_filter_data": "inventory_tools.inventory_tools.faceted_search.get_product_filter_data",
 }
 
 

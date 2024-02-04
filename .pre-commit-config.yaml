@@ -7,7 +7,7 @@ repos:
     rev: v4.3.0
     hooks:
       - id: trailing-whitespace
-        files: 'beam.*'
+        files: 'inventory_tools.*'
         exclude: '.*json$|.*txt$|.*csv|.*md|.*svg'
       - id: check-yaml
       - id: no-commit-to-branch
@@ -38,12 +38,12 @@ repos:
         # Ignore any files that might contain jinja / bundles
         exclude: |
           (?x)^(
-              beam/public/dist/.*|
-              .*node_modules.*|
               .*boilerplate.*|
-              beam/www/website_script.js|
-              beam/templates/includes/.*|
-              beam/public/js/lib/.*
+              .*node_modules.*|
+              inventory_tools/public/dist/.*|
+              inventory_tools/public/js/lib/.*|
+              inventory_tools/templates/includes/.*|
+              inventory_tools/www/website_script.js
           )$
 
   - repo: https://github.com/PyCQA/isort

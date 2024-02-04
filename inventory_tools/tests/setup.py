@@ -4,6 +4,7 @@ from itertools import groupby
 
 import frappe
 from erpnext.accounts.doctype.account.account import update_account_number
+from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 )
@@ -12,10 +13,12 @@ from erpnext.stock.get_item_details import get_item_details
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 
 from inventory_tools.tests.fixtures import (
+	attributes,
 	boms,
 	customers,
 	items,
 	operations,
+	specifications,
 	suppliers,
 	workstations,
 )
@@ -86,6 +89,7 @@ def create_test_data():
 	create_suppliers(settings)
 	create_customers(settings)
 	create_items(settings)
+	create_specifications(settings)
 	create_boms(settings)
 	prod_plan_from_doc = "Sales Order"
 	if prod_plan_from_doc == "Sales Order":
@@ -220,6 +224,11 @@ def create_item_groups(settings):
 		ig.parent_item_group = "All Item Groups"
 		ig.save()
 
+	if not frappe.db.exists("Brand", "Ambrosia Pie Co"):
+		brand = frappe.new_doc("Brand")
+		brand.brand = "Ambrosia Pie Co"
+		brand.save()
+
 
 def create_price_lists(settings):
 	if not frappe.db.exists("Price List", "Bakery Buying"):
@@ -267,6 +276,7 @@ def create_items(settings):
 		i.valuation_rate = item.get("valuation_rate") or 0
 		i.is_sub_contracted_item = item.get("is_sub_contracted_item") or 0
 		i.default_warehouse = settings.get("warehouse")
+		i.weight_uom = "Pound" if i.is_stock_item else None
 		i.default_material_request_type = (
 			"Purchase"
 			if item.get("item_group") in ("Bakery Supplies", "Ingredients")
@@ -284,6 +294,11 @@ def create_items(settings):
 			else 0
 		)
 		i.is_sales_item = 1 if item.get("item_group") == "Baked Goods" else 0
+		i.sales_uom = "Nos" if i.is_sales_item else None
+		i.shelf_life_in_days = 7 if i.is_sales_item else None
+		i.brand = "Ambrosia Pie Co" if i.is_sales_item else None
+		i.weight_per_unit = 32 * 4 if i.is_sales_item else None
+		i.weight_uom = "Ounce" if i.is_sales_item else None
 		i.append(
 			"item_defaults",
 			{
@@ -327,6 +342,11 @@ def create_items(settings):
 			)
 			se.save()
 			se.submit()
+		if i.is_sales_item:
+			website_item = make_website_item(i, True)
+			website_item = frappe.get_doc("Website Item", website_item[0])
+			website_item.route = f"products/{frappe.scrub(i.name)}"
+			website_item.save()
 
 
 def create_warehouses(settings):
@@ -560,3 +580,22 @@ def create_production_plan(settings, prod_plan_from_doc):
 			job_card.time_logs[0].completed_qty = wo.qty
 			job_card.save()
 			job_card.submit()
+
+
+def create_specifications(settings=None):
+	for spec in specifications:
+		if frappe.db.exists("Specification", {"title": f"{spec.get('dt')} - {spec.get('apply_on')}"}):
+			s = frappe.get_doc("Specification", {"title": f"{spec.get('dt')} - {spec.get('apply_on')}"})
+		else:
+			s = frappe.new_doc("Specification")
+			s.dt = spec.get("dt")
+			s.apply_on = spec.get("apply_on")
+			s.enabled = spec.get("enabled")
+			for at in spec.get("attributes"):
+				s.append("attributes", at)
+			s.save()
+
+		spec_items = frappe.get_all("Item", {"item_group": "Baked Goods"})
+		for spec_item in spec_items:
+			spec_item = frappe.get_doc("Item", spec_item)
+			s.create_linked_values(spec_item, attributes[spec_item.name])
