@@ -22,7 +22,7 @@ def get_alternative_workstations(operation):
 def set_alternative_workstations(self, method):
 	if self.operation and self.is_new():
 		workstations = get_alternative_workstations(self.operation)
-		if not self.alternative_workstations:
+		if not self.custom_alternative_workstations:
 			for row in workstations:
 				if row.workstation:
 					self.append("custom_alternative_workstations", {"workstation": row.workstation})
