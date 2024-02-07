@@ -17,6 +17,8 @@
   "create_purchase_orders",
   "bom_column",
   "create_job_cards_automatically",
+  "column_break_ilobm",
+  "overproduction_percentage_for_work_order",
   "section_break_0",
   "update_warehouse_path",
   "section_break_gzcbr",
@@ -108,11 +110,20 @@
    "fieldtype": "Select",
    "label": "Create Job Card(s) Automatically",
    "options": "Yes\nNo"
+  },
+  {
+   "fieldname": "column_break_ilobm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "overproduction_percentage_for_work_order",
+   "fieldtype": "Percent",
+   "label": "Overproduction Percentage For Work Order"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-09 18:12:20.714002",
+ "modified": "2024-01-11 10:10:57.356068",
  "modified_by": "Administrator",
  "module": "Inventory Tools",
  "name": "Inventory Tools Settings",

@@ -2,6 +2,51 @@
 
 
 
+## v14.2.0 (2024-02-01)
+
+### Feature
+
+* feat: manufacturing over/under production
+
+* feat: WIP Manufacturing Over/Under Production
+
+* feat: WIP Manufacturing Over/Under Production
+
+* feat: WIP Manufacturing Over/Under Production
+
+* fix: unused import
+
+* feat: override onload for work order
+
+* feat: oveeride get_pending_raw_materials
+
+* fix: allowed_qty in job card
+
+* fix: indentation
+
+* fix: import
+
+* fixes
+
+* wip: tests
+
+* feat: test_get_allowance_percentage
+
+* feat: test test_validate_finished_goods
+
+* fix: validate_job_card and test
+
+* fix: test ([`baeb469`](https://github.com/agritheory/inventory_tools/commit/baeb4690d42429a062595eb9058ddd2770b190c9))
+
+### Unknown
+
+* Make Creation of Job Card(s) on Submit of Work Order configurable (#49)
+
+* feat: configurable creation of job card
+
+* feat: configurable creation of job card ([`5bf9486`](https://github.com/agritheory/inventory_tools/commit/5bf94860c58d81faccb1106828f16121c081871a))
+
+
 ## v14.1.3 (2024-01-04)
 
 ### Fix
