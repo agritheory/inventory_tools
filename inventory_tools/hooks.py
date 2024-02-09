@@ -34,7 +34,8 @@ doctype_js = {
 	"Work Order": "public/js/work_order_custom.js",
 	"Purchase Order": "public/js/purchase_order_custom.js",
 	"Purchase Invoice": "public/js/purchase_invoice_custom.js",
-	"Job Card": "public/js/job_card.js",
+	"Job Card": "public/js/job_card_custom.js",
+	"BOM":"public/js/bom_custom.js"
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -137,7 +138,6 @@ doc_events = {
 	"Warehouse": {
 		"validate": ["inventory_tools.inventory_tools.overrides.warehouse.update_warehouse_path"]
 	},
-	"Job Card": {"validate": ["inventory_tools.api.set_alternative_workstations"]},
 }
 
 # Scheduled Tasks

@@ -1,10 +1,10 @@
 import json
-
 import frappe
 
-
 @frappe.whitelist()
-def get_alternative_workstations(operation):
+@frappe.validate_and_sanitize_search_inputs
+def get_alternative_workstations(doctype, txt, searchfield, start, page_len, filters):
+	operation = filters.get('operation')
 	operation_doc = frappe.qb.DocType("Operation")
 	alternative_workstations = frappe.qb.DocType("Alternative Workstations")
 	qb_data = (
@@ -14,15 +14,10 @@ def get_alternative_workstations(operation):
 		.select(alternative_workstations.workstation)
 		.where(operation_doc.name == operation)
 	)
-	workstation = frappe.db.sql(qb_data, as_dict=1)
+	workstation = frappe.db.sql(qb_data)
+	default_workstation = frappe.db.get_value("Operation", operation, 'workstation')
+	if workstation:
+		workstation += ((default_workstation,),)
+	else:
+		workstation = ((default_workstation,),)
 	return workstation
-
-
-# set alternative workstation in job card
-def set_alternative_workstations(self, method):
-	if self.operation and self.is_new():
-		workstations = get_alternative_workstations(self.operation)
-		if not self.custom_alternative_workstations:
-			for row in workstations:
-				if row.workstation:
-					self.append("custom_alternative_workstations", {"workstation": row.workstation})
