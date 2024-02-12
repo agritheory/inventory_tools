@@ -1,10 +1,12 @@
 import json
+
 import frappe
+
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_alternative_workstations(doctype, txt, searchfield, start, page_len, filters):
-	operation = filters.get('operation')
+	operation = filters.get("operation")
 	operation_doc = frappe.qb.DocType("Operation")
 	alternative_workstations = frappe.qb.DocType("Alternative Workstations")
 	qb_data = (
@@ -15,9 +17,12 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 		.where(operation_doc.name == operation)
 	)
 	workstation = frappe.db.sql(qb_data)
-	default_workstation = frappe.db.get_value("Operation", operation, 'workstation')
-	if workstation:
+	default_workstation = frappe.db.get_value("Operation", operation, "workstation")
+	flag = True
+	for row in workstation:
+		if None in row:
+			workstation = ((default_workstation,),)
+			flag = False
+	if flag:
 		workstation += ((default_workstation,),)
-	else:
-		workstation = ((default_workstation,),)
 	return workstation
