@@ -10,6 +10,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 from erpnext.setup.utils import enable_all_roles_and_domains, set_defaults_for_tests
 from erpnext.stock.get_item_details import get_item_details
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
+from frappe.utils import add_months, nowdate
 
 from inventory_tools.tests.fixtures import (
 	boms,
@@ -93,6 +94,7 @@ def create_test_data():
 	else:
 		create_material_request(settings)
 	create_production_plan(settings, prod_plan_from_doc)
+	create_quotations(settings)
 
 
 def create_suppliers(settings):
@@ -560,3 +562,62 @@ def create_production_plan(settings, prod_plan_from_doc):
 			job_card.time_logs[0].completed_qty = wo.qty
 			job_card.save()
 			job_card.submit()
+
+
+def create_quotations(settings):
+	quotation = frappe.new_doc("Quotation")
+	values = {
+		"doctype": "Quotation",
+		"quotation_to": "Customer",
+		"order_type": "Sales",
+		"party_name": "Almacs Food Group",
+		"docstatus": 0,
+		"selling_price_list": "Bakery Wholesale",
+		"currency": "USD",
+		"conversion_rate": 1,
+		"transaction_date": nowdate(),
+		"valid_till": add_months(nowdate(), 1),
+		"items": [{"item_code": "Ambrosia Pie", "qty": 5}, {"item_code": "Double Plum Pie", "qty": 10}],
+		"company": settings.company,
+	}
+	quotation.update(values)
+	quotation.insert()
+	quotation.submit()
+
+	quotation = frappe.new_doc("Quotation")
+	values = {
+		"doctype": "Quotation",
+		"quotation_to": "Customer",
+		"order_type": "Sales",
+		"party_name": "Almacs Food Group",
+		"docstatus": 0,
+		"selling_price_list": "Bakery Wholesale",
+		"currency": "USD",
+		"conversion_rate": 1,
+		"transaction_date": nowdate(),
+		"valid_till": add_months(nowdate(), 1),
+		"items": [{"item_code": "Ambrosia Pie", "qty": 1}, {"item_code": "Gooseberry Pie", "qty": 5}],
+		"company": settings.company,
+	}
+	quotation.update(values)
+	quotation.insert()
+	quotation.submit()
+
+	quotation = frappe.new_doc("Quotation")
+	values = {
+		"doctype": "Quotation",
+		"quotation_to": "Customer",
+		"order_type": "Sales",
+		"party_name": "Downtown Deli",
+		"docstatus": 0,
+		"selling_price_list": "Bakery Wholesale",
+		"currency": "USD",
+		"conversion_rate": 1,
+		"transaction_date": nowdate(),
+		"valid_till": add_months(nowdate(), 1),
+		"items": [{"item_code": "Ambrosia Pie", "qty": 2}, {"item_code": "Double Plum Pie", "qty": 1}],
+		"company": settings.company,
+	}
+	quotation.update(values)
+	quotation.insert()
+	quotation.submit()
