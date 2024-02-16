@@ -34,7 +34,6 @@ doctype_js = {
 	"Work Order": "public/js/work_order_custom.js",
 	"Purchase Order": "public/js/purchase_order_custom.js",
 	"Purchase Invoice": "public/js/purchase_invoice_custom.js",
-	"Stock Entry": "public/js/stock_entry_custom.js",
 	"Job Card": "public/js/job_card_custom.js",
 	"Operation": "public/js/operation_custom.js",
 }
