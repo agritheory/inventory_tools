@@ -48,6 +48,7 @@ def get_data(filters):
 		rows = list(_rows)
 		output.append({"customer": customer, "indent": 0})
 		for r in rows:
+			r["split_qty"] = r["qty"]
 			output.append({**r, "indent": 1})
 	return output
 
@@ -103,6 +104,13 @@ def get_columns(filters):
 		{
 			"label": "Qty",
 			"fieldname": "qty",
+			"fieldtype": "Data",
+			"width": "90px",
+			"align": "right",
+		},
+		{
+			"label": "Split Qty",
+			"fieldname": "split_qty",
 			"fieldtype": "Data",
 			"width": "90px",
 			"align": "right",

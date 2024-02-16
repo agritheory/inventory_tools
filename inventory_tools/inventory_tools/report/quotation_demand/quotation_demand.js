@@ -28,6 +28,10 @@ frappe.query_reports['Quotation Demand'] = {
 			options: 'Price List',
 		},
 	],
+	on_report_render: reportview => {
+		frappe.query_report.datatable.options.columns[7].editable = true
+		frappe.query_report.datatable.refresh()
+	},
 	get_datatable_options(options) {
 		return Object.assign(options, {
 			treeView: true,
