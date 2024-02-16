@@ -28,22 +28,51 @@ frappe.query_reports['Quotation Demand'] = {
 			options: 'Price List',
 		},
 	],
-	// get_datatable_options(options) {
-	// 	return Object.assign(options, {
-	// 		treeView: true,
-	// 		checkedRowStatus: false,
-	// 		checkboxColumn: true,
-	// 		events: {
-	// 			onCheckRow: row => {
-	// 				update_selection(row)
-	// 			},
-	// 		},
-	// 	})
-	// },
-	// onload: reportview => {
-	// 	manage_buttons(reportview)
-	// },
-	// refresh: reportview => {
-	// 	manage_buttons(reportview)
-	// },
+	get_datatable_options(options) {
+		return Object.assign(options, {
+			treeView: true,
+			checkedRowStatus: false,
+			checkboxColumn: true,
+			events: {
+				onCheckRow: row => {
+					update_selection(row)
+				},
+			},
+		})
+	},
+}
+
+function update_selection(row) {
+	if (row !== undefined && !row[5].content) {
+		const toggle = frappe.query_report.datatable.rowmanager.checkMap[row[0].rowIndex]
+		select_all_customer_items(row, toggle)
+	}
+}
+
+async function select_all_customer_items(row, toggle) {
+	return new Promise(resolve => {
+		if (frappe.query_report.datatable.datamanager._filteredRows) {
+			frappe.query_report.datatable.datamanager._filteredRows.forEach(f => {
+				if (f[2].content === row[1].content) {
+					frappe.query_report.datatable.rowmanager.checkMap.splice(row[0].rowIndex, 0, toggle ? 1 : 0)
+					$(row[0].content).find('input').check = toggle
+				} else {
+					frappe.query_report.datatable.rowmanager.checkMap.splice(f[0].rowIndex, 0, 0)
+				}
+			})
+		} else {
+			frappe.query_report.datatable.datamanager.rows.forEach(f => {
+				if (f[2].content === row[2].content) {
+					frappe.query_report.datatable.rowmanager.checkMap.splice(row[0].rowIndex, 0, toggle ? 1 : 0)
+					let input = $(frappe.query_report.datatable.rowmanager.getRow$(f[0].rowIndex)).find('input')
+					if (input[0]) {
+						input[0].checked = toggle
+					}
+				} else {
+					frappe.query_report.datatable.rowmanager.checkMap.splice(f[0].rowIndex, 0, 0)
+				}
+			})
+		}
+		resolve()
+	})
 }
