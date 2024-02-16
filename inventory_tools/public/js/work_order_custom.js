@@ -9,7 +9,15 @@ frappe.ui.form.on('Work Order', {
 		manage_subcontracting_buttons(frm)
 	},
 })
-
+cur_frm.fields_dict["operations"].grid.get_field("workstation").get_query = function(doc,cdt,cdn) {
+	var d = locals[cdt][cdn]
+	return {
+		query: "inventory_tools.api.get_alternative_workstations",
+		filters: {
+			operation: d.operation
+		}
+	}
+}
 function manage_subcontracting_buttons(frm) {
 	if (frm.doc.company) {
 		frappe.db.get_value('BOM', { name: frm.doc.bom_no }, 'is_subcontracted').then(r => {
