@@ -202,6 +202,14 @@ def create_operations():
 		oper.workstation = op[1]
 		oper.batch_size = op[2]
 		oper.description = op[3]
+		if len(op) == 5:
+			for aw in op[4]:
+				oper.append(
+					"custom_alternative_workstations",
+					{
+						"workstation": aw,
+					},
+				)
 		oper.save()
 
 

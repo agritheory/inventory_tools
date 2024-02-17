@@ -85,6 +85,7 @@ operations = [
 	- Remove butter and ice water from refrigerator
 	- Place ingredients at workstation
 	- Measure amounts for batch size into mixing bowl""",
+		["Food Prep Table 1"],
 	),
 	(
 		"Gather Pie Filling Ingredients",
@@ -94,6 +95,7 @@ operations = [
 	- Remove sugar and cornstarch
 	- Get water from sink
 	- Measure ingredients and place in pot, excluding 1/4 of fruit and butter""",
+		["Food Prep Table 2"],
 	),
 	(
 		"Assemble Pie Op",
@@ -104,6 +106,7 @@ operations = [
 	- Fill bottom crust with filling
 	- Create decorative cut out for top crust
 	- Layer top crust over bottom crust / filling and create a crimped seal""",
+		["Food Prep Table 1", "Assemble Pie Station"],
 	),
 	(
 		"Cook Pie Filling Operation",
@@ -121,6 +124,7 @@ operations = [
 	- Pulse for 30 seconds
 	- Divide into equal-sized portions, one portion for each pie crust being made
 	- Put in refrigerator""",
+		["Mix Pie Crust Station", "Mix Pie Filling Station"],
 	),
 	("Box Pie Op", "Packaging Station", "5", "- Place pie into box for sale"),
 	(
@@ -131,8 +135,9 @@ operations = [
 	- Separate each portion into two (one for bottom crust, one for top)
 	- Flour board and roll out each portion into a circle
 	- Place bottom crust into pie tin, then layer a piece of parchment paper, followed by the top crust""",
+		["Food Prep Table 1", "Roll Pie Crust Station"],
 	),
-	("Divide Dough Op", "Food Prep Table 2", "1", "Divide Dough Op"),
+	("Divide Dough Op", "Food Prep Table 2", "1", "Divide Dough Op", ["Food Prep Table 1"]),
 	(
 		"Bake Op",
 		"Oven Station",
@@ -140,13 +145,21 @@ operations = [
 		"""- Place assembled pies into oven
 	- Bake at 375F for 50 minutes
 	- Remove from oven""",
+		["Baking Station"],
 	),
-	("Chill Pie Crust Op", "Refrigerator Station", "1", "- Chill pie crust for at least 30 minutes"),
+	(
+		"Chill Pie Crust Op",
+		"Refrigerator Station",
+		"1",
+		"- Chill pie crust for at least 30 minutes",
+		["Cooling Station", "Refrigerator Station"],
+	),
 	(
 		"Cool Pie Op",
 		"Cooling Racks Station",
 		"1",
 		"Cool baked pies for at least 30 minutes before boxing",
+		["Cooling Station", "Refrigerator Station"],
 	),
 ]
 
