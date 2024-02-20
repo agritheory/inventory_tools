@@ -152,7 +152,7 @@ operations = [
 		"Refrigerator Station",
 		"1",
 		"- Chill pie crust for at least 30 minutes",
-		["Cooling Station", "Refrigerator Station"],
+		["Cooling Station", "Cooling Racks Station"],
 	),
 	(
 		"Cool Pie Op",
