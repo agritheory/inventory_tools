@@ -35,7 +35,7 @@ def get_data(filters):
 		.where(Quotation.docstatus < 2)
 		.where(Quotation.quotation_to == "Customer")
 		.where(Quotation.transaction_date[filters.start_date : filters.end_date])
-		.orderby(Quotation.party_name, QuotationItem.item_name)
+		.orderby(Quotation.party_name, Quotation.name, QuotationItem.item_name)
 	)
 
 	if filters.company:
