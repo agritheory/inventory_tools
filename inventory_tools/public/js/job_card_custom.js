@@ -6,7 +6,7 @@ frappe.ui.form.on('Job Card', {
 		frm.trigger('set_workstation')
 	},
 	set_workstation: frm => {
-		frm.set_query("workstation", function(doc) {
+		frm.set_query("workstation", doc => {
 			return {
 				query: "inventory_tools.api.get_alternative_workstations",
 				filters: {
