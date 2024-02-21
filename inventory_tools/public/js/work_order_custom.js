@@ -7,17 +7,28 @@ frappe.ui.form.on('Work Order', {
 	},
 	refresh: frm => {
 		manage_subcontracting_buttons(frm)
+		get_workstations(frm)
+	},
+	operation: frm => {
+		get_workstations(frm)
 	},
 })
-cur_frm.fields_dict["operations"].grid.get_field("workstation").get_query = function(doc,cdt,cdn) {
-	var d = locals[cdt][cdn]
-	return {
-		query: "inventory_tools.api.get_alternative_workstations",
-		filters: {
-			operation: d.operation
+
+function get_workstations(frm) {
+	frm.set_query('workstation', 'operations', (doc, cdt, cdn) => {
+		var d = locals[cdt][cdn]
+		if (!d.operation) {
+			frappe.throw('Please select a Operation first.')
 		}
-	}
+		return {
+			query: 'inventory_tools.inventory_tools.overrides.workstation.get_alternative_workstations',
+			filters: {
+				operation: d.operation,
+			},
+		}
+	})
 }
+
 function manage_subcontracting_buttons(frm) {
 	if (frm.doc.company) {
 		frappe.db.get_value('BOM', { name: frm.doc.bom_no }, 'is_subcontracted').then(r => {
