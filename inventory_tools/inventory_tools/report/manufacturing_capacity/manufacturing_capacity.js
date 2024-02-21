@@ -19,12 +19,12 @@ frappe.query_reports['Manufacturing Capacity'] = {
 			reqd: 1,
 		},
 	],
-	// "formatter": function (value, row, column, data, default_formatter) {
-	// 	value = default_formatter(value, row, column, data);
+	formatter: function (value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data)
 
-	// 	if (data && data.is_selected_bom) {
-	// 		value = value.bold()
-	// 	}
-	// 	return value
-	// }
+		if (data && data.is_selected_bom) {
+			value = value.bold()
+		}
+		return value
+	},
 }
