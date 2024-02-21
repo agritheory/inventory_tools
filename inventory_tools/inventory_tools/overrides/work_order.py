@@ -1,5 +1,4 @@
 import frappe
-from erpnext.manufacturing.doctype.bom.bom import get_children as get_bom_children
 from erpnext.manufacturing.doctype.work_order.work_order import (
 	OverProductionError,
 	StockOverProductionError,
@@ -424,33 +423,6 @@ def add_to_existing_purchase_order(wo_name, po_name):
 			)
 		)
 		return
-
-
-def get_sub_assembly_items(bom_no, bom_data, to_produce_qty, company, indent=0):
-	"""
-	Recursively collects sub-assembly item BOM data for a given 'parent' BOM (`bom_no`)
-	"""
-	data = get_bom_children(parent=bom_no)
-	for d in data:
-		if d.expandable:
-			parent_item_code = frappe.get_cached_value("BOM", bom_no, "item")
-			stock_qty = (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
-
-			bom_data.append(
-				frappe._dict(
-					{
-						"parent_item_code": parent_item_code,
-						"production_item": d.item_code,
-						"bom_no": d.value,
-						"is_sub_contracted_item": d.is_sub_contracted_item,
-						"bom_level": indent,
-						"indent": indent,
-					}
-				)
-			)
-
-			if d.value:
-				get_sub_assembly_items(d.value, bom_data, stock_qty, company, indent=indent + 1)
 
 
 @frappe.whitelist()
