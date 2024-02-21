@@ -141,6 +141,11 @@ doc_events = {
 	"Warehouse": {
 		"validate": ["inventory_tools.inventory_tools.overrides.warehouse.update_warehouse_path"]
 	},
+	"Operation": {
+		"validate": [
+			"inventory_tools.inventory_tools.overrides.operation.validate_alternative_workstation"
+		]
+	},
 }
 
 # Scheduled Tasks
