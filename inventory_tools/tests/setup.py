@@ -205,7 +205,7 @@ def create_operations():
 		if len(op) == 5:
 			for aw in op[4]:
 				oper.append(
-					"custom_alternative_workstations",
+					"alternative_workstations",
 					{
 						"workstation": aw,
 					},
