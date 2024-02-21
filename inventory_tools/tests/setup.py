@@ -405,7 +405,7 @@ def create_sales_order(settings):
 		{
 			"item_code": "Ambrosia Pie",
 			"delivery_date": so.transaction_date,
-			"qty": 40,
+			"qty": 30,
 			"warehouse": "Refrigerated Display - APC",
 		},
 	)
@@ -414,7 +414,7 @@ def create_sales_order(settings):
 		{
 			"item_code": "Double Plum Pie",
 			"delivery_date": so.transaction_date,
-			"qty": 40,
+			"qty": 30,
 			"warehouse": "Refrigerated Display - APC",
 		},
 	)
@@ -433,6 +433,24 @@ def create_sales_order(settings):
 			"item_code": "Kaduka Key Lime Pie",
 			"delivery_date": so.transaction_date,
 			"qty": 10,
+			"warehouse": "Refrigerated Display - APC",
+		},
+	)
+	so.append(
+		"items",
+		{
+			"item_code": "Pocketful of Bay",
+			"delivery_date": so.transaction_date,
+			"qty": 10,
+			"warehouse": "Refrigerated Display - APC",
+		},
+	)
+	so.append(
+		"items",
+		{
+			"item_code": "Tower of Bay-bel",
+			"delivery_date": so.transaction_date,
+			"qty": 20,
 			"warehouse": "Refrigerated Display - APC",
 		},
 	)
@@ -482,6 +500,24 @@ def create_material_request(settings):
 			"warehouse": "Refrigerated Display - APC",
 		},
 	)
+	mr.append(
+		"items",
+		{
+			"item_code": "Pocketful of Bay",
+			"delivery_date": mr.schedule_date,
+			"qty": 10,
+			"warehouse": "Refrigerated Display - APC",
+		},
+	)
+	mr.append(
+		"items",
+		{
+			"item_code": "Tower of Bay-bel",
+			"delivery_date": mr.schedule_date,
+			"qty": 20,
+			"warehouse": "Refrigerated Display - APC",
+		},
+	)
 	mr.save()
 	mr.submit()
 
@@ -515,10 +551,11 @@ def create_production_plan(settings, prod_plan_from_doc):
 	for item in pp.sub_assembly_items:
 		item.schedule_date = settings.day
 		if item.production_item == "Pie Crust":
+			idx = item.idx
 			item.type_of_manufacturing = "Subcontract"
 			item.supplier = "Credible Contract Baking"
 			item.qty = 50
-	pp.append("sub_assembly_items", pp.sub_assembly_items[0].as_dict())
+	pp.append("sub_assembly_items", pp.sub_assembly_items[idx - 1].as_dict())
 	pp.sub_assembly_items[-1].name = None
 	pp.sub_assembly_items[-1].type_of_manufacturing = "In House"
 	pp.sub_assembly_items[-1].bom_no = "BOM-Pie Crust-001"

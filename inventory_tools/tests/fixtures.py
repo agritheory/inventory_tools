@@ -114,7 +114,7 @@ operations = [
 	- Store in refrigerator if not using immediately""",
 	),
 	(
-		"Mix Pie Crust Op",
+		"Mix Dough Op",
 		"Mixer Station",
 		"5",
 		"""- Combine flour, butter, salt, and ice water in mixer
@@ -147,6 +147,25 @@ operations = [
 		"Cooling Racks Station",
 		"1",
 		"Cool baked pies for at least 30 minutes before boxing",
+	),
+	(
+		"Assemble Pocket Op",
+		"Food Prep Table 1",
+		"5",
+		"""- Fold 3 poppers into dough pocket""",
+	),
+	(
+		"Assemble Popper Op",
+		"Food Prep Table 1",
+		"5",
+		"""- Top dough bite with fruit""",
+	),
+	(
+		"Assemble Combination Product",
+		"Food Prep Table 1",
+		"5",
+		"""- Tower: package one pie and one pocket, and one popper
+    - Pocketful of Bay: package one pocket with two poppers""",
 	),
 ]
 
@@ -184,6 +203,46 @@ items = [
 		"description": "<div><p>Take your tastebuds on an adventure with this whimsical twist on the classic Key Lime pie. Made with kaduka limes and the exotic limequat, this seasonal pie is sure to satisfy even the most weary culinary explorer. Grab it when you can - it's only available April through September.</p></div>",
 	},
 	{
+		"item_code": "Tower of Bay-bel",
+		"uom": "Nos",
+		"item_group": "Baked Goods",
+		"item_price": 20.00,
+		"default_warehouse": "Refrigerated Display - APC",
+		"description": "<div><p>Reach for the stars with this epic all-things-bayberry dessert that stacks a Bayberry Pocket on top of our Bayberry Pie.</p></div>",
+	},
+	{
+		"item_code": "Pocketful of Bay",
+		"uom": "Nos",
+		"item_group": "Baked Goods",
+		"item_price": 12.00,
+		"default_warehouse": "Refrigerated Display - APC",
+		"description": "<div><p>Try this delightful combination of a Bayberry Pocket and two additional Bayberry Poppers.</p></div>",
+	},
+	{
+		"item_code": "Bayberry Pie",
+		"uom": "Nos",
+		"item_group": "Sub Assemblies",
+		# "item_price": 11.00,  # can a finished good be included as sub-assembly for another good?
+		"default_warehouse": "Refrigerated Display - APC",
+		"description": "<div><p>This pie features the sweet and scrumptious bayberry and is sure to be a crowd-pleaser.</p></div>",
+	},
+	{
+		"item_code": "Bayberry Pocket",
+		"uom": "Nos",
+		"item_group": "Sub Assemblies",
+		# "item_price": 8.00,
+		"default_warehouse": "Refrigerated Display - APC",
+		"description": "<div><p>Need a little more than one popper? The Bayberry Pocket is a tasty dough pocket stuffed with several Bayberry Poppers.</p></div>",
+	},
+	{
+		"item_code": "Bayberry Popper",
+		"uom": "Nos",
+		"item_group": "Sub Assemblies",
+		# "item_price": 3.00,
+		"default_warehouse": "Refrigerated Display - APC",
+		"description": "<div><p>Part cookie, part tart, these bite-sized treats will bring a little sweetness to your day.</p></div>",
+	},
+	{
 		"item_code": "Ambrosia Pie Filling",
 		"uom": "Cup",
 		"item_group": "Sub Assemblies",
@@ -201,6 +260,13 @@ items = [
 		"item_code": "Gooseberry Pie Filling",
 		"uom": "Cup",
 		"description": "Gooseberry Pie Filling",
+		"item_group": "Sub Assemblies",
+		"default_warehouse": "Refrigerator - APC",
+	},
+	{
+		"item_code": "Bayberry Pie Filling",
+		"uom": "Cup",
+		"description": "Bayberry Pie Filling",
 		"item_group": "Sub Assemblies",
 		"default_warehouse": "Refrigerator - APC",
 	},
@@ -251,7 +317,7 @@ items = [
 	{
 		"item_code": "Cloudberry",
 		"uom": "Pound",
-		"description": "Our Own Cloudberry",
+		"description": "Cloudberry",
 		"item_group": "Ingredients",
 		"item_price": 0.65,
 		"default_warehouse": "Refrigerator - APC",
@@ -314,9 +380,18 @@ items = [
 	{
 		"item_code": "Tayberry",
 		"uom": "Pound",
-		"description": "Tayberry - Box",
+		"description": "Tayberry",
 		"item_group": "Ingredients",
 		"item_price": 0.85,
+		"default_warehouse": "Refrigerator - APC",
+		"supplier": "Chelsea Fruit Co",
+	},
+	{
+		"item_code": "Bayberry",
+		"uom": "Pound",
+		"description": "Bayberry",
+		"item_group": "Ingredients",
+		"item_price": 0.45,
 		"default_warehouse": "Refrigerator - APC",
 		"supplier": "Chelsea Fruit Co",
 	},
@@ -415,6 +490,127 @@ items = [
 ]
 
 boms = [
+	{
+		"item": "Tower of Bay-bel",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"items": [
+			{"item_code": "Bayberry Pie", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
+			{"item_code": "Bayberry Pocket", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Assemble Combination Product",
+				"time_in_mins": 2.0,
+				"workstation": "Food Prep Table 1",
+			},
+		],
+	},
+	{
+		"item": "Pocketful of Bay",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"items": [
+			{"item_code": "Bayberry Pocket", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
+			{"item_code": "Bayberry Popper", "qty": 10.0, "qty_consumed_per_unit": 2.0, "uom": "Nos"},
+			{"item_code": "Pie Box", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Assemble Combination Product",
+				"time_in_mins": 2.0,
+				"workstation": "Food Prep Table 1",
+			},
+		],
+	},
+	{
+		"item": "Bayberry Pocket",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"items": [
+			{"item_code": "Flour", "qty": 1.5, "qty_consumed_per_unit": 0.3, "uom": "Pound"},
+			{"item_code": "Butter", "qty": 0.75, "qty_consumed_per_unit": 0.15, "uom": "Pound"},
+			{"item_code": "Sugar", "qty": 0.1, "qty_consumed_per_unit": 0.02, "uom": "Pound"},
+			{"item_code": "Bayberry Popper", "qty": 15.0, "qty_consumed_per_unit": 3.0, "uom": "Nos"},
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Mix Dough Op",
+				"time_in_mins": 5.0,
+				"workstation": "Mixer Station",
+			},
+			{
+				"batch_size": 5,
+				"operation": "Assemble Pocket Op",
+				"time_in_mins": 2.0,
+				"workstation": "Food Prep Table 1",
+			},
+		],
+	},
+	{
+		"item": "Bayberry Popper",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"items": [
+			{"item_code": "Flour", "qty": 0.5, "qty_consumed_per_unit": 0.1, "uom": "Pound"},
+			{"item_code": "Butter", "qty": 0.25, "qty_consumed_per_unit": 0.05, "uom": "Pound"},
+			{"item_code": "Sugar", "qty": 0.05, "qty_consumed_per_unit": 0.01, "uom": "Pound"},
+			{"item_code": "Bayberry", "qty": 1.0, "qty_consumed_per_unit": 0.2, "uom": "Pound"},
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Mix Dough Op",
+				"time_in_mins": 5.0,
+				"workstation": "Mixer Station",
+			},
+			{
+				"batch_size": 5,
+				"operation": "Assemble Popper Op",
+				"time_in_mins": 1.0,
+				"workstation": "Food Prep Table 1",
+			},
+		],
+	},
+	{
+		"item": "Bayberry Pie",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"items": [
+			{"item_code": "Pie Crust", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
+			{
+				"item_code": "Bayberry Pie Filling",
+				"qty": 20.0,
+				"qty_consumed_per_unit": 4.0,
+				"uom": "Cup",
+			},
+			{"item_code": "Pie Box", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Assemble Pie Op",
+				"time_in_mins": 10.0,
+				"workstation": "Food Prep Table 2",
+			},
+			{"batch_size": 1, "operation": "Bake Op", "time_in_mins": 50.0, "workstation": "Oven Station"},
+			{
+				"batch_size": 1,
+				"operation": "Cool Pie Op",
+				"time_in_mins": 30.0,
+				"workstation": "Cooling Racks Station",
+			},
+			{
+				"batch_size": 5,
+				"operation": "Box Pie Op",
+				"time_in_mins": 5.0,
+				"workstation": "Packaging Station",
+			},
+		],
+	},
 	{
 		"item": "Double Plum Pie",
 		"quantity": 5.0,
@@ -552,6 +748,32 @@ boms = [
 				"operation": "Box Pie Op",
 				"time_in_mins": 5.0,
 				"workstation": "Packaging Station",
+			},
+		],
+	},
+	{
+		"item": "Bayberry Pie Filling",
+		"quantity": 20.0,
+		"uom": "Cup",
+		"items": [
+			{"item_code": "Sugar", "qty": 0.5, "qty_consumed_per_unit": 0.025, "uom": "Pound"},
+			{"item_code": "Cornstarch", "qty": 0.1, "qty_consumed_per_unit": 0.005, "uom": "Pound"},
+			{"item_code": "Water", "qty": 1.25, "qty_consumed_per_unit": 0.0625, "uom": "Cup"},
+			{"item_code": "Butter", "qty": 0.313, "qty_consumed_per_unit": 0.01565, "uom": "Pound"},
+			{"item_code": "Bayberry", "qty": 15.0, "qty_consumed_per_unit": 0.05025, "uom": "Pound"},
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Gather Pie Filling Ingredients",
+				"time_in_mins": 5.0,
+				"workstation": "Food Prep Table 1",
+			},
+			{
+				"batch_size": 5,
+				"operation": "Cook Pie Filling Operation",
+				"time_in_mins": 15.0,
+				"workstation": "Range Station",
 			},
 		],
 	},
@@ -706,7 +928,7 @@ boms = [
 			},
 			{
 				"batch_size": 5,
-				"operation": "Mix Pie Crust Op",
+				"operation": "Mix Dough Op",
 				"time_in_mins": 5.0,
 				"workstation": "Mixer Station",
 			},
