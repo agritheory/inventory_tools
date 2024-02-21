@@ -1,6 +1,7 @@
 # Copyright (c) 2024, AgriTheory and contributors
 # For license information, please see license.txt
 
+import json
 from itertools import groupby
 
 import frappe
@@ -121,4 +122,38 @@ def get_columns(filters):
 
 @frappe.whitelist()
 def create(company, filters, rows):
-	frappe.msgprint("TODO", alert=True, indicator="green")
+	filters = frappe._dict(json.loads(filters)) if isinstance(filters, str) else filters
+	rows = json.loads(rows) if isinstance(rows, str) else rows
+	if not rows:
+		return
+
+	counter = 0
+	for customer, _rows in groupby(rows, lambda x: x.get("customer")):
+		rows = list(_rows)
+		so = frappe.new_doc("Sales Order")
+		so.transaction_date = rows[0].get("transaction_date")
+		so.customer = customer
+		so.order_type = "Sales"
+		so.currency = "USD"
+
+		for row in rows:
+			if not row.get("item_code"):
+				continue
+
+			so.append(
+				"items",
+				{
+					"item_code": row.get("item_code"),
+					"item_name": row.get("item_name"),
+					"delivery_date": row.get("transaction_date"),
+					"uom": row.get("uom"),
+					"qty": row.get("split_qty"),
+					"warehouse": row.get("warehouse"),
+					"quotation_item": row.get("quotation_item,"),
+					"prevdoc_docname": row.get("quotation"),
+				},
+			)
+		so.save()
+		counter += 1
+
+	frappe.msgprint(frappe._(f"{counter} Sales Orders created"), alert=True, indicator="green")
