@@ -1,6 +1,8 @@
 frappe.ui.form.on('Job Card', {
 	refresh: frm => {
-		set_workstation_query(frm)
+		if (frm.doc.operation) {
+			set_workstation_query(frm)
+		}
 	},
 	operation: frm => {
 		set_workstation_query(frm)
