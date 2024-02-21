@@ -117,3 +117,8 @@ def get_columns(filters):
 		},
 		{"fieldname": "currency", "fieldtype": "Link", "options": "Currency", "hidden": 1},
 	]
+
+
+@frappe.whitelist()
+def create(company, filters, rows):
+	frappe.msgprint("TODO", alert=True, indicator="green")

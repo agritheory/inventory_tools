@@ -44,6 +44,22 @@ frappe.query_reports['Quotation Demand'] = {
 			},
 		})
 	},
+	onload: reportview => {
+		manage_buttons(reportview)
+	},
+	refresh: reportview => {
+		manage_buttons(reportview)
+	},
+}
+
+function manage_buttons(reportview) {
+	reportview.page.add_inner_button(
+		'Create SO(s)',
+		function () {
+			create()
+		},
+		'Create'
+	)
 }
 
 function update_selection(row) {
@@ -78,5 +94,65 @@ async function select_all_customer_items(row, toggle) {
 			})
 		}
 		resolve()
+	})
+}
+
+async function create() {
+	let filters = frappe.query_report.get_filter_values()
+	let company = undefined
+	if (filters.company) {
+		company = filters.company
+	} else {
+		company = await select_company()
+	}
+
+	let selected_rows = frappe.query_report.datatable.rowmanager.getCheckedRows()
+	let selected_items = frappe.query_report.datatable.datamanager.data.filter((row, index) => {
+		return selected_rows.includes(String(index)) ? row : false
+	})
+
+	// Update split_qty with the edited value
+	let selected_raw_rows = frappe.query_report.datatable.datamanager.rows.filter((row, index) => {
+		return selected_rows.includes(String(index)) ? row : false
+	})
+	for (let i = 0; i < selected_items.length; i++) {
+		selected_items[i]['split_qty'] = selected_raw_rows[i][9].content
+	}
+
+	if (!selected_items.length) {
+		frappe.show_alert({ message: 'Please select one or more rows.', seconds: 5, indicator: 'red' })
+	} else {
+		await frappe
+			.xcall('inventory_tools.inventory_tools.report.quotation_demand.quotation_demand.create', {
+				company: company,
+				filters: filters,
+				rows: selected_items,
+			})
+			.then(r => {})
+	}
+}
+
+async function select_company() {
+	return new Promise(resolve => {
+		let dialog = new frappe.ui.Dialog({
+			title: __('Select a Company'),
+			fields: [
+				{
+					fieldtype: 'Link',
+					fieldname: 'company',
+					label: 'Company',
+					options: 'Company',
+					reqd: 1,
+				},
+			],
+			primary_action: () => {
+				let values = dialog.get_values()
+				dialog.hide()
+				return resolve(values.company)
+			},
+			primary_action_label: __('Select'),
+		})
+		dialog.show()
+		dialog.get_close_btn()
 	})
 }
