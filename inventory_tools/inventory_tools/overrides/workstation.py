@@ -6,12 +6,15 @@ import frappe
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_alternative_workstations(doctype, txt, searchfield, start, page_len, filters):
+	operation = filters.get("operation")
+	if not operation:
+		frappe.throw("Please select a Operation first.")
+
 	if txt:
 		searchfields = frappe.get_meta(doctype).get_search_fields()
 		searchfields = " or ".join(["ws." + field + f" LIKE '%{txt}%'" for field in searchfields])
-	operation = filters.get("operation")
-	conditions = ""
 
+	conditions = ""
 	if txt and searchfields:
 		conditions = f"and ({searchfields})"
 
