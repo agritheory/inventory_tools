@@ -7,7 +7,9 @@ frappe.ui.form.on('Work Order', {
 	},
 	refresh: frm => {
 		manage_subcontracting_buttons(frm)
-		get_workstations(frm)
+		if (frm.doc.operation) {
+			get_workstations(frm)
+		}
 	},
 	operation: frm => {
 		get_workstations(frm)
