@@ -77,6 +77,7 @@ class Specification(Document):
 							"reference_doctype": at.applied_on,
 							"reference_name": doc.name,
 							"attribute": at.attribute_name,
+							"value": value,  # this make this an add-only API
 						},
 					)
 					if existing_attribute_value:

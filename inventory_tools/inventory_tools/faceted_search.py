@@ -34,6 +34,15 @@ def show_faceted_search_components(doctype="Item", filters=None):
 		elif attribute.date_values and values:
 			_values = [localtime(int(flt(v))) for v in values]
 			_min, _max = min(_values), max(_values)
+		elif attribute.component == "FacetedSearchColorPicker":
+			attribute.values = frappe.get_all(
+				"Color",
+				[
+					"name",
+					"color",
+				],
+				order_by="name",
+			)
 		else:
 			attribute.values = values
 

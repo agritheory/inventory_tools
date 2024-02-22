@@ -1,10 +1,14 @@
 function getSearchComponents(doctype) {
-	frappe
-		.xcall('inventory_tools.inventory_tools.faceted_search.show_faceted_search_components', { doctype: 'Item' })
-		.then(r => {
-			console.log(r)
-			return r
+	frappe.ready(() => {
+		frappe.call({
+			method: 'inventory_tools.inventory_tools.faceted_search.show_faceted_search_components',
+			args: { doctype: 'Item' },
+			headers: { 'X-Frappe-CSRF-Token': frappe.csrf_token },
+			callback: r => {
+				return r
+			},
 		})
+	})
 }
 
 module.exports = {

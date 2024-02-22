@@ -89,7 +89,7 @@ def create_test_data():
 	create_suppliers(settings)
 	create_customers(settings)
 	create_items(settings)
-	create_specifications(settings)
+	# create_specifications(settings)
 	create_boms(settings)
 	prod_plan_from_doc = "Sales Order"
 	if prod_plan_from_doc == "Sales Order":
@@ -577,6 +577,19 @@ def create_production_plan(settings, prod_plan_from_doc):
 
 
 def create_specifications(settings=None):
+	for c in (
+		("Red", "#E24C4C"),
+		("Blue", "#2490EF"),
+		("Purple", "#8684FF"),
+		("Green", "#8CCF54"),
+		("Yellow", "#FFFF00"),
+	):
+		if not frappe.db.exists("Color", c[0]):
+			color = frappe.new_doc("Color")
+			color.name = c[0]
+			color.color = c[1]
+			color.save()
+
 	for spec in specifications:
 		if frappe.db.exists("Specification", {"title": f"{spec.get('dt')} - {spec.get('apply_on')}"}):
 			s = frappe.get_doc("Specification", {"title": f"{spec.get('dt')} - {spec.get('apply_on')}"})

@@ -22,7 +22,9 @@ export default {
 		return { searchComponents: [], filterValues: {}, sortOrder: '' }
 	},
 	mounted(){
-		this.loadAttributeFilters()
+		frappe.ready(() => {
+			this.loadAttributeFilters()
+		})
 	},
 	methods: {
 		updateFilters(values){

@@ -794,6 +794,11 @@ specifications = [
 				"date_values": 1,
 				"component": "FacetedSearchDateRange",
 			},
+			{
+				"attribute_name": "Color",
+				"applied_on": "Item",
+				"component": "FacetedSearchColorPicker",
+			},
 		],
 	}
 ]
@@ -804,16 +809,28 @@ attributes = {
 		"Fruits": ["Hairless Rambutan", "Cloudberry", "Tayberry"],
 		"Weight": 120,
 		"Price": 11.00,
+		"Color": ["Blue", "Red"],
+		"Brand": "Chelsea Fruit Co",
 	},
-	"Double Plum Pie": {"Fruits": ["Cocoplum", "Damson Plum"], "Weight": 124, "Price": 10.50},
+	"Double Plum Pie": {
+		"Fruits": ["Cocoplum", "Damson Plum"],
+		"Weight": 124,
+		"Price": 10.50,
+		"Color": ["Purple"],
+		"Brand": "Chelsea Fruit Co",
+	},
 	"Gooseberry Pie": {
 		"Fruits": "Gooseberry",
 		"Weight": 128,
 		"Price": 12.00,
+		"Color": ["Yellow"],
+		"Brand": "Chelsea Fruit Co",
 	},
 	"Kaduka Key Lime Pie": {
 		"Fruits": ["Kaduka Lime", "Limequat"],
 		"Weight": 132,
 		"Price": 11.50,
+		"Color": ["Green", "Yellow"],
+		"Brand": "Chelsea Fruit Co",
 	},
 }
