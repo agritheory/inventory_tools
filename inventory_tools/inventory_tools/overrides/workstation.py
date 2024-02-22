@@ -2,6 +2,27 @@ import json
 
 import frappe
 
+"""
+	This function fetch workstation of the document operation.
+	In Operation you can select multiple workstations in Alternative Workstation field. 
+	In the Work Order, Operation table, and Jobcard, there exists an operation field. 
+	When selecting an operation, this function is responsible for fetching the workstations 
+	both from the Alternative Workstation and the default workstation.
+	
+	Example : 	Operation : Cool Pie Op
+				Default Workstation: Cooling Racks Station
+				Alternative Workstation: 
+						`````````````````````````````````````````````````````
+						:	Cooling Station	, Refrigerator Station ,		:
+						:													:
+						:													:
+						``````````````````````````````````````````````````````
+				In work order and job card when you select operation Cool Pie Op then you find below workstation in workstation field 
+							:	Cooling Station			:
+							:	Refrigerator Station	:
+							:	Cooling Racks Station	:
+"""
+
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
