@@ -153,7 +153,6 @@ def get_data(filters):
 			MaterialRequestItem.rate.as_("supplier_price"),
 			Coalesce(ItemSupplier.supplier.as_("supplier"), "No Supplier").as_("supplier"),
 		)
-		.distinct()
 		.where(MaterialRequest.docstatus < 2)
 		.where(
 			MaterialRequest.schedule_date[

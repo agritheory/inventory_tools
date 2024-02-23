@@ -24,7 +24,7 @@ frappe.query_reports['Quotation Demand'] = {
 	],
 	on_report_render: reportview => {
 		reportview.datatable.options.columns[7].editable = true
-		reportview.datatable.refresh()
+		reportview.render_datatable()
 	},
 	get_datatable_options(options) {
 		return Object.assign(options, {

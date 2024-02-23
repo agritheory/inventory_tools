@@ -108,6 +108,7 @@ def create_test_data():
 	else:
 		create_material_request(settings)
 	create_production_plan(settings, prod_plan_from_doc)
+	create_material_request_for_seconday_company(settings)
 	create_quotations(settings)
 
 
@@ -308,6 +309,14 @@ def create_items(settings):
 				"default_supplier": item.get("default_supplier"),
 			},
 		)
+		i.append(
+			"item_defaults",
+			{
+				"company": settings.secondary_company,
+				"default_warehouse": item.get("default_secondary_warehouse"),
+				"default_supplier": item.get("default_supplier"),
+			},
+		)
 		if i.is_purchase_item and item.get("supplier"):
 			if isinstance(item.get("supplier"), list):
 				[i.append("supplier_items", {"supplier": s}) for s in item.get("supplier")]
@@ -346,10 +355,12 @@ def create_items(settings):
 
 
 def create_warehouses(settings):
-	for company in [
-		(settings.company, settings.company_abbr),
-		(settings.secondary_company, settings.secondary_company_abbr),
-	]:
+	for idx, company in enumerate(
+		[
+			(settings.company, settings.company_abbr),
+			(settings.secondary_company, settings.secondary_company_abbr),
+		]
+	):
 		inventory_tools_settings = frappe.get_doc("Inventory Tools Settings", company[0])
 		inventory_tools_settings.enable_work_order_subcontracting = 1
 		inventory_tools_settings.create_purchase_orders = 0
@@ -370,27 +381,27 @@ def create_warehouses(settings):
 		for wh in frappe.get_all("Warehouse", {"company": company[0]}, ["name", "is_group"]):
 			if wh.name not in warehouses and not wh.is_group:
 				frappe.delete_doc("Warehouse", wh.name)
+
 		for item in items:
-			if frappe.db.exists("Warehouse", item.get("default_warehouse")):
-				continue
-			wh = frappe.new_doc("Warehouse")
-			wh.warehouse_name = item.get("default_warehouse").split(" - ")[0]
-			wh.parent_warehouse = root_wh
-			wh.company = company[0]
-			wh.save()
+			if idx == 0 and not frappe.db.exists("Warehouse", item.get("default_warehouse")):
+				wh = frappe.new_doc("Warehouse")
+				wh.warehouse_name = item.get("default_warehouse").split(" - ")[0]
+				wh.parent_warehouse = root_wh
+				wh.company = company[0]
+				wh.save()
+
+			if idx == 1 and not frappe.db.exists("Warehouse", item.get("default_secondary_warehouse")):
+				wh = frappe.new_doc("Warehouse")
+				wh.warehouse_name = item.get("default_secondary_warehouse").split(" - ")[0]
+				wh.parent_warehouse = root_wh
+				wh.company = company[0]
+				wh.save()
 
 		wh = frappe.new_doc("Warehouse")
 		wh.warehouse_name = "Bakery Display"
 		wh.parent_warehouse = f"Baked Goods - {company[1]}"
 		wh.company = company[0]
 		wh.save()
-
-		if not frappe.db.exists("Warehouse", f"Refrigerated Display - {company[1]}"):
-			wh = frappe.new_doc("Warehouse")
-			wh.warehouse_name = "Refrigerated Display"
-			wh.parent_warehouse = root_wh
-			wh.company = company[0]
-			wh.save()
 
 		wh = frappe.get_doc("Warehouse", f"Refrigerated Display - {company[1]}")
 		wh.parent_warehouse = f"Baked Goods - {company[1]}"
@@ -469,6 +480,52 @@ def create_sales_order(settings):
 	)
 	so.save()
 	so.submit()
+
+
+def create_material_request_for_seconday_company(settings):
+	mr = frappe.new_doc("Material Request")
+	mr.material_request_type = "Manufacture"
+	mr.schedule_date = mr.transaction_date = settings.day
+	mr.title = "Pies"
+	mr.company = settings.secondary_company
+	mr.append(
+		"items",
+		{
+			"item_code": "Ambrosia Pie",
+			"schedule_date": mr.schedule_date,
+			"qty": 40,
+			"warehouse": f"Refrigerated Display - {settings.secondary_company_abbr}",
+		},
+	)
+	mr.append(
+		"items",
+		{
+			"item_code": "Double Plum Pie",
+			"schedule_date": mr.schedule_date,
+			"qty": 40,
+			"warehouse": f"Refrigerated Display - {settings.secondary_company_abbr}",
+		},
+	)
+	mr.append(
+		"items",
+		{
+			"item_code": "Gooseberry Pie",
+			"schedule_date": mr.schedule_date,
+			"qty": 10,
+			"warehouse": f"Refrigerated Display - {settings.secondary_company_abbr}",
+		},
+	)
+	mr.append(
+		"items",
+		{
+			"item_code": "Kaduka Key Lime Pie",
+			"schedule_date": mr.schedule_date,
+			"qty": 10,
+			"warehouse": f"Refrigerated Display - {settings.secondary_company_abbr}",
+		},
+	)
+	mr.save()
+	mr.submit()
 
 
 def create_material_request(settings):
@@ -568,13 +625,14 @@ def create_production_plan(settings, prod_plan_from_doc):
 			{
 				**row,
 				"warehouse": frappe.get_value(
-					"Item Default", {"parent": row.get("item_code")}, "default_warehouse"
+					"Item Default",
+					{"parent": row.get("item_code"), "company": settings.company},
+					"default_warehouse",
 				),
 			},
 		)
 	pp.save()
 	pp.submit()
-
 	pp.make_material_request()
 	mr = frappe.get_last_doc("Material Request")
 	mr.schedule_date = mr.transaction_date = settings.day
