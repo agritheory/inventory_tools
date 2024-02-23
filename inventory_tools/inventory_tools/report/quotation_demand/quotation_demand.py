@@ -11,7 +11,7 @@ from frappe.query_builder import DocType
 def execute(filters=None):
 	if (filters.start_date and filters.end_date) and (filters.start_date > filters.end_date):
 		frappe.throw(frappe._("Start date cannot be before end date"))
-	return get_columns(filters), get_data(filters)
+	return get_columns(), get_data(filters)
 
 
 def get_data(filters):
@@ -54,7 +54,8 @@ def get_data(filters):
 	return output
 
 
-def get_columns(filters):
+def get_columns():
+	hide_company = True if len(frappe.get_all("Company")) == 1 else False
 	return [
 		{
 			"label": "Customer",
@@ -75,6 +76,7 @@ def get_columns(filters):
 			"label": "Company",
 			"fieldtype": "Data",
 			"width": "200px",
+			"hidden": hide_company,
 		},
 		{
 			"fieldname": "transaction_date",
@@ -133,8 +135,6 @@ def create(company, filters, rows):
 		so = frappe.new_doc("Sales Order")
 		so.transaction_date = rows[0].get("transaction_date")
 		so.customer = customer
-		so.order_type = "Sales"
-		so.currency = "USD"
 
 		for row in rows:
 			if not row.get("item_code"):

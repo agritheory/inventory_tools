@@ -472,49 +472,53 @@ def create_sales_order(settings):
 
 
 def create_material_request(settings):
-	mr = frappe.new_doc("Material Request")
-	mr.material_request_type = "Manufacture"
-	mr.schedule_date = mr.transaction_date = settings.day
-	mr.title = "Pies"
-	mr.company = settings.company
-	mr.append(
-		"items",
-		{
-			"item_code": "Ambrosia Pie",
-			"schedule_date": mr.schedule_date,
-			"qty": 40,
-			"warehouse": "Refrigerated Display - APC",
-		},
-	)
-	mr.append(
-		"items",
-		{
-			"item_code": "Double Plum Pie",
-			"schedule_date": mr.schedule_date,
-			"qty": 40,
-			"warehouse": "Refrigerated Display - APC",
-		},
-	)
-	mr.append(
-		"items",
-		{
-			"item_code": "Gooseberry Pie",
-			"schedule_date": mr.schedule_date,
-			"qty": 10,
-			"warehouse": "Refrigerated Display - APC",
-		},
-	)
-	mr.append(
-		"items",
-		{
-			"item_code": "Kaduka Key Lime Pie",
-			"schedule_date": mr.schedule_date,
-			"qty": 10,
-			"warehouse": "Refrigerated Display - APC",
-		},
-	)
-	mr.save()
-	mr.submit()
+	for company in [
+		(settings.company, settings.company_abbr),
+		(settings.secondary_company, settings.secondary_company_abbr),
+	]:
+		mr = frappe.new_doc("Material Request")
+		mr.material_request_type = "Manufacture"
+		mr.schedule_date = mr.transaction_date = settings.day
+		mr.title = "Pies"
+		mr.company = company[0]
+		mr.append(
+			"items",
+			{
+				"item_code": "Ambrosia Pie",
+				"schedule_date": mr.schedule_date,
+				"qty": 40,
+				"warehouse": f"Refrigerated Display - {company[1]}",
+			},
+		)
+		mr.append(
+			"items",
+			{
+				"item_code": "Double Plum Pie",
+				"schedule_date": mr.schedule_date,
+				"qty": 40,
+				"warehouse": f"Refrigerated Display - {company[1]}",
+			},
+		)
+		mr.append(
+			"items",
+			{
+				"item_code": "Gooseberry Pie",
+				"schedule_date": mr.schedule_date,
+				"qty": 10,
+				"warehouse": f"Refrigerated Display - {company[1]}",
+			},
+		)
+		mr.append(
+			"items",
+			{
+				"item_code": "Kaduka Key Lime Pie",
+				"schedule_date": mr.schedule_date,
+				"qty": 10,
+				"warehouse": f"Refrigerated Display - {company[1]}",
+			},
+		)
+		mr.save()
+		mr.submit()
 
 
 def create_production_plan(settings, prod_plan_from_doc):

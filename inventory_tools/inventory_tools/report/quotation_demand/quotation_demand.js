@@ -21,16 +21,10 @@ frappe.query_reports['Quotation Demand'] = {
 			fieldtype: 'Date',
 			default: moment(),
 		},
-		{
-			fieldname: 'price_list',
-			label: __('Price List'),
-			fieldtype: 'Link',
-			options: 'Price List',
-		},
 	],
 	on_report_render: reportview => {
-		frappe.query_report.datatable.options.columns[7].editable = true
-		frappe.query_report.datatable.refresh()
+		reportview.datatable.options.columns[7].editable = true
+		reportview.datatable.refresh()
 	},
 	get_datatable_options(options) {
 		return Object.assign(options, {
@@ -54,11 +48,11 @@ frappe.query_reports['Quotation Demand'] = {
 
 function manage_buttons(reportview) {
 	reportview.page.add_inner_button(
-		'Create SO(s)',
+		__('Create SO(s)'),
 		function () {
 			create()
 		},
-		'Create'
+		__('Create')
 	)
 }
 
@@ -97,7 +91,7 @@ async function select_all_customer_items(row, toggle) {
 	})
 }
 
-async function create() {
+async function create(reportview) {
 	let filters = frappe.query_report.get_filter_values()
 	let company = undefined
 	if (filters.company) {
@@ -120,7 +114,7 @@ async function create() {
 	}
 
 	if (!selected_items.length) {
-		frappe.show_alert({ message: 'Please select one or more rows.', seconds: 5, indicator: 'red' })
+		frappe.show_alert({ message: __('Please select one or more rows.'), seconds: 5, indicator: 'red' })
 	} else {
 		await frappe
 			.xcall('inventory_tools.inventory_tools.report.quotation_demand.quotation_demand.create', {

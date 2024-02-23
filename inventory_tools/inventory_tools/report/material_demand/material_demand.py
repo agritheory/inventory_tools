@@ -8,6 +8,8 @@ import frappe
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.get_item_details import get_price_list_rate_for
 from frappe import _
+from frappe.query_builder import DocType
+from frappe.query_builder.functions import Coalesce
 from frappe.utils.data import fmt_money, getdate
 
 
@@ -123,43 +125,51 @@ def get_columns(filters):
 
 def get_data(filters):
 	output = []
-	# TODO: refactor to frappe query builder
-	company_query = "AND `tabMaterial Request`.company = (%(company)s)" if filters.company else ""
-	data = frappe.db.sql(
-		f"""
-	SELECT DISTINCT `tabMaterial Request Item`.name AS material_request_item,
-	`tabMaterial Request`.name AS material_request,
-	`tabMaterial Request`.company,
-	`tabMaterial Request`.schedule_date,
-	`tabMaterial Request Item`.name AS mri,
-	`tabMaterial Request Item`.item_code,
-	`tabMaterial Request Item`.item_name,
-	`tabMaterial Request Item`.qty,
-	`tabMaterial Request Item`.uom,
-	`tabMaterial Request Item`.warehouse,
-	`tabCompany`.default_currency AS currency,
-	`tabMaterial Request Item`.rate AS supplier_price,
-	COALESCE(`tabItem Supplier`.supplier, 'No Supplier') AS supplier
-	FROM `tabCompany`, `tabMaterial Request`, `tabMaterial Request Item`, `tabItem Supplier`
-	WHERE `tabMaterial Request`.name = `tabMaterial Request Item`.parent
-	AND `tabMaterial Request`.company = `tabCompany`.name
-	AND `tabMaterial Request`.docstatus < 2 
-	AND `tabMaterial Request`.schedule_date BETWEEN %(start_date)s AND %(end_date)s
-	AND `tabMaterial Request Item`.ordered_qty < `tabMaterial Request Item`.stock_qty
-	AND `tabMaterial Request Item`.received_qty < `tabMaterial Request Item`.stock_qty
-	AND `tabItem Supplier`.parent = `tabMaterial Request Item`.item_code
-	
-	{company_query}
-	ORDER BY supplier, item_name
-	""",
-		{
-			"company": filters.company,
-			"start_date": filters.start_date or "1900-01-01",
-			"end_date": filters.end_date or "2100-12-31",
-		},
-		as_dict=True,
-		# debug=True,
+
+	MaterialRequest = DocType("Material Request")
+	MaterialRequestItem = DocType("Material Request Item")
+	ItemSupplier = DocType("Item Supplier")
+	Company = DocType("Company")
+	query = (
+		frappe.qb.from_(MaterialRequest)
+		.join(MaterialRequestItem)
+		.on(MaterialRequest.name == MaterialRequestItem.parent)
+		.join(ItemSupplier)
+		.on(ItemSupplier.parent == MaterialRequestItem.item_code)
+		.join(Company)
+		.on(MaterialRequest.company == Company.name)
+		.select(
+			MaterialRequestItem.name.as_("material_request_item"),
+			MaterialRequest.name.as_("material_request"),
+			MaterialRequest.company,
+			MaterialRequest.schedule_date,
+			MaterialRequestItem.name.as_("mri"),
+			MaterialRequestItem.item_code,
+			MaterialRequestItem.item_name,
+			MaterialRequestItem.qty,
+			MaterialRequestItem.uom,
+			MaterialRequestItem.warehouse,
+			Company.default_currency.as_("currency"),
+			MaterialRequestItem.rate.as_("supplier_price"),
+			Coalesce(ItemSupplier.supplier.as_("supplier"), "No Supplier").as_("supplier"),
+		)
+		.distinct()
+		.where(MaterialRequest.docstatus < 2)
+		.where(
+			MaterialRequest.schedule_date[
+				filters.start_date or "1900-01-01" : filters.en_date or "2100-12-31"
+			]
+		)
+		.where(MaterialRequestItem.ordered_qty < MaterialRequestItem.stock_qty)
+		.where(MaterialRequestItem.received_qty < MaterialRequestItem.stock_qty)
+		.orderby(Coalesce(ItemSupplier.supplier, "No Supplier"), MaterialRequestItem.item_name)
 	)
+
+	if filters.company:
+		query = query.where(MaterialRequest.company == filters.company)
+
+	data = query.run(as_dict=1)
+
 	total_demand = frappe._dict()
 	mris = []
 	for row in data:
