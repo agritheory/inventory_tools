@@ -20,7 +20,7 @@
    "fetch_from": null,
    "fetch_if_empty": 0,
    "fieldname": "image",
-   "fieldtype": "Image",
+   "fieldtype": "Attach",
    "hidden": 0,
    "hide_border": 0,
    "hide_days": 0,

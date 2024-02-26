@@ -2,14 +2,12 @@
 	<div>
 		<h5>{{ attribute_name }}</h5>
 		<div class="colorpicker">
-				<div v-for="(attr, idx) in selectedValues" :key="idx" class="color-card"
-				@click="selectColor(attr, idx)"
-				>
-					<div class="color-display" :style="{'background-color': attr.attribute.color }">
-						<p :style="{'color': attr.isChecked ? contrast(attr.attribute.color): 'transparent'}">✓</p>
-					</div>
-					<span> {{ attr.attribute.name }} </span>
+			<div v-for="(attr, idx) in selectedValues" :key="idx" class="color-card" @click="selectColor(attr, idx)">
+				<div class="color-display" :style="getBackground(attr)">
+					<p :style="{ 'color': attr.isChecked ? contrast(attr.attribute.color) : 'transparent' }">✓</p>
 				</div>
+				<span> {{ attr.attribute.name }} </span>
+			</div>
 		</div>
 	</div>
 </template>
@@ -35,9 +33,16 @@ export default {
 					}),
 			})
 		},
-		selectColor(attr, idx){
+		selectColor(attr, idx) {
 			attr.isChecked = !attr.isChecked
 			this.change()
+		},
+		getBackground(attr) {
+			if (attr.attribute.image != undefined) {
+				return { 'background-image': `url("${attr.attribute.image}")` }
+			} else {
+				return { 'background-color': attr.attribute.color }
+			}
 		},
 		contrast(color) {
 			if (
@@ -64,16 +69,19 @@ export default {
 	display: flex;
 	flex-wrap: wrap;
 }
+
 .color-card {
 	display: flex;
-	flex-direction:column;
-	flex:1;
+	flex-direction: column;
+	flex: 1;
 	min-width: 4rem;
 	max-width: 4rem;
 }
+
 input {
 	display: none;
 }
+
 .color-display {
 	display: flex;
 	min-height: .75rem;
@@ -81,7 +89,9 @@ input {
 	flex-direction: column;
 	justify-content: center;
 	text-align: center;
+	background-size: contain;
 }
+
 .colorpicker span {
 	font-size: 90%;
 	user-select: none;
@@ -90,6 +100,7 @@ input {
 	text-align: center;
 	align-self: center;
 }
+
 .color-display p {
 	user-select: none;
 	display: relative;

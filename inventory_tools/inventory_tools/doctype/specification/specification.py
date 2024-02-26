@@ -120,7 +120,7 @@ def convert_to_epoch(date):
 
 def convert_from_epoch(date):
 	system_settings = frappe.get_cached_doc("System Settings", "System Settings")
-	d = datetime.datetime.utcfromtimestamp(int(date))
+	d = datetime.datetime.utcfromtimestamp(int(flt(date)))
 	utc_offset = d.utcoffset().total_seconds() if d.utcoffset() else 0
 	return (d + datetime.timedelta(hours=12, seconds=int(utc_offset))).date()
 
