@@ -194,6 +194,17 @@ async function select_company() {
 					label: 'Company',
 					options: 'Company',
 					reqd: 0,
+					description: __('Leave this field blank to disallow aggregation for this company'),
+					change: () => {
+						if (dialog.fields_dict.company.value) {
+							dialog.fields_dict.warehouse.df.hidden = 0
+							dialog.fields_dict.warehouse.df.reqd = 1
+						} else {
+							dialog.fields_dict.warehouse.df.hidden = 1
+							dialog.fields_dict.warehouse.df.reqd = 0
+						}
+						dialog.refresh()
+					},
 				},
 				{
 					fieldtype: 'Link',
@@ -201,6 +212,7 @@ async function select_company() {
 					label: 'Warehouse',
 					options: 'Warehouse',
 					reqd: 0,
+					hidden: 1,
 					get_query: function () {
 						let company = dialog.get_value('company')
 						if (company) {
@@ -212,12 +224,6 @@ async function select_company() {
 				},
 			],
 			primary_action: () => {
-				let company = dialog.get_value('company')
-				let warehouse = dialog.get_value('warehouse')
-				if (company && !warehouse) {
-					frappe.throw(__('Warehouse is required.'))
-				}
-
 				let values = dialog.get_values()
 				dialog.hide()
 				return resolve(values)
