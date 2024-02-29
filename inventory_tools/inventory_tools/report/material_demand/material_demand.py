@@ -8,8 +8,6 @@ import frappe
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.get_item_details import get_price_list_rate_for
 from frappe import _
-from frappe.query_builder import DocType
-from frappe.query_builder.functions import Coalesce
 from frappe.utils.data import fmt_money, getdate
 
 
@@ -125,50 +123,43 @@ def get_columns(filters):
 
 def get_data(filters):
 	output = []
-
-	MaterialRequest = DocType("Material Request")
-	MaterialRequestItem = DocType("Material Request Item")
-	ItemSupplier = DocType("Item Supplier")
-	Company = DocType("Company")
-	query = (
-		frappe.qb.from_(MaterialRequest)
-		.join(MaterialRequestItem)
-		.on(MaterialRequest.name == MaterialRequestItem.parent)
-		.join(ItemSupplier)
-		.on(ItemSupplier.parent == MaterialRequestItem.item_code)
-		.join(Company)
-		.on(MaterialRequest.company == Company.name)
-		.select(
-			MaterialRequestItem.name.as_("material_request_item"),
-			MaterialRequest.name.as_("material_request"),
-			MaterialRequest.company,
-			MaterialRequest.schedule_date,
-			MaterialRequestItem.name.as_("mri"),
-			MaterialRequestItem.item_code,
-			MaterialRequestItem.item_name,
-			MaterialRequestItem.qty,
-			MaterialRequestItem.uom,
-			MaterialRequestItem.warehouse,
-			Company.default_currency.as_("currency"),
-			MaterialRequestItem.rate.as_("supplier_price"),
-			Coalesce(ItemSupplier.supplier.as_("supplier"), "No Supplier").as_("supplier"),
-		)
-		.where(MaterialRequest.docstatus < 2)
-		.where(
-			MaterialRequest.schedule_date[
-				filters.start_date or "1900-01-01" : filters.en_date or "2100-12-31"
-			]
-		)
-		.where(MaterialRequestItem.ordered_qty < MaterialRequestItem.stock_qty)
-		.where(MaterialRequestItem.received_qty < MaterialRequestItem.stock_qty)
-		.orderby(Coalesce(ItemSupplier.supplier, "No Supplier"), MaterialRequestItem.item_name)
+	# TODO: refactor to frappe query builder
+	company_query = "AND `tabMaterial Request`.company = (%(company)s)" if filters.company else ""
+	data = frappe.db.sql(
+		f"""
+	SELECT DISTINCT `tabMaterial Request Item`.name AS material_request_item,
+	`tabMaterial Request`.name AS material_request,
+	`tabMaterial Request`.company,
+	`tabMaterial Request`.schedule_date,
+	`tabMaterial Request Item`.name AS mri,
+	`tabMaterial Request Item`.item_code,
+	`tabMaterial Request Item`.item_name,
+	`tabMaterial Request Item`.qty,
+	`tabMaterial Request Item`.uom,
+	`tabMaterial Request Item`.warehouse,
+	`tabCompany`.default_currency AS currency,
+	`tabMaterial Request Item`.rate AS supplier_price,
+	COALESCE(`tabItem Supplier`.supplier, 'No Supplier') AS supplier
+	FROM `tabCompany`, `tabMaterial Request`, `tabMaterial Request Item`, `tabItem Supplier`
+	WHERE `tabMaterial Request`.name = `tabMaterial Request Item`.parent
+	AND `tabMaterial Request`.company = `tabCompany`.name
+	AND `tabMaterial Request`.docstatus < 2 
+	AND `tabMaterial Request`.schedule_date BETWEEN %(start_date)s AND %(end_date)s
+	AND `tabMaterial Request Item`.ordered_qty < `tabMaterial Request Item`.stock_qty
+	AND `tabMaterial Request Item`.received_qty < `tabMaterial Request Item`.stock_qty
+	AND `tabItem Supplier`.parent = `tabMaterial Request Item`.item_code
+	
+	{company_query}
+	ORDER BY supplier, item_name
+	""",
+		{
+			"company": filters.company,
+			"start_date": filters.start_date or "1900-01-01",
+			"end_date": filters.end_date or "2100-12-31",
+		},
+		as_dict=True,
+		# debug=True,
 	)
-
-	if filters.company:
-		query = query.where(MaterialRequest.company == filters.company)
-
-	data = query.run(as_dict=1)
-
 	total_demand = frappe._dict()
 	mris = []
 	for row in data:
@@ -208,18 +199,18 @@ def get_item_price(filters, r):
 
 
 @frappe.whitelist()
-def create(company, email_template, filters, creation_type, rows):
+def create(company, warehouse, email_template, filters, creation_type, rows):
 	if creation_type == "po":
-		message = create_pos(company, filters, rows)
+		message = create_pos(company, warehouse, filters, rows)
 	elif creation_type == "rfq":
 		message = create_rfqs(company, email_template, filters, rows)
 	elif creation_type == "item_based":
-		message = create_item_based(company, email_template, filters, rows)
+		message = create_item_based(company, warehouse, email_template, filters, rows)
 	frappe.msgprint(message, alert=True, indicator="green")
 
 
 @frappe.whitelist()
-def create_item_based(company, email_template, filters, rows):
+def create_item_based(company, warehouse, email_template, filters, rows):
 	filters = frappe._dict(json.loads(filters)) if isinstance(filters, str) else filters
 	rows = json.loads(rows) if isinstance(rows, str) else rows
 	if not rows:
@@ -239,7 +230,7 @@ def create_item_based(company, email_template, filters, rows):
 			po_rows.append(row)
 
 	if po_rows:
-		po_message = create_pos(company, filters, po_rows)
+		po_message = create_pos(company, warehouse, filters, po_rows)
 
 	if rfq_rows:
 		rfqs_message = create_rfqs(company, email_template, filters, rfq_rows)
@@ -342,47 +333,74 @@ def create_rfqs(company, email_template, filters, rows):
 
 
 @frappe.whitelist()
-def create_pos(company, filters, rows):
+def create_pos(company, warehouse, filters, rows):
 	filters = frappe._dict(json.loads(filters)) if isinstance(filters, str) else filters
 	rows = json.loads(rows) if isinstance(rows, str) else rows
 	if not rows:
 		return
-	companies = set()
+
 	counter = 0
+
 	for supplier, _rows in groupby(rows, lambda x: x.get("supplier")):
 		rows = list(_rows)
-		po = frappe.new_doc("Purchase Order")
-		po.schedule_date = po.posting_date = getdate()
-		po.supplier = supplier
-		po.company = frappe.get_value("Material Request", rows[0].get("material_request"), "company")
-		po.buying_price_list = filters.price_list
-		companies.add(po.company)
-		settings = frappe.get_doc("Inventory Tools Settings", company)
-		if settings.purchase_order_aggregation_company:
-			po.company = settings.purchase_order_aggregation_company
 
-		for row in rows:
-			if not row.get("item_code"):
-				continue
-			po.append(
-				"items",
-				{
-					"item_code": row.get("item_code"),
-					"item_name": row.get("item_name"),
-					"schedule_date": max(getdate(), getdate(row.get("schedule_date"))),
-					"company": row.get("company"),
-					"qty": row.get("qty"),
-					"rate": row.get("supplier_price"),
-					"uom": row.get("uom"),
-					"material_request": row.get("material_request"),
-					"material_request_item": row.get("material_request_item"),
-					"warehouse": settings.aggregated_purchasing_warehouse
-					if settings.aggregated_purchasing_warehouse
-					else row.get("warehouse"),
-				},
-			)
-		po.multi_company_purchase_order = True if len(list(companies)) > 1 else False
-		po.save()
-		counter += 1
+		if company:
+			po = frappe.new_doc("Purchase Order")
+			po.schedule_date = po.posting_date = getdate()
+			po.supplier = supplier
+			po.company = company
+			po.buying_price_list = filters.price_list
+
+			for row in rows:
+				if not row.get("item_code"):
+					continue
+				po.append(
+					"items",
+					{
+						"item_code": row.get("item_code"),
+						"item_name": row.get("item_name"),
+						"schedule_date": max(getdate(), getdate(row.get("schedule_date"))),
+						"company": row.get("company"),
+						"qty": row.get("qty"),
+						"rate": row.get("supplier_price"),
+						"uom": row.get("uom"),
+						"material_request": row.get("material_request"),
+						"material_request_item": row.get("material_request_item"),
+						"warehouse": warehouse,
+					},
+				)
+			po.multi_company_purchase_order = True
+			po.save()
+			counter += 1
+
+		else:
+			for mr_company, _company_rows in groupby(rows, lambda x: x.get("company")):
+				rows = list(_company_rows)
+				po = frappe.new_doc("Purchase Order")
+				po.schedule_date = po.posting_date = getdate()
+				po.supplier = supplier
+				po.company = mr_company
+				po.buying_price_list = filters.price_list
+
+				for row in rows:
+					if not row.get("item_code"):
+						continue
+					po.append(
+						"items",
+						{
+							"item_code": row.get("item_code"),
+							"item_name": row.get("item_name"),
+							"schedule_date": max(getdate(), getdate(row.get("schedule_date"))),
+							"company": row.get("company"),
+							"qty": row.get("qty"),
+							"rate": row.get("supplier_price"),
+							"uom": row.get("uom"),
+							"material_request": row.get("material_request"),
+							"material_request_item": row.get("material_request_item"),
+							"warehouse": row.get("warehouse"),
+						},
+					)
+				po.save()
+				counter += 1
 
 	return frappe._(f"{counter} Purchase Orders created")

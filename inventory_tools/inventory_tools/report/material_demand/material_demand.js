@@ -82,16 +82,15 @@ async function create(type) {
 	let values = frappe.query_report.get_filter_values()
 	let company = undefined
 	let email_template = undefined
+	let warehouse = undefined
 	if (type != 'po') {
 		values = await select_company_and_email_template(values.company)
 		company = values['company']
 		email_template = values['email_template']
 	} else {
-		if (!values.company) {
-			company = await select_company()
-		} else {
-			company = values.company
-		}
+		values = await select_company()
+		company = values['company']
+		warehouse = values['warehouse']
 	}
 
 	let selected_rows = frappe.query_report.datatable.rowmanager.getCheckedRows()
@@ -103,7 +102,8 @@ async function create(type) {
 	} else {
 		await frappe
 			.xcall('inventory_tools.inventory_tools.report.material_demand.material_demand.create', {
-				company: company,
+				company: company || '',
+				warehouse: warehouse || '',
 				email_template: email_template || '',
 				filters: values,
 				creation_type: type,
@@ -193,13 +193,34 @@ async function select_company() {
 					fieldname: 'company',
 					label: 'Company',
 					options: 'Company',
-					reqd: 1,
+					reqd: 0,
+				},
+				{
+					fieldtype: 'Link',
+					fieldname: 'warehouse',
+					label: 'Warehouse',
+					options: 'Warehouse',
+					reqd: 0,
+					get_query: function () {
+						let company = dialog.get_value('company')
+						if (company) {
+							return {
+								filters: { company: company },
+							}
+						}
+					},
 				},
 			],
 			primary_action: () => {
+				let company = dialog.get_value('company')
+				let warehouse = dialog.get_value('warehouse')
+				if (company && !warehouse) {
+					frappe.throw(__('Warehouse is required.'))
+				}
+
 				let values = dialog.get_values()
 				dialog.hide()
-				return resolve(values.company)
+				return resolve(values)
 			},
 			primary_action_label: __('Select'),
 		})
