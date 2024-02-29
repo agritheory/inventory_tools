@@ -562,9 +562,10 @@ def create_production_plan(settings, prod_plan_from_doc):
 		wo.wip_warehouse = "Kitchen - APC"
 		wo.save()
 		wo.submit()
-		job_cards = frappe.get_all("Job Card", {"work_order": wo.name})
-		for job_card in job_cards:
-			job_card = frappe.get_doc("Job Card", job_card)
-			job_card.time_logs[0].completed_qty = wo.qty
-			job_card.save()
-			job_card.submit()
+		# Need to be able to change job cards in Alternative Workstation Tests
+		# job_cards = frappe.get_all("Job Card", {"work_order": wo.name})
+		# for job_card in job_cards:
+		# 	job_card = frappe.get_doc("Job Card", job_card)
+		# 	job_card.time_logs[0].completed_qty = wo.qty
+		# 	job_card.save()
+		# 	job_card.submit()
