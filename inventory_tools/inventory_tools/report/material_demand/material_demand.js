@@ -186,7 +186,7 @@ async function select_all_supplier_items(row, toggle) {
 async function select_company() {
 	return new Promise(resolve => {
 		let dialog = new frappe.ui.Dialog({
-			title: __('Select a Company'),
+			title: __('Aggregate by Company'),
 			fields: [
 				{
 					fieldtype: 'Link',
