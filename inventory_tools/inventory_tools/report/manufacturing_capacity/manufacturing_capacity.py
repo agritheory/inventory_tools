@@ -9,6 +9,8 @@ from pypika.terms import ExistsCriterion
 
 def execute(filters=None):
 	data = get_data(filters)
+	print("DATA")
+	print(data)
 	return get_columns(filters), data
 
 
@@ -104,8 +106,13 @@ def get_data(filters=None):
 		)
 
 	# Recalculate the difference quantity for all rows
+	# - BOM rows: in_stock_qty + parts_can_build_qty - demanded_qty (parts can build based off sub-assembly availability, NOT what's already in stock, so need to include that separately)
+	# - Raw materials rows: parts_can_build_qty - demanded_qty (parts can build based off what's in stock, so already accounted for)
 	for row in bom_data:
-		row.difference_qty = row.parts_can_build_qty - row.demanded_qty
+		if row.bom:
+			row.difference_qty = row.in_stock_qty + row.parts_can_build_qty - row.demanded_qty
+		else:
+			row.difference_qty = row.parts_can_build_qty - row.demanded_qty
 
 	return bom_data
 
@@ -242,9 +249,11 @@ def get_bom_data(bom_no, demanded_qty, filters, indent, is_root=False):
 				ITEM.description,
 				(BOM.quantity).as_("qty_per_parent_bom"),
 				(ITEM.stock_uom).as_("bom_uom"),
-				(BOM.quantity * demanded_qty / BOM.quantity).as_("demanded_qty"),
+				(BOM.quantity * demanded_qty / BOM.quantity).as_(
+					"demanded_qty"
+				),  # redundant calc but needs cols and avoid errors
 				Sum(BIN.actual_qty).as_("in_stock_qty"),
-				Sum(BIN.actual_qty / demanded_qty).as_("orig_parts_can_build_qty"),
+				Sum(BIN.actual_qty).as_("orig_parts_can_build_qty"),
 			)
 			.where(BOM.name == bom_no)
 			.groupby(BOM.item)
@@ -264,9 +273,7 @@ def get_bom_data(bom_no, demanded_qty, filters, indent, is_root=False):
 				(BOM_ITEM.stock_uom).as_("bom_uom"),
 				(BOM_ITEM.stock_qty * demanded_qty / BOM.quantity).as_("demanded_qty"),
 				Sum(BIN.actual_qty).as_("in_stock_qty"),
-				Sum(BIN.actual_qty / (BOM_ITEM.stock_qty * demanded_qty / BOM.quantity)).as_(
-					"orig_parts_can_build_qty"
-				),
+				Sum(BIN.actual_qty / (BOM_ITEM.stock_qty / BOM.quantity)).as_("orig_parts_can_build_qty"),
 			)
 			.where((BOM_ITEM.parent == bom_no) & (BOM_ITEM.parenttype == "BOM"))
 			.groupby(BOM_ITEM.item_code)
@@ -276,7 +283,9 @@ def get_bom_data(bom_no, demanded_qty, filters, indent, is_root=False):
 	for r in results:
 		r.update(
 			{
-				"orig_parts_can_build_qty": int(r.orig_parts_can_build_qty),
+				"orig_parts_can_build_qty": int(r.orig_parts_can_build_qty)
+				if r.orig_parts_can_build_qty
+				else 0,
 				"is_selected_bom": int(r.bom == filters.get("bom")),
 				"parent_bom": "" if is_root else bom_no,
 				"root_parent_index": filters.get("root_parent_index") or 0,
