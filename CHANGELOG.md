@@ -2,6 +2,55 @@
 
 
 
+## v14.3.0 (2024-03-01)
+
+### Feature
+
+* feat: Alternative workstation in job card and operation (#56)
+
+* feat: New field and link filters to select alternative workstation
+
+* fix: add alternativ workstation in fixture
+
+* fix:change alternative workstation in fixture
+
+* change to error key function
+
+* fix: set validation on workstation if not operation
+
+* changes field name in testcase
+
+* fix: change a class base function to saperate function
+
+* added a searchfield in query
+
+* added a searchfield in query
+
+* added a searchfield in query
+
+* added a searchfield in query
+
+* added a searchfield in query
+
+* feat: validation to not allow default workstation in alternative
+
+* added comment on function ([`0788d3c`](https://github.com/agritheory/inventory_tools/commit/0788d3caa67ad7820a5a3cdfdc950c85bd6f0cd7))
+
+### Unknown
+
+* Prompt Material Transfer upon Completion of Manufacturing Stock Entry (#51)
+
+* feat: wip stock entry next action
+
+* feat: improve message
+
+* fix: on_submit hook
+
+* fix: parameter hardcoded
+
+* feat: change wording ([`d1e126b`](https://github.com/agritheory/inventory_tools/commit/d1e126b8dbaf09370f6d4c173e24af33ac994bd7))
+
+
 ## v14.2.0 (2024-02-01)
 
 ### Feature
