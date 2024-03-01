@@ -9,8 +9,6 @@ from pypika.terms import ExistsCriterion
 
 def execute(filters=None):
 	data = get_data(filters)
-	print("DATA")
-	print(data)
 	return get_columns(filters), data
 
 
