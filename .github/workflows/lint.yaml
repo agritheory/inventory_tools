@@ -38,6 +38,27 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  black:
+    needs: [ py_json_merge ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 2
+
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+
+      - name: Install Black (Frappe)
+        run: pip install git+https://github.com/frappe/black.git
+    
+      - name: Run Black (Frappe)
+        run: black --check .
+
   prettier:
     needs: [ py_json_merge ]
     runs-on: ubuntu-latest
