@@ -281,6 +281,7 @@ def get_bom_data(bom_no, demanded_qty, filters, indent, is_root=False):
 	for r in results:
 		r.update(
 			{
+				"in_stock_qty": r.in_stock_qty or 0,
 				"orig_parts_can_build_qty": int(r.orig_parts_can_build_qty)
 				if r.orig_parts_can_build_qty
 				else 0,
