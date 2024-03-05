@@ -1,7 +1,8 @@
 import frappe
+from erpnext.stock.doctype.stock_entry.stock_entry import FinishedGoodError, StockEntry
 from frappe import _
 from frappe.utils import flt
-from erpnext.stock.doctype.stock_entry.stock_entry import FinishedGoodError, StockEntry
+
 from inventory_tools.inventory_tools.overrides.work_order import get_allowance_percentage
 
 
@@ -151,7 +152,7 @@ class InventoryToolsStockEntry(StockEntry):
 
 		return item_dict
 
-  
+
 @frappe.whitelist()
 def get_production_item_if_work_orders_for_required_item_exists(stock_entry_name: str) -> str:
 	stock_entry = frappe.get_doc("Stock Entry", stock_entry_name)
@@ -175,5 +176,3 @@ def get_production_item_if_work_orders_for_required_item_exists(stock_entry_name
 		return production_item
 
 	return ""
-
-
