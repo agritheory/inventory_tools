@@ -40,6 +40,7 @@ function add_swith_work_order_action(frm) {
 							return {
 								filters: [
 									['docstatus', '=', '1'],
+									['status', '!=', 'Closed'],
 									['bom_no', '=', frm.doc.bom_no],
 									['company', '=', frm.doc.company],
 									['name', '!=', frm.doc.work_order],
