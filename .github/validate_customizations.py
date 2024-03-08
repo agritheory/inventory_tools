@@ -39,7 +39,7 @@ def validate_module(customized_doctypes, set_module=False):
 	this_app = app_dir.stem
 	for doctype, customize_files in customized_doctypes.items():
 		for customize_file in customize_files:
-			if not this_app in str(customize_file):
+			if not this_app == customize_file.parent.parent.parent.parent.stem:
 				continue
 			module = customize_file.parent.parent.stem
 			file_contents = json.loads(customize_file.read_text())
@@ -85,7 +85,7 @@ def validate_no_custom_perms(customized_doctypes):
 	this_app = pathlib.Path(__file__).resolve().parent.parent.stem
 	for doctype, customize_files in customized_doctypes.items():
 		for customize_file in customize_files:
-			if not this_app in str(customize_file):
+			if not this_app == customize_file.parent.parent.parent.parent.stem:
 				continue
 			file_contents = json.loads(customize_file.read_text())
 			if file_contents.get("custom_perms"):
