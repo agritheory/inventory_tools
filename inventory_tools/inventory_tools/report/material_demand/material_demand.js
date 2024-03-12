@@ -79,7 +79,7 @@ function manage_buttons(reportview) {
 }
 
 async function create(type) {
-	let values = frappe.query_report.get_filter_values()
+	let filters = frappe.query_report.get_filter_values()
 	let company = undefined
 	let email_template = undefined
 	let warehouse = undefined
@@ -105,7 +105,7 @@ async function create(type) {
 				company: company || '',
 				warehouse: warehouse || '',
 				email_template: email_template || '',
-				filters: values,
+				filters: filters,
 				creation_type: type,
 				rows: selected_items,
 			})
