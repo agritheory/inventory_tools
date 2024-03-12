@@ -83,6 +83,7 @@ async function create(type) {
 	let company = undefined
 	let email_template = undefined
 	let warehouse = undefined
+
 	if (type != 'po') {
 		values = await select_company_and_email_template(values.company)
 		company = values['company']
