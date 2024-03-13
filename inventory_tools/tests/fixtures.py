@@ -55,6 +55,20 @@ suppliers = [
 			"pincode": "89074",
 		},
 	),
+	(
+		"Credible Contract Baking",
+		None,
+		None,
+		None,
+		"Net 30",
+		{
+			"address_line1": "4 Crumb Circle",
+			"city": "Belmont",
+			"state": "MA",
+			"country": "United States",
+			"pincode": "89074",
+		},
+	),
 ]
 
 workstations = [
@@ -415,7 +429,10 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 4.5,
 		"default_warehouse": "Refrigerator - APC",
-		"supplier": "Freedom Provisions",
+		"supplier": [
+			"Freedom Provisions",
+			"Chelsea Fruit Co",
+		],
 	},
 	{
 		"item_code": "Cornstarch",

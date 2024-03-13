@@ -76,7 +76,16 @@ def create_test_data():
 	company_address.is_your_company_address = 1
 	company_address.append("links", {"link_doctype": "Company", "link_name": settings.company})
 	company_address.save()
-	frappe.set_value("Company", settings.company, "tax_id", "04-1871930")
+	cfc = frappe.new_doc("Company")
+	cfc.company_name = "Chelsea Fruit Co"
+	cfc.default_currency = "USD"
+	cfc.create_chart_of_accounts_based_on = "Existing Company"
+	cfc.existing_company = settings.company
+	cfc.abbr = "CFC"
+	cfc.save()
+
+	frappe.db.set_single_value("Stock Settings", "valuation_method", "Moving Average")
+	frappe.db.set_single_value("Stock Settings", "default_warehouse", "")
 	create_warehouses(settings)
 	setup_manufacturing_settings(settings)
 	create_workstations()
@@ -281,7 +290,7 @@ def create_items(settings):
 			or item.get("is_sub_contracted_item")
 			else "Manufacture"
 		)
-		i.valuation_method = "FIFO"
+		i.valuation_method = "Moving Average"
 		if item.get("uom_conversion_detail"):
 			for uom, cf in item.get("uom_conversion_detail").items():
 				i.append("uoms", {"uom": uom, "conversion_factor": cf})
@@ -298,6 +307,7 @@ def create_items(settings):
 				"company": settings.company,
 				"default_warehouse": item.get("default_warehouse"),
 				"default_supplier": item.get("default_supplier"),
+				"requires_rfq": True if item.get("item_code") == "Cloudberry" else False,
 			},
 		)
 		if i.is_purchase_item and item.get("supplier"):
@@ -528,6 +538,11 @@ def create_material_request(settings):
 	)
 	mr.save()
 	mr.submit()
+	mr = frappe.new_doc("Material Request")
+	mr.material_request_type = "Purchase"
+	mr.schedule_date = mr.transaction_date = settings.day
+	mr.title = "Boxes"
+	mr.company = settings.company
 
 
 def create_production_plan(settings, prod_plan_from_doc):
