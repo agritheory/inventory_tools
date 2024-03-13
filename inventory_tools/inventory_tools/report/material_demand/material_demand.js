@@ -96,7 +96,7 @@ async function create(type) {
 
 	let selected_rows = frappe.query_report.datatable.rowmanager.getCheckedRows()
 	let selected_items = frappe.query_report.datatable.datamanager.data.filter((row, index) => {
-		return selected_rows.includes(String(index)) ? row : false
+		return selected_rows.includes(String(index)) && row.indent == 1 ? row : false
 	})
 	if (!selected_items.length) {
 		frappe.show_alert({ message: 'Please select one or more rows.', seconds: 5, indicator: 'red' })
