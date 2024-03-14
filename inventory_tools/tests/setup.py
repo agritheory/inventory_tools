@@ -1,7 +1,3 @@
-import datetime
-import types
-from itertools import groupby
-
 import frappe
 from erpnext.accounts.doctype.account.account import update_account_number
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
@@ -10,6 +6,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 from erpnext.setup.utils import enable_all_roles_and_domains, set_defaults_for_tests
 from erpnext.stock.get_item_details import get_item_details
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
+from frappe.utils import add_months, nowdate
 
 from inventory_tools.tests.fixtures import (
 	boms,
@@ -43,6 +40,21 @@ def before_test():
 			"bank_account": "Primary Checking",
 		}
 	)
+	company = frappe.get_doc(
+		{
+			"doctype": "Company",
+			"company_name": "Golden Crust Company",
+			"country": "United States",
+			"default_currency": "USD",
+			"domains": ["Distribution"],
+			"company_abbr": "GCC",
+			"fy_start_date": today.replace(month=1, day=1).isoformat(),
+			"fy_end_date": today.replace(month=12, day=31).isoformat(),
+			"language": "english",
+			"company_tagline": "Golden Crust Company",
+		}
+	)
+	company.insert()
 	set_defaults_for_tests()
 	for modu in frappe.get_all("Module Onboarding"):
 		frappe.db.set_value("Module Onboarding", modu, "is_complete", 1)
@@ -56,6 +68,9 @@ def create_test_data():
 		{
 			"day": frappe.utils.getdate().replace(month=1, day=1),
 			"company": "Ambrosia Pie Company",
+			"company_abbr": "APC",
+			"secondary_company": "Golden Crust Company",
+			"secondary_company_abbr": "GCC",
 			"company_account": frappe.get_value(
 				"Account",
 				{
@@ -93,6 +108,8 @@ def create_test_data():
 	else:
 		create_material_request(settings)
 	create_production_plan(settings, prod_plan_from_doc)
+	create_material_request_for_seconday_company(settings)
+	create_quotations(settings)
 
 
 def create_suppliers(settings):
@@ -300,6 +317,14 @@ def create_items(settings):
 				"default_supplier": item.get("default_supplier"),
 			},
 		)
+		i.append(
+			"item_defaults",
+			{
+				"company": settings.secondary_company,
+				"default_warehouse": item.get("default_secondary_warehouse"),
+				"default_supplier": item.get("default_supplier"),
+			},
+		)
 		if i.is_purchase_item and item.get("supplier"):
 			if isinstance(item.get("supplier"), list):
 				[i.append("supplier_items", {"supplier": s}) for s in item.get("supplier")]
@@ -338,40 +363,57 @@ def create_items(settings):
 
 
 def create_warehouses(settings):
-	inventory_tools_settings = frappe.get_doc("Inventory Tools Settings", settings.company)
-	inventory_tools_settings.enable_work_order_subcontracting = 1
-	inventory_tools_settings.create_purchase_orders = 0
-	inventory_tools_settings.update_warehouse_path = 1
-	inventory_tools_settings.save()
+	for idx, company in enumerate(
+		[
+			(settings.company, settings.company_abbr),
+			(settings.secondary_company, settings.secondary_company_abbr),
+		]
+	):
+		inventory_tools_settings = frappe.get_doc("Inventory Tools Settings", company[0])
+		inventory_tools_settings.enable_work_order_subcontracting = 1
+		inventory_tools_settings.create_purchase_orders = 0
+		inventory_tools_settings.update_warehouse_path = 1
+		inventory_tools_settings.save()
 
-	warehouses = [item.get("default_warehouse") for item in items]
-	root_wh = frappe.get_value("Warehouse", {"company": settings.company, "is_group": 1})
-	if frappe.db.exists("Warehouse", "Stores - APC"):
-		frappe.rename_doc("Warehouse", "Stores - APC", "Storeroom - APC", force=True)
-	if frappe.db.exists("Warehouse", "Finished Goods - APC"):
-		frappe.rename_doc("Warehouse", "Finished Goods - APC", "Baked Goods - APC", force=True)
-		frappe.set_value("Warehouse", "Baked Goods - APC", "is_group", 1)
-	for wh in frappe.get_all("Warehouse", {"company": settings.company}, ["name", "is_group"]):
-		if wh.name not in warehouses and not wh.is_group:
-			frappe.delete_doc("Warehouse", wh.name)
-	for item in items:
-		if frappe.db.exists("Warehouse", item.get("default_warehouse")):
-			continue
+		warehouses = [item.get("default_warehouse") for item in items]
+		root_wh = frappe.get_value("Warehouse", {"company": company[0], "is_group": 1})
+		if frappe.db.exists("Warehouse", f"Stores - {company[1]}"):
+			frappe.rename_doc(
+				"Warehouse", f"Stores - {company[1]}", f"Storeroom - {company[1]}", force=True
+			)
+		if frappe.db.exists("Warehouse", f"Finished Goods - {company[1]}"):
+			frappe.rename_doc(
+				"Warehouse", f"Finished Goods - {company[1]}", f"Baked Goods - {company[1]}", force=True
+			)
+			frappe.set_value("Warehouse", f"Baked Goods - {company[1]}", "is_group", 1)
+		for wh in frappe.get_all("Warehouse", {"company": company[0]}, ["name", "is_group"]):
+			if wh.name not in warehouses and not wh.is_group:
+				frappe.delete_doc("Warehouse", wh.name)
+
+		for item in items:
+			if idx == 0 and not frappe.db.exists("Warehouse", item.get("default_warehouse")):
+				wh = frappe.new_doc("Warehouse")
+				wh.warehouse_name = item.get("default_warehouse").split(" - ")[0]
+				wh.parent_warehouse = root_wh
+				wh.company = company[0]
+				wh.save()
+
+			if idx == 1 and not frappe.db.exists("Warehouse", item.get("default_secondary_warehouse")):
+				wh = frappe.new_doc("Warehouse")
+				wh.warehouse_name = item.get("default_secondary_warehouse").split(" - ")[0]
+				wh.parent_warehouse = root_wh
+				wh.company = company[0]
+				wh.save()
+
 		wh = frappe.new_doc("Warehouse")
-		wh.warehouse_name = item.get("default_warehouse").split(" - ")[0]
-		wh.parent_warehouse = root_wh
-		wh.company = settings.company
+		wh.warehouse_name = "Bakery Display"
+		wh.parent_warehouse = f"Baked Goods - {company[1]}"
+		wh.company = company[0]
 		wh.save()
 
-	wh = frappe.new_doc("Warehouse")
-	wh.warehouse_name = "Bakery Display"
-	wh.parent_warehouse = "Baked Goods - APC"
-	wh.company = settings.company
-	wh.save()
-
-	wh = frappe.get_doc("Warehouse", "Refrigerated Display - APC")
-	wh.parent_warehouse = "Baked Goods - APC"
-	wh.save()
+		wh = frappe.get_doc("Warehouse", f"Refrigerated Display - {company[1]}")
+		wh.parent_warehouse = f"Baked Goods - {company[1]}"
+		wh.save()
 
 
 def create_boms(settings):
@@ -466,19 +508,19 @@ def create_sales_order(settings):
 	so.submit()
 
 
-def create_material_request(settings):
+def create_material_request_for_seconday_company(settings):
 	mr = frappe.new_doc("Material Request")
 	mr.material_request_type = "Manufacture"
 	mr.schedule_date = mr.transaction_date = settings.day
 	mr.title = "Pies"
-	mr.company = settings.company
+	mr.company = settings.secondary_company
 	mr.append(
 		"items",
 		{
 			"item_code": "Ambrosia Pie",
 			"schedule_date": mr.schedule_date,
 			"qty": 40,
-			"warehouse": "Refrigerated Display - APC",
+			"warehouse": f"Refrigerated Display - {settings.secondary_company_abbr}",
 		},
 	)
 	mr.append(
@@ -487,7 +529,7 @@ def create_material_request(settings):
 			"item_code": "Double Plum Pie",
 			"schedule_date": mr.schedule_date,
 			"qty": 40,
-			"warehouse": "Refrigerated Display - APC",
+			"warehouse": f"Refrigerated Display - {settings.secondary_company_abbr}",
 		},
 	)
 	mr.append(
@@ -496,7 +538,7 @@ def create_material_request(settings):
 			"item_code": "Gooseberry Pie",
 			"schedule_date": mr.schedule_date,
 			"qty": 10,
-			"warehouse": "Refrigerated Display - APC",
+			"warehouse": f"Refrigerated Display - {settings.secondary_company_abbr}",
 		},
 	)
 	mr.append(
@@ -505,7 +547,7 @@ def create_material_request(settings):
 			"item_code": "Kaduka Key Lime Pie",
 			"schedule_date": mr.schedule_date,
 			"qty": 10,
-			"warehouse": "Refrigerated Display - APC",
+			"warehouse": f"Refrigerated Display - {settings.secondary_company_abbr}",
 		},
 	)
 	mr.append(
@@ -528,6 +570,56 @@ def create_material_request(settings):
 	)
 	mr.save()
 	mr.submit()
+
+
+def create_material_request(settings):
+	for company in [
+		(settings.company, settings.company_abbr),
+		(settings.secondary_company, settings.secondary_company_abbr),
+	]:
+		mr = frappe.new_doc("Material Request")
+		mr.material_request_type = "Manufacture"
+		mr.schedule_date = mr.transaction_date = settings.day
+		mr.title = "Pies"
+		mr.company = company[0]
+		mr.append(
+			"items",
+			{
+				"item_code": "Ambrosia Pie",
+				"schedule_date": mr.schedule_date,
+				"qty": 40,
+				"warehouse": f"Refrigerated Display - {company[1]}",
+			},
+		)
+		mr.append(
+			"items",
+			{
+				"item_code": "Double Plum Pie",
+				"schedule_date": mr.schedule_date,
+				"qty": 40,
+				"warehouse": f"Refrigerated Display - {company[1]}",
+			},
+		)
+		mr.append(
+			"items",
+			{
+				"item_code": "Gooseberry Pie",
+				"schedule_date": mr.schedule_date,
+				"qty": 10,
+				"warehouse": f"Refrigerated Display - {company[1]}",
+			},
+		)
+		mr.append(
+			"items",
+			{
+				"item_code": "Kaduka Key Lime Pie",
+				"schedule_date": mr.schedule_date,
+				"qty": 10,
+				"warehouse": f"Refrigerated Display - {company[1]}",
+			},
+		)
+		mr.save()
+		mr.submit()
 
 
 def create_production_plan(settings, prod_plan_from_doc):
@@ -578,13 +670,14 @@ def create_production_plan(settings, prod_plan_from_doc):
 			{
 				**row,
 				"warehouse": frappe.get_value(
-					"Item Default", {"parent": row.get("item_code")}, "default_warehouse"
+					"Item Default",
+					{"parent": row.get("item_code"), "company": settings.company},
+					"default_warehouse",
 				),
 			},
 		)
 	pp.save()
 	pp.submit()
-
 	pp.make_material_request()
 	mr = frappe.get_last_doc("Material Request")
 	mr.schedule_date = mr.transaction_date = settings.day
@@ -605,3 +698,81 @@ def create_production_plan(settings, prod_plan_from_doc):
 			job_card.time_logs[0].completed_qty = wo.qty
 			job_card.save()
 			job_card.submit()
+
+
+def create_quotations(settings):
+	quotation = frappe.new_doc("Quotation")
+	values = {
+		"doctype": "Quotation",
+		"quotation_to": "Customer",
+		"order_type": "Sales",
+		"party_name": "Almacs Food Group",
+		"docstatus": 0,
+		"selling_price_list": "Bakery Wholesale",
+		"currency": "USD",
+		"conversion_rate": 1,
+		"transaction_date": nowdate(),
+		"valid_till": add_months(nowdate(), 1),
+		"items": [{"item_code": "Ambrosia Pie", "qty": 5}, {"item_code": "Double Plum Pie", "qty": 10}],
+		"company": settings.company,
+	}
+	quotation.update(values)
+	quotation.insert()
+	quotation.submit()
+
+	quotation = frappe.new_doc("Quotation")
+	values = {
+		"doctype": "Quotation",
+		"quotation_to": "Customer",
+		"order_type": "Sales",
+		"party_name": "Almacs Food Group",
+		"docstatus": 0,
+		"selling_price_list": "Bakery Wholesale",
+		"currency": "USD",
+		"conversion_rate": 1,
+		"transaction_date": nowdate(),
+		"valid_till": add_months(nowdate(), 1),
+		"items": [{"item_code": "Ambrosia Pie", "qty": 1}, {"item_code": "Gooseberry Pie", "qty": 5}],
+		"company": settings.company,
+	}
+	quotation.update(values)
+	quotation.insert()
+	quotation.submit()
+
+	quotation = frappe.new_doc("Quotation")
+	values = {
+		"doctype": "Quotation",
+		"quotation_to": "Customer",
+		"order_type": "Sales",
+		"party_name": "Downtown Deli",
+		"docstatus": 0,
+		"selling_price_list": "Bakery Wholesale",
+		"currency": "USD",
+		"conversion_rate": 1,
+		"transaction_date": nowdate(),
+		"valid_till": add_months(nowdate(), 1),
+		"items": [{"item_code": "Ambrosia Pie", "qty": 2}, {"item_code": "Double Plum Pie", "qty": 1}],
+		"company": settings.company,
+	}
+	quotation.update(values)
+	quotation.insert()
+	quotation.submit()
+
+	quotation = frappe.new_doc("Quotation")
+	values = {
+		"doctype": "Quotation",
+		"quotation_to": "Customer",
+		"order_type": "Sales",
+		"party_name": "Almacs Food Group",
+		"docstatus": 0,
+		"selling_price_list": "Bakery Wholesale",
+		"currency": "USD",
+		"conversion_rate": 1,
+		"transaction_date": nowdate(),
+		"valid_till": add_months(nowdate(), 1),
+		"items": [{"item_code": "Ambrosia Pie", "qty": 5}, {"item_code": "Double Plum Pie", "qty": 10}],
+		"company": settings.secondary_company,
+	}
+	quotation.update(values)
+	quotation.insert()
+	quotation.submit()

@@ -189,6 +189,7 @@ items = [
 		"uom": "Nos",
 		"item_price": 11.00,
 		"default_warehouse": "Refrigerated Display - APC",
+		"default_secondary_warehouse": "Refrigerated Display - GCC",
 		"description": "<div><p>Ambrosia Pie is the marquee product of Ambrosia Pie Company. A filling of heavenly cloudberries pair perfectly with the tart hairless rambutan, finished with drizzles of tayberry nectar. It's a feast fit for Mt Olympus!</p></div>",
 	},
 	{
@@ -197,6 +198,7 @@ items = [
 		"item_group": "Baked Goods",
 		"item_price": 10.50,
 		"default_warehouse": "Refrigerated Display - APC",
+		"default_secondary_warehouse": "Refrigerated Display - GCC",
 		"description": "<div><p>Double the fun and double the flavor with our Double Plum Pie! We combine damson and cocoplums in a daring tropical-meets-temperate filling. Forbidden fruit never tasted this good.</p></div>",
 	},
 	{
@@ -205,6 +207,7 @@ items = [
 		"item_group": "Baked Goods",
 		"item_price": 12.00,
 		"default_warehouse": "Refrigerated Display - APC",
+		"default_secondary_warehouse": "Refrigerated Display - GCC",
 		"description": "<div><p>Our delicious take on the traditional gooseberry pie that tastes like the holidays. This classic pie is best shared with the ones you love.</p></div>",
 	},
 	{
@@ -213,6 +216,7 @@ items = [
 		"uom": "Nos",
 		"item_price": 11.50,
 		"default_warehouse": "Refrigerated Display - APC",
+		"default_secondary_warehouse": "Refrigerated Display - GCC",
 		"description": "<div><p>Take your tastebuds on an adventure with this whimsical twist on the classic Key Lime pie. Made with kaduka limes and the exotic limequat, this seasonal pie is sure to satisfy even the most weary culinary explorer. Grab it when you can - it's only available April through September.</p></div>",
 	},
 	{
@@ -260,6 +264,7 @@ items = [
 		"uom": "Cup",
 		"item_group": "Sub Assemblies",
 		"default_warehouse": "Refrigerator - APC",
+		"default_secondary_warehouse": "Refrigerator - GCC",
 		"description": "Ambrosia Pie Filling",
 	},
 	{
@@ -267,6 +272,7 @@ items = [
 		"uom": "Cup",
 		"item_group": "Sub Assemblies",
 		"default_warehouse": "Refrigerator - APC",
+		"default_secondary_warehouse": "Refrigerator - GCC",
 		"description": "Double Plum Pie Filling",
 	},
 	{
@@ -275,6 +281,7 @@ items = [
 		"description": "Gooseberry Pie Filling",
 		"item_group": "Sub Assemblies",
 		"default_warehouse": "Refrigerator - APC",
+		"default_secondary_warehouse": "Refrigerator - GCC",
 	},
 	{
 		"item_code": "Bayberry Pie Filling",
@@ -287,6 +294,7 @@ items = [
 		"item_code": "Kaduka Key Lime Pie Filling",
 		"item_group": "Sub Assemblies",
 		"default_warehouse": "Refrigerator - APC",
+		"default_secondary_warehouse": "Refrigerator - GCC",
 		"uom": "Cup",
 		"description": "Kaduka Key Lime Pie Filling",
 	},
@@ -296,6 +304,7 @@ items = [
 		"description": "Pie Crust",
 		"item_group": "Sub Assemblies",
 		"default_warehouse": "Refrigerator - APC",
+		"default_secondary_warehouse": "Refrigerator - GCC",
 		"is_sub_contracted_item": 1,
 		"item_price": 2.00,
 		"default_supplier": "",
@@ -309,6 +318,7 @@ items = [
 		"description": "Subcontracted pie crust manufacturing service. Item price is per crust.",
 		"item_group": "Sub Assemblies",
 		"default_warehouse": "Credible Contract Baking - APC",
+		"default_secondary_warehouse": "Credible Contract Baking - GCC",
 		"is_sub_contracted_item": 1,
 		"is_stock_item": 0,
 		"item_price": 2.00,
@@ -321,6 +331,7 @@ items = [
 		"description": "Subcontracted pie crust manufacturing service. Item price is per hour.",
 		"item_group": "Sub Assemblies",
 		"default_warehouse": "Credible Contract Baking - APC",
+		"default_secondary_warehouse": "Credible Contract Baking - GCC",
 		"is_sub_contracted_item": 1,
 		"is_stock_item": 0,
 		"item_price": 40.00,  # Assumes 5 crusts takes 15 mins (excluding chilling time), or 20 crusts/hour at rate of $2.00/crust
@@ -334,6 +345,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.65,
 		"default_warehouse": "Refrigerator - APC",
+		"default_secondary_warehouse": "Refrigerator - GCC",
 		"supplier": "Chelsea Fruit Co",
 	},
 	{
@@ -343,6 +355,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.35,
 		"default_warehouse": "Refrigerator - APC",
+		"default_secondary_warehouse": "Refrigerator - GCC",
 		"supplier": "Chelsea Fruit Co",
 	},
 	{
@@ -352,6 +365,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.85,
 		"default_warehouse": "Refrigerator - APC",
+		"default_secondary_warehouse": "Refrigerator - GCC",
 		"supplier": "Chelsea Fruit Co",
 	},
 	{
@@ -361,6 +375,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.99,
 		"default_warehouse": "Refrigerator - APC",
+		"default_secondary_warehouse": "Refrigerator - GCC",
 		"supplier": "Chelsea Fruit Co",
 	},
 	{
@@ -370,6 +385,7 @@ items = [
 		"item_price": 0.50,
 		"item_group": "Ingredients",
 		"default_warehouse": "Storeroom - APC",
+		"default_secondary_warehouse": "Storeroom - GCC",
 		"supplier": "Chelsea Fruit Co",
 	},
 	{
@@ -379,6 +395,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.89,
 		"default_warehouse": "Refrigerator - APC",
+		"default_secondary_warehouse": "Refrigerator - GCC",
 		"supplier": "Chelsea Fruit Co",
 	},
 	{
@@ -388,6 +405,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.75,
 		"default_warehouse": "Refrigerator - APC",
+		"default_secondary_warehouse": "Refrigerator - GCC",
 		"supplier": "Chelsea Fruit Co",
 	},
 	{
@@ -397,6 +415,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.85,
 		"default_warehouse": "Refrigerator - APC",
+		"default_secondary_warehouse": "Refrigerator - GCC",
 		"supplier": "Chelsea Fruit Co",
 	},
 	{
@@ -415,6 +434,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 4.5,
 		"default_warehouse": "Refrigerator - APC",
+		"default_secondary_warehouse": "Refrigerator - GCC",
 		"supplier": "Freedom Provisions",
 	},
 	{
@@ -424,6 +444,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.52,
 		"default_warehouse": "Storeroom - APC",
+		"default_secondary_warehouse": "Storeroom - GCC",
 		"supplier": "Freedom Provisions",
 	},
 	{
@@ -433,6 +454,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.01,
 		"default_warehouse": "Refrigerator - APC",
+		"default_secondary_warehouse": "Refrigerator - GCC",
 		"available_in_house": 1,
 		"opening_qty": 50,
 	},
@@ -443,6 +465,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.66,
 		"default_warehouse": "Storeroom - APC",
+		"default_secondary_warehouse": "Storeroom - GCC",
 		"supplier": "Freedom Provisions",
 	},
 	{
@@ -452,6 +475,7 @@ items = [
 		"item_group": "Bakery Supplies",
 		"item_price": 0.4,
 		"default_warehouse": "Storeroom - APC",
+		"default_secondary_warehouse": "Storeroom - GCC",
 		"supplier": ["Freedom Provisions", "Unity Bakery Supply"],
 	},
 	{
@@ -461,6 +485,7 @@ items = [
 		"item_price": 0.18,
 		"item_group": "Bakery Supplies",
 		"default_warehouse": "Storeroom - APC",
+		"default_secondary_warehouse": "Storeroom - GCC",
 		"supplier": ["Freedom Provisions", "Unity Bakery Supply"],
 	},
 	{
@@ -470,6 +495,7 @@ items = [
 		"item_group": "Bakery Supplies",
 		"item_price": 0.02,
 		"default_warehouse": "Storeroom - APC",
+		"default_secondary_warehouse": "Storeroom - GCC",
 		"supplier": ["Freedom Provisions", "Unity Bakery Supply"],
 	},
 	{
@@ -479,6 +505,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.36,
 		"default_warehouse": "Storeroom - APC",
+		"default_secondary_warehouse": "Storeroom - GCC",
 		"supplier": "Freedom Provisions",
 	},
 	{
@@ -488,6 +515,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.60,
 		"default_warehouse": "Storeroom - APC",
+		"default_secondary_warehouse": "Storeroom - GCC",
 		"supplier": "Freedom Provisions",
 	},
 	{
@@ -497,6 +525,7 @@ items = [
 		"description": "Water",
 		"item_group": "Ingredients",
 		"default_warehouse": "Kitchen - APC",
+		"default_secondary_warehouse": "Kitchen - GCC",
 		"available_in_house": 1,
 		"opening_qty": 50,
 	},

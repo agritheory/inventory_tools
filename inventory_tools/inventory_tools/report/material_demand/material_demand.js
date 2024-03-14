@@ -28,6 +28,11 @@ frappe.query_reports['Material Demand'] = {
 			options: 'Price List',
 		},
 	],
+	on_report_render: reportview => {
+		// these don't seem to be working
+		$(".btn-default:contains('Create Card')").addClass('hidden')
+		$(".btn-default:contains('Set Chart')").addClass('hidden')
+	},
 	get_datatable_options(options) {
 		return Object.assign(options, {
 			treeView: true,
@@ -72,40 +77,37 @@ function manage_buttons(reportview) {
 		},
 		'Create'
 	)
-
-	// these don't seem to be working
-	$(".btn-default:contains('Create Card')").addClass('hidden')
-	$(".btn-default:contains('Set Chart')").addClass('hidden')
 }
 
 async function create(type) {
-	let values = frappe.query_report.get_filter_values()
+	let filters = frappe.query_report.get_filter_values()
 	let company = undefined
 	let email_template = undefined
+	let warehouse = undefined
+
 	if (type != 'po') {
 		values = await select_company_and_email_template(values.company)
 		company = values['company']
 		email_template = values['email_template']
 	} else {
-		if (!values.company) {
-			company = await select_company()
-		} else {
-			company = values.company
-		}
+		values = await select_company()
+		company = values['company']
+		warehouse = values['warehouse']
 	}
 
 	let selected_rows = frappe.query_report.datatable.rowmanager.getCheckedRows()
 	let selected_items = frappe.query_report.datatable.datamanager.data.filter((row, index) => {
-		return selected_rows.includes(String(index)) ? row : false
+		return selected_rows.includes(String(index)) && row.indent == 1 ? row : false
 	})
 	if (!selected_items.length) {
 		frappe.show_alert({ message: 'Please select one or more rows.', seconds: 5, indicator: 'red' })
 	} else {
 		await frappe
 			.xcall('inventory_tools.inventory_tools.report.material_demand.material_demand.create', {
-				company: company,
+				company: company || '',
+				warehouse: warehouse || '',
 				email_template: email_template || '',
-				filters: values,
+				filters: filters,
 				creation_type: type,
 				rows: selected_items,
 			})
@@ -186,20 +188,47 @@ async function select_all_supplier_items(row, toggle) {
 async function select_company() {
 	return new Promise(resolve => {
 		let dialog = new frappe.ui.Dialog({
-			title: __('Select a Company'),
+			title: __('Aggregate by Company'),
 			fields: [
 				{
 					fieldtype: 'Link',
 					fieldname: 'company',
 					label: 'Company',
 					options: 'Company',
-					reqd: 1,
+					reqd: 0,
+					description: __('Leave this field blank to disallow aggregation for this company'),
+					change: () => {
+						if (dialog.fields_dict.company.value) {
+							dialog.fields_dict.warehouse.df.hidden = 0
+							dialog.fields_dict.warehouse.df.reqd = 1
+						} else {
+							dialog.fields_dict.warehouse.df.hidden = 1
+							dialog.fields_dict.warehouse.df.reqd = 0
+						}
+						dialog.refresh()
+					},
+				},
+				{
+					fieldtype: 'Link',
+					fieldname: 'warehouse',
+					label: 'Warehouse',
+					options: 'Warehouse',
+					reqd: 0,
+					hidden: 1,
+					get_query: function () {
+						let company = dialog.get_value('company')
+						if (company) {
+							return {
+								filters: { company: company },
+							}
+						}
+					},
 				},
 			],
 			primary_action: () => {
 				let values = dialog.get_values()
 				dialog.hide()
-				return resolve(values.company)
+				return resolve(values)
 			},
 			primary_action_label: __('Select'),
 		})
