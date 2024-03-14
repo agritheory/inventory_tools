@@ -28,6 +28,11 @@ frappe.query_reports['Material Demand'] = {
 			options: 'Price List',
 		},
 	],
+	on_report_render: reportview => {
+		// these don't seem to be working
+		$(".btn-default:contains('Create Card')").addClass('hidden')
+		$(".btn-default:contains('Set Chart')").addClass('hidden')
+	},
 	get_datatable_options(options) {
 		return Object.assign(options, {
 			treeView: true,
@@ -72,10 +77,6 @@ function manage_buttons(reportview) {
 		},
 		'Create'
 	)
-
-	// these don't seem to be working
-	$(".btn-default:contains('Create Card')").addClass('hidden')
-	$(".btn-default:contains('Set Chart')").addClass('hidden')
 }
 
 async function create(type) {

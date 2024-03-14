@@ -125,37 +125,70 @@ def get_columns():
 
 
 @frappe.whitelist()
-def create(company, filters, rows):
+def create(company, warehouse, filters, rows):
 	filters = frappe._dict(json.loads(filters)) if isinstance(filters, str) else filters
 	rows = json.loads(rows) if isinstance(rows, str) else rows
 	if not rows:
 		return
 
 	counter = 0
+
 	for customer, _rows in groupby(rows, lambda x: x.get("customer")):
 		rows = list(_rows)
-		so = frappe.new_doc("Sales Order")
-		so.transaction_date = rows[0].get("transaction_date")
-		so.customer = customer
 
-		for row in rows:
-			if not row.get("item_code"):
-				continue
+		if company:
+			print("PASA")
+			so = frappe.new_doc("Sales Order")
+			so.transaction_date = rows[0].get("transaction_date")
+			so.customer = customer
+			so.company = company
 
-			so.append(
-				"items",
-				{
-					"item_code": row.get("item_code"),
-					"item_name": row.get("item_name"),
-					"delivery_date": row.get("transaction_date"),
-					"uom": row.get("uom"),
-					"qty": row.get("split_qty"),
-					"warehouse": row.get("warehouse"),
-					"quotation_item": row.get("quotation_item,"),
-					"prevdoc_docname": row.get("quotation"),
-				},
-			)
-		so.save()
-		counter += 1
+			for row in rows:
+				if not row.get("item_code"):
+					continue
+
+				so.append(
+					"items",
+					{
+						"item_code": row.get("item_code"),
+						"item_name": row.get("item_name"),
+						"delivery_date": row.get("transaction_date"),
+						"uom": row.get("uom"),
+						"qty": row.get("split_qty"),
+						"warehouse": warehouse,
+						"quotation_item": row.get("quotation_item"),
+						"prevdoc_docname": row.get("quotation"),
+					},
+				)
+			so.multi_company_sales_order = True
+			so.save()
+			counter += 1
+		else:
+			for quotation_company, _company_rows in groupby(rows, lambda x: x.get("company")):
+				rows = list(_company_rows)
+				so = frappe.new_doc("Sales Order")
+				so.transaction_date = rows[0].get("transaction_date")
+				so.customer = customer
+				so.company = quotation_company
+
+				for row in rows:
+					if not row.get("item_code"):
+						continue
+
+					so.append(
+						"items",
+						{
+							"item_code": row.get("item_code"),
+							"item_name": row.get("item_name"),
+							"delivery_date": row.get("transaction_date"),
+							"uom": row.get("uom"),
+							"qty": row.get("split_qty"),
+							"warehouse": row.get("warehouse"),
+							"quotation_item": row.get("quotation_item"),
+							"prevdoc_docname": row.get("quotation"),
+						},
+					)
+				so.save()
+				counter += 1
 
 	frappe.msgprint(frappe._(f"{counter} Sales Orders created"), alert=True, indicator="green")
