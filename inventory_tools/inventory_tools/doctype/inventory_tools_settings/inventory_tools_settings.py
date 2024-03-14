@@ -53,7 +53,7 @@ class InventoryToolsSettings(Document):
 			for i in frappe.get_all("Inventory Tools Settings")
 		]
 		for its in itsl:
-			if its.name == self.name:
+			if its.name == self.name or not its.purchase_order_aggregation_company:
 				continue
 			if self.purchase_order_aggregation_company != its.purchase_order_aggregation_company:
 				frappe.throw(

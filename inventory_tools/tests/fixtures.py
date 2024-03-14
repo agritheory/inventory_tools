@@ -56,17 +56,17 @@ suppliers = [
 		},
 	),
 	(
-		"Credible Contract Baking",
+		"Southern Fruit Supply",
 		None,
 		None,
 		None,
 		"Net 30",
 		{
-			"address_line1": "4 Crumb Circle",
-			"city": "Belmont",
-			"state": "MA",
+			"address_line1": "10001 Pineapple Way",
+			"city": "Largo",
+			"state": "TX",
 			"country": "United States",
-			"pincode": "89074",
+			"pincode": "89574",
 		},
 	),
 ]

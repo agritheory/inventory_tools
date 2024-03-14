@@ -301,7 +301,6 @@ def create_pos(company, filters, rows):
 	rows = [frappe._dict(r) for r in json.loads(rows)] if isinstance(rows, str) else rows
 	if not rows:
 		return
-	companies = set()
 	counter = 0
 	for supplier, _rows in groupby(rows, lambda x: x.get("supplier")):
 		rows = list(_rows)
@@ -310,9 +309,9 @@ def create_pos(company, filters, rows):
 		po.supplier = supplier
 		po.company = frappe.get_value("Material Request", rows[0].get("material_request"), "company")
 		po.buying_price_list = filters.price_list
-		companies.add(po.company)
 		settings = frappe.get_doc("Inventory Tools Settings", company)
-		if settings.purchase_order_aggregation_company:
+		if settings.purchase_order_aggregation_company == company:
+			po.multi_company_purchase_order = True
 			po.company = settings.purchase_order_aggregation_company
 
 		for row in rows:
@@ -335,7 +334,6 @@ def create_pos(company, filters, rows):
 					else row.get("warehouse"),
 				},
 			)
-		po.multi_company_purchase_order = True if len(list(companies)) > 1 else False
 		po.save()
 		counter += 1
 

@@ -10,6 +10,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 from erpnext.setup.utils import enable_all_roles_and_domains, set_defaults_for_tests
 from erpnext.stock.get_item_details import get_item_details
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
+from frappe.utils.data import getdate
 
 from inventory_tools.tests.fixtures import (
 	boms,
@@ -23,7 +24,6 @@ from inventory_tools.tests.fixtures import (
 
 def before_test():
 	frappe.clear_cache()
-	today = frappe.utils.getdate()
 	setup_complete(
 		{
 			"currency": "USD",
@@ -33,8 +33,8 @@ def before_test():
 			"company_abbr": "APC",
 			"domains": ["Distribution"],
 			"country": "United States",
-			"fy_start_date": today.replace(month=1, day=1).isoformat(),
-			"fy_end_date": today.replace(month=12, day=31).isoformat(),
+			"fy_start_date": getdate().replace(month=1, day=1).isoformat(),
+			"fy_end_date": getdate().replace(month=12, day=31).isoformat(),
 			"language": "english",
 			"company_tagline": "Ambrosia Pie Company",
 			"email": "support@agritheory.dev",
@@ -54,7 +54,7 @@ def before_test():
 def create_test_data():
 	settings = frappe._dict(
 		{
-			"day": frappe.utils.getdate().replace(month=1, day=1),
+			"day": getdate().replace(month=1, day=1),
 			"company": "Ambrosia Pie Company",
 			"company_account": frappe.get_value(
 				"Account",
@@ -102,6 +102,7 @@ def create_test_data():
 	else:
 		create_material_request(settings)
 	create_production_plan(settings, prod_plan_from_doc)
+	create_fruit_material_request(settings)
 
 
 def create_suppliers(settings):
@@ -620,3 +621,47 @@ def create_production_plan(settings, prod_plan_from_doc):
 			job_card.time_logs[0].completed_qty = wo.qty
 			job_card.save()
 			job_card.submit()
+
+
+def create_fruit_material_request(settings):
+	fruits = [
+		"Bayberry",
+		"Cocoplum",
+		"Damson Plum",
+		"Gooseberry",
+		"Hairless Rambutan",
+		"Kaduka Lime",
+		"Limequat",
+		"Tayberry",
+	]
+
+	for fruit in fruits:
+		i = frappe.get_doc("Item", fruit)
+		i.append(
+			"item_defaults",
+			{
+				"company": "Chelsea Fruit Co",
+				"default_warehouse": "Stores - CFC",
+				"default_supplier": "Southern Fruit Supply",
+			},
+		)
+		i.save()
+
+	mr = frappe.new_doc("Material Request")
+	mr.company = "Chelsea Fruit Co"
+	mr.transaction_date = settings.day
+	mr.schedule_date = getdate()
+	mr.purpose = "Purchase"
+	for f in fruits:
+		mr.append(
+			"items",
+			{
+				"item_code": f,
+				"qty": 100,
+				"schedule_date": mr.schedule_date,
+				"warehouse": "Stores - CFC",
+				"uom": "Pound",
+			},
+		)
+	mr.save()
+	mr.submit()
