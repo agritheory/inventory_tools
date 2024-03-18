@@ -21,14 +21,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          node-version: 20
           ref: ${{ github.head_ref }}
           fetch-depth: 2
 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          node-version: 20
           python-version: '3.10'
 
       - name: Install mypy
@@ -40,7 +38,6 @@ jobs:
       - name: Run mypy
         uses: sasanquaneuf/mypy-github-action@releases/v1
         with:
-          node-version: 20
           checkName: 'mypy'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -54,13 +51,11 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 2
-          node-version: 20
 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          node-version: 20
 
       - name: Install Black (Frappe)
         run: pip install git+https://github.com/frappe/black.git
@@ -77,7 +72,6 @@ jobs:
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 2
-          node-version: 20
 
       - name: Prettify code
         uses: rutajdash/prettier-cli-action@v1.0.0
@@ -101,7 +95,6 @@ jobs:
         with:
           ref: ${{ github.ref }}
           fetch-depth: 2
-          node-version: 20
 
       - name: Find JSON changes
         id: changed-json
