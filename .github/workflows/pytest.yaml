@@ -10,10 +10,6 @@ on:
       - version-14
       - version-15
 
-# concurrency:
-#   group: develop-cloud_storage-${{ github.event.number }}
-#   cancel-in-progress: true
-
 jobs:
   tests:
     runs-on: ${{ matrix.os }}
