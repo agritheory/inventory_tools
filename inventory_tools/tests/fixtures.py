@@ -348,7 +348,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.65,
 		"default_warehouse": "Refrigerator - APC",
-		"supplier": "Chelsea Fruit Co",
+		"supplier": ["Chelsea Fruit Co", "Southern Fruit Supply"],
 	},
 	{
 		"item_code": "Cocoplum",
@@ -357,7 +357,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.35,
 		"default_warehouse": "Refrigerator - APC",
-		"supplier": "Chelsea Fruit Co",
+		"supplier": ["Chelsea Fruit Co", "Southern Fruit Supply"],
 	},
 	{
 		"item_code": "Damson Plum",
@@ -366,7 +366,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.85,
 		"default_warehouse": "Refrigerator - APC",
-		"supplier": "Chelsea Fruit Co",
+		"supplier": ["Chelsea Fruit Co", "Southern Fruit Supply"],
 	},
 	{
 		"item_code": "Gooseberry",
@@ -375,7 +375,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.99,
 		"default_warehouse": "Refrigerator - APC",
-		"supplier": "Chelsea Fruit Co",
+		"supplier": ["Chelsea Fruit Co", "Southern Fruit Supply"],
 	},
 	{
 		"item_code": "Hairless Rambutan",
@@ -384,7 +384,7 @@ items = [
 		"item_price": 0.50,
 		"item_group": "Ingredients",
 		"default_warehouse": "Storeroom - APC",
-		"supplier": "Chelsea Fruit Co",
+		"supplier": ["Chelsea Fruit Co", "Southern Fruit Supply"],
 	},
 	{
 		"item_code": "Kaduka Lime",
@@ -393,7 +393,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.89,
 		"default_warehouse": "Refrigerator - APC",
-		"supplier": "Chelsea Fruit Co",
+		"supplier": ["Chelsea Fruit Co", "Southern Fruit Supply"],
 	},
 	{
 		"item_code": "Limequat",
@@ -402,7 +402,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.75,
 		"default_warehouse": "Refrigerator - APC",
-		"supplier": "Chelsea Fruit Co",
+		"supplier": ["Chelsea Fruit Co", "Southern Fruit Supply"],
 	},
 	{
 		"item_code": "Tayberry",
@@ -411,7 +411,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.85,
 		"default_warehouse": "Refrigerator - APC",
-		"supplier": "Chelsea Fruit Co",
+		"supplier": ["Chelsea Fruit Co", "Southern Fruit Supply"],
 	},
 	{
 		"item_code": "Bayberry",
@@ -420,7 +420,7 @@ items = [
 		"item_group": "Ingredients",
 		"item_price": 0.45,
 		"default_warehouse": "Refrigerator - APC",
-		"supplier": "Chelsea Fruit Co",
+		"supplier": ["Chelsea Fruit Co", "Southern Fruit Supply"],
 	},
 	{
 		"item_code": "Butter",

@@ -124,7 +124,11 @@ def get_columns(filters):
 def get_data(filters):
 	output = []
 	# TODO: refactor to frappe query builder
-	company_query = "AND `tabMaterial Request`.company = (%(company)s)" if filters.company else ""
+	company_query = (
+		"AND `tabMaterial Request`.company = (%(company)s) AND `tabItem Supplier`.supplier != %(company)s"
+		if filters.company
+		else ""
+	)
 	data = frappe.db.sql(
 		f"""
 	SELECT DISTINCT `tabMaterial Request Item`.name AS material_request_item,
@@ -148,7 +152,6 @@ def get_data(filters):
 	AND `tabMaterial Request Item`.ordered_qty < `tabMaterial Request Item`.stock_qty
 	AND `tabMaterial Request Item`.received_qty < `tabMaterial Request Item`.stock_qty
 	AND `tabItem Supplier`.parent = `tabMaterial Request Item`.item_code
-	
 	{company_query}
 	ORDER BY supplier, item_name
 	""",
@@ -222,6 +225,8 @@ def create_item_based(company, email_template, filters, rows):
 	po_message = frappe._("0 Purchase Orders created")
 
 	for row in rows:
+		if not row.get("item_code"):
+			continue
 		if frappe.get_value(
 			"Item Supplier", {"parent": row["item_code"], "supplier": row["supplier"]}, "requires_rfq"
 		):
@@ -302,39 +307,48 @@ def create_pos(company, filters, rows):
 	if not rows:
 		return
 	counter = 0
-	for supplier, _rows in groupby(rows, lambda x: x.get("supplier")):
-		rows = list(_rows)
-		po = frappe.new_doc("Purchase Order")
-		po.schedule_date = po.posting_date = getdate()
-		po.supplier = supplier
-		po.company = frappe.get_value("Material Request", rows[0].get("material_request"), "company")
-		po.buying_price_list = filters.price_list
-		settings = frappe.get_doc("Inventory Tools Settings", company)
-		if settings.purchase_order_aggregation_company == company:
-			po.multi_company_purchase_order = True
-			po.company = settings.purchase_order_aggregation_company
+	settings = frappe.get_doc("Inventory Tools Settings", company)
+	requesting_companies = list({row.company for row in rows})
+	if settings.purchase_order_aggregation_company == company:
+		requesting_companies = [company]
+	for requesting_company in requesting_companies:
+		for supplier, _rows in groupby(rows, lambda x: x.get("supplier")):
+			rows = list(_rows)
+			po = frappe.new_doc("Purchase Order")
+			po.schedule_date = po.posting_date = getdate()
+			po.supplier = supplier
+			po.buying_price_list = filters.price_list
+			if len(requesting_companies) == 1:
+				po.multi_company_purchase_order = True
+				po.company = settings.purchase_order_aggregation_company
+			else:
+				po.company = requesting_company
+			for row in rows:
+				if not row.get("item_code"):
+					continue
+				if settings.purchase_order_aggregation_company == po.company or po.company == row.company:
+					if (
+						settings.purchase_order_aggregation_company == po.company
+						and settings.aggregated_purchasing_warehouse
+					):
+						warehouse = settings.aggregated_purchasing_warehouse
+					else:
+						warehouse = frappe.get_value("Material Request Item", row.material_request_item, "warehouse")
+					i = {
+						"item_code": row.get("item_code"),
+						"item_name": row.get("item_name"),
+						"schedule_date": max(getdate(), getdate(row.get("schedule_date"))),
+						"company": row.get("company"),
+						"qty": row.get("qty"),
+						"rate": row.get("supplier_price"),
+						"uom": row.get("uom"),
+						"material_request": row.get("material_request"),
+						"material_request_item": row.get("material_request_item"),
+						"warehouse": warehouse,
+					}
+					po.append("items", i)
 
-		for row in rows:
-			if not row.get("item_code"):
-				continue
-			po.append(
-				"items",
-				{
-					"item_code": row.get("item_code"),
-					"item_name": row.get("item_name"),
-					"schedule_date": max(getdate(), getdate(row.get("schedule_date"))),
-					"company": row.get("company"),
-					"qty": row.get("qty"),
-					"rate": row.get("supplier_price"),
-					"uom": row.get("uom"),
-					"material_request": row.get("material_request"),
-					"material_request_item": row.get("material_request_item"),
-					"warehouse": settings.aggregated_purchasing_warehouse
-					if settings.aggregated_purchasing_warehouse
-					else row.get("warehouse"),
-				},
-			)
-		po.save()
-		counter += 1
+			po.save()
+			counter += 1
 
 	return frappe._(f"{counter} Purchase Orders created")

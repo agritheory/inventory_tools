@@ -10,7 +10,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 from erpnext.setup.utils import enable_all_roles_and_domains, set_defaults_for_tests
 from erpnext.stock.get_item_details import get_item_details
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
-from frappe.utils.data import getdate
+from frappe.utils.data import flt, getdate
 
 from inventory_tools.tests.fixtures import (
 	boms,
@@ -646,6 +646,10 @@ def create_fruit_material_request(settings):
 			},
 		)
 		i.save()
+		ip = frappe.copy_doc(frappe.get_doc("Item Price", {"item_code": fruit}))
+		ip.price_list = "Standard Buying"
+		ip.price_list_rate = flt(ip.price_list_rate * 0.75, 2)
+		ip.save()
 
 	mr = frappe.new_doc("Material Request")
 	mr.company = "Chelsea Fruit Co"

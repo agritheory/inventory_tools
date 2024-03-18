@@ -15,6 +15,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 	make_purchase_receipt,
 )
 from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
+from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 from frappe import _, throw
 
 
@@ -54,21 +55,15 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 		super(PurchaseOrder, self).validate_with_previous_doc(config)
 
 	def validate_warehouse(self):
-		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
-
 		warehouses = list({d.warehouse for d in self.get("items") if getattr(d, "warehouse", None)})
 
-		target_warehouses = list(
-			{d.target_warehouse for d in self.get("items") if getattr(d, "target_warehouse", None)}
+		warehouses.extend(
+			list({d.target_warehouse for d in self.get("items") if getattr(d, "target_warehouse", None)})
 		)
 
-		warehouses.extend(target_warehouses)
-
-		from_warehouse = list(
-			{d.from_warehouse for d in self.get("items") if getattr(d, "from_warehouse", None)}
+		warehouses.extend(
+			list({d.from_warehouse for d in self.get("items") if getattr(d, "from_warehouse", None)})
 		)
-
-		warehouses.extend(from_warehouse)
 
 		for w in warehouses:
 			validate_disabled_warehouse(w)
