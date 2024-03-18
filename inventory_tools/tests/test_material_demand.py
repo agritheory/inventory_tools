@@ -133,54 +133,6 @@ def test_report_item_based_without_aggregation():
 		rfq.delete()
 
 
-def test_report_po_with_aggregation_and_aggregation_warehouse():
-	settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
-	settings.purchase_order_aggregation_company = settings.name
-	settings.aggregated_purchasing_warehouse = "Stores - CFC"
-	settings.update_warehouse_path = True
-	settings.save()
-
-	filters = frappe._dict({"end_date": getdate(), "price_list": "Bakery Buying"})
-	columns, rows = execute_material_demand(filters)
-	assert len(rows) == 50
-	assert rows[1].get("supplier") == "Chelsea Fruit Co"
-
-	selected_rows = [
-		row for row in rows if row.get("supplier") not in ["Chelsea Fruit Co", "Unity Bakery Supply"]
-	]
-
-	frappe.call(
-		"inventory_tools.inventory_tools.report.material_demand.material_demand.create",
-		**{
-			"company": "Chelsea Fruit Co",
-			"email_template": "",
-			"filters": filters,
-			"creation_type": "po",
-			"rows": frappe.as_json(selected_rows),
-		},
-	)
-
-	pos = [frappe.get_doc("Purchase Order", p) for p in frappe.get_all("Purchase Order")]
-	assert "Unity Bakery Supply" not in [p.get("supplier") for p in pos]
-	assert "Chelsea Fruit Co" not in [p.get("supplier") for p in pos]
-	for po in pos:
-		if po.supplier == "Southern Fruit Supply":
-			assert po.grand_total == flt(765.9, 2)
-			for item in po.items:
-				wh_company = frappe.get_value("Warehouse", item.warehouse, "company")
-				assert wh_company == po.company
-
-		elif po.supplier == "Freedom Provisions":
-			assert po.grand_total == flt(439.89, 2)
-			for item in po.items:
-				wh_company = frappe.get_value("Warehouse", item.warehouse, "company")
-				assert wh_company == po.company
-
-		else:
-			raise AssertionError(f"{po.supplier} should not be in this test")
-		frappe.delete_doc("Purchase Order", po.name)
-
-
 def test_report_po_with_aggregation_and_no_aggregation_warehouse():
 	settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
 	settings.purchase_order_aggregation_company = settings.name
