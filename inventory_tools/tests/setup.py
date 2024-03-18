@@ -10,6 +10,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 from erpnext.setup.utils import enable_all_roles_and_domains, set_defaults_for_tests
 from erpnext.stock.get_item_details import get_item_details
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
+from frappe.utils.data import flt, getdate
 
 from inventory_tools.tests.fixtures import (
 	boms,
@@ -23,7 +24,6 @@ from inventory_tools.tests.fixtures import (
 
 def before_test():
 	frappe.clear_cache()
-	today = frappe.utils.getdate()
 	setup_complete(
 		{
 			"currency": "USD",
@@ -33,8 +33,8 @@ def before_test():
 			"company_abbr": "APC",
 			"domains": ["Distribution"],
 			"country": "United States",
-			"fy_start_date": today.replace(month=1, day=1).isoformat(),
-			"fy_end_date": today.replace(month=12, day=31).isoformat(),
+			"fy_start_date": getdate().replace(month=1, day=1).isoformat(),
+			"fy_end_date": getdate().replace(month=12, day=31).isoformat(),
 			"language": "english",
 			"company_tagline": "Ambrosia Pie Company",
 			"email": "support@agritheory.dev",
@@ -54,7 +54,7 @@ def before_test():
 def create_test_data():
 	settings = frappe._dict(
 		{
-			"day": frappe.utils.getdate().replace(month=1, day=1),
+			"day": getdate().replace(month=1, day=1),
 			"company": "Ambrosia Pie Company",
 			"company_account": frappe.get_value(
 				"Account",
@@ -76,7 +76,16 @@ def create_test_data():
 	company_address.is_your_company_address = 1
 	company_address.append("links", {"link_doctype": "Company", "link_name": settings.company})
 	company_address.save()
-	frappe.set_value("Company", settings.company, "tax_id", "04-1871930")
+	cfc = frappe.new_doc("Company")
+	cfc.company_name = "Chelsea Fruit Co"
+	cfc.default_currency = "USD"
+	cfc.create_chart_of_accounts_based_on = "Existing Company"
+	cfc.existing_company = settings.company
+	cfc.abbr = "CFC"
+	cfc.save()
+
+	frappe.db.set_single_value("Stock Settings", "valuation_method", "Moving Average")
+	frappe.db.set_single_value("Stock Settings", "default_warehouse", "")
 	create_warehouses(settings)
 	setup_manufacturing_settings(settings)
 	create_workstations()
@@ -93,6 +102,7 @@ def create_test_data():
 	else:
 		create_material_request(settings)
 	create_production_plan(settings, prod_plan_from_doc)
+	create_fruit_material_request(settings)
 
 
 def create_suppliers(settings):
@@ -281,7 +291,7 @@ def create_items(settings):
 			or item.get("is_sub_contracted_item")
 			else "Manufacture"
 		)
-		i.valuation_method = "FIFO"
+		i.valuation_method = "Moving Average"
 		if item.get("uom_conversion_detail"):
 			for uom, cf in item.get("uom_conversion_detail").items():
 				i.append("uoms", {"uom": uom, "conversion_factor": cf})
@@ -298,6 +308,7 @@ def create_items(settings):
 				"company": settings.company,
 				"default_warehouse": item.get("default_warehouse"),
 				"default_supplier": item.get("default_supplier"),
+				"requires_rfq": True if item.get("item_code") == "Cloudberry" else False,
 			},
 		)
 		if i.is_purchase_item and item.get("supplier"):
@@ -528,6 +539,11 @@ def create_material_request(settings):
 	)
 	mr.save()
 	mr.submit()
+	mr = frappe.new_doc("Material Request")
+	mr.material_request_type = "Purchase"
+	mr.schedule_date = mr.transaction_date = settings.day
+	mr.title = "Boxes"
+	mr.company = settings.company
 
 
 def create_production_plan(settings, prod_plan_from_doc):
@@ -605,3 +621,51 @@ def create_production_plan(settings, prod_plan_from_doc):
 			job_card.time_logs[0].completed_qty = wo.qty
 			job_card.save()
 			job_card.submit()
+
+
+def create_fruit_material_request(settings):
+	fruits = [
+		"Bayberry",
+		"Cocoplum",
+		"Damson Plum",
+		"Gooseberry",
+		"Hairless Rambutan",
+		"Kaduka Lime",
+		"Limequat",
+		"Tayberry",
+	]
+
+	for fruit in fruits:
+		i = frappe.get_doc("Item", fruit)
+		i.append(
+			"item_defaults",
+			{
+				"company": "Chelsea Fruit Co",
+				"default_warehouse": "Stores - CFC",
+				"default_supplier": "Southern Fruit Supply",
+			},
+		)
+		i.save()
+		ip = frappe.copy_doc(frappe.get_doc("Item Price", {"item_code": fruit}))
+		ip.price_list = "Standard Buying"
+		ip.price_list_rate = flt(ip.price_list_rate * 0.75, 2)
+		ip.save()
+
+	mr = frappe.new_doc("Material Request")
+	mr.company = "Chelsea Fruit Co"
+	mr.transaction_date = settings.day
+	mr.schedule_date = getdate()
+	mr.purpose = "Purchase"
+	for f in fruits:
+		mr.append(
+			"items",
+			{
+				"item_code": f,
+				"qty": 100,
+				"schedule_date": mr.schedule_date,
+				"warehouse": "Stores - CFC",
+				"uom": "Pound",
+			},
+		)
+	mr.save()
+	mr.submit()

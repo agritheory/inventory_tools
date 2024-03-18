@@ -8,6 +8,7 @@ from frappe.model.document import Document
 class InventoryToolsSettings(Document):
 	def validate(self):
 		self.create_warehouse_path_custom_field()
+		self.validate_single_aggregation_company()
 
 	def create_warehouse_path_custom_field(self):
 		if frappe.db.exists("Custom Field", "Warehouse-warehouse_path"):
@@ -42,6 +43,26 @@ class InventoryToolsSettings(Document):
 		for warehouse in frappe.get_all("Warehouse"):
 			wh = frappe.get_doc("Warehouse", warehouse)
 			wh.save()
+
+	def validate_single_aggregation_company(self):
+		if not self.purchase_order_aggregation_company:
+			return
+
+		itsl = [
+			frappe.get_doc("Inventory Tools Settings", i)
+			for i in frappe.get_all("Inventory Tools Settings")
+		]
+		for its in itsl:
+			if its.name == self.name or not its.purchase_order_aggregation_company:
+				continue
+			if self.purchase_order_aggregation_company != its.purchase_order_aggregation_company:
+				frappe.throw(
+					f"Purchase Order Aggregation Company in {its.name} Inventory Tools Settings is set to {its.purchase_order_aggregation_company}"
+				)
+			if self.aggregated_purchasing_warehouse != its.aggregated_purchasing_warehouse:
+				frappe.throw(
+					f"Purchase Order Aggregation Company in {its.name} Inventory Tools Settings is set to {its.aggregated_purchasing_warehouse}"
+				)
 
 
 @frappe.whitelist()
