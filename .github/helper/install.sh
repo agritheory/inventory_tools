@@ -48,7 +48,6 @@ sed -i 's/schedule:/# schedule:/g' Procfile
 sed -i 's/socketio:/# socketio:/g' Procfile
 sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
 
-bench get-app https://github.com/frappe/erpnext --branch "${BRANCH_NAME}" --resolve-deps --skip-assets
 bench get-app https://github.com/frappe/hrms --branch "${BRANCH_NAME}" --resolve-deps --skip-assets
 bench get-app inventory_tools "${GITHUB_WORKSPACE}" --skip-assets --resolve-deps
 
@@ -59,9 +58,6 @@ bench use test_site
 bench start &> bench_run_logs.txt &
 CI=Yes &
 bench --site test_site reinstall --yes --admin-password admin
-
-# bench --site test_site install-app erpnext inventory_tools
-bench setup requirements --dev
 
 echo "BENCH VERSION NUMBERS:"
 bench version
