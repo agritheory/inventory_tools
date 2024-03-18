@@ -84,7 +84,7 @@ jobs:
         shell: bash
         run: |
           echo "The following files are not formatted:"
-          echo "${{steps.prettier-run.outputs.prettier_output}}"
+          echo "${{steps.prettier-run.outputs.prettier_output}}" >> $GITHUB_OUTPUT
 
   json_diff:
     needs: [ py_json_merge ]
@@ -98,7 +98,7 @@ jobs:
 
       - name: Find JSON changes
         id: changed-json
-        uses: tj-actions/changed-files@v36
+        uses: tj-actions/changed-files@v43
         with:
           files: |
             **/*.json
