@@ -49,10 +49,9 @@ sed -i 's/socketio:/# socketio:/g' Procfile
 sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
 
 bench get-app https://github.com/frappe/erpnext --branch "${BRANCH_NAME}" --resolve-deps --skip-assets
-bench get-app https://github.com/frappe/hrms --branch "${BRANCH_NAME}" --resolve-deps --skip-assets
 bench get-app inventory_tools "${GITHUB_WORKSPACE}" --skip-assets --resolve-deps
 
-printf '%s\n' 'frappe' 'erpnext' 'inventory_tools' > ~/frappe-bench/sites/apps.txt
+printf '%s\n' 'frappe' 'erpnext' 'hrms' 'inventory_tools' > ~/frappe-bench/sites/apps.txt
 bench setup requirements --python
 bench use test_site
 
