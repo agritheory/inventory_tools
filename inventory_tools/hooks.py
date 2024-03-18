@@ -6,7 +6,7 @@ app_publisher = "AgriTheory"
 app_description = "Inventory Tools"
 app_email = "support@agritheory.dev"
 app_license = "MIT"
-required_apps = ["frappe/erpnext", "frappe/hrms"]
+# required_apps = ["frappe/erpnext", "frappe/hrms"]
 
 # Includes in <head>
 # ------------------
