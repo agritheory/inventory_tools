@@ -48,9 +48,9 @@ sed -i 's/schedule:/# schedule:/g' Procfile
 sed -i 's/socketio:/# socketio:/g' Procfile
 sed -i 's/redis_socketio:/# redis_socketio:/g' Procfile
 
-bench get-app hrms --branch "${BRANCH_NAME}" --resolve-deps --skip-assets --overwrite
-bench get-app erpnext --branch "${BRANCH_NAME}" --resolve-deps --skip-assets --overwrite
-bench get-app inventory_tools "${GITHUB_WORKSPACE}" --skip-assets --resolve-deps
+bench get-app hrms --branch "${BRANCH_NAME}" --skip-assets --overwrite
+bench get-app erpnext --branch "${BRANCH_NAME}" --skip-assets --overwrite
+bench get-app inventory_tools "${GITHUB_WORKSPACE}" --skip-assets
 
 printf '%s\n' 'frappe' 'erpnext' 'hrms' 'inventory_tools' > ~/frappe-bench/sites/apps.txt
 bench setup requirements --python
