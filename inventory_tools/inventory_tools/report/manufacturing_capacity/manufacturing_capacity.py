@@ -174,9 +174,10 @@ def get_total_demand(bom_no):
 		.select(
 			(Sum(mr_item.stock_qty - mr_item.ordered_qty)).as_(
 				"total"
-			)  # removes ordered-qty (accounted for in a Work Order)
+			)  # removes ordered-qty, labeled as "Completed Qty" (accounted for in a Work Order)
 		)
 		.where(mr.docstatus == 1)
+		.where(mr.status != "Stopped")
 		.where(mr.material_request_type == "Manufacture")
 		.where(mr_item.item_code == item)
 		.groupby(mr_item.item_code)
