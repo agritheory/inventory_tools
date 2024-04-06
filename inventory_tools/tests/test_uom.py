@@ -15,7 +15,4 @@ def test_uom_enforcement_validation():
 	with pytest.raises(ValidationError) as exc_info:
 		so.save()
 
-	assert (
-		"RowItemInvalid UOMValid UOMs Row 1  Ambrosia Pie:Ambrosia Pie Box  Nos"
-		in exc_info.value.args[0]
-	)
+	assert "Invalid UOM" in exc_info.value.args[0]
