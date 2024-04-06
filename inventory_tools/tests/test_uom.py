@@ -1,10 +1,21 @@
 import frappe
 import pytest
+from frappe.exceptions import ValidationError
 
 
-@pytest.mark.xfail()
 def test_uom_enforcement_validation():
-	so = frappe.get_last_doc("Sales Order")
+	_so = frappe.get_last_doc("Sales Order")
+	inventory_tools_settings = frappe.get_doc("Inventory Tools Settings", _so.company)
+	inventory_tools_settings.enforce_uoms = True
+	inventory_tools_settings.save()
+
+	so = frappe.copy_doc(_so)
 	assert so.items[0].uom == "Nos"
 	so.items[0].uom = "Box"
-	so.save()
+	with pytest.raises(ValidationError) as exc_info:
+		so.save()
+
+	assert (
+		"RowItemInvalid UOMValid UOMs Row 1  Ambrosia Pie:Ambrosia Pie Box  Nos"
+		in exc_info.value.args[0]
+	)
