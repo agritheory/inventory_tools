@@ -11,6 +11,7 @@ from frappe.utils import now
 from inventory_tools.inventory_tools.overrides.work_order import get_allowance_percentage
 
 
+@pytest.mark.order(30)
 def test_get_allowance_percentage():
 	work_order = frappe.get_doc("Work Order", {"item_name": "Gooseberry Pie"})
 	bom = frappe.get_doc("BOM", work_order.bom_no)
@@ -40,6 +41,7 @@ def test_get_allowance_percentage():
 	assert get_allowance_percentage(work_order.company, bom.name) == 100.0
 
 
+@pytest.mark.order(31)
 def test_check_if_operations_completed():
 
 	# BOM with overproduction_percentage_for_work_order configured
@@ -112,6 +114,7 @@ def test_check_if_operations_completed():
 	)
 
 
+@pytest.mark.order(32)
 def test_validate_finished_goods():
 	work_order = frappe.get_doc("Work Order", {"item_name": "Ambrosia Pie"})
 	se = make_stock_entry(work_order_id=work_order.name, purpose="Manufacture", qty=work_order.qty)
@@ -129,6 +132,7 @@ def test_validate_finished_goods():
 	)
 
 
+@pytest.mark.order(33)
 def test_validate_job_card():
 	work_order = frappe.get_doc("Work Order", {"item_name": "Ambrosia Pie"})
 	jc = frappe.get_doc(

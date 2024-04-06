@@ -3,6 +3,7 @@ import pytest
 from frappe.exceptions import ValidationError
 
 
+@pytest.mark.order(40)
 def test_uom_enforcement_validation():
 	_so = frappe.get_last_doc("Sales Order")
 	inventory_tools_settings = frappe.get_doc("Inventory Tools Settings", _so.company)

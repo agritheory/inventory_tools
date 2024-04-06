@@ -7,6 +7,7 @@ from inventory_tools.inventory_tools.report.material_demand.material_demand impo
 )
 
 
+@pytest.mark.order(20)
 def test_report_po_without_aggregation():
 	filters = frappe._dict(
 		{"end_date": getdate(), "price_list": "Bakery Buying", "company": "Ambrosia Pie Company"}
@@ -89,6 +90,7 @@ def test_report_rfq_without_aggregation():
 		rfq.delete()
 
 
+@pytest.mark.order(21)
 def test_report_item_based_without_aggregation():
 	filters = frappe._dict(
 		{"end_date": getdate(), "price_list": "Bakery Buying", "company": "Ambrosia Pie Company"}
@@ -133,6 +135,7 @@ def test_report_item_based_without_aggregation():
 		rfq.delete()
 
 
+@pytest.mark.order(22)
 def test_report_po_with_aggregation_and_no_aggregation_warehouse():
 	settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
 	settings.purchase_order_aggregation_company = settings.name
@@ -180,6 +183,7 @@ def test_report_po_with_aggregation_and_no_aggregation_warehouse():
 		frappe.delete_doc("Purchase Order", po.name)
 
 
+@pytest.mark.order(23)
 def test_report_po_with_aggregation_and_aggregation_warehouse():
 	settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
 	settings.purchase_order_aggregation_company = settings.name

@@ -13,6 +13,7 @@ from inventory_tools.inventory_tools.report.manufacturing_capacity.manufacturing
 )
 
 
+@pytest.mark.order(10)
 def test_total_demand():
 	pocketful_bom_no = frappe.get_value(
 		"BOM", {"item": "Pocketful of Bay", "is_active": 1, "is_default": 1}
