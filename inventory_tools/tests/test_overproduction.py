@@ -1,10 +1,8 @@
-import re
-
 import frappe
 import pytest
 from erpnext.manufacturing.doctype.work_order.work_order import create_job_card, make_stock_entry
 from frappe.exceptions import ValidationError
-from frappe.utils import now
+from frappe.utils import now, strip_html
 
 from inventory_tools.inventory_tools.overrides.work_order import get_allowance_percentage
 
@@ -163,9 +161,8 @@ def test_validate_job_card():
 
 	with pytest.raises(ValidationError) as exc_info:
 		job_card.validate_job_card()
-
-	exception_text = re.sub(re.compile("<.*?>"), "", exc_info.value.args[0])
+	
 	assert (
 		f"The Total Completed Qty ({over_production_qty + 10}) must be equal to Qty to Manufacture ({job_card.for_quantity})"
-		in exception_text
+		in strip_html(exc_info.value.args[0])
 	)
