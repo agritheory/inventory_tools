@@ -161,7 +161,7 @@ def test_validate_job_card():
 
 	with pytest.raises(ValidationError) as exc_info:
 		job_card.validate_job_card()
-	
+
 	assert (
 		f"The Total Completed Qty ({over_production_qty + 10}) must be equal to Qty to Manufacture ({job_card.for_quantity})"
 		in strip_html(exc_info.value.args[0])
