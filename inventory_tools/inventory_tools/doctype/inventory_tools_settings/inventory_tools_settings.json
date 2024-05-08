@@ -26,8 +26,11 @@
   "section_break_0",
   "update_warehouse_path",
   "section_break_gzcbr",
+  "update_warehouse_path",
   "uoms_section",
-  "enforce_uoms"
+  "enforce_uoms",
+  "landed_costing_section",
+  "enable_inline_landed_costing"
  ],
  "fields": [
   {
@@ -78,19 +81,15 @@
    "label": "Create Purchase Orders in Production Plan"
   },
   {
-   "fieldname": "section_break_0",
-   "fieldtype": "Section Break"
-  },
+    "fieldname": "section_break_gzcbr",
+    "fieldtype": "Section Break",
+    "label": "Warehouses"
+   },
   {
    "default": "0",
    "fieldname": "update_warehouse_path",
    "fieldtype": "Check",
    "label": "Update Warehouse Path"
-  },
-  {
-   "fieldname": "section_break_gzcbr",
-   "fieldtype": "Section Break",
-   "label": "Warehouses"
   },
   {
    "fieldname": "uoms_section",
@@ -146,6 +145,17 @@
    "fieldtype": "Link",
    "label": "Aggregated Sales Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "fieldname": "landed_costing_section",
+   "fieldtype": "Section Break",
+   "label": "Landed Costing"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_inline_landed_costing",
+   "fieldtype": "Check",
+   "label": "Enable Inline Landed Costing"
   }
  ],
  "index_web_pages_for_search": 1,
