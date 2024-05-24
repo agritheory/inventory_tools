@@ -8,11 +8,18 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	make_stock_entry as _make_stock_entry,
 )
 from frappe import _
-from frappe.utils import flt, get_link_to_form, getdate, nowdate
+from frappe.utils import flt, get_link_to_form, getdate
 
 
 class InventoryToolsWorkOrder(WorkOrder):
 	def onload(self):
+		"""
+		HASH: 4d34b1ead73baf4c5430a2ecbe44b9e8468d7626
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
+		METHOD: onload
+		"""
+
 		ms = frappe.get_doc("Manufacturing Settings")
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
@@ -102,8 +109,16 @@ class InventoryToolsWorkOrder(WorkOrder):
 		return super().create_job_card()
 
 	def update_work_order_qty(self):
-		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
-		based on Stock Entry"""
+		"""
+		HASH: 4d34b1ead73baf4c5430a2ecbe44b9e8468d7626
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
+		METHOD: update_work_order_qty
+
+		Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
+		based on Stock Entry
+		"""
+
 		allowance_percentage = get_allowance_percentage(self.company, self.bom_no)
 
 		for purpose, fieldname in (
@@ -140,6 +155,13 @@ class InventoryToolsWorkOrder(WorkOrder):
 			self.update_production_plan_status()
 
 	def update_operation_status(self):
+		"""
+		HASH: 4d34b1ead73baf4c5430a2ecbe44b9e8468d7626
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
+		METHOD: update_operation_status
+		"""
+
 		allowance_percentage = get_allowance_percentage(self.company, self.bom_no)
 		max_allowed_qty_for_wo = flt(self.qty) + (allowance_percentage / 100 * flt(self.qty))
 
@@ -156,6 +178,12 @@ class InventoryToolsWorkOrder(WorkOrder):
 				frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))
 
 	def validate_qty(self):
+		"""
+		HASH: 4d34b1ead73baf4c5430a2ecbe44b9e8468d7626
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
+		METHOD: validate_qty
+		"""
 
 		if not self.qty > 0:
 			frappe.throw(_("Quantity to Manufacture must be greater than 0."))

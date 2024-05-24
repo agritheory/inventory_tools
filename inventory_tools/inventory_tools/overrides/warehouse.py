@@ -44,6 +44,13 @@ def update_warehouse_path(doc, method=None) -> None:
 
 @frappe.whitelist()
 def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
+	"""
+	HASH: 4d34b1ead73baf4c5430a2ecbe44b9e8468d7626
+	REPO: https://github.com/frappe/erpnext/
+	PATH: erpnext/controllers/queries.py
+	METHOD: warehouse_query
+	"""
+
 	company = frappe.defaults.get_defaults().get("company")
 	if not company:
 		return search_link(doctype, txt, searchfield, start, page_len, filters)

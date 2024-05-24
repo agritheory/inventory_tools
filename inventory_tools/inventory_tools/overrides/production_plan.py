@@ -8,6 +8,13 @@ from erpnext.manufacturing.doctype.work_order.work_order import get_default_ware
 class InventoryToolsProductionPlan(ProductionPlan):
 	@frappe.whitelist()
 	def make_work_order(self):
+		"""
+		HASH: b087fb3d549462ea8c9d1e65e8622e952d4039f6
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/manufacturing/doctype/production_plan/production_plan.py
+		METHOD: make_work_order
+		"""
+
 		wo_list, po_list = [], []
 		subcontracted_po = {}
 		default_warehouses = get_default_warehouse()
@@ -20,6 +27,13 @@ class InventoryToolsProductionPlan(ProductionPlan):
 		self.show_list_created_message("Purchase Order", po_list)
 
 	def make_work_order_for_subassembly_items(self, wo_list, subcontracted_po, default_warehouses):
+		"""
+		HASH: b087fb3d549462ea8c9d1e65e8622e952d4039f6
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/manufacturing/doctype/production_plan/production_plan.py
+		METHOD: make_work_order_for_subassembly_items
+		"""
+
 		for row in self.sub_assembly_items:
 			if row.type_of_manufacturing == "Subcontract":
 				subcontracted_po.setdefault(row.supplier, []).append(row)
