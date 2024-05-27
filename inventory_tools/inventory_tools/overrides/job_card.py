@@ -47,3 +47,11 @@ class InventoryToolsJobCard(JobCard):
 					frappe.bold(self.for_quantity),
 				)
 			)
+
+
+@frappe.whitelist()
+def switch_job_card_work_order(job_card: str, work_order: str):
+	doc = frappe.get_doc("Job Card", job_card)
+	frappe.db.set_value("Job Card", job_card, "work_order", work_order)
+	doc.update_work_order()
+	frappe.db.commit()

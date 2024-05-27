@@ -27,7 +27,9 @@
   "update_warehouse_path",
   "section_break_gzcbr",
   "uoms_section",
-  "enforce_uoms"
+  "enforce_uoms",
+  "job_card_section",
+  "allow_switch_work_order"
  ],
  "fields": [
   {
@@ -125,6 +127,17 @@
    "label": "Overproduction Percentage For Work Order"
   },
   {
+   "fieldname": "job_card_section",
+   "fieldtype": "Section Break",
+   "label": "Job Card"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_switch_work_order",
+   "fieldtype": "Check",
+   "label": "Allow Switch Work Order"
+  },
+  {
    "fieldname": "quotation_demand_section",
    "fieldtype": "Section Break",
    "label": "Quotation Demand"
@@ -146,11 +159,22 @@
    "fieldtype": "Link",
    "label": "Aggregated Sales Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "fieldname": "job_card_section",
+   "fieldtype": "Section Break",
+   "label": "Job Card"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_switch_work_order",
+   "fieldtype": "Check",
+   "label": "Allow Switch Work Order"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-04-12 10:02:32.688310",
+ "modified": "2024-04-18 10:20:36.647244",
  "modified_by": "Administrator",
  "module": "Inventory Tools",
  "name": "Inventory Tools Settings",
