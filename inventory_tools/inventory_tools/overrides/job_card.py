@@ -8,6 +8,13 @@ from inventory_tools.inventory_tools.overrides.work_order import get_allowance_p
 
 class InventoryToolsJobCard(JobCard):
 	def validate_job_card(self):
+		"""
+		HASH: 4d34b1ead73baf4c5430a2ecbe44b9e8468d7626
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/manufacturing/doctype/job_card/job_card.py
+		METHOD: validate_job_card
+		"""
+
 		if (
 			self.work_order
 			and frappe.get_cached_value("Work Order", self.work_order, "status") == "Stopped"

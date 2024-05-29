@@ -31,12 +31,12 @@ app_include_js = ["inventory_tools.bundle.js"]
 
 # include js in doctype views
 doctype_js = {
-	"Work Order": "public/js/work_order_custom.js",
-	"Purchase Order": "public/js/purchase_order_custom.js",
-	"Purchase Invoice": "public/js/purchase_invoice_custom.js",
-	"Stock Entry": "public/js/stock_entry_custom.js",
 	"Job Card": "public/js/job_card_custom.js",
+	"Purchase Invoice": "public/js/purchase_invoice_custom.js",
+	"Purchase Order": "public/js/purchase_order_custom.js",
 	"Operation": "public/js/operation_custom.js",
+	"Stock Entry": "public/js/stock_entry_custom.js",
+	"Work Order": "public/js/work_order_custom.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -83,7 +83,7 @@ after_migrate = "inventory_tools.customize.load_customizations"
 
 # Boot
 # ------------
-# extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
+extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
 
 
 # Desk Notifications
@@ -109,14 +109,14 @@ after_migrate = "inventory_tools.customize.load_customizations"
 # Override standard doctype classes
 
 override_doctype_class = {
-	"Work Order": "inventory_tools.inventory_tools.overrides.work_order.InventoryToolsWorkOrder",
+	"Job Card": "inventory_tools.inventory_tools.overrides.job_card.InventoryToolsJobCard",
+	"Production Plan": "inventory_tools.inventory_tools.overrides.production_plan.InventoryToolsProductionPlan",
 	"Purchase Invoice": "inventory_tools.inventory_tools.overrides.purchase_invoice.InventoryToolsPurchaseInvoice",
 	"Purchase Order": "inventory_tools.inventory_tools.overrides.purchase_order.InventoryToolsPurchaseOrder",
 	"Purchase Receipt": "inventory_tools.inventory_tools.overrides.purchase_receipt.InventoryToolsPurchaseReceipt",
-	"Production Plan": "inventory_tools.inventory_tools.overrides.production_plan.InventoryToolsProductionPlan",
-	"Stock Entry": "inventory_tools.inventory_tools.overrides.stock_entry.InventoryToolsStockEntry",
-	"Job Card": "inventory_tools.inventory_tools.overrides.job_card.InventoryToolsJobCard",
 	"Sales Order": "inventory_tools.inventory_tools.overrides.sales_order.InventoryToolsSalesOrder",
+	"Stock Entry": "inventory_tools.inventory_tools.overrides.stock_entry.InventoryToolsStockEntry",
+	"Work Order": "inventory_tools.inventory_tools.overrides.work_order.InventoryToolsWorkOrder",
 }
 
 

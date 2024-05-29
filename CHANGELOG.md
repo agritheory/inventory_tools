@@ -2,6 +2,17 @@
 
 
 
+## v14.6.0 (2024-05-13)
+
+### Chore
+
+* chore: update quotation demand docs (#77) ([`f168079`](https://github.com/agritheory/inventory_tools/commit/f168079e29d99056d4c5eb2321d84957cff84f3b))
+
+### Feature
+
+* feat: add inventory tools settings to boot (#81) ([`7ac2e15`](https://github.com/agritheory/inventory_tools/commit/7ac2e15aa74676ba5741887231814cdf9e675755))
+
+
 ## v14.5.0 (2024-04-29)
 
 ### Feature

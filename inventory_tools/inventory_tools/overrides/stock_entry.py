@@ -9,6 +9,11 @@ from inventory_tools.inventory_tools.overrides.work_order import get_allowance_p
 class InventoryToolsStockEntry(StockEntry):
 	def check_if_operations_completed(self):
 		"""
+		HASH: 153e0ba81b62acc170a951a289363fff5579edc7
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
+		METHOD: check_if_operations_completed
+
 		Original code checks that the stock entry amount plus what's already produced in the WO
 		is not larger than any operation's completed quantity (plus the overallowance amount).
 		Since customized code rewires so stock entries happen via a Job Card, the function now
@@ -45,6 +50,11 @@ class InventoryToolsStockEntry(StockEntry):
 
 	def validate_finished_goods(self):
 		"""
+		HASH: 153e0ba81b62acc170a951a289363fff5579edc7
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
+		METHOD: validate_finished_goods
+
 		1. Check if FG exists (mfg, repack)
 		2. Check if Multiple FG Items are present (mfg)
 		3. Check FG Item and Qty against WO if present (mfg)
@@ -105,6 +115,11 @@ class InventoryToolsStockEntry(StockEntry):
 
 	def get_pending_raw_materials(self, backflush_based_on=None):
 		"""
+		HASH: 153e0ba81b62acc170a951a289363fff5579edc7
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
+		METHOD: get_pending_raw_materials
+
 		issue (item quantity) that is pending to issue or desire to transfer,
 		whichever is less
 		"""
