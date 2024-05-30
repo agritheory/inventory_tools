@@ -12,11 +12,5 @@
 	"publishConfig": {
 		"access": "restricted"
 	},
-	"private": true,
-	"release": {
-		"branches": [
-			"version-14",
-			"version-15"
-		]
-	}
+	"private": true
 }

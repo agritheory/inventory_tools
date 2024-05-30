@@ -2,9 +2,6 @@ name: Track Overrides
 
 on:
   pull_request:
-    branches:
-      - version-14
-      - version-15
 
 jobs:
   track_overrides:

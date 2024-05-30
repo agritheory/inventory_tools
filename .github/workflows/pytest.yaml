@@ -6,9 +6,6 @@ on:
       - version-14
       - version-15
   pull_request:
-    branches:
-      - version-14
-      - version-15
 
 permissions:
   contents: write
@@ -18,12 +15,8 @@ permissions:
 
 jobs:
   tests:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-      fail-fast: false
     name: Server
+    runs-on: ubuntu-latest
 
     services:
       mariadb:
@@ -92,8 +85,7 @@ jobs:
         env:
           MYSQL_HOST: 'localhost'
           MYSQL_PWD: 'admin'
-        run: |
-          bash ${{ github.workspace }}/.github/helper/install.sh
+        run: bash ${{ github.workspace }}/.github/helper/install.sh
 
       - name: Run Tests
         working-directory: /home/runner/frappe-bench

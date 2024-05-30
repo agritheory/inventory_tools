@@ -3,7 +3,6 @@
 
 import json
 import types
-from typing import Union
 
 import frappe
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
@@ -102,7 +101,7 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 
 
 @frappe.whitelist()
-def make_purchase_invoices(docname: str, rows: Union[list, str]) -> None:
+def make_purchase_invoices(docname: str, rows: list | str) -> None:
 	rows = json.loads(rows) if isinstance(rows, str) else rows
 	doc = frappe.get_doc("Purchase Order", docname)
 	forwarding = frappe._dict()
@@ -126,7 +125,7 @@ def make_purchase_invoices(docname: str, rows: Union[list, str]) -> None:
 
 
 @frappe.whitelist()
-def make_purchase_receipts(docname: str, rows: Union[list, str]) -> None:
+def make_purchase_receipts(docname: str, rows: list | str) -> None:
 	rows = json.loads(rows) if isinstance(rows, str) else rows
 	doc = frappe.get_doc("Purchase Order", docname)
 	forwarding = frappe._dict()
@@ -149,7 +148,7 @@ def make_purchase_receipts(docname: str, rows: Union[list, str]) -> None:
 
 
 @frappe.whitelist()
-def make_sales_invoices(docname: str, rows: Union[list, str]) -> None:
+def make_sales_invoices(docname: str, rows: list | str) -> None:
 	rows = json.loads(rows) if isinstance(rows, str) else rows
 	doc = frappe.get_doc("Purchase Order", docname)
 	buying_settings = frappe.get_doc("Buying Settings", "Buying Settings")

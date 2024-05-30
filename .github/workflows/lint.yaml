@@ -6,9 +6,6 @@ on:
       - version-14
       - version-15
   pull_request:
-    branches:
-      - version-14
-      - version-15
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -59,7 +56,7 @@ jobs:
 
       - name: Install Black (Frappe)
         run: pip install git+https://github.com/frappe/black.git
-    
+
       - name: Run Black (Frappe)
         run: black --check .
 
