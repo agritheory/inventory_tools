@@ -1,3 +1,6 @@
+<!-- Copyright (c) 2024, AgriTheory and contributors
+For license information, please see license.txt-->
+
 # Inventory Tools Documentation
 
 The Inventory Tools application enhances and extends inventory-related functionality and workflows in ERPNext. It includes the following features:

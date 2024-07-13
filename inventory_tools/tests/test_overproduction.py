@@ -1,3 +1,6 @@
+# Copyright (c) 2024, AgriTheory and contributors
+# For license information, please see license.txt
+
 import frappe
 import pytest
 from erpnext.manufacturing.doctype.work_order.work_order import create_job_card, make_stock_entry

@@ -1,3 +1,6 @@
+<!-- Copyright (c) 2024, AgriTheory and contributors
+For license information, please see license.txt-->
+
 # UOM Enforcement
 
 By default, ERPNext allows its users to select any Unit of Measure (UOM) for any Item. If no conversion ratio exists between the UOM selected and the Item's stock UOM, ERPNext assumes it should be 1:1. This feature enforces that a user is only able to select and use valid UOMs. If an Item has no way to be understood in "Linear Feet" or "Volts", those UOMs will not be included as options in any UOM field for that Item.

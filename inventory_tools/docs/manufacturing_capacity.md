@@ -1,3 +1,6 @@
+<!-- Copyright (c) 2024, AgriTheory and contributors
+For license information, please see license.txt-->
+
 # Manufacturing Capacity Report
 
 Manufacturing Capacity is a report-based interface that, given a BOM and Warehouse, displays the demand and in-stock quantities for the entire hierarchy of any BOM tree containing that BOM.

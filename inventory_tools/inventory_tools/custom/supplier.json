@@ -29,7 +29,11 @@
 			"is_virtual": 0,
 			"label": "",
 			"length": 0,
+<<<<<<< HEAD
 			"modified": "2024-07-13 08:52:49.184094",
+=======
+			"modified": "2024-07-13 08:36:13.059558",
+>>>>>>> 2baa7a2 (chore: update pre-commit)
 			"modified_by": "Administrator",
 			"module": "Inventory Tools",
 			"name": "Supplier-subcontracting_defaults",

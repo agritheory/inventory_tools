@@ -1,3 +1,6 @@
+<!-- Copyright (c) 2024, AgriTheory and contributors
+For license information, please see license.txt-->
+
 # Material Demand
 
 Material Demand is a report-based interface that allows you to aggregate required Items across multiple Material Requests, Suppliers, and requesting Companies. From there, you can create draft Purchase Orders (PO), draft Request for Quotations (RFQ), or a combination of the two based on the Item's configuration.

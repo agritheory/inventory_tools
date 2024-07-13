@@ -41,9 +41,17 @@ repos:
       - id: flake8
         additional_dependencies: ['flake8-bugbear']
 
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.5.1
+    hooks:
+      - id: mypy
+        exclude: ^tests/
+        args: [--ignore-missing-imports]
+
   - repo: https://github.com/agritheory/test_utils
     rev: v0.13.1
     hooks:
+      - id: update_pre_commit_config
       - id: validate_copyright
         files: '\.(js|ts|py|md)$'
         args: ['--app', 'inventory_tools']
@@ -52,13 +60,6 @@ repos:
       - id: validate_customizations
       - id: validate_python_dependencies
       - id: validate_javascript_dependencies
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.5.1
-    hooks:
-      - id: mypy
-        exclude: ^tests/
-        args: [--ignore-missing-imports]
 
   - repo: local
     hooks:

@@ -1,3 +1,6 @@
+<!-- Copyright (c) 2024, AgriTheory and contributors
+For license information, please see license.txt-->
+
 # Work Order Subcontracting
 
 Material Demand is a report-based interface that allows a user to aggregate required items across multiple Material Requests, Suppliers, requesting Companies and create draft Purchase Orders in that process.

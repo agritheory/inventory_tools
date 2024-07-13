@@ -1,3 +1,6 @@
+// Copyright (c) 2024, AgriTheory and contributors
+// For license information, please see license.txt
+
 frappe.ui.form.on('Stock Entry', {
 	on_submit: frm => {
 		if (frm.doc.docstatus === 1) {

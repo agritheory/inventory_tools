@@ -1,3 +1,6 @@
+<!-- Copyright (c) 2024, AgriTheory and contributors
+For license information, please see license.txt-->
+
 # Quotation Demand
 
 Quotation Demand is a report-based interface that allows you to aggregate required Items across multiple Quotations, Customers, and requesting Companies. From there, you can create draft Sales Orders (SO).

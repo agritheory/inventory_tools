@@ -1,3 +1,6 @@
+<!-- Copyright (c) 2024, AgriTheory and contributors
+For license information, please see license.txt-->
+
 # Subcontracting Workflow via Work Order
 
 ERPNext's subcontracting workflow has changed substantially with each version release of the software, generally without backwards compatibility. This feature offers an alternative to using a Purchase Receipt or the Version-14 Subcontracting Order and Subcontracting Receipt documents. Instead, it allows you to manage the subcontracting process with Work Orders, Purchase Orders and Invoices, and Stock Entries.

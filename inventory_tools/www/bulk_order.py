@@ -1,3 +1,6 @@
+# Copyright (c) 2024, AgriTheory and contributors
+# For license information, please see license.txt
+
 import frappe
 from erpnext.e_commerce.shopping_cart.cart import update_cart
 
