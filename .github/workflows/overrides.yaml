@@ -1,0 +1,20 @@
+name: Track Overrides
+
+on:
+  pull_request:
+    branches:
+      - version-14
+      - version-15
+
+jobs:
+  track_overrides:
+    runs-on: ubuntu-latest
+    name: Track Overrides
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name:  Track Overrides
+        uses: diamorafaela/track-overrides@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

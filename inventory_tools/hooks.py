@@ -1,3 +1,6 @@
+# Copyright (c) 2024, AgriTheory and contributors
+# For license information, please see license.txt
+
 from . import __version__ as app_version
 
 app_name = "inventory_tools"
@@ -35,6 +38,8 @@ doctype_js = {
 	"Purchase Invoice": "public/js/purchase_invoice_custom.js",
 	"Purchase Order": "public/js/purchase_order_custom.js",
 	"Operation": "public/js/operation_custom.js",
+	"Purchase Invoice": "public/js/purchase_invoice_custom.js",
+	"Purchase Order": "public/js/purchase_order_custom.js",
 	"Stock Entry": "public/js/stock_entry_custom.js",
 	"Work Order": "public/js/work_order_custom.js",
 }
@@ -109,14 +114,14 @@ extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
 # Override standard doctype classes
 
 override_doctype_class = {
-	"Work Order": "inventory_tools.inventory_tools.overrides.work_order.InventoryToolsWorkOrder",
+	"Job Card": "inventory_tools.inventory_tools.overrides.job_card.InventoryToolsJobCard",
+	"Production Plan": "inventory_tools.inventory_tools.overrides.production_plan.InventoryToolsProductionPlan",
 	"Purchase Invoice": "inventory_tools.inventory_tools.overrides.purchase_invoice.InventoryToolsPurchaseInvoice",
 	"Purchase Order": "inventory_tools.inventory_tools.overrides.purchase_order.InventoryToolsPurchaseOrder",
 	"Purchase Receipt": "inventory_tools.inventory_tools.overrides.purchase_receipt.InventoryToolsPurchaseReceipt",
-	"Production Plan": "inventory_tools.inventory_tools.overrides.production_plan.InventoryToolsProductionPlan",
-	"Stock Entry": "inventory_tools.inventory_tools.overrides.stock_entry.InventoryToolsStockEntry",
-	"Job Card": "inventory_tools.inventory_tools.overrides.job_card.InventoryToolsJobCard",
 	"Sales Order": "inventory_tools.inventory_tools.overrides.sales_order.InventoryToolsSalesOrder",
+	"Stock Entry": "inventory_tools.inventory_tools.overrides.stock_entry.InventoryToolsStockEntry",
+	"Work Order": "inventory_tools.inventory_tools.overrides.work_order.InventoryToolsWorkOrder",
 }
 
 

@@ -1,17 +1,17 @@
-exclude: 'node_modules|.git'
+exclude: "node_modules|.git"
 default_stages: [commit]
 fail_fast: false
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.3.0
+    rev: v4.6.0
     hooks:
       - id: trailing-whitespace
-        files: 'beam.*'
-        exclude: '.*json$|.*txt$|.*csv|.*md|.*svg'
+        files: "inventory_tools.*"
+        exclude: ".*json$|.*txt$|.*csv|.*md|.*svg"
       - id: check-yaml
       - id: no-commit-to-branch
-        args: ['--branch', 'develop']
+        args: ["--branch", "version-15"]
       - id: check-merge-conflict
       - id: check-ast
       - id: check-json
@@ -23,7 +23,7 @@ repos:
     rev: v2.34.0
     hooks:
       - id: pyupgrade
-        args: ['--py38-plus']
+        args: ["--py310-plus"]
 
   - repo: https://github.com/frappe/black
     rev: 951ccf4d5bb0d692b457a5ebc4215d755618eb68
@@ -38,12 +38,10 @@ repos:
         # Ignore any files that might contain jinja / bundles
         exclude: |
           (?x)^(
-              beam/public/dist/.*|
               .*node_modules.*|
-              .*boilerplate.*|
-              beam/www/website_script.js|
-              beam/templates/includes/.*|
-              beam/public/js/lib/.*
+              inventory_tools/public/dist/.*|
+              inventory_tools/public/js/lib/.*|
+              inventory_tools/templates/includes/.*
           )$
 
   - repo: https://github.com/PyCQA/isort
@@ -55,10 +53,10 @@ repos:
     rev: 5.0.4
     hooks:
       - id: flake8
-        additional_dependencies: ['flake8-bugbear']
+        additional_dependencies: ["flake8-bugbear"]
 
   - repo: https://github.com/agritheory/test_utils
-    rev: v0.11.0
+    rev: v0.13.1
     hooks:
       - id: validate_copyright
         files: '\.(js|ts|py|md)$'
@@ -70,7 +68,14 @@ repos:
       - id: validate_python_dependencies
       - id: validate_javascript_dependencies
 
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.5.1
+    hooks:
+      - id: mypy
+        exclude: ^tests/
+        args: [--ignore-missing-imports]
+
 ci:
-  autoupdate_schedule: weekly
-  skip: []
-  submodules: false
+    autoupdate_schedule: weekly
+    skip: []
+    submodules: false

@@ -1,23 +1,15 @@
 {
-    "custom_fields": [
-     {
-      "_assign": null,
-      "_comments": null,
-      "_liked_by": null,
-      "_user_tags": null,
+  "custom_fields": [
+    {
       "allow_in_quick_entry": 0,
       "allow_on_submit": 0,
       "bold": 0,
       "collapsible": 0,
-      "collapsible_depends_on": null,
       "columns": 0,
       "creation": "2024-03-14 10:10:39.991377",
       "default": null,
-      "depends_on": null,
-      "description": null,
       "docstatus": 0,
       "dt": "Sales Order",
-      "fetch_from": null,
       "fetch_if_empty": 0,
       "fieldname": "multi_company_sales_order",
       "fieldtype": "Check",
@@ -37,34 +29,29 @@
       "is_virtual": 0,
       "label": "Multi-Company Sales Order",
       "length": 0,
-      "mandatory_depends_on": null,
-      "modified": "2024-03-14 10:09:39.991377",
+      "modified": "2024-07-13 08:52:49.182103",
       "modified_by": "Administrator",
       "module": "Inventory Tools",
       "name": "Sales Order-multi_company_sales_order",
       "no_copy": 0,
       "non_negative": 0,
-      "options": null,
       "owner": "Administrator",
       "permlevel": 0,
       "precision": "",
       "print_hide": 0,
       "print_hide_if_no_value": 0,
-      "print_width": null,
       "read_only": 1,
-      "read_only_depends_on": null,
       "report_hide": 0,
       "reqd": 0,
       "search_index": 0,
       "sort_options": 0,
       "translatable": 0,
-      "unique": 0,
-      "width": null
-     }
-    ],
-    "custom_perms": [],
-    "doctype": "Sales Order",
-    "links": [],
-    "property_setters": [],
-    "sync_on_migrate": 1
-   }
+      "unique": 0
+    }
+  ],
+  "custom_perms": [],
+  "doctype": "Sales Order",
+  "links": [],
+  "property_setters": [],
+  "sync_on_migrate": 1
+}

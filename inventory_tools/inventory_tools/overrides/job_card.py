@@ -1,3 +1,6 @@
+# Copyright (c) 2024, AgriTheory and contributors
+# For license information, please see license.txt
+
 import frappe
 from erpnext.manufacturing.doctype.job_card.job_card import JobCard
 from frappe import _, bold
@@ -8,6 +11,13 @@ from inventory_tools.inventory_tools.overrides.work_order import get_allowance_p
 
 class InventoryToolsJobCard(JobCard):
 	def validate_job_card(self):
+		"""
+		HASH: 6554f192fbe90033a71fa323462633c5130e1b46
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/manufacturing/doctype/job_card/job_card.py
+		METHOD: validate_job_card
+		"""
+
 		if (
 			self.work_order
 			and frappe.get_cached_value("Work Order", self.work_order, "status") == "Stopped"
