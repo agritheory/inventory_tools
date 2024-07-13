@@ -1,21 +1,25 @@
-[project]
+[tool.poetry]
 name = "inventory_tools"
-authors = [
-    { name = "AgriTheory", email = "support@agritheory.dev"}
-]
+version =  "14.6.0"
+authors = ["AgriTheory <support@agritheory.dev>"]
 description = "Inventory Tools for ERPNext"
-requires-python = ">=3.10"
 readme = "README.md"
-dynamic = ["version"]
-dependencies = [
-    "pytest",
-    "pytest-order",
-    "mypy"
-]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+pytest-cov = "^5.0.0"
+pytest-order = "^1.2.1"
+mypy = "^1.10.0"
 
 [build-system]
-requires = ["flit_core >=3.4,<4"]
-build-backend = "flit_core.buildapi"
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+addopts = "--cov=inventory_tools --cov-report term-missing"
 
 [tool.black]
 line-length = 99

@@ -57,14 +57,18 @@ repos:
       - id: flake8
         additional_dependencies: ['flake8-bugbear']
 
-  - repo: local
+  - repo: https://github.com/agritheory/test_utils
+    rev: v0.11.0
     hooks:
+      - id: validate_copyright
+        files: '\.(js|ts|py|md)$'
+        args: ["--app", "inventory_tools"]
+      - id: clean_customized_doctypes
+        args: ["--app", "inventory_tools"]
       - id: validate_customizations
-        always_run: true
-        name: .github/validate_customizations.py
-        entry: python .github/validate_customizations.py
-        language: system
-        types: [python]
+        args: ["--set-module", "True"]
+      - id: validate_python_dependencies
+      - id: validate_javascript_dependencies
 
 ci:
   autoupdate_schedule: weekly

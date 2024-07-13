@@ -10,6 +10,12 @@ on:
       - version-14
       - version-15
 
+permissions:
+  contents: write
+  checks: write
+  issues: write
+  pull-requests: write
+
 jobs:
   tests:
     runs-on: ${{ matrix.os }}
@@ -44,7 +50,7 @@ jobs:
           node-version: 20
           check-latest: true
           cache: 'yarn'  # Replaces `Get yarn cache directory path` and `yarn-cache` steps
-    
+
       # Uncomment if running locally, remove after local testing (already available in github actions environment)
       # - name: Install Yarn
       #   run: npm install -g yarn
@@ -73,6 +79,9 @@ jobs:
       #     restore-keys: |
       #       ${{ runner.os }}-yarn-
 
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
       - name: Install JS Dependencies
         run: yarn --prefer-offline
 
@@ -90,4 +99,12 @@ jobs:
         working-directory: /home/runner/frappe-bench
         run: |
           source env/bin/activate
-          pytest ./apps/inventory_tools/inventory_tools/tests/ --disable-warnings -s
+          cd apps/inventory_tools
+          poetry install
+          pytest --cov=inventory_tools --cov-report=xml --disable-warnings -s | tee pytest-coverage.txt
+
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: /home/runner/frappe-bench/apps/inventory_tools/pytest-coverage.txt
+          junitxml-path: /home/runner/frappe-bench/apps/inventory_tools/coverage.xml
