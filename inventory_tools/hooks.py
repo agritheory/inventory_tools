@@ -31,12 +31,12 @@ app_include_js = ["inventory_tools.bundle.js"]
 
 # include js in doctype views
 doctype_js = {
-	"Work Order": "public/js/work_order_custom.js",
-	"Purchase Order": "public/js/purchase_order_custom.js",
-	"Purchase Invoice": "public/js/purchase_invoice_custom.js",
-	"Stock Entry": "public/js/stock_entry_custom.js",
 	"Job Card": "public/js/job_card_custom.js",
+	"Purchase Invoice": "public/js/purchase_invoice_custom.js",
+	"Purchase Order": "public/js/purchase_order_custom.js",
 	"Operation": "public/js/operation_custom.js",
+	"Stock Entry": "public/js/stock_entry_custom.js",
+	"Work Order": "public/js/work_order_custom.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
@@ -83,7 +83,7 @@ after_migrate = "inventory_tools.customize.load_customizations"
 
 # Boot
 # ------------
-# extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
+extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
 
 
 # Desk Notifications
