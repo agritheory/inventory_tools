@@ -1,200 +1,200 @@
 {
- "actions": [],
- "autoname": "field:company",
- "creation": "2023-05-30 20:24:26.832647",
- "default_view": "List",
- "doctype": "DocType",
- "editable_grid": 1,
- "engine": "InnoDB",
- "field_order": [
-  "company",
-  "material_demand_section",
-  "purchase_order_aggregation_company",
-  "column_break_vgsiq",
-  "aggregated_purchasing_warehouse",
-  "quotation_demand_section",
-  "sales_order_aggregation_company",
-  "column_break_ljy4o",
-  "aggregated_sales_warehouse",
-  "work_order_subcontracting_section",
-  "enable_work_order_subcontracting",
-  "create_purchase_orders",
-  "bom_column",
-  "create_job_cards_automatically",
-  "column_break_ilobm",
-  "overproduction_percentage_for_work_order",
-  "section_break_0",
-  "update_warehouse_path",
-  "section_break_gzcbr",
-  "uoms_section",
-  "enforce_uoms"
- ],
- "fields": [
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company",
-   "unique": 1
-  },
-  {
-   "fieldname": "material_demand_section",
-   "fieldtype": "Section Break",
-   "label": "Material Demand"
-  },
-  {
-   "description": "Leave this field blank to disallow aggregation for this company",
-   "fieldname": "purchase_order_aggregation_company",
-   "fieldtype": "Link",
-   "label": "Purchase Order Aggregation Company",
-   "options": "Company"
-  },
-  {
-   "fieldname": "column_break_vgsiq",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "When set, this will override the Material Requests Receiving Warehouse. If not set, this will map Warehouses from Material Request into Purchase Order.",
-   "fieldname": "aggregated_purchasing_warehouse",
-   "fieldtype": "Link",
-   "label": "Aggregated Purchasing Warehouse",
-   "options": "Warehouse"
-  },
-  {
-   "fieldname": "work_order_subcontracting_section",
-   "fieldtype": "Section Break",
-   "label": "Work Order Subcontracting"
-  },
-  {
-   "default": "0",
-   "fieldname": "enable_work_order_subcontracting",
-   "fieldtype": "Check",
-   "label": "Enable Work Order Subcontracting"
-  },
-  {
-   "default": "0",
-   "fieldname": "create_purchase_orders",
-   "fieldtype": "Check",
-   "label": "Create Purchase Orders in Production Plan"
-  },
-  {
-   "fieldname": "section_break_0",
-   "fieldtype": "Section Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "update_warehouse_path",
-   "fieldtype": "Check",
-   "label": "Update Warehouse Path"
-  },
-  {
-   "fieldname": "section_break_gzcbr",
-   "fieldtype": "Section Break",
-   "label": "Warehouses"
-  },
-  {
-   "fieldname": "uoms_section",
-   "fieldtype": "Section Break",
-   "label": "UOMs"
-  },
-  {
-   "default": "0",
-   "fieldname": "enforce_uoms",
-   "fieldtype": "Check",
-   "label": "Enforce UOMs"
-  },
-  {
-   "fieldname": "bom_column",
-   "fieldtype": "Section Break",
-   "label": "Work Order"
-  },
-  {
-   "default": "Yes",
-   "fieldname": "create_job_cards_automatically",
-   "fieldtype": "Select",
-   "label": "Create Job Card(s) Automatically",
-   "options": "Yes\nNo"
-  },
-  {
-   "fieldname": "column_break_ilobm",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "overproduction_percentage_for_work_order",
-   "fieldtype": "Percent",
-   "label": "Overproduction Percentage For Work Order"
-  },
-  {
-   "fieldname": "quotation_demand_section",
-   "fieldtype": "Section Break",
-   "label": "Quotation Demand"
-  },
-  {
-   "description": "Leave this field blank to disallow aggregation for this company",
-   "fieldname": "sales_order_aggregation_company",
-   "fieldtype": "Link",
-   "label": "Sales Order Aggregation Company",
-   "options": "Company"
-  },
-  {
-   "fieldname": "column_break_ljy4o",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "When set, this will override the Quotation Warehouse. If not set, this will map Warehouses from Quotation into Sales Order.",
-   "fieldname": "aggregated_sales_warehouse",
-   "fieldtype": "Link",
-   "label": "Aggregated Sales Warehouse",
-   "options": "Warehouse"
-  }
- ],
- "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2024-04-12 10:02:32.688310",
- "modified_by": "Administrator",
- "module": "Inventory Tools",
- "name": "Inventory Tools Settings",
- "naming_rule": "Expression (old style)",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Stock Manager",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Purchase Master Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": []
+	"actions": [],
+	"autoname": "field:company",
+	"creation": "2023-05-30 20:24:26.832647",
+	"default_view": "List",
+	"doctype": "DocType",
+	"editable_grid": 1,
+	"engine": "InnoDB",
+	"field_order": [
+		"company",
+		"material_demand_section",
+		"purchase_order_aggregation_company",
+		"column_break_vgsiq",
+		"aggregated_purchasing_warehouse",
+		"quotation_demand_section",
+		"sales_order_aggregation_company",
+		"column_break_ljy4o",
+		"aggregated_sales_warehouse",
+		"work_order_subcontracting_section",
+		"enable_work_order_subcontracting",
+		"create_purchase_orders",
+		"bom_column",
+		"create_job_cards_automatically",
+		"column_break_ilobm",
+		"overproduction_percentage_for_work_order",
+		"section_break_0",
+		"update_warehouse_path",
+		"section_break_gzcbr",
+		"uoms_section",
+		"enforce_uoms"
+	],
+	"fields": [
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"label": "Company",
+			"options": "Company",
+			"unique": 1
+		},
+		{
+			"fieldname": "material_demand_section",
+			"fieldtype": "Section Break",
+			"label": "Material Demand"
+		},
+		{
+			"description": "Leave this field blank to disallow aggregation for this company",
+			"fieldname": "purchase_order_aggregation_company",
+			"fieldtype": "Link",
+			"label": "Purchase Order Aggregation Company",
+			"options": "Company"
+		},
+		{
+			"fieldname": "column_break_vgsiq",
+			"fieldtype": "Column Break"
+		},
+		{
+			"description": "When set, this will override the Material Requests Receiving Warehouse. If not set, this will map Warehouses from Material Request into Purchase Order.",
+			"fieldname": "aggregated_purchasing_warehouse",
+			"fieldtype": "Link",
+			"label": "Aggregated Purchasing Warehouse",
+			"options": "Warehouse"
+		},
+		{
+			"fieldname": "work_order_subcontracting_section",
+			"fieldtype": "Section Break",
+			"label": "Work Order Subcontracting"
+		},
+		{
+			"default": "0",
+			"fieldname": "enable_work_order_subcontracting",
+			"fieldtype": "Check",
+			"label": "Enable Work Order Subcontracting"
+		},
+		{
+			"default": "0",
+			"fieldname": "create_purchase_orders",
+			"fieldtype": "Check",
+			"label": "Create Purchase Orders in Production Plan"
+		},
+		{
+			"fieldname": "section_break_0",
+			"fieldtype": "Section Break"
+		},
+		{
+			"default": "0",
+			"fieldname": "update_warehouse_path",
+			"fieldtype": "Check",
+			"label": "Update Warehouse Path"
+		},
+		{
+			"fieldname": "section_break_gzcbr",
+			"fieldtype": "Section Break",
+			"label": "Warehouses"
+		},
+		{
+			"fieldname": "uoms_section",
+			"fieldtype": "Section Break",
+			"label": "UOMs"
+		},
+		{
+			"default": "0",
+			"fieldname": "enforce_uoms",
+			"fieldtype": "Check",
+			"label": "Enforce UOMs"
+		},
+		{
+			"fieldname": "bom_column",
+			"fieldtype": "Section Break",
+			"label": "Work Order"
+		},
+		{
+			"default": "Yes",
+			"fieldname": "create_job_cards_automatically",
+			"fieldtype": "Select",
+			"label": "Create Job Card(s) Automatically",
+			"options": "Yes\nNo"
+		},
+		{
+			"fieldname": "column_break_ilobm",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "overproduction_percentage_for_work_order",
+			"fieldtype": "Percent",
+			"label": "Overproduction Percentage For Work Order"
+		},
+		{
+			"fieldname": "quotation_demand_section",
+			"fieldtype": "Section Break",
+			"label": "Quotation Demand"
+		},
+		{
+			"description": "Leave this field blank to disallow aggregation for this company",
+			"fieldname": "sales_order_aggregation_company",
+			"fieldtype": "Link",
+			"label": "Sales Order Aggregation Company",
+			"options": "Company"
+		},
+		{
+			"fieldname": "column_break_ljy4o",
+			"fieldtype": "Column Break"
+		},
+		{
+			"description": "When set, this will override the Quotation Warehouse. If not set, this will map Warehouses from Quotation into Sales Order.",
+			"fieldname": "aggregated_sales_warehouse",
+			"fieldtype": "Link",
+			"label": "Aggregated Sales Warehouse",
+			"options": "Warehouse"
+		}
+	],
+	"index_web_pages_for_search": 1,
+	"links": [],
+	"modified": "2024-04-12 10:02:32.688310",
+	"modified_by": "Administrator",
+	"module": "Inventory Tools",
+	"name": "Inventory Tools Settings",
+	"naming_rule": "Expression (old style)",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Stock Manager",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Purchase Master Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": []
 }

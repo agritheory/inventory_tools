@@ -1,35 +1,35 @@
 {
- "add_total_row": 0,
- "columns": [],
- "creation": "2024-04-11 07:05:15.429002",
- "disable_prepared_report": 0,
- "disabled": 0,
- "docstatus": 0,
- "doctype": "Report",
- "filters": [],
- "idx": 0,
- "is_standard": "Yes",
- "modified": "2024-04-11 07:05:15.429002",
- "modified_by": "Administrator",
- "module": "Inventory Tools",
- "name": "Quotation Demand",
- "owner": "Administrator",
- "prepared_report": 0,
- "ref_doctype": "Quotation",
- "report_name": "Quotation Demand",
- "report_type": "Script Report",
- "roles": [
-  {
-   "role": "Sales User"
-  },
-  {
-   "role": "Sales Manager"
-  },
-  {
-   "role": "Maintenance Manager"
-  },
-  {
-   "role": "Maintenance User"
-  }
- ]
+	"add_total_row": 0,
+	"columns": [],
+	"creation": "2024-04-11 07:05:15.429002",
+	"disable_prepared_report": 0,
+	"disabled": 0,
+	"docstatus": 0,
+	"doctype": "Report",
+	"filters": [],
+	"idx": 0,
+	"is_standard": "Yes",
+	"modified": "2024-04-11 07:05:15.429002",
+	"modified_by": "Administrator",
+	"module": "Inventory Tools",
+	"name": "Quotation Demand",
+	"owner": "Administrator",
+	"prepared_report": 0,
+	"ref_doctype": "Quotation",
+	"report_name": "Quotation Demand",
+	"report_type": "Script Report",
+	"roles": [
+		{
+			"role": "Sales User"
+		},
+		{
+			"role": "Sales Manager"
+		},
+		{
+			"role": "Maintenance Manager"
+		},
+		{
+			"role": "Maintenance User"
+		}
+	]
 }

@@ -1,8 +1,0 @@
-{
-  "custom_fields": [],
-  "custom_perms": [],
-  "doctype": "Purchase Invoice Item",
-  "links": [],
-  "property_setters": [],
-  "sync_on_migrate": 1
-}

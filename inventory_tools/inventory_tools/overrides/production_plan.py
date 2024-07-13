@@ -11,7 +11,7 @@ class InventoryToolsProductionPlan(ProductionPlan):
 	@frappe.whitelist()
 	def make_work_order(self):
 		"""
-		HASH: 544e56a71cac8751f5ff9fb7c32fe3a0e9f3eb85
+		HASH: ce8b423ad6aefd2a0355a8efd3505c2d9e161cee
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/production_plan/production_plan.py
 		METHOD: make_work_order
@@ -33,7 +33,7 @@ class InventoryToolsProductionPlan(ProductionPlan):
 
 	def make_work_order_for_subassembly_items(self, wo_list, subcontracted_po, default_warehouses):
 		"""
-		HASH: 544e56a71cac8751f5ff9fb7c32fe3a0e9f3eb85
+		HASH: ce8b423ad6aefd2a0355a8efd3505c2d9e161cee
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/production_plan/production_plan.py
 		METHOD: make_work_order_for_subassembly_items

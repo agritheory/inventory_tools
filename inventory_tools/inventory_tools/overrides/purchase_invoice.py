@@ -13,7 +13,7 @@ from frappe.utils.data import cint
 class InventoryToolsPurchaseInvoice(PurchaseInvoice):
 	def validate_with_previous_doc(self):
 		"""
-		HASH: 0a0970e0e7b4662e093189b692748b16cd1e7588
+		HASH: ce8b423ad6aefd2a0355a8efd3505c2d9e161cee
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py
 		METHOD: validate_with_previous_doc

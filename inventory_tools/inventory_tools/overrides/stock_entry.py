@@ -12,7 +12,7 @@ from inventory_tools.inventory_tools.overrides.work_order import get_allowance_p
 class InventoryToolsStockEntry(StockEntry):
 	def check_if_operations_completed(self):
 		"""
-		HASH: dc0bb220ed2d7a7e0bb2db8d284480d051b9e221
+		HASH: ce8b423ad6aefd2a0355a8efd3505c2d9e161cee
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
 		METHOD: check_if_operations_completed
@@ -54,7 +54,7 @@ class InventoryToolsStockEntry(StockEntry):
 
 	def validate_finished_goods(self):
 		"""
-		HASH: dc0bb220ed2d7a7e0bb2db8d284480d051b9e221
+		HASH: ce8b423ad6aefd2a0355a8efd3505c2d9e161cee
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
 		METHOD: validate_finished_goods
@@ -94,7 +94,7 @@ class InventoryToolsStockEntry(StockEntry):
 
 		if not finished_items:
 			frappe.throw(
-				msg=_("There must be atleast 1 Finished Good in this Stock Entry").format(self.name),
+				msg=_("There must be at least 1 Finished Good in this Stock Entry").format(self.name),
 				title=_("Missing Finished Good"),
 				exc=FinishedGoodError,
 			)
@@ -120,7 +120,7 @@ class InventoryToolsStockEntry(StockEntry):
 
 	def get_pending_raw_materials(self, backflush_based_on=None):
 		"""
-		HASH: dc0bb220ed2d7a7e0bb2db8d284480d051b9e221
+		HASH: ce8b423ad6aefd2a0355a8efd3505c2d9e161cee
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
 		METHOD: get_pending_raw_materials
