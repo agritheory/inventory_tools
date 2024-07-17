@@ -25,7 +25,7 @@ def _bypass(*args, **kwargs):
 class InventoryToolsPurchaseOrder(PurchaseOrder):
 	def validate_with_previous_doc(self):
 		"""
-		HASH: ce8b423ad6aefd2a0355a8efd3505c2d9e161cee
+		HASH: 7cc5579ecaae99336b8164e7aeedc15b990d2257
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/buying/doctype/purchase_order/purchase_order.py
 		METHOD: validate_with_previous_doc
@@ -243,7 +243,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 @frappe.whitelist()
 def validate_item_details(args, item):
 	"""
-	HASH: ce8b423ad6aefd2a0355a8efd3505c2d9e161cee
+	HASH: 7cc5579ecaae99336b8164e7aeedc15b990d2257
 	REPO: https://github.com/frappe/erpnext/
 	PATH: erpnext/stock/get_item_details.py
 	METHOD: validate_item_details
