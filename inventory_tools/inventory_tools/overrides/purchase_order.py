@@ -26,7 +26,7 @@ def _bypass(*args, **kwargs):
 class InventoryToolsPurchaseOrder(PurchaseOrder):
 	def validate_with_previous_doc(self):
 		"""
-		HASH: 4d34b1ead73baf4c5430a2ecbe44b9e8468d7626
+		HASH: f833923f2fcc5ce18847a93fe741db7e59a4d349
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/buying/doctype/purchase_order/purchase_order.py
 		METHOD: validate_with_previous_doc
@@ -225,7 +225,7 @@ def make_sales_invoices(docname: str, rows: Union[list, str]) -> None:
 @frappe.whitelist()
 def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=True):
 	"""
-	HASH: 0bee921d402060abe6c06568dd3f600d1445719f
+	HASH: 4d6a71ab4ba0f008e1a6816ed99e890fae347016
 	REPO: https://github.com/frappe/erpnext/
 	PATH: erpnext/stock/get_item_details.py
 	METHOD: get_item_details
@@ -242,7 +242,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 @frappe.whitelist()
 def validate_item_details(args, item):
 	"""
-	HASH: 0bee921d402060abe6c06568dd3f600d1445719f
+	HASH: 4d6a71ab4ba0f008e1a6816ed99e890fae347016
 	REPO: https://github.com/frappe/erpnext/
 	PATH: erpnext/stock/get_item_details.py
 	METHOD: validate_item_details

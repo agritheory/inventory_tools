@@ -1,0 +1,11 @@
+{
+	"repoOwner": "agritheory",
+	"repoName": "inventory_tools",
+	"targetBranchChoices": [
+		"version-14",
+		"version-15"
+	],
+	"branchLabelMapping": {
+		"^backport-to-(.+)$": "$1"
+	}
+}
