@@ -7,7 +7,7 @@ import frappe
 import pytest
 from erpnext.manufacturing.doctype.work_order.work_order import create_job_card, make_stock_entry
 from frappe.exceptions import ValidationError
-from frappe.utils import now, strip_html, get_datetime
+from frappe.utils import strip_html, get_datetime
 
 from inventory_tools.inventory_tools.overrides.work_order import get_allowance_percentage
 

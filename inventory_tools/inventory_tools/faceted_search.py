@@ -7,7 +7,6 @@ from time import localtime
 import frappe
 from webshop.webshop.api import get_product_filter_data as webshop_get_product_filter_data
 from webshop.webshop.product_data_engine.filters import ProductFiltersBuilder
-from webshop.webshop.product_data_engine.query import ProductQuery
 from webshop.webshop.doctype.override_doctype.item_group import get_child_groups_for_website
 from frappe.utils.data import cint, flt, getdate
 
