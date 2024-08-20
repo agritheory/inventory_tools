@@ -3,12 +3,6 @@
 
 import frappe
 import pytest
-from erpnext.manufacturing.doctype.work_order.work_order import (
-	create_job_card,
-	make_stock_entry,
-	make_work_order,
-)
-from frappe.exceptions import ValidationError
 from frappe.utils import getdate
 
 from inventory_tools.inventory_tools.report.manufacturing_capacity.manufacturing_capacity import (

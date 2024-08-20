@@ -2,8 +2,6 @@
 # For license information, please see license.txt
 
 
-import json
-
 import frappe
 from frappe import _
 from erpnext.manufacturing.doctype.production_plan.production_plan import ProductionPlan

@@ -7,7 +7,6 @@ from itertools import groupby
 import frappe
 from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.get_item_details import get_price_list_rate_for
-from frappe import _
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Coalesce
 from frappe.utils.data import fmt_money, getdate

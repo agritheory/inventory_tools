@@ -2,12 +2,10 @@
 # For license information, please see license.txt
 
 import datetime
-import json
 
 import frappe
 from erpnext.manufacturing.doctype.workstation.workstation import Workstation
 from frappe.desk.reportview import execute
-from frappe.desk.search import search_link
 from frappe.utils.data import comma_and, flt, get_time, time_diff_in_hours
 
 

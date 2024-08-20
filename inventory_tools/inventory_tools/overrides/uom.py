@@ -3,7 +3,6 @@
 
 import frappe
 from frappe.desk.reportview import execute
-from frappe.desk.search import search_link
 
 
 @frappe.whitelist()

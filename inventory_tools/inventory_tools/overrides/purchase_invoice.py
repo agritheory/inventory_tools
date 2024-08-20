@@ -2,7 +2,6 @@
 # See license.txt
 
 import datetime
-import json
 
 import frappe
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import PurchaseInvoice
