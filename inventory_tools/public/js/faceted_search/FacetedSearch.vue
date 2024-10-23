@@ -16,6 +16,7 @@
 				:attribute_id="component.attribute_id"
 				:attribute_name="component.attribute_name"
 				:values="component.values"
+				:init_values="component.init_values"
 				@update_filters="updateFilters" />
 			<hr />
 		</li>
@@ -23,6 +24,7 @@
 </template>
 
 <script setup lang="ts">
+import { useUrlSearchParams } from '@vueuse/core'
 import { computed, onMounted, ref } from 'vue'
 
 export type ListFilters = [string, string, string, any] | [string, string, string, any, boolean] | any[]
@@ -33,6 +35,7 @@ export type FilterValue = {
 	component?: string
 	date_values?: boolean
 	field?: string
+	init_values?: any[]
 	numeric_values?: boolean
 	sort_order?: string
 	values?: any[]
@@ -41,15 +44,9 @@ export type FilterValue = {
 
 frappe.provide('webshop')
 
-const props = withDefaults(
-	defineProps<{
-		doctype: string
-	}>(),
-	{
-		doctype: 'Item',
-	}
-)
+const { doctype = 'Item' } = defineProps<{ doctype: string }>()
 
+const params = useUrlSearchParams('history')
 const componentKey = ref(0)
 const filterValues = ref<{ [key: string]: Partial<FilterValue> }>({})
 const searchComponents = ref<SearchComponents>({})
@@ -91,25 +88,29 @@ const updateFilters = async (values: FilterValue) => {
 }
 
 const loadFacets = async () => {
-	const params = new URLSearchParams(window.location.search)
 	const { message }: { message: SearchComponents } = await frappe.call({
 		method: 'inventory_tools.inventory_tools.faceted_search.show_faceted_search_components',
-		args: { doctype: props.doctype, filters: filterValues.value },
+		args: { doctype, filters: filterValues.value },
 		headers: { 'X-Frappe-CSRF-Token': frappe.csrf_token },
 	})
 
 	searchComponents.value = message
 	for (const [key, value] of Object.entries(message)) {
 		filterValues.value[key] = {}
-		if (value.attribute_name in Object.fromEntries(params)) {
-			updateFilters({
+		if (value.attribute_name in params) {
+			const paramValue = params[value.attribute_name]
+			const values = Array.isArray(paramValue) ? Array.from(paramValue) : [paramValue]
+			const searchComponent = searchComponents.value[key]
+			searchComponent.init_values = values
+			await updateFilters({
 				attribute_name: value.attribute_name,
 				attribute_id: value.attribute_id,
-				values: [params.get(value.attribute_name)],
+				values,
 			})
-			params.delete(value.attribute_name)
 		}
 	}
+
+	componentKey.value++ // force re-render after applying init values
 }
 
 const setFilters = async () => {
@@ -119,6 +120,14 @@ const setFilters = async () => {
 	}
 
 	if (webshop && window.cur_list === undefined) {
+		for (const [key, value] of Object.entries(filterValues.value)) {
+			if (value.values) {
+				params[key] = value.values
+			} else {
+				delete params[key]
+			}
+		}
+
 		const response = await frappe.xcall('webshop.webshop.api.get_product_filter_data', {
 			query_args: {
 				attributes: filterValues.value,
@@ -148,7 +157,7 @@ const setFilters = async () => {
 		const items = await frappe.xcall('inventory_tools.inventory_tools.faceted_search.get_specification_items', {
 			attributes: filterValues.value,
 		})
-		const listview = frappe.get_list_view(props.doctype || 'Item')
+		const listview = frappe.get_list_view(doctype || 'Item')
 		let filters: ListFilters = listview.filter_area.get()
 
 		for (const [key, value] of Object.entries(filterValues.value)) {
@@ -166,7 +175,7 @@ const setFilters = async () => {
 								// TODO: handle case where numeric range is unset
 							}
 						} else {
-							filters.push([props.doctype, attribute.field, 'in', values])
+							filters.push([doctype, attribute.field, 'in', values])
 						}
 					} else {
 						filters = filters.filter(filter => filter[1] !== attribute.field)
@@ -191,12 +200,12 @@ const setFilters = async () => {
 							const existing_name_filter_value = existing_name_filter[3]
 							filters = filters.filter(filter => filter[1] !== 'name')
 							if (Array.isArray(existing_name_filter_value)) {
-								filters.push([props.doctype, 'name', 'in', [...existing_name_filter_value, ...items]])
+								filters.push([doctype, 'name', 'in', [...existing_name_filter_value, ...items]])
 							} else {
-								filters.push([props.doctype, 'name', 'in', [existing_name_filter_value, ...items]])
+								filters.push([doctype, 'name', 'in', [existing_name_filter_value, ...items]])
 							}
 						} else {
-							filters.push([props.doctype, 'name', 'in', items])
+							filters.push([doctype, 'name', 'in', items])
 						}
 
 						refreshListFilters(filters)
@@ -210,7 +219,7 @@ const setFilters = async () => {
 }
 
 const refreshListFilters = (filters: ListFilters) => {
-	const listview = frappe.get_list_view(props.doctype)
+	const listview = frappe.get_list_view(doctype)
 	listview.filter_area.clear(false)
 	listview.filter_area.set(filters)
 	listview.refresh()
