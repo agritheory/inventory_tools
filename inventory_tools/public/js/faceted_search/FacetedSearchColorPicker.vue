@@ -14,32 +14,36 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 
-export type Value = {
-	attribute: string[]
+type ColorAttribute = [name: string, color: string, image: string | null | undefined]
+type ColorValue = {
+	attribute: ColorAttribute
 	isChecked: boolean
 }
 
 const emit = defineEmits(['update_filters'])
-const props = defineProps<{
-	values: any[]
+const { values, attribute_name, attribute_id, init_values } = defineProps<{
+	values: ColorAttribute[]
 	attribute_name: string
 	attribute_id: string
+	init_values?: string[]
 }>()
 
-const selectedValues = ref<Value[]>([])
+const selectedValues = ref<ColorValue[]>([])
 
 onMounted(() => {
-	if (props.values?.length > 0) {
-		selectedValues.value = props.values.map(value => {
-			return { attribute: value, isChecked: false }
+	if (values?.length > 0) {
+		selectedValues.value = values.map(value => {
+			const initValues = init_values ? Array.from(init_values) : []
+			const isChecked = initValues.includes(value[0])
+			return { attribute: value, isChecked }
 		})
 	}
 })
 
 const change = () => {
 	emit('update_filters', {
-		attribute_name: props.attribute_name,
-		attribute_id: props.attribute_id,
+		attribute_name,
+		attribute_id,
 		values: selectedValues.value
 			.map(r => {
 				return r.isChecked ? r.attribute[0] : null
@@ -50,16 +54,17 @@ const change = () => {
 	})
 }
 
-const selectColor = (attr: Value) => {
+const selectColor = (attr: ColorValue) => {
 	attr.isChecked = !attr.isChecked
 	change()
 }
 
-const getBackground = (attr: Value) => {
-	if (attr.attribute[2] != undefined) {
-		return { 'background-image': `url("${attr.attribute[2]}")` }
+const getBackground = (attr: ColorValue) => {
+	const [name, color, image] = attr.attribute
+	if (image != undefined) {
+		return { 'background-image': `url("${image}")` }
 	} else {
-		return { 'background-color': attr.attribute[1] }
+		return { 'background-color': color }
 	}
 }
 

@@ -13,26 +13,28 @@
 import { onMounted, ref } from 'vue'
 
 const emit = defineEmits(['update_filters'])
-const props = defineProps<{
-	values: any[]
+const { values, attribute_name, attribute_id, init_values } = defineProps<{
+	values: string[]
 	attribute_name: string
 	attribute_id: string
+	init_values?: string[]
 }>()
 
-const minFilterValue = ref(0)
-const maxFilterValue = ref(0)
+const minFilterValue = ref('0')
+const maxFilterValue = ref('0')
 
 onMounted(() => {
-	if (props.values) {
-		minFilterValue.value = props.values[0]
-		maxFilterValue.value = props.values[1]
+	if (values) {
+		const refValues = init_values || values ? Array.from(init_values || values) : []
+		minFilterValue.value = refValues[0]
+		maxFilterValue.value = refValues[1]
 	}
 })
 
 const change = () => {
 	emit('update_filters', {
-		attribute_name: props.attribute_name,
-		attribute_id: props.attribute_id,
+		attribute_name,
+		attribute_id,
 		values: [minFilterValue.value, maxFilterValue.value],
 	})
 }

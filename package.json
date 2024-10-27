@@ -3,7 +3,6 @@
 	"dependencies": {
 		"@vitejs/plugin-vue": "^4.0.0",
 		"@vueuse/core": "^10.11.0",
-		"fabric": "^6.0.1",
 		"vite": "^4.0.2",
 		"vue": "^3.3.10"
 	},
