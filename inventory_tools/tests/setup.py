@@ -20,6 +20,8 @@ from inventory_tools.tests.fixtures import (
 	specifications,
 	suppliers,
 	workstations,
+	planned_dates,
+	shifts,
 )
 
 
@@ -89,6 +91,8 @@ def create_test_data():
 	frappe.db.set_single_value("Stock Settings", "default_warehouse", "")
 	create_warehouses(settings)
 	setup_manufacturing_settings(settings)
+	# create_shift_types is a pre-req for createworkstations
+	create_shift_types()
 	create_workstations()
 	create_operations()
 	create_item_groups(settings)
@@ -197,19 +201,46 @@ def setup_manufacturing_settings(settings):
 	)
 	frappe.set_value("Inventory Tools Settings", settings.company, "create_purchase_orders", 0)
 	frappe.set_value(
-		"Inventory Tools Settings", settings.company, "overproduction_percentage_for_work_order", 50
+		"Inventory Tools Settings",
+		settings.company,
+		"overproduction_percentage_for_work_order",
+		50,
 	)
 	frappe.set_value("Inventory Tools Settings", settings.company, "show_on_website", 1)
 	frappe.set_value("Inventory Tools Settings", settings.company, "show_in_listview", 1)
 
 
+def create_shift_types():
+	for shift in shifts:
+		if frappe.db.exists("Shift Type", shift["name"]):
+			continue
+		sh = frappe.new_doc("Shift Type")
+		sh.name = shift["name"]
+		sh.start_time = shift["start_time"]
+		sh.end_time = shift["end_time"]
+		sh.color = shift["color"]
+		sh.save()
+
+
 def create_workstations():
 	for ws in workstations:
-		if frappe.db.exists("Workstation", ws[0]):
+		if frappe.db.exists("Workstation", ws["workstation_name"]):
 			continue
 		work = frappe.new_doc("Workstation")
-		work.workstation_name = ws[0]
-		work.production_capacity = ws[1]
+		work.workstation_name = ws["workstation_name"]
+		work.production_capacity = ws["production_capacity"]
+		for shift_type in ws["shift_types"]:
+			for sh in shifts:
+				if sh["name"] == shift_type:
+					result = sh
+			work.append(
+				"working_hours",
+				{
+					"shift_type": shift_type,
+					"start_time": result["start_time"],
+					"end_time": result["end_time"],
+				},
+			)
 		work.save()
 
 
@@ -638,6 +669,12 @@ def create_production_plan(settings, prod_plan_from_doc):
 	for wo in wos:
 		wo = frappe.get_doc("Work Order", wo)
 		wo.wip_warehouse = "Kitchen - APC"
+		current_year = str(settings.day.year)
+		wo.planned_start_date = f'{current_year}-{planned_dates[wo.item_name]["planned_start_date"]}'
+		wo.planned_end_date = f'{current_year}-{planned_dates[wo.item_name]["planned_end_date"]}'
+		wo.expected_delivery_date = (
+			f'{current_year}-{planned_dates[wo.item_name]["expected_delivery_date"]}'
+		)
 		wo.save()
 		wo.submit()
 		job_cards = frappe.get_all("Job Card", {"work_order": wo.name})
@@ -731,7 +768,10 @@ def create_quotations(settings):
 		"conversion_rate": 1,
 		"transaction_date": nowdate(),
 		"valid_till": add_months(nowdate(), 1),
-		"items": [{"item_code": "Ambrosia Pie", "qty": 1}, {"item_code": "Gooseberry Pie", "qty": 5}],
+		"items": [
+			{"item_code": "Ambrosia Pie", "qty": 1},
+			{"item_code": "Gooseberry Pie", "qty": 5},
+		],
 		"company": settings.company,
 	}
 	quotation.update(values)
@@ -748,7 +788,10 @@ def create_quotations(settings):
 		"conversion_rate": 1,
 		"transaction_date": nowdate(),
 		"valid_till": add_months(nowdate(), 1),
-		"items": [{"item_code": "Ambrosia Pie", "qty": 1}, {"item_code": "Gooseberry Pie", "qty": 5}],
+		"items": [
+			{"item_code": "Ambrosia Pie", "qty": 1},
+			{"item_code": "Gooseberry Pie", "qty": 5},
+		],
 		"company": settings.company,
 	}
 	quotation.update(values)
@@ -765,7 +808,10 @@ def create_quotations(settings):
 		"conversion_rate": 1,
 		"transaction_date": nowdate(),
 		"valid_till": add_months(nowdate(), 1),
-		"items": [{"item_code": "Ambrosia Pie", "qty": 2}, {"item_code": "Double Plum Pie", "qty": 1}],
+		"items": [
+			{"item_code": "Ambrosia Pie", "qty": 2},
+			{"item_code": "Double Plum Pie", "qty": 1},
+		],
 		"company": settings.company,
 	}
 	quotation.update(values)
@@ -782,7 +828,10 @@ def create_quotations(settings):
 		"conversion_rate": 1,
 		"transaction_date": nowdate(),
 		"valid_till": add_months(nowdate(), 1),
-		"items": [{"item_code": "Ambrosia Pie", "qty": 5}, {"item_code": "Double Plum Pie", "qty": 10}],
+		"items": [
+			{"item_code": "Ambrosia Pie", "qty": 5},
+			{"item_code": "Double Plum Pie", "qty": 10},
+		],
 		"company": "Chelsea Fruit Co",
 	}
 	quotation.update(values)

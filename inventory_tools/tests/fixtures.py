@@ -74,24 +74,114 @@ suppliers = [
 	),
 ]
 
+# workstations = [
+# 	("Mix Pie Crust Station", "20"),
+# 	("Roll Pie Crust Station", "20"),
+# 	("Make Pie Filling Station", "20"),
+# 	("Cooling Station", "100"),
+# 	("Box Pie Station", "100"),
+# 	("Baking Station", "20"),
+# 	("Assemble Pie Station", "20"),
+# 	("Mix Pie Filling Station", "20"),
+# 	("Packaging Station", "2"),
+# 	("Food Prep Table 2", "10"),
+# 	("Food Prep Table 1", "5"),
+# 	("Range Station", "20"),
+# 	("Cooling Racks Station", "80"),
+# 	("Refrigerator Station", "200"),
+# 	("Oven Station", "20"),
+# 	("Mixer Station", "10"),
+# ]
+
 workstations = [
-	("Mix Pie Crust Station", "20"),
-	("Roll Pie Crust Station", "20"),
-	("Make Pie Filling Station", "20"),
-	("Cooling Station", "100"),
-	("Box Pie Station", "100"),
-	("Baking Station", "20"),
-	("Assemble Pie Station", "20"),
-	("Mix Pie Filling Station", "20"),
-	("Packaging Station", "2"),
-	("Food Prep Table 2", "10"),
-	("Food Prep Table 1", "5"),
-	("Range Station", "20"),
-	("Cooling Racks Station", "80"),
-	("Refrigerator Station", "200"),
-	("Oven Station", "20"),
-	("Mixer Station", "10"),
+	{
+		"workstation_name": "Mix Pie Crust Station",
+		"production_capacity": "20",
+		"shift_types": ["Day Shift", "Evening Shift"],
+	},
+	{
+		"workstation_name": "Roll Pie Crust Station",
+		"production_capacity": "20",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Make Pie Filling Station",
+		"production_capacity": "20",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Cooling Station",
+		"production_capacity": "100",
+		"shift_types": ["Day Shift", "Evening Shift"],
+	},
+	{
+		"workstation_name": "Box Pie Station",
+		"production_capacity": "100",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Baking Station",
+		"production_capacity": "20",
+		"shift_types": ["Day Shift", "Evening Shift"],
+	},
+	{
+		"workstation_name": "Assemble Pie Station",
+		"production_capacity": "20",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Mix Pie Filling Station",
+		"production_capacity": "20",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Packaging Station",
+		"production_capacity": "2",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Food Prep Table 2",
+		"production_capacity": "10",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Food Prep Table 1",
+		"production_capacity": "5",
+		"shift_types": ["Day Shift", "Evening Shift"],
+	},
+	{
+		"workstation_name": "Range Station",
+		"production_capacity": "20",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Cooling Racks Station",
+		"production_capacity": "80",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Refrigerator Station",
+		"production_capacity": "200",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Oven Station",
+		"production_capacity": "20",
+		"shift_types": ["Day Shift", "Evening Shift"],
+	},
+	{
+		"workstation_name": "Mixer Station",
+		"production_capacity": "10",
+		"shift_types": ["Day Shift"],
+	},
 ]
+
+shifts = [
+	{"name": "Day Shift", "start_time": "06:00:00", "end_time": "14:00:00", "color": "Yellow"},
+	{"name": "Evening Shift", "start_time": "14:00:00", "end_time": "22:00:00", "color": "Blue"},
+	{"name": "Night Shift", "start_time": "22:00:00", "end_time": "06:00:00", "color": "Violet"},
+]
+
 
 operations = [
 	(
@@ -570,7 +660,12 @@ boms = [
 		"uom": "Nos",
 		"items": [
 			{"item_code": "Bayberry Pie", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
-			{"item_code": "Bayberry Pocket", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
+			{
+				"item_code": "Bayberry Pocket",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos",
+			},
 		],
 		"operations": [
 			{
@@ -586,8 +681,18 @@ boms = [
 		"quantity": 5.0,
 		"uom": "Nos",
 		"items": [
-			{"item_code": "Bayberry Pocket", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
-			{"item_code": "Bayberry Popper", "qty": 10.0, "qty_consumed_per_unit": 2.0, "uom": "Nos"},
+			{
+				"item_code": "Bayberry Pocket",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos",
+			},
+			{
+				"item_code": "Bayberry Popper",
+				"qty": 10.0,
+				"qty_consumed_per_unit": 2.0,
+				"uom": "Nos",
+			},
 			{"item_code": "Pie Box", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
 		],
 		"operations": [
@@ -607,7 +712,12 @@ boms = [
 			{"item_code": "Flour", "qty": 1.5, "qty_consumed_per_unit": 0.3, "uom": "Pound"},
 			{"item_code": "Butter", "qty": 0.75, "qty_consumed_per_unit": 0.15, "uom": "Pound"},
 			{"item_code": "Sugar", "qty": 0.1, "qty_consumed_per_unit": 0.02, "uom": "Pound"},
-			{"item_code": "Bayberry Popper", "qty": 15.0, "qty_consumed_per_unit": 3.0, "uom": "Nos"},
+			{
+				"item_code": "Bayberry Popper",
+				"qty": 15.0,
+				"qty_consumed_per_unit": 3.0,
+				"uom": "Nos",
+			},
 		],
 		"operations": [
 			{
@@ -670,7 +780,12 @@ boms = [
 				"time_in_mins": 10.0,
 				"workstation": "Food Prep Table 2",
 			},
-			{"batch_size": 1, "operation": "Bake Op", "time_in_mins": 50.0, "workstation": "Oven Station"},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station",
+			},
 			{
 				"batch_size": 1,
 				"operation": "Cool Pie Op",
@@ -706,7 +821,12 @@ boms = [
 				"time_in_mins": 10.0,
 				"workstation": "Food Prep Table 2",
 			},
-			{"batch_size": 1, "operation": "Bake Op", "time_in_mins": 50.0, "workstation": "Oven Station"},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station",
+			},
 			{
 				"batch_size": 1,
 				"operation": "Cool Pie Op",
@@ -742,7 +862,12 @@ boms = [
 				"time_in_mins": 10.0,
 				"workstation": "Food Prep Table 2",
 			},
-			{"batch_size": 1, "operation": "Bake Op", "time_in_mins": 50.0, "workstation": "Oven Station"},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station",
+			},
 			{
 				"batch_size": 1,
 				"operation": "Cool Pie Op",
@@ -778,7 +903,12 @@ boms = [
 				"time_in_mins": 10.0,
 				"workstation": "Food Prep Table 2",
 			},
-			{"batch_size": 1, "operation": "Bake Op", "time_in_mins": 50.0, "workstation": "Oven Station"},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station",
+			},
 			{
 				"batch_size": 1,
 				"operation": "Cool Pie Op",
@@ -800,7 +930,12 @@ boms = [
 		"overproduction_percentage_for_work_order": 100,
 		"items": [
 			{"item_code": "Pie Crust", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
-			{"item_code": "Ambrosia Pie Filling", "qty": 20.0, "qty_consumed_per_unit": 4.0, "uom": "Cup"},
+			{
+				"item_code": "Ambrosia Pie Filling",
+				"qty": 20.0,
+				"qty_consumed_per_unit": 4.0,
+				"uom": "Cup",
+			},
 			{"item_code": "Pie Box", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
 		],
 		"operations": [
@@ -810,7 +945,12 @@ boms = [
 				"time_in_mins": 10.0,
 				"workstation": "Food Prep Table 2",
 			},
-			{"batch_size": 1, "operation": "Bake Op", "time_in_mins": 50.0, "workstation": "Oven Station"},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station",
+			},
 			{
 				"batch_size": 1,
 				"operation": "Cool Pie Op",
@@ -831,10 +971,25 @@ boms = [
 		"uom": "Cup",
 		"items": [
 			{"item_code": "Sugar", "qty": 0.5, "qty_consumed_per_unit": 0.025, "uom": "Pound"},
-			{"item_code": "Cornstarch", "qty": 0.1, "qty_consumed_per_unit": 0.005, "uom": "Pound"},
+			{
+				"item_code": "Cornstarch",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.005,
+				"uom": "Pound",
+			},
 			{"item_code": "Water", "qty": 1.25, "qty_consumed_per_unit": 0.0625, "uom": "Cup"},
-			{"item_code": "Butter", "qty": 0.313, "qty_consumed_per_unit": 0.01565, "uom": "Pound"},
-			{"item_code": "Bayberry", "qty": 15.0, "qty_consumed_per_unit": 0.05025, "uom": "Pound"},
+			{
+				"item_code": "Butter",
+				"qty": 0.313,
+				"qty_consumed_per_unit": 0.01565,
+				"uom": "Pound",
+			},
+			{
+				"item_code": "Bayberry",
+				"qty": 15.0,
+				"qty_consumed_per_unit": 0.05025,
+				"uom": "Pound",
+			},
 		],
 		"operations": [
 			{
@@ -857,11 +1012,31 @@ boms = [
 		"uom": "Cup",
 		"items": [
 			{"item_code": "Sugar", "qty": 0.5, "qty_consumed_per_unit": 0.025, "uom": "Pound"},
-			{"item_code": "Cornstarch", "qty": 0.1, "qty_consumed_per_unit": 0.005, "uom": "Pound"},
+			{
+				"item_code": "Cornstarch",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.005,
+				"uom": "Pound",
+			},
 			{"item_code": "Water", "qty": 1.25, "qty_consumed_per_unit": 0.0625, "uom": "Cup"},
-			{"item_code": "Butter", "qty": 0.313, "qty_consumed_per_unit": 0.01565, "uom": "Pound"},
-			{"item_code": "Cocoplum", "qty": 7.5, "qty_consumed_per_unit": 0.02515, "uom": "Pound"},
-			{"item_code": "Damson Plum", "qty": 7.5, "qty_consumed_per_unit": 0.02515, "uom": "Pound"},
+			{
+				"item_code": "Butter",
+				"qty": 0.313,
+				"qty_consumed_per_unit": 0.01565,
+				"uom": "Pound",
+			},
+			{
+				"item_code": "Cocoplum",
+				"qty": 7.5,
+				"qty_consumed_per_unit": 0.02515,
+				"uom": "Pound",
+			},
+			{
+				"item_code": "Damson Plum",
+				"qty": 7.5,
+				"qty_consumed_per_unit": 0.02515,
+				"uom": "Pound",
+			},
 		],
 		"operations": [
 			{
@@ -884,11 +1059,31 @@ boms = [
 		"uom": "Cup",
 		"items": [
 			{"item_code": "Sugar", "qty": 0.5, "qty_consumed_per_unit": 0.025, "uom": "Pound"},
-			{"item_code": "Cornstarch", "qty": 0.1, "qty_consumed_per_unit": 0.005, "uom": "Pound"},
+			{
+				"item_code": "Cornstarch",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.005,
+				"uom": "Pound",
+			},
 			{"item_code": "Water", "qty": 1.25, "qty_consumed_per_unit": 0.0625, "uom": "Cup"},
-			{"item_code": "Butter", "qty": 0.313, "qty_consumed_per_unit": 0.01565, "uom": "Pound"},
-			{"item_code": "Kaduka Lime", "qty": 10.0, "qty_consumed_per_unit": 0.0335, "uom": "Pound"},
-			{"item_code": "Limequat", "qty": 5.0, "qty_consumed_per_unit": 0.01675, "uom": "Pound"},
+			{
+				"item_code": "Butter",
+				"qty": 0.313,
+				"qty_consumed_per_unit": 0.01565,
+				"uom": "Pound",
+			},
+			{
+				"item_code": "Kaduka Lime",
+				"qty": 10.0,
+				"qty_consumed_per_unit": 0.0335,
+				"uom": "Pound",
+			},
+			{
+				"item_code": "Limequat",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 0.01675,
+				"uom": "Pound",
+			},
 		],
 		"operations": [
 			{
@@ -911,10 +1106,25 @@ boms = [
 		"uom": "Cup",
 		"items": [
 			{"item_code": "Sugar", "qty": 0.5, "qty_consumed_per_unit": 0.025, "uom": "Pound"},
-			{"item_code": "Cornstarch", "qty": 0.1, "qty_consumed_per_unit": 0.005, "uom": "Pound"},
+			{
+				"item_code": "Cornstarch",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.005,
+				"uom": "Pound",
+			},
 			{"item_code": "Water", "qty": 1.25, "qty_consumed_per_unit": 0.0625, "uom": "Cup"},
-			{"item_code": "Butter", "qty": 0.313, "qty_consumed_per_unit": 0.01565, "uom": "Pound"},
-			{"item_code": "Gooseberry", "qty": 15.0, "qty_consumed_per_unit": 0.05025, "uom": "Pound"},
+			{
+				"item_code": "Butter",
+				"qty": 0.313,
+				"qty_consumed_per_unit": 0.01565,
+				"uom": "Pound",
+			},
+			{
+				"item_code": "Gooseberry",
+				"qty": 15.0,
+				"qty_consumed_per_unit": 0.05025,
+				"uom": "Pound",
+			},
 		],
 		"operations": [
 			{
@@ -937,8 +1147,18 @@ boms = [
 		"uom": "Cup",
 		"items": [
 			{"item_code": "Sugar", "qty": 0.5, "qty_consumed_per_unit": 0.025, "uom": "Pound"},
-			{"item_code": "Cornstarch", "qty": 0.1, "qty_consumed_per_unit": 0.005, "uom": "Pound"},
-			{"item_code": "Butter", "qty": 0.313, "qty_consumed_per_unit": 0.01565, "uom": "Pound"},
+			{
+				"item_code": "Cornstarch",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.005,
+				"uom": "Pound",
+			},
+			{
+				"item_code": "Butter",
+				"qty": 0.313,
+				"qty_consumed_per_unit": 0.01565,
+				"uom": "Pound",
+			},
 			{
 				"item_code": "Hairless Rambutan",
 				"qty": 5.0,
@@ -946,7 +1166,12 @@ boms = [
 				"uom": "Pound",
 			},
 			{"item_code": "Tayberry", "qty": 2.5, "qty_consumed_per_unit": 0.0084, "uom": "Pound"},
-			{"item_code": "Cloudberry", "qty": 7.5, "qty_consumed_per_unit": 0.02515, "uom": "Pound"},
+			{
+				"item_code": "Cloudberry",
+				"qty": 7.5,
+				"qty_consumed_per_unit": 0.02515,
+				"uom": "Pound",
+			},
 			{"item_code": "Water", "qty": 1.25, "qty_consumed_per_unit": 0.0625, "uom": "Cup"},
 		],
 		"operations": [
@@ -976,7 +1201,12 @@ boms = [
 			{"item_code": "Butter", "qty": 2.5, "qty_consumed_per_unit": 0.5, "uom": "Pound"},
 			# {"item_code": "Ice Water", "qty": 2.5, "qty_consumed_per_unit": 0.5, "uom": "Cup"},
 			{"item_code": "Salt", "qty": 0.05, "qty_consumed_per_unit": 0.01, "uom": "Pound"},
-			{"item_code": "Parchment Paper", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
+			{
+				"item_code": "Parchment Paper",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos",
+			},
 			{"item_code": "Pie Tin", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
 		],
 		"operations": [],  # Subcontracted item -> operations done by supplier
@@ -990,7 +1220,12 @@ boms = [
 			{"item_code": "Butter", "qty": 2.5, "qty_consumed_per_unit": 0.5, "uom": "Pound"},
 			{"item_code": "Ice Water", "qty": 2.5, "qty_consumed_per_unit": 0.5, "uom": "Cup"},
 			{"item_code": "Salt", "qty": 0.05, "qty_consumed_per_unit": 0.01, "uom": "Pound"},
-			{"item_code": "Parchment Paper", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
+			{
+				"item_code": "Parchment Paper",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos",
+			},
 			{"item_code": "Pie Tin", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
 		],
 		"operations": [
@@ -1176,5 +1411,83 @@ attributes = {
 	},
 	"Cloudberry": {
 		"Color": ["Yellow", "Red"],
+	},
+}
+
+planned_dates = {
+	"Ambrosia Pie": {
+		"planned_start_date": "01-01 07:17:00",
+		"planned_end_date": "01-01",
+		"expected_delivery_date": "01-01",
+	},
+	"Double Plum Pie": {
+		"planned_start_date": "01-01 07:26:00",
+		"planned_end_date": "01-01",
+		"expected_delivery_date": "01-01",
+	},
+	"Gooseberry Pie": {
+		"planned_start_date": "01-01 07:29:00",
+		"planned_end_date": "01-01",
+		"expected_delivery_date": "01-01",
+	},
+	"Kaduka Key Lime Pie": {
+		"planned_start_date": "01-01 07:39:00",
+		"planned_end_date": "01-01",
+		"expected_delivery_date": "01-01",
+	},
+	"Pocketful of Bay": {
+		"planned_start_date": "01-01 07:16:00",
+		"planned_end_date": "01-01",
+		"expected_delivery_date": "01-01",
+	},
+	"Tower of Bay-bel": {
+		"planned_start_date": "01-01 07:30:00",
+		"planned_end_date": "01-01",
+		"expected_delivery_date": "01-01",
+	},
+	"Pie Crust": {
+		"planned_start_date": "01-01 07:10:00",
+		"planned_end_date": "01-01",
+		"expected_delivery_date": "01-01",
+	},
+	"Ambrosia Pie Filling": {
+		"planned_start_date": "01-01 07:16:00",
+		"planned_end_date": "01-01",
+		"expected_delivery_date": "01-01",
+	},
+	"Kaduka Key Lime Pie Filling": {
+		"planned_start_date": "01-01 07:19:00",
+		"planned_end_date": "01-01",
+		"expected_delivery_date": "01-01",
+	},
+	"Gooseberry Pie Filling": {
+		"planned_start_date": "01-01 07:18:00",
+		"planned_end_date": "01-01",
+		"expected_delivery_date": "01-01",
+	},
+	"Bayberry Pocket": {
+		"planned_start_date": "01-01 07:25:00",
+		"planned_end_date": "01-01",
+		"expected_delivery_date": "01-01",
+	},
+	"Bayberry Popper": {
+		"planned_start_date": "01-01 07:20:00",
+		"planned_end_date": "01-01",
+		"expected_delivery_date": "01-01",
+	},
+	"Bayberry Pie": {
+		"planned_start_date": "01-01 07:11:00",
+		"planned_end_date": "01-01",
+		"expected_delivery_date": "01-01",
+	},
+	"Bayberry Pie Filling": {
+		"planned_start_date": "01-01 07:22:00",
+		"planned_end_date": "01-01",
+		"expected_delivery_date": "01-01",
+	},
+	"Double Plum Pie Filling": {
+		"planned_start_date": "01-01 07:37:00",
+		"planned_end_date": "01-01",
+		"expected_delivery_date": "01-01",
 	},
 }
