@@ -9,7 +9,7 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 )
 from erpnext.setup.utils import set_defaults_for_tests
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
-from frappe.utils.data import add_months, flt, getdate, nowdate, get_datetime
+from frappe.utils.data import add_months, flt, getdate, nowdate
 from webshop.webshop.doctype.website_item.website_item import make_website_item
 
 from inventory_tools.tests.fixtures import (
@@ -20,7 +20,6 @@ from inventory_tools.tests.fixtures import (
 	specifications,
 	suppliers,
 	workstations,
-	planned_dates,
 	shifts,
 )
 
@@ -91,7 +90,6 @@ def create_test_data():
 	frappe.db.set_single_value("Stock Settings", "default_warehouse", "")
 	create_warehouses(settings)
 	setup_manufacturing_settings(settings)
-	# create_shift_types is a pre-req for createworkstations
 	create_shift_types()
 	create_workstations()
 	create_operations()
@@ -625,22 +623,39 @@ def create_production_plan(settings, prod_plan_from_doc):
 			},
 		)
 		pp.get_mr_items()
-	for item in pp.po_items:
-		item.planned_start_date = settings.day
+
+	pp.po_items = sorted(pp.po_items, key=lambda x: x.get("item_code"))
+
+	for idx, item in enumerate(pp.po_items):
+		item.planned_start_date = settings.day + datetime.timedelta(days=idx)
+
 	pp.get_sub_assembly_items()
-	for item in pp.sub_assembly_items:
-		item.schedule_date = settings.day
+	start_time = datetime.datetime(settings.day.year, settings.day.month, settings.day.day, 6, 0)
+	pp.append(
+		"sub_assembly_items",
+		{
+			"schedule_date": start_time,
+			"production_item": "Pie Crust",
+			"name": None,
+			"type_of_manufacturing": "In House",
+			"idx": 1,
+			"qty": 50,
+			"bom_no": "BOM-Pie Crust-001",
+			"bom_level": 1,
+			"supplier": None,
+			"for_warehouse": "Storeroom - APC",
+		},
+	)
+	for idx, item in enumerate(
+		sorted(pp.sub_assembly_items, key=lambda x: (-abs(x.bom_level), x.idx)), start=1
+	):
+		item.idx = idx
+		item.schedule_date = start_time
 		if item.production_item == "Pie Crust":
-			idx = item.idx
-			item.type_of_manufacturing = "Subcontract"
-			item.supplier = "Credible Contract Baking"
 			item.qty = 50
-	pp.append("sub_assembly_items", pp.sub_assembly_items[idx - 1].as_dict())
-	pp.sub_assembly_items[-1].name = None
-	pp.sub_assembly_items[-1].type_of_manufacturing = "In House"
-	pp.sub_assembly_items[-1].bom_no = "BOM-Pie Crust-001"
-	pp.sub_assembly_items[-1].supplier = None
-	pp.for_warehouse = "Storeroom - APC"
+		time = frappe.get_value("BOM Operation", {"parent": item.bom_no}, "SUM(time_in_mins) AS time")
+		if time:
+			start_time += datetime.timedelta(minutes=time + 2)
 	raw_materials = get_items_for_material_requests(
 		pp.as_dict(), warehouses=None, get_parent_warehouse_data=None
 	)
@@ -670,15 +685,20 @@ def create_production_plan(settings, prod_plan_from_doc):
 		wo = frappe.get_doc("Work Order", wo)
 		wo.wip_warehouse = "Kitchen - APC"
 		current_year = str(settings.day.year)
-		wo.planned_start_date = f'{current_year}-{planned_dates[wo.item_name]["planned_start_date"]}'
-		wo.planned_end_date = f'{current_year}-{planned_dates[wo.item_name]["planned_end_date"]}'
-		wo.expected_delivery_date = (
-			f'{current_year}-{planned_dates[wo.item_name]["expected_delivery_date"]}'
-		)
 		wo.save()
 		wo.submit()
 		job_cards = frappe.get_all("Job Card", {"work_order": wo.name})
-		start_time = get_datetime()
+		wo.planned_start_date = start_time
+		time = frappe.get_value("BOM Operation", {"parent": item.bom_no}, "SUM(time_in_mins) AS time")
+		if time:
+			wo.planned_end_date = wo.planned_start_date + datetime.timedelta(minutes=time + 2)
+		wo.required_items = sorted(wo.required_items, key=lambda x: x.get("item_code"))
+		for idx, w in enumerate(wo.required_items, start=1):
+			w.idx = idx
+			w.required_qty = flt(w.required_qty, 3)
+		wo.save()
+		wo.submit()
+		frappe.db.set_value("Work Order", wo.name, "creation", start_time)
 		for job_card in job_cards:
 			job_card = frappe.get_doc("Job Card", job_card)
 			batch_size, total_operation_time = frappe.get_value(

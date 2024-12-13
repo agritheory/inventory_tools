@@ -117,7 +117,6 @@ class OptimizerView {
 						frappe.set_route('Form', 'Work Order', task.id)
 					},
 				})
-
 				this.output_gantt = new Gantt(this.output, r, {
 					view_mode: 'Quarter Day',
 					on_click: task => {
