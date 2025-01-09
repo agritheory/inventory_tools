@@ -4,6 +4,8 @@
 import frappe
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 from frappe.desk.search import search_link
+from frappe.query_builder import DocType
+from frappe.query_builder.functions import IfNull
 
 
 @frappe.whitelist()
@@ -82,3 +84,29 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 				"page_len": page_len or 20,
 			},
 		)
+
+
+@frappe.whitelist()
+def get_children(doctype, parent=None, company=None, is_root=False):
+	if is_root:
+		parent = ""
+
+	Warehouse = DocType(doctype)
+	WarehouseType = DocType("Warehouse Type")
+	query = (
+		frappe.qb.from_(Warehouse)
+		.left_join(WarehouseType)
+		.on(Warehouse.warehouse_type == WarehouseType.name)
+		.select(
+			Warehouse.name.as_("value"),
+			Warehouse.is_group.as_("expandable"),
+			Warehouse.disabled,
+			Warehouse.warehouse_type,
+			WarehouseType.icon,
+		)
+		.where(IfNull(Warehouse.parent_warehouse, "") == parent)
+		.where(Warehouse.company.isin([company, None, ""]))
+		.orderby(Warehouse.name)
+	)
+
+	return query.run(as_dict=True)

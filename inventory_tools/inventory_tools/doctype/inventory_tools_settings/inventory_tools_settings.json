@@ -25,6 +25,7 @@
 		"overproduction_percentage_for_work_order",
 		"section_break_0",
 		"update_warehouse_path",
+		"prettify_warehouse_tree",
 		"column_break_ddssn",
 		"allow_alternative_workstations",
 		"uoms_section",
@@ -178,11 +179,17 @@
 			"description": "These settings will apply to all companies",
 			"fieldname": "section_break_pxnx",
 			"fieldtype": "Section Break"
+		},
+		{
+			"default": "0",
+			"fieldname": "prettify_warehouse_tree",
+			"fieldtype": "Check",
+			"label": "Prettify Warehouse Tree"
 		}
 	],
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2024-08-05 10:12:40.728422",
+	"modified": "2025-01-08 11:24:33.522547",
 	"modified_by": "Administrator",
 	"module": "Inventory Tools",
 	"name": "Inventory Tools Settings",

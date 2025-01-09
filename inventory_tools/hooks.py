@@ -53,7 +53,7 @@ doctype_js = {
 	"Plant Floor": "public/js/custom/plant_floor_custom.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
-# doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
+doctype_tree_js = {"Warehouse": "public/js/custom/warehouse_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
 # Home Pages
