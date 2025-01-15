@@ -186,9 +186,9 @@ function toggle_subcontracting_columns(frm) {
 
 function setup_item_queries(frm) {
 	frm.set_query('item_code', 'items', () => {
-		if (me.frm.doc.is_subcontracted) {
-			var filters = { supplier: me.frm.doc.supplier }
-			if (me.frm.doc.is_old_subcontracting_flow) {
+		if (frm.doc.is_subcontracted) {
+			var filters = { supplier: frm.doc.supplier }
+			if (frm.doc.is_old_subcontracting_flow) {
 				filters['is_sub_contracted_item'] = 1
 			} else {
 				frappe.db.get_value('Inventory Tools Settings', frm.doc.company, 'enable_work_order_subcontracting').then(r => {
@@ -204,7 +204,7 @@ function setup_item_queries(frm) {
 		} else {
 			return {
 				query: 'erpnext.controllers.queries.item_query',
-				filters: { supplier: me.frm.doc.supplier, is_purchase_item: 1, has_variants: 0 },
+				filters: { supplier: frm.doc.supplier, is_purchase_item: 1, has_variants: 0 },
 			}
 		}
 	})
