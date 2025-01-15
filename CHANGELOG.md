@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v15.2.1 (2025-01-15)
+
+### Bug Fixes
+
+- Remove undefined global ([#121](https://github.com/agritheory/inventory_tools/pull/121),
+  [`baecd5f`](https://github.com/agritheory/inventory_tools/commit/baecd5f42799dbe32ba4ada552643ae42afffa61))
+
+
 ## v15.2.0 (2025-01-09)
 
 ### Features

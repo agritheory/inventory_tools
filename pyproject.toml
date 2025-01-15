@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "inventory_tools"
-version =  "15.2.0"
+version =  "15.2.1"
 authors = ["AgriTheory <support@agritheory.dev>"]
 description = "Inventory Tools for ERPNext"
 readme = "README.md"
