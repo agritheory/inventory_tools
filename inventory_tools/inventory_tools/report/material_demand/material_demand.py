@@ -9,6 +9,7 @@ from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.get_item_details import get_price_list_rate_for
 from frappe import _
 from frappe.query_builder import DocType
+from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Coalesce
 from frappe.utils.data import fmt_money, getdate
 
@@ -32,10 +33,16 @@ def get_columns(filters):
 			"width": "250px",
 		},
 		{
-			"fieldname": "material_request",
-			"fieldtype": "Link",
-			"options": "Material Request",
-			"label": "Material Request",
+			"fieldname": "source",
+			"label": "Source",
+			"fieldtype": "Data",
+			"width": "150px",
+		},
+		{
+			"fieldname": "source_reference",
+			"label": "Source Reference",
+			"fieldtype": "Dynamic Link",
+			"options": "source",
 			"width": "200px",
 		},
 		{
@@ -128,9 +135,12 @@ def get_data(filters):
 
 	MaterialRequest = DocType("Material Request")
 	MaterialRequestItem = DocType("Material Request Item")
+	SalesOrder = DocType("Sales Order")
+	SalesOrderItem = DocType("Sales Order Item")
 	ItemSupplier = DocType("Item Supplier")
 	Company = DocType("Company")
-	query = (
+
+	mr_query = (
 		frappe.qb.from_(MaterialRequest)
 		.join(MaterialRequestItem)
 		.on(MaterialRequest.name == MaterialRequestItem.parent)
@@ -140,7 +150,8 @@ def get_data(filters):
 		.on(MaterialRequest.company == Company.name)
 		.select(
 			MaterialRequestItem.name.as_("material_request_item"),
-			MaterialRequest.name.as_("material_request"),
+			MaterialRequest.name.as_("source_reference"),
+			ConstantColumn("Material Request").as_("source"),
 			MaterialRequest.company,
 			MaterialRequest.schedule_date,
 			MaterialRequestItem.name.as_("mri"),
@@ -166,10 +177,57 @@ def get_data(filters):
 	)
 
 	if filters.company:
-		query = query.where(MaterialRequest.company == filters.company)
-		query = query.where(ItemSupplier.supplier != filters.company)
+		mr_query = mr_query.where(MaterialRequest.company == filters.company)
+		mr_query = mr_query.where(ItemSupplier.supplier != filters.company)
 
-	data = query.run(as_dict=1)
+	so_query = (
+		frappe.qb.from_(SalesOrder)
+		.join(SalesOrderItem)
+		.on(SalesOrder.name == SalesOrderItem.parent)
+		.join(ItemSupplier)
+		.on(ItemSupplier.parent == SalesOrderItem.item_code)
+		.join(Company)
+		.on(SalesOrder.company == Company.name)
+		.select(
+			SalesOrderItem.name.as_("material_request_item"),
+			SalesOrder.name.as_("source_reference"),
+			ConstantColumn("Sales Order").as_("source"),
+			SalesOrder.company,
+			SalesOrder.delivery_date.as_("schedule_date"),
+			SalesOrderItem.name.as_("mri"),
+			SalesOrderItem.item_code,
+			SalesOrderItem.item_name,
+			SalesOrderItem.qty,
+			SalesOrderItem.uom,
+			SalesOrderItem.warehouse,
+			Company.default_currency.as_("currency"),
+			SalesOrderItem.rate.as_("supplier_price"),
+			Coalesce(ItemSupplier.supplier.as_("supplier"), "No Supplier").as_("supplier"),
+		)
+		.distinct()
+		.where(SalesOrder.docstatus < 2)
+		.where(
+			SalesOrder.delivery_date[filters.start_date or "1900-01-01" : filters.en_date or "2100-12-31"]
+		)
+		.where(SalesOrderItem.material_request_item.isnull())
+		# .where(SalesOrderItem.ordered_qty < SalesOrderItem.stock_qty)
+		# .where(SalesOrderItem.received_qty < SalesOrderItem.stock_qty)
+		.orderby(Coalesce(ItemSupplier.supplier, "No Supplier"), SalesOrderItem.item_name)
+	)
+
+	if filters.company:
+		so_query = so_query.where(SalesOrder.company == filters.company)
+		so_query = so_query.where(ItemSupplier.supplier != filters.company)
+
+	if filters.source == "Material Request":
+		data = mr_query.run(as_dict=True)
+	elif filters.source == "Sales Order":
+		data = so_query.run(as_dict=True)
+	else:
+		mr_data = mr_query.run(as_dict=True)
+		so_data = so_query.run(as_dict=True)
+		data = sorted(mr_data + so_data, key=lambda x: x.get("supplier"))
+
 	total_demand = frappe._dict()
 	mris = []
 	for row in data:
@@ -187,11 +245,18 @@ def get_data(filters):
 			r.total_demand = total_demand[r.item_code]
 			r.supplier_price = get_item_price(filters, r)
 			r.supplier_price = fmt_money(r.get("supplier_price"), 2, r.get("currency")).replace(" ", "")
-			r.draft_po = frappe.db.get_value(
-				"Purchase Order Item",
-				{"material_request_item": r.material_request_item, "docstatus": 0},
-				"sum(qty) as qty",
-			)
+			if r.source == "Material Request":
+				r.draft_po = frappe.db.get_value(
+					"Purchase Order Item",
+					{"material_request_item": r.material_request_item, "docstatus": 0},
+					"sum(qty) as qty",
+				)
+			elif r.source == "Sales Order":
+				r.draft_po = frappe.db.get_value(
+					"Purchase Order Item",
+					{"sales_order_item": r.material_request_item, "docstatus": 0},
+					"sum(qty) as qty",
+				)
 			r.draft_po = f'<span style="color: red">{r.draft_po}</span>' if r.draft_po else None
 			output.append({**r, "indent": 1})
 	return output

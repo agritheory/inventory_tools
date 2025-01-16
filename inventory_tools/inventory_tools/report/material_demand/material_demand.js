@@ -27,6 +27,12 @@ frappe.query_reports['Material Demand'] = {
 			fieldtype: 'Link',
 			options: 'Price List',
 		},
+		{
+			fieldname: 'source',
+			label: __('Source'),
+			fieldtype: 'Select',
+			options: ['', 'Material Request', 'Sales Order'],
+		},
 	],
 	get_datatable_options(options) {
 		return Object.assign(options, {
