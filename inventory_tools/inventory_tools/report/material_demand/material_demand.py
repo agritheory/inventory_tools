@@ -315,7 +315,8 @@ def create_pos(company, filters, rows):
 		return
 	counter = 0
 	settings = frappe.get_doc("Inventory Tools Settings", company)
-	requesting_companies = list({row.company for row in rows})
+	requesting_companies = list({row.company for row in rows if row.company})
+
 	if settings.purchase_order_aggregation_company == company:
 		requesting_companies = [company]
 	for requesting_company in requesting_companies:
@@ -325,9 +326,12 @@ def create_pos(company, filters, rows):
 			po.schedule_date = po.posting_date = getdate()
 			po.supplier = supplier
 			po.buying_price_list = filters.price_list
-			if len(requesting_companies) == 1:
-				po.multi_company_purchase_order = True
+			if (
+				len(requesting_companies) == 1
+				and requesting_company == settings.purchase_order_aggregation_company
+			):
 				po.company = settings.purchase_order_aggregation_company
+				po.multi_company_purchase_order = True
 			else:
 				po.company = requesting_company
 			for row in rows:
@@ -349,6 +353,7 @@ def create_pos(company, filters, rows):
 						"qty": row.get("qty"),
 						"rate": row.get("supplier_price"),
 						"uom": row.get("uom"),
+						"material_request_company": row.get("company"),
 						"material_request": row.get("material_request"),
 						"material_request_item": row.get("material_request_item"),
 						"warehouse": warehouse,

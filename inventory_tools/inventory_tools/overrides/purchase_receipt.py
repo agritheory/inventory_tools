@@ -5,6 +5,7 @@ import json
 
 import frappe
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import PurchaseReceipt
+from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 from frappe.utils.data import cint
 
 

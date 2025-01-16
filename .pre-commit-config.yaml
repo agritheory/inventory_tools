@@ -25,26 +25,17 @@ repos:
       - id: pyupgrade
         args: ['--py38-plus']
 
-  - repo: https://github.com/frappe/black
+  - repo: https://github.com/agritheory/black
     rev: 951ccf4d5bb0d692b457a5ebc4215d755618eb68
     hooks:
       - id: black
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v2.7.1
+  - repo: local
     hooks:
       - id: prettier
-        types_or: [javascript]
-        # Ignore any files that might contain jinja / bundles
-        exclude: |
-          (?x)^(
-              beam/public/dist/.*|
-              .*node_modules.*|
-              .*boilerplate.*|
-              beam/www/website_script.js|
-              beam/templates/includes/.*|
-              beam/public/js/lib/.*
-          )$
+        name: prettier
+        entry: npx prettier -w . --config .prettierrc.js --ignore-path .prettierignore
+        language: system
 
   - repo: https://github.com/PyCQA/isort
     rev: 5.12.0
@@ -57,14 +48,25 @@ repos:
       - id: flake8
         additional_dependencies: ['flake8-bugbear']
 
-  - repo: local
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
     hooks:
+      - id: codespell
+        additional_dependencies:
+          - tomli
+
+  - repo: https://github.com/agritheory/test_utils
+    rev: v0.15.0
+    hooks:
+      - id: update_pre_commit_config
+      - id: mypy
+      - id: validate_copyright
+        files: '\.(js|ts|py|md)$'
+        args: ['--app', 'inventory_tools']
+      - id: clean_customized_doctypes
+        args: ['--app', 'inventory_tools']
       - id: validate_customizations
-        always_run: true
-        name: .github/validate_customizations.py
-        entry: python .github/validate_customizations.py
-        language: system
-        types: [python]
+      - id: validate_python_dependencies
 
 ci:
   autoupdate_schedule: weekly

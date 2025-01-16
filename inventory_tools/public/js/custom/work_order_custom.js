@@ -34,18 +34,15 @@ function manage_subcontracting_buttons(frm) {
 	if (frm.doc.company) {
 		frappe.db.get_value('BOM', { name: frm.doc.bom_no }, 'is_subcontracted').then(r => {
 			if (r && r.message && r.message.is_subcontracted) {
-				frappe.db
-					.get_value('Inventory Tools Settings', { company: frm.doc.company }, 'enable_work_order_subcontracting')
-					.then(r => {
-						if (r && r.message && r.message.enable_work_order_subcontracting && frm.doc.docstatus == 1) {
-							frm.add_custom_button(
-								__('Create Subcontract PO'),
-								() => make_subcontracting_po(frm),
-								__('Subcontracting')
-							)
-							frm.add_custom_button(__('Add to Existing PO'), () => add_to_existing_po(frm), __('Subcontracting'))
-						}
-					})
+				if (
+					frm.doc.docstatus &&
+					frappe.boot.inventory_tools_settings &&
+					frappe.boot.inventory_tools_settings[frm.doc.company] &&
+					frappe.boot.inventory_tools_settings[frm.doc.company].enable_work_order_subcontracting
+				) {
+					frm.add_custom_button(__('Create Subcontract PO'), () => make_subcontracting_po(frm), __('Subcontracting'))
+					frm.add_custom_button(__('Add to Existing PO'), () => add_to_existing_po(frm), __('Subcontracting'))
+				}
 			}
 		})
 	}
