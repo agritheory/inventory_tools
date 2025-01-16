@@ -152,11 +152,11 @@ function update_selected_qty() {
 				total_selected = `<span style="color: red">${total_selected}</span>`
 				selected_price = `<span style="color: red">${selected_price}</span>`
 			}
-			frappe.query_report.datatable.cellmanager.updateCell(9, index, total_selected, true)
-			frappe.query_report.datatable.cellmanager.updateCell(12, index, selected_price, true)
+			frappe.query_report.datatable.cellmanager.updateCell(10, index, total_selected, true) // draft_po
+			frappe.query_report.datatable.cellmanager.updateCell(13, index, selected_price, true) // supplier_price
 		} else {
-			frappe.query_report.datatable.cellmanager.updateCell(9, index, '', true)
-			frappe.query_report.datatable.cellmanager.updateCell(12, index, '', true)
+			frappe.query_report.datatable.cellmanager.updateCell(10, index, '', true) // draft_po
+			frappe.query_report.datatable.cellmanager.updateCell(13, index, '', true) // supplier_price
 		}
 	})
 }

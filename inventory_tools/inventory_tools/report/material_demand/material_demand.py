@@ -403,13 +403,13 @@ def create_pos(company, filters, rows):
 				if not row.get("item_code"):
 					continue
 				if settings.purchase_order_aggregation_company == po.company or po.company == row.company:
+					warehouse = None
 					if (
 						settings.purchase_order_aggregation_company == po.company
 						and settings.aggregated_purchasing_warehouse
 					):
 						warehouse = settings.aggregated_purchasing_warehouse
-					else:
-						warehouse = frappe.get_value("Material Request Item", row.material_request_item, "warehouse")
+
 					i = {
 						"item_code": row.get("item_code"),
 						"item_name": row.get("item_name"),
@@ -418,11 +418,31 @@ def create_pos(company, filters, rows):
 						"qty": row.get("qty"),
 						"rate": row.get("supplier_price"),
 						"uom": row.get("uom"),
-						"material_request_company": row.get("company"),
-						"material_request": row.get("material_request"),
-						"material_request_item": row.get("material_request_item"),
 						"warehouse": warehouse,
 					}
+
+					if row.get("source") == "Material Request":
+						warehouse = warehouse or frappe.get_value(
+							"Material Request Item", row.material_request_item, "warehouse"
+						)
+						i.update(
+							{
+								"material_request_company": row.get("company"),
+								"material_request": row.get("source_reference"),
+								"material_request_item": row.get("material_request_item"),
+							}
+						)
+
+					elif row.get("source") == "Sales Order":
+						warehouse = warehouse or frappe.get_value(
+							"Sales Order Item", row.material_request_item, "warehouse"
+						)
+						i.update(
+							{
+								"sales_order": row.get("source_reference"),
+								"sales_order_item": row.get("material_request_item"),
+							}
+						)
 					po.append("items", i)
 
 			po.save()
