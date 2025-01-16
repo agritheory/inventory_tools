@@ -348,23 +348,40 @@ def create_rfqs(company, email_template, filters, rows):
 		for item_code in item_codes:
 			for row in rows:
 				if row.item_code == item_code and item_code not in [r.item_code for r in rfq.items]:
+					item = {
+						"item_code": row.get("item_code"),
+						"item_name": row.get("item_name"),
+						"required_date": max(getdate(), getdate(row.get("schedule_date"))),
+						"qty": row.get("qty"),
+						"uom": row.get("uom"),
+						"warehouse": settings.aggregated_purchasing_warehouse
+						if settings.aggregated_purchasing_warehouse
+						else row.get("warehouse"),
+					}
+					if row.get("source") == "Material Request":
+						item.update(
+							{
+								"conversion_factor": frappe.get_value(
+									"Material Request Item", row.get("material_request_item"), "conversion_factor"
+								),
+								"material_request": row.get("source_reference"),
+								"material_request_item": row.get("material_request_item"),
+							}
+						)
+					elif row.get("source") == "Sales Order":
+						item.update(
+							{
+								"conversion_factor": frappe.get_value(
+									"Sales Order Item", row.get("material_request_item"), "conversion_factor"
+								),
+								# TODO
+								# "sales_order": row.get("source_reference"),
+								# "sales_order_item": row.get("material_request_item"),
+							}
+						)
 					rfq.append(
 						"items",
-						{
-							"item_code": row.get("item_code"),
-							"item_name": row.get("item_name"),
-							"required_date": max(getdate(), getdate(row.get("schedule_date"))),
-							"conversion_factor": frappe.get_value(
-								"Material Request Item", row.get("material_request_item"), "conversion_factor"
-							),
-							"qty": row.get("qty"),
-							"uom": row.get("uom"),
-							"material_request": row.get("material_request"),
-							"material_request_item": row.get("material_request_item"),
-							"warehouse": settings.aggregated_purchasing_warehouse
-							if settings.aggregated_purchasing_warehouse
-							else row.get("warehouse"),
-						},
+						item,
 					)
 		rfq.set_missing_values()
 		rfq.save()
