@@ -18,11 +18,10 @@ def execute(filters=None):
 	if (filters.start_date and filters.end_date) and (filters.start_date > filters.end_date):
 		frappe.throw(frappe._("Start date cannot be before end date"))
 
-	return get_columns(filters), get_data(filters)
+	return get_columns(), get_data(filters)
 
 
-def get_columns(filters):
-	file_export = True if frappe.form_dict.cmd == "frappe.desk.query_report.export_query" else False
+def get_columns():
 	hide_company = True if len(frappe.get_all("Company")) == 1 else False
 	return [
 		{
@@ -210,8 +209,6 @@ def get_data(filters):
 			SalesOrder.delivery_date[filters.start_date or "1900-01-01" : filters.en_date or "2100-12-31"]
 		)
 		.where(SalesOrderItem.material_request_item.isnull())
-		# .where(SalesOrderItem.ordered_qty < SalesOrderItem.stock_qty)
-		# .where(SalesOrderItem.received_qty < SalesOrderItem.stock_qty)
 		.orderby(Coalesce(ItemSupplier.supplier, "No Supplier"), SalesOrderItem.item_name)
 	)
 
@@ -374,9 +371,6 @@ def create_rfqs(company, email_template, filters, rows):
 								"conversion_factor": frappe.get_value(
 									"Sales Order Item", row.get("material_request_item"), "conversion_factor"
 								),
-								# TODO
-								# "sales_order": row.get("source_reference"),
-								# "sales_order_item": row.get("material_request_item"),
 							}
 						)
 					rfq.append(
