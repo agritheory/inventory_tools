@@ -87,3 +87,10 @@ def get_work_order_dependencies(work_order=None, production_item=None):
 	return frappe.db.sql(
 		query, {"work_order": work_order, "production_item": production_item}, as_dict=True
 	)
+
+
+def get_optimized_data(work_order_names=None, start_datetime=None):
+	from Job_Shop_Scheduling_Benchmark_Environments_and_Instances.frappe.frappe_parser import FrappeJobShop
+	op_schedule = FrappeJobShop(work_order_names)
+	op_schedule.solve_fjsp()
+	return op_schedule.get_optimizer_schedule(start_datetime)
