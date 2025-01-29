@@ -26,7 +26,7 @@ def _bypass(*args, **kwargs):
 class InventoryToolsPurchaseOrder(PurchaseOrder):
 	def validate_with_previous_doc(self):
 		"""
-		HASH: f833923f2fcc5ce18847a93fe741db7e59a4d349
+		HASH: 1446aa3636f3d3814d973036de9c57da03b6d8ee
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/buying/doctype/purchase_order/purchase_order.py
 		METHOD: validate_with_previous_doc
