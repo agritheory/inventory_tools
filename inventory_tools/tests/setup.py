@@ -10,6 +10,8 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 from erpnext.setup.utils import enable_all_roles_and_domains, set_defaults_for_tests
 from erpnext.stock.get_item_details import get_item_details
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
+from frappe.utils import add_months, nowdate
+from frappe.utils.data import flt, getdate
 
 from inventory_tools.tests.fixtures import (
 	boms,
@@ -23,7 +25,6 @@ from inventory_tools.tests.fixtures import (
 
 def before_test():
 	frappe.clear_cache()
-	today = frappe.utils.getdate()
 	setup_complete(
 		{
 			"currency": "USD",
@@ -33,8 +34,8 @@ def before_test():
 			"company_abbr": "APC",
 			"domains": ["Distribution"],
 			"country": "United States",
-			"fy_start_date": today.replace(month=1, day=1).isoformat(),
-			"fy_end_date": today.replace(month=12, day=31).isoformat(),
+			"fy_start_date": getdate().replace(month=1, day=1).isoformat(),
+			"fy_end_date": getdate().replace(month=12, day=31).isoformat(),
 			"language": "english",
 			"company_tagline": "Ambrosia Pie Company",
 			"email": "support@agritheory.dev",
@@ -54,7 +55,7 @@ def before_test():
 def create_test_data():
 	settings = frappe._dict(
 		{
-			"day": frappe.utils.getdate().replace(month=1, day=1),
+			"day": getdate().replace(month=1, day=1),
 			"company": "Ambrosia Pie Company",
 			"company_account": frappe.get_value(
 				"Account",
@@ -76,7 +77,16 @@ def create_test_data():
 	company_address.is_your_company_address = 1
 	company_address.append("links", {"link_doctype": "Company", "link_name": settings.company})
 	company_address.save()
-	frappe.set_value("Company", settings.company, "tax_id", "04-1871930")
+	cfc = frappe.new_doc("Company")
+	cfc.company_name = "Chelsea Fruit Co"
+	cfc.default_currency = "USD"
+	cfc.create_chart_of_accounts_based_on = "Existing Company"
+	cfc.existing_company = settings.company
+	cfc.abbr = "CFC"
+	cfc.save()
+
+	frappe.db.set_single_value("Stock Settings", "valuation_method", "Moving Average")
+	frappe.db.set_single_value("Stock Settings", "default_warehouse", "")
 	create_warehouses(settings)
 	setup_manufacturing_settings(settings)
 	create_workstations()
@@ -93,6 +103,8 @@ def create_test_data():
 	else:
 		create_material_request(settings)
 	create_production_plan(settings, prod_plan_from_doc)
+	create_fruit_material_request(settings)
+	create_quotations(settings)
 
 
 def create_suppliers(settings):
@@ -178,6 +190,9 @@ def setup_manufacturing_settings(settings):
 		"Inventory Tools Settings", settings.company, "enable_work_order_subcontracting", 1
 	)
 	frappe.set_value("Inventory Tools Settings", settings.company, "create_purchase_orders", 0)
+	frappe.set_value(
+		"Inventory Tools Settings", settings.company, "overproduction_percentage_for_work_order", 50
+	)
 
 
 def create_workstations():
@@ -199,6 +214,14 @@ def create_operations():
 		oper.workstation = op[1]
 		oper.batch_size = op[2]
 		oper.description = op[3]
+		if len(op) == 5:
+			for aw in op[4]:
+				oper.append(
+					"alternative_workstations",
+					{
+						"workstation": aw,
+					},
+				)
 		oper.save()
 
 
@@ -270,7 +293,7 @@ def create_items(settings):
 			or item.get("is_sub_contracted_item")
 			else "Manufacture"
 		)
-		i.valuation_method = "FIFO"
+		i.valuation_method = "Moving Average"
 		if item.get("uom_conversion_detail"):
 			for uom, cf in item.get("uom_conversion_detail").items():
 				i.append("uoms", {"uom": uom, "conversion_factor": cf})
@@ -287,6 +310,7 @@ def create_items(settings):
 				"company": settings.company,
 				"default_warehouse": item.get("default_warehouse"),
 				"default_supplier": item.get("default_supplier"),
+				"requires_rfq": True if item.get("item_code") == "Cloudberry" else False,
 			},
 		)
 		if i.is_purchase_item and item.get("supplier"):
@@ -374,6 +398,9 @@ def create_boms(settings):
 		b.company = settings.company
 		b.is_default = 0 if bom.get("is_default") == 0 else 1
 		b.is_subcontracted = bom.get("is_subcontracted") or 0
+		b.overproduction_percentage_for_work_order = bom.get(
+			"overproduction_percentage_for_work_order", None
+		)
 		b.rm_cost_as_per = "Price List"
 		b.buying_price_list = "Bakery Buying"
 		b.currency = "USD"
@@ -399,7 +426,7 @@ def create_sales_order(settings):
 		{
 			"item_code": "Ambrosia Pie",
 			"delivery_date": so.transaction_date,
-			"qty": 40,
+			"qty": 30,
 			"warehouse": "Refrigerated Display - APC",
 		},
 	)
@@ -408,7 +435,7 @@ def create_sales_order(settings):
 		{
 			"item_code": "Double Plum Pie",
 			"delivery_date": so.transaction_date,
-			"qty": 40,
+			"qty": 30,
 			"warehouse": "Refrigerated Display - APC",
 		},
 	)
@@ -427,6 +454,24 @@ def create_sales_order(settings):
 			"item_code": "Kaduka Key Lime Pie",
 			"delivery_date": so.transaction_date,
 			"qty": 10,
+			"warehouse": "Refrigerated Display - APC",
+		},
+	)
+	so.append(
+		"items",
+		{
+			"item_code": "Pocketful of Bay",
+			"delivery_date": so.transaction_date,
+			"qty": 10,
+			"warehouse": "Refrigerated Display - APC",
+		},
+	)
+	so.append(
+		"items",
+		{
+			"item_code": "Tower of Bay-bel",
+			"delivery_date": so.transaction_date,
+			"qty": 20,
 			"warehouse": "Refrigerated Display - APC",
 		},
 	)
@@ -476,8 +521,31 @@ def create_material_request(settings):
 			"warehouse": "Refrigerated Display - APC",
 		},
 	)
+	mr.append(
+		"items",
+		{
+			"item_code": "Pocketful of Bay",
+			"delivery_date": mr.schedule_date,
+			"qty": 10,
+			"warehouse": "Refrigerated Display - APC",
+		},
+	)
+	mr.append(
+		"items",
+		{
+			"item_code": "Tower of Bay-bel",
+			"delivery_date": mr.schedule_date,
+			"qty": 20,
+			"warehouse": "Refrigerated Display - APC",
+		},
+	)
 	mr.save()
 	mr.submit()
+	mr = frappe.new_doc("Material Request")
+	mr.material_request_type = "Purchase"
+	mr.schedule_date = mr.transaction_date = settings.day
+	mr.title = "Boxes"
+	mr.company = settings.company
 
 
 def create_production_plan(settings, prod_plan_from_doc):
@@ -509,10 +577,11 @@ def create_production_plan(settings, prod_plan_from_doc):
 	for item in pp.sub_assembly_items:
 		item.schedule_date = settings.day
 		if item.production_item == "Pie Crust":
+			idx = item.idx
 			item.type_of_manufacturing = "Subcontract"
 			item.supplier = "Credible Contract Baking"
 			item.qty = 50
-	pp.append("sub_assembly_items", pp.sub_assembly_items[0].as_dict())
+	pp.append("sub_assembly_items", pp.sub_assembly_items[idx - 1].as_dict())
 	pp.sub_assembly_items[-1].name = None
 	pp.sub_assembly_items[-1].type_of_manufacturing = "In House"
 	pp.sub_assembly_items[-1].bom_no = "BOM-Pie Crust-001"
@@ -553,4 +622,135 @@ def create_production_plan(settings, prod_plan_from_doc):
 			job_card = frappe.get_doc("Job Card", job_card)
 			job_card.time_logs[0].completed_qty = wo.qty
 			job_card.save()
-			job_card.submit()
+			job_card.submit()  # don't submit to test alternative workstations
+
+
+def create_fruit_material_request(settings):
+	fruits = [
+		"Bayberry",
+		"Cocoplum",
+		"Damson Plum",
+		"Gooseberry",
+		"Hairless Rambutan",
+		"Kaduka Lime",
+		"Limequat",
+		"Tayberry",
+	]
+
+	for fruit in fruits:
+		i = frappe.get_doc("Item", fruit)
+		i.append(
+			"item_defaults",
+			{
+				"company": "Chelsea Fruit Co",
+				"default_warehouse": "Stores - CFC",
+				"default_supplier": "Southern Fruit Supply",
+			},
+		)
+		i.save()
+		ip = frappe.copy_doc(frappe.get_doc("Item Price", {"item_code": fruit}))
+		ip.price_list = "Standard Buying"
+		ip.price_list_rate = flt(ip.price_list_rate * 0.75, 2)
+		ip.save()
+
+	mr = frappe.new_doc("Material Request")
+	mr.company = "Chelsea Fruit Co"
+	mr.transaction_date = settings.day
+	mr.schedule_date = getdate()
+	mr.purpose = "Purchase"
+	for f in fruits:
+		mr.append(
+			"items",
+			{
+				"item_code": f,
+				"qty": 100,
+				"schedule_date": mr.schedule_date,
+				"warehouse": "Stores - CFC",
+				"uom": "Pound",
+			},
+		)
+	mr.save()
+	mr.submit()
+
+
+def create_quotations(settings):
+	quotation = frappe.new_doc("Quotation")
+
+	items = ["Ambrosia Pie", "Gooseberry Pie", "Double Plum Pie"]
+	for item in items:
+		i = frappe.get_doc("Item", item)
+		i.append(
+			"item_defaults",
+			{
+				"company": "Chelsea Fruit Co",
+				"default_warehouse": "Finished Goods - CFC",
+			},
+		)
+		i.save()
+
+	values = {
+		"quotation_to": "Customer",
+		"order_type": "Sales",
+		"party_name": "Almacs Food Group",
+		"selling_price_list": "Bakery Wholesale",
+		"currency": "USD",
+		"conversion_rate": 1,
+		"transaction_date": nowdate(),
+		"valid_till": add_months(nowdate(), 1),
+		"items": [{"item_code": "Ambrosia Pie", "qty": 1}, {"item_code": "Gooseberry Pie", "qty": 5}],
+		"company": settings.company,
+	}
+	quotation.update(values)
+	quotation.save()
+	quotation.submit()
+
+	quotation = frappe.new_doc("Quotation")
+	values = {
+		"quotation_to": "Customer",
+		"order_type": "Sales",
+		"party_name": "Almacs Food Group",
+		"selling_price_list": "Bakery Wholesale",
+		"currency": "USD",
+		"conversion_rate": 1,
+		"transaction_date": nowdate(),
+		"valid_till": add_months(nowdate(), 1),
+		"items": [{"item_code": "Ambrosia Pie", "qty": 1}, {"item_code": "Gooseberry Pie", "qty": 5}],
+		"company": settings.company,
+	}
+	quotation.update(values)
+	quotation.save()
+	quotation.submit()
+
+	quotation = frappe.new_doc("Quotation")
+	values = {
+		"quotation_to": "Customer",
+		"order_type": "Sales",
+		"party_name": "Downtown Deli",
+		"selling_price_list": "Bakery Wholesale",
+		"currency": "USD",
+		"conversion_rate": 1,
+		"transaction_date": nowdate(),
+		"valid_till": add_months(nowdate(), 1),
+		"items": [{"item_code": "Ambrosia Pie", "qty": 2}, {"item_code": "Double Plum Pie", "qty": 1}],
+		"company": settings.company,
+	}
+	quotation.update(values)
+	quotation.save()
+	quotation.submit()
+
+	quotation = frappe.new_doc("Quotation")
+	values = {
+		"quotation_to": "Customer",
+		"order_type": "Sales",
+		"party_name": "Almacs Food Group",
+		"selling_price_list": "Bakery Wholesale",
+		"currency": "USD",
+		"conversion_rate": 1,
+		"transaction_date": nowdate(),
+		"valid_till": add_months(nowdate(), 1),
+		"items": [{"item_code": "Ambrosia Pie", "qty": 5}, {"item_code": "Double Plum Pie", "qty": 10}],
+		"company": "Chelsea Fruit Co",
+	}
+	quotation.update(values)
+	quotation.save()
+	quotation.submit()

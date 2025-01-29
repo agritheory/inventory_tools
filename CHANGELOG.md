@@ -1,6 +1,316 @@
 # CHANGELOG
 
+## v14.6.1 (2024-07-30)
 
+### Ci
+
+* ci: backport config (#106)
+
+* ci: backport config
+
+* fix: update commit hashes for overriden methods ([`7e89b54`](https://github.com/agritheory/inventory_tools/commit/7e89b54bfbbb335e5bc38a34efbd5f2d22f725ee))
+
+* ci: track overrides for stock and manufacturing cycles (#90)
+
+Co-authored-by: Rohan Bansal &lt;rohan@agritheory.dev&gt; ([`a187f29`](https://github.com/agritheory/inventory_tools/commit/a187f29707f7be4e2534356c76d0ca642e56bb7d))
+
+* ci: track overrides for purchase cycle (PO/PI/PR) (#89) ([`d0469ea`](https://github.com/agritheory/inventory_tools/commit/d0469ea9781c1f8f5a0fb42f792699e03731c5cc))
+
+### Fix
+
+* fix: make weight required if weight UOM is present and vice versa (#108)
+
+* fix: make weight required if weight UOM is present and vice versa
+
+* fix: update commit hashes for overriden methods ([`fdf6a44`](https://github.com/agritheory/inventory_tools/commit/fdf6a448bf43714741f01758b4ff1f48e9ede582))
+
+### Unknown
+
+* Test alternative workstation (#80)
+
+* test: add test for alternative workstation
+
+* feat: make alternative workstations configurable
+
+* fix: uncomment js code for testing
+
+* feat: search alternative workstation names
+
+* refactor: pop filters that cause error for Workstation
+
+* chore: update override commit hash
+
+---------
+
+Co-authored-by: Heather Kusmierz &lt;heather.kusmierz@gmail.com&gt; ([`e8f300f`](https://github.com/agritheory/inventory_tools/commit/e8f300f2d63e47659dcdf65bd8728a0b4c19f6bc))
+
+## v14.6.0 (2024-05-13)
+
+### Chore
+
+* chore: update quotation demand docs (#77) ([`f168079`](https://github.com/agritheory/inventory_tools/commit/f168079e29d99056d4c5eb2321d84957cff84f3b))
+
+### Feature
+
+* feat: add inventory tools settings to boot (#81) ([`7ac2e15`](https://github.com/agritheory/inventory_tools/commit/7ac2e15aa74676ba5741887231814cdf9e675755))
+
+## v14.5.0 (2024-04-29)
+
+### Feature
+
+* feat: allow user to bulk upload items with quantity to shopping cart (#70)
+
+* feat: allow user to bulk upload items with quantity to shoping cart
+
+* nit: variable and syntactical changes
+
+* fix: removed line by line order placing, optimised code, added enqueue
+
+* fix: minor cleanup
+
+---------
+
+Co-authored-by: Rohan Bansal &lt;rohan@agritheory.dev&gt; ([`748a9bc`](https://github.com/agritheory/inventory_tools/commit/748a9bc85034094dcd60544fe2b822b67322fb44))
+
+### Unknown
+
+* Aggregate and/or Split Quotations into multiple Sales Orders  (#65)
+
+* feat: Quotation Demand
+
+* feat: hook
+
+* feat: settings for quotation demand
+
+* feat: fixes, SO validate_warehouse
+
+* feat: quotation demand tests
+
+* feat: documentation
+
+* feat: improvements
+
+* feat: improve tests
+
+* feat: total selected, price, draft so
+
+* feat: tests ([`6eceeb5`](https://github.com/agritheory/inventory_tools/commit/6eceeb5623856d659db1ffc3dd7a3ce352cd8000))
+
+## v14.4.0 (2024-04-25)
+
+### Ci
+
+* ci: add black to ci (#61)
+
+* ci: add black to ci
+
+* chore: black ([`db5a742`](https://github.com/agritheory/inventory_tools/commit/db5a7427f068d7005f8f07125d81f1430c49eb9b))
+
+### Feature
+
+* feat: aggregate POs (#71) ([`5ff8fee`](https://github.com/agritheory/inventory_tools/commit/5ff8fee2ef356990e2dcda0d2db76d1b856a0685))
+
+### Unknown
+
+* Material Demand Test (#64)
+
+* wip: material demand tests
+
+* test: material demand aggregation tests and fixes with and without warehouse
+
+* test: material demand tests and bug fixes
+
+* chore: add mypy types isntall
+
+* fix: remove duplicate function
+
+* tests: add pytest runner file
+
+* tests: add helper files
+
+* tests: correct app name
+
+* ci: fix site_config
+
+* ci: update action version to use node 20
+
+* ci: hrms get-app
+
+* ci: add base branch sensitvie get-app
+
+* ci: add hrms to install
+
+* ci: add node 20 versions
+
+* ci: remove hrms from install-apps
+
+* ci: get-app for hrms
+
+* ci: update prettier and changed-files actions
+
+* ci: ad dhrms to apps.txt
+
+* ci: get-app for hrms again
+
+* ci: get-app for hrms only
+
+* ci: overrite erpnext install (hrms is tryign to install develop branch)
+
+* ci: add app name
+
+* ci: add repo to required apps
+
+* ci: try install hrms first with overwrite
+
+* ci: remove &#34;install_apps&#34; key from site_config
+
+* ci: remove required apps
+
+* feat: use query builder
+
+* ci: remove resolve deps
+
+* ci: fix install apps
+
+* test: fix manufacturing capacity test and report
+
+* test: cleanup uom test
+
+* test: fix error message assert
+
+* test: add ordering
+
+* fix: test
+
+* fix: use frappe function
+
+* fix: use frappe function
+
+---------
+
+Co-authored-by: fproldan &lt;franciscoproldan@gmail.com&gt; ([`6f4f63f`](https://github.com/agritheory/inventory_tools/commit/6f4f63f22f3f7278e20c6aba9e5ef6a021ae03b2))
+
+* Manufacturing capacity report (#57)
+
+* ci: update app in str(file path) code to more exact matching
+
+* chore: remove unused code
+
+* feat: add manufacturing capacity report
+
+* tests: start manufacturing capacity report tests
+
+* chore: uncomment formatting code
+
+* docs: add manufacturing capacity report documentation
+
+* fix: div by zero in parts can build calc
+
+* docs: update for calculation differences
+
+* fix: in stock qty to zero if none from query ([`2936cde`](https://github.com/agritheory/inventory_tools/commit/2936cde9aac6583edeb383d94d74142461cf243a))
+
+## v14.3.0 (2024-03-01)
+
+### Feature
+
+* feat: Alternative workstation in job card and operation (#56)
+
+* feat: New field and link filters to select alternative workstation
+
+* fix: add alternativ workstation in fixture
+
+* fix:change alternative workstation in fixture
+
+* change to error key function
+
+* fix: set validation on workstation if not operation
+
+* changes field name in testcase
+
+* fix: change a class base function to saperate function
+
+* added a searchfield in query
+
+* added a searchfield in query
+
+* added a searchfield in query
+
+* added a searchfield in query
+
+* added a searchfield in query
+
+* feat: validation to not allow default workstation in alternative
+
+* added comment on function ([`0788d3c`](https://github.com/agritheory/inventory_tools/commit/0788d3caa67ad7820a5a3cdfdc950c85bd6f0cd7))
+
+### Unknown
+
+* Prompt Material Transfer upon Completion of Manufacturing Stock Entry (#51)
+
+* feat: wip stock entry next action
+
+* feat: improve message
+
+* fix: on_submit hook
+
+* fix: parameter hardcoded
+
+* feat: change wording ([`d1e126b`](https://github.com/agritheory/inventory_tools/commit/d1e126b8dbaf09370f6d4c173e24af33ac994bd7))
+
+## v14.2.0 (2024-02-01)
+
+### Feature
+
+* feat: manufacturing over/under production
+
+* feat: WIP Manufacturing Over/Under Production
+
+* feat: WIP Manufacturing Over/Under Production
+
+* feat: WIP Manufacturing Over/Under Production
+
+* fix: unused import
+
+* feat: override onload for work order
+
+* feat: oveeride get_pending_raw_materials
+
+* fix: allowed_qty in job card
+
+* fix: indentation
+
+* fix: import
+
+* fixes
+
+* wip: tests
+
+* feat: test_get_allowance_percentage
+
+* feat: test test_validate_finished_goods
+
+* fix: validate_job_card and test
+
+* fix: test ([`baeb469`](https://github.com/agritheory/inventory_tools/commit/baeb4690d42429a062595eb9058ddd2770b190c9))
+
+### Unknown
+
+* Make Creation of Job Card(s) on Submit of Work Order configurable (#49)
+
+* feat: configurable creation of job card
+
+* feat: configurable creation of job card ([`5bf9486`](https://github.com/agritheory/inventory_tools/commit/5bf94860c58d81faccb1106828f16121c081871a))
+
+## v14.1.3 (2024-01-04)
+
+### Fix
+
+* fix: validate customizations (#35)
+
+* fix: validate customizations
+
+* fix: only install inventory tools customizations ([`e1d86a0`](https://github.com/agritheory/inventory_tools/commit/e1d86a0739e56f3b987b599c275644ee5c29fc0a))
 
 ## v14.1.2 (2023-09-12)
 
@@ -22,7 +332,6 @@
 
 fix: make uom enforcement respond better to toggle on/off ([`13ad883`](https://github.com/agritheory/inventory_tools/commit/13ad8832a346799563e0f7ae2f1b20c457d10d5c))
 
-
 ## v14.1.1 (2023-08-30)
 
 ### Fix
@@ -34,7 +343,6 @@ fix: make uom enforcement respond better to toggle on/off ([`13ad883`](https://g
 * Merge pull request #30 from agritheory/fix_subc_validation
 
 fix: add is_subcontracted check for additional validation/submit/cancel code ([`c4e7b83`](https://github.com/agritheory/inventory_tools/commit/c4e7b83fd1700d08e8f711e10f1a77c81da0de32))
-
 
 ## v14.1.0 (2023-08-24)
 
@@ -58,6 +366,14 @@ fix: add is_subcontracted check for additional validation/submit/cancel code ([`
 
 * feat: select email template ([`02196e3`](https://github.com/agritheory/inventory_tools/commit/02196e37c7234982c5dafda9e814117d374565a9))
 
+* feat: based on item option ([`cc90229`](https://github.com/agritheory/inventory_tools/commit/cc90229b9ccf27cb5a872b24109dc7071f146802))
+
+* feat: wip, make rfqs ([`c5a8867`](https://github.com/agritheory/inventory_tools/commit/c5a88673c3d57480a10ec68091e04a75488e18cb))
+
+* feat: wip material demand options ([`bedd3d4`](https://github.com/agritheory/inventory_tools/commit/bedd3d42f299c73c1c1fa80c3a4928316d1428a2))
+
+* feat: requires_rfq custom field, creation options in report ([`cd4ec42`](https://github.com/agritheory/inventory_tools/commit/cd4ec42e15fdbfa2cc24dc41b16562e74daf6124))
+
 ### Fix
 
 * fix: blank email template for PO; skip supplier-only rows for RFQ ([`2a0e8cd`](https://github.com/agritheory/inventory_tools/commit/2a0e8cd6c6aefdd1a0d7b978652f97ddc755523f))
@@ -69,6 +385,68 @@ fix: add is_subcontracted check for additional validation/submit/cancel code ([`
 * Merge pull request #23 from agritheory/issue_19
 
 Allow Creation of RFQ from Material Demand report ([`8a0e350`](https://github.com/agritheory/inventory_tools/commit/8a0e35024968ce5a0f6da05e71f62c091bf2b38f))
+
+* Merge branch &#39;version-14&#39; into issue_19 ([`ee0a27f`](https://github.com/agritheory/inventory_tools/commit/ee0a27f0f03a8e3c9e9fa54011d02e44554b8bbb))
+
+* Documentation (#29)
+
+* docs: add index page
+
+* docs: add screen shots and workflow
+
+* docs: add screen shots, text edits
+
+* docs: add example data page
+
+* docs: add placeholder pages
+
+* docs: add subcontracting via WO section
+
+* docs: edits, conform text conventions ([`2fc980d`](https://github.com/agritheory/inventory_tools/commit/2fc980d41105759cffa33e610b779b6d464cf24c))
+
+* tests: test cadence (#28) ([`6b5bd47`](https://github.com/agritheory/inventory_tools/commit/6b5bd47089fb2f8a09159635e618425743cc9dff))
+
+* Warehouse path (#25)
+
+* wip: warehouse path
+
+* wip: warehouse path
+
+* wip: warehouse path feature
+
+* feat: warehouse path builder
+
+* feat: undo query when not configured; setup tweaks
+
+* chore: update test data for erpnext codebase changes (#24)
+
+* wip: warehouse path feature
+
+* wip: test setup
+
+* chore: update yarn
+
+* tests: trying to defaeat logger problem
+
+* test: fix conftest logger issue
+
+* docs: add docs for warehouse path
+
+* chore: union types for whitelisted function
+
+---------
+
+Co-authored-by: Heather Kusmierz &lt;heather.kusmierz@gmail.com&gt; ([`370dd6f`](https://github.com/agritheory/inventory_tools/commit/370dd6f9789156ebcbbe7b111d891a74731a477b))
+
+* Enforce UOMs to those that exist in the Item&#39;s conversion detail (#27)
+
+* wip: uom restricted query
+
+* feat: refactor UOM enforcement validation to be hookable
+
+* docs: add docs for UOM enforcement
+
+* tests: fix test logger problem, add xfail uom test ([`d4c145a`](https://github.com/agritheory/inventory_tools/commit/d4c145a94d8402fa441619289b4cc6438b7d5c45))
 
 * Work Order Subcontracting (#13)
 
@@ -198,68 +576,6 @@ Co-authored-by: Heather Kusmierz &lt;heather.kusmierz@gmail.com&gt;
 
 Co-authored-by: Tyler Matteson &lt;tyler@agritheory.com&gt; ([`ac11c1d`](https://github.com/agritheory/inventory_tools/commit/ac11c1df4daad2189916ca9841480aa1796e42e3))
 
-* Merge branch &#39;version-14&#39; into issue_19 ([`ee0a27f`](https://github.com/agritheory/inventory_tools/commit/ee0a27f0f03a8e3c9e9fa54011d02e44554b8bbb))
-
-* Documentation (#29)
-
-* docs: add index page
-
-* docs: add screen shots and workflow
-
-* docs: add screen shots, text edits
-
-* docs: add example data page
-
-* docs: add placeholder pages
-
-* docs: add subcontracting via WO section
-
-* docs: edits, conform text conventions ([`2fc980d`](https://github.com/agritheory/inventory_tools/commit/2fc980d41105759cffa33e610b779b6d464cf24c))
-
-* tests: test cadence (#28) ([`6b5bd47`](https://github.com/agritheory/inventory_tools/commit/6b5bd47089fb2f8a09159635e618425743cc9dff))
-
-* Warehouse path (#25)
-
-* wip: warehouse path
-
-* wip: warehouse path
-
-* wip: warehouse path feature
-
-* feat: warehouse path builder
-
-* feat: undo query when not configured; setup tweaks
-
-* chore: update test data for erpnext codebase changes (#24)
-
-* wip: warehouse path feature
-
-* wip: test setup
-
-* chore: update yarn
-
-* tests: trying to defaeat logger problem
-
-* test: fix conftest logger issue
-
-* docs: add docs for warehouse path
-
-* chore: union types for whitelisted function
-
----------
-
-Co-authored-by: Heather Kusmierz &lt;heather.kusmierz@gmail.com&gt; ([`370dd6f`](https://github.com/agritheory/inventory_tools/commit/370dd6f9789156ebcbbe7b111d891a74731a477b))
-
-* Enforce UOMs to those that exist in the Item&#39;s conversion detail (#27)
-
-* wip: uom restricted query
-
-* feat: refactor UOM enforcement validation to be hookable
-
-* docs: add docs for UOM enforcement
-
-* tests: fix test logger problem, add xfail uom test ([`d4c145a`](https://github.com/agritheory/inventory_tools/commit/d4c145a94d8402fa441619289b4cc6438b7d5c45))
-
 * Documentation (#29)
 
 * docs: add index page
@@ -320,7 +636,6 @@ Co-authored-by: Heather Kusmierz &lt;heather.kusmierz@gmail.com&gt; ([`e3fb9c7`]
 
 * tests: fix test logger problem, add xfail uom test ([`65d42e1`](https://github.com/agritheory/inventory_tools/commit/65d42e126d81f3ed1b98178f7b6c68c6a070986e))
 
-
 ## v14.0.1 (2023-08-10)
 
 ### Chore
@@ -334,16 +649,6 @@ Co-authored-by: Heather Kusmierz &lt;heather.kusmierz@gmail.com&gt; ([`e3fb9c7`]
 * ci: update version number ([`6e0c194`](https://github.com/agritheory/inventory_tools/commit/6e0c194235a19011b0c7db5adb8ed7e5954ba5eb))
 
 * ci: add python semantic release ([`3382787`](https://github.com/agritheory/inventory_tools/commit/3382787d4726d7483a7243eafff03eb775d0ac3e))
-
-### Feature
-
-* feat: based on item option ([`cc90229`](https://github.com/agritheory/inventory_tools/commit/cc90229b9ccf27cb5a872b24109dc7071f146802))
-
-* feat: wip, make rfqs ([`c5a8867`](https://github.com/agritheory/inventory_tools/commit/c5a88673c3d57480a10ec68091e04a75488e18cb))
-
-* feat: wip material demand options ([`bedd3d4`](https://github.com/agritheory/inventory_tools/commit/bedd3d42f299c73c1c1fa80c3a4928316d1428a2))
-
-* feat: requires_rfq custom field, creation options in report ([`cd4ec42`](https://github.com/agritheory/inventory_tools/commit/cd4ec42e15fdbfa2cc24dc41b16562e74daf6124))
 
 ### Fix
 
@@ -359,7 +664,6 @@ ci: update remote name ([`946657b`](https://github.com/agritheory/inventory_tool
 
 ci: add python semantic release ([`13b41fa`](https://github.com/agritheory/inventory_tools/commit/13b41fad052f9c45e017b6fbac6897bdf38b7883))
 
-
 ## v14.0.0 (2023-07-21)
 
 ### Documentation
@@ -370,9 +674,9 @@ ci: add python semantic release ([`13b41fa`](https://github.com/agritheory/inven
 
 * feat: add column for draft PO amount ([`59d837b`](https://github.com/agritheory/inventory_tools/commit/59d837b1d3dbf4798d08618d033f732cad76cf1f))
 
-* feat: create inventory tools settings when company is created ([`0121499`](https://github.com/agritheory/inventory_tools/commit/0121499bd99fa9ff5126b7432dd1d9a1d2816dd4))
-
 * feat: create inventory tools settings when company is created ([`edff215`](https://github.com/agritheory/inventory_tools/commit/edff215f58ce8163da37436af893e1395164520c))
+
+* feat: create inventory tools settings when company is created ([`0121499`](https://github.com/agritheory/inventory_tools/commit/0121499bd99fa9ff5126b7432dd1d9a1d2816dd4))
 
 * feat: material demand PO creation ([`794f735`](https://github.com/agritheory/inventory_tools/commit/794f7352b27eb000ca96ece71c8081b69f519751))
 
@@ -404,13 +708,13 @@ Material Demand ([`486fde6`](https://github.com/agritheory/inventory_tools/commi
 
 * Merge branch &#39;version-14&#39; into material_demand ([`9275dbf`](https://github.com/agritheory/inventory_tools/commit/9275dbf04f30a7391a0c003fff77cc5b105bd4cb))
 
-* wip: material demand report improvements ([`d167804`](https://github.com/agritheory/inventory_tools/commit/d167804e90e10fc8299a49f6f0b90a512e93b5a3))
-
-* wip: material demand ([`067b0d7`](https://github.com/agritheory/inventory_tools/commit/067b0d71dc372c35ac988556b20d13b9ab95f009))
-
 * Merge pull request #16 from agritheory/settings_hook
 
 feat: create inventory tools settings when company is created ([`acc2b9c`](https://github.com/agritheory/inventory_tools/commit/acc2b9c640e1cb9eadf2e96060518a323ce34990))
+
+* wip: material demand report improvements ([`d167804`](https://github.com/agritheory/inventory_tools/commit/d167804e90e10fc8299a49f6f0b90a512e93b5a3))
+
+* wip: material demand ([`067b0d7`](https://github.com/agritheory/inventory_tools/commit/067b0d71dc372c35ac988556b20d13b9ab95f009))
 
 * wip: material demand
 

@@ -12,12 +12,21 @@
   "purchase_order_aggregation_company",
   "column_break_vgsiq",
   "aggregated_purchasing_warehouse",
+  "quotation_demand_section",
+  "sales_order_aggregation_company",
+  "column_break_ljy4o",
+  "aggregated_sales_warehouse",
   "work_order_subcontracting_section",
   "enable_work_order_subcontracting",
   "create_purchase_orders",
+  "bom_column",
+  "create_job_cards_automatically",
+  "column_break_ilobm",
+  "overproduction_percentage_for_work_order",
   "section_break_0",
   "update_warehouse_path",
-  "section_break_gzcbr",
+  "column_break_ddssn",
+  "allow_alternative_workstations",
   "uoms_section",
   "enforce_uoms"
  ],
@@ -71,18 +80,14 @@
   },
   {
    "fieldname": "section_break_0",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Warehouses and Workstations"
   },
   {
    "default": "0",
    "fieldname": "update_warehouse_path",
    "fieldtype": "Check",
    "label": "Update Warehouse Path"
-  },
-  {
-   "fieldname": "section_break_gzcbr",
-   "fieldtype": "Section Break",
-   "label": "Warehouses"
   },
   {
    "fieldname": "uoms_section",
@@ -94,12 +99,65 @@
    "fieldname": "enforce_uoms",
    "fieldtype": "Check",
    "label": "Enforce UOMs"
+  },
+  {
+   "fieldname": "bom_column",
+   "fieldtype": "Section Break",
+   "label": "Work Order"
+  },
+  {
+   "default": "Yes",
+   "fieldname": "create_job_cards_automatically",
+   "fieldtype": "Select",
+   "label": "Create Job Card(s) Automatically",
+   "options": "Yes\nNo"
+  },
+  {
+   "fieldname": "column_break_ilobm",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "overproduction_percentage_for_work_order",
+   "fieldtype": "Percent",
+   "label": "Overproduction Percentage For Work Order"
+  },
+  {
+   "fieldname": "quotation_demand_section",
+   "fieldtype": "Section Break",
+   "label": "Quotation Demand"
+  },
+  {
+   "description": "Leave this field blank to disallow aggregation for this company",
+   "fieldname": "sales_order_aggregation_company",
+   "fieldtype": "Link",
+   "label": "Sales Order Aggregation Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "column_break_ljy4o",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "When set, this will override the Quotation Warehouse. If not set, this will map Warehouses from Quotation into Sales Order.",
+   "fieldname": "aggregated_sales_warehouse",
+   "fieldtype": "Link",
+   "label": "Aggregated Sales Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_ddssn",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_alternative_workstations",
+   "fieldtype": "Check",
+   "label": "Allow Alternative Workstations"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-08-09 20:12:09.274841",
-
+ "modified": "2024-05-13 13:19:00.665445",
  "modified_by": "Administrator",
  "module": "Inventory Tools",
  "name": "Inventory Tools Settings",

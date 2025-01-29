@@ -12,8 +12,8 @@ locale
 *.egg-info
 dist/
 # build/
-cloud_storage/docs/current
-cloud_storage/public/dist
+inventory_tools/docs/current
+inventory_tools/public/dist
 .vscode
 .vs
 node_modules

@@ -1,0 +1,33 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="text-center login-content container">
+	<h3 class="form-signin-heading mt-4 mb-4">Bulk Order</h3>
+	<form
+		class="form-signin form-forgot"
+		role="form"
+		action="/api/method/inventory_tools.www.bulk_order.create_quotation">
+		<div class="form-group data-row row ml-5 grid-field">
+			<textarea
+				name="bulk_paste"
+				class="form-control col col-xs-11"
+				placeholder="Paste your bulk order here..."
+				title="Please separate SKU and Quantity by using tab and use new line to add multiple SKUs"
+				required >
+			</textarea>
+		</div>
+		<button class="btn btn-primary mt-2 btn-sm w-60" type="submit">Add to Quote</button>
+	</form>
+	<button class="switch-mode-link" onclick='location.href="/all-products"'>Select product one-by-one</button>
+</div>
+
+<style>
+	.switch-mode-link {
+		border: 0;
+		background: 0;
+		color: var(--primary);
+		outline: none !important;
+		text-decoration: underline;
+	}
+</style>
+{% endblock %}

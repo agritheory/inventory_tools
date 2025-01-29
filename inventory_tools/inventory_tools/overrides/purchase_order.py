@@ -15,6 +15,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 	make_purchase_receipt,
 )
 from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
+from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 from frappe import _, throw
 
 
@@ -24,6 +25,12 @@ def _bypass(*args, **kwargs):
 
 class InventoryToolsPurchaseOrder(PurchaseOrder):
 	def validate_with_previous_doc(self):
+		"""
+		HASH: f833923f2fcc5ce18847a93fe741db7e59a4d349
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/buying/doctype/purchase_order/purchase_order.py
+		METHOD: validate_with_previous_doc
+		"""
 		config = {
 			"Supplier Quotation": {
 				"ref_dn_field": "supplier_quotation",
@@ -54,21 +61,22 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 		super(PurchaseOrder, self).validate_with_previous_doc(config)
 
 	def validate_warehouse(self):
-		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
+		warehouses = []
+		inventory_tools_settings = frappe.get_doc("Inventory Tools Settings", self.company)
 
-		warehouses = list({d.warehouse for d in self.get("items") if getattr(d, "warehouse", None)})
-
-		target_warehouses = list(
-			{d.target_warehouse for d in self.get("items") if getattr(d, "target_warehouse", None)}
-		)
-
-		warehouses.extend(target_warehouses)
-
-		from_warehouse = list(
-			{d.from_warehouse for d in self.get("items") if getattr(d, "from_warehouse", None)}
-		)
-
-		warehouses.extend(from_warehouse)
+		for d in self.get("items"):
+			if (
+				self.multi_company_purchase_order
+				and not inventory_tools_settings.aggregated_purchasing_warehouse
+			):
+				validate_warehouse_company(d.warehouse, d.material_request_company)
+				continue
+			if getattr(d, "warehouse", None):
+				warehouses.append(d.warehouse)
+			if getattr(d, "target_warehouse", None):
+				warehouses.append(d.warehouse)
+			if getattr(d, "from_warehouse", None):
+				warehouses.append(d.warehouse)
 
 		for w in warehouses:
 			validate_disabled_warehouse(w)
@@ -110,23 +118,37 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 def make_purchase_invoices(docname: str, rows: Union[list, str]) -> None:
 	rows = json.loads(rows) if isinstance(rows, str) else rows
 	doc = frappe.get_doc("Purchase Order", docname)
+	inventory_tools_settings = frappe.get_doc("Inventory Tools Settings", doc.company)
 	forwarding = frappe._dict()
-	for row in doc.items:
-		if row.name in rows:
-			if row.company in forwarding:
-				forwarding[row.company].append(row.name)
-			else:
-				forwarding[row.company] = [row.name]
+	for row_name in rows:
+		for row in doc.items:
+			if row_name == row.name:
+				company = frappe.get_value("Material Request", row.material_request, "company")
+				if company in forwarding:
+					forwarding[company].append(row.name)
+				else:
+					forwarding[company] = [row.name]
 
-	for company, rows in forwarding.items():
+	for company, _rows in forwarding.items():
 		pi = make_purchase_invoice(docname)
 		pi.company = company
 		pi.credit_to = frappe.get_value("Company", pi.company, "default_payable_account")
+		filtered_rows = []
 		for row in pi.items:
-			if row.po_detail in rows:
-				continue
-			else:
-				pi.items.remove(row)
+			if row.po_detail in _rows:
+				if inventory_tools_settings.aggregated_purchasing_warehouse is not None:
+					row.warehouse = inventory_tools_settings.aggregated_purchasing_warehouse
+				else:
+					material_request_item = frappe.get_value(
+						"Purchase Order Item", row.po_detail, "material_request_item"
+					)
+					warehouse, cost_center = frappe.get_value(
+						"Material Request Item", material_request_item, ["warehouse", "cost_center"]
+					)
+					row.warehouse = warehouse
+					row.cost_center = cost_center
+				filtered_rows.append(row)
+		pi.items = filtered_rows
 		pi.save()
 
 
@@ -134,22 +156,34 @@ def make_purchase_invoices(docname: str, rows: Union[list, str]) -> None:
 def make_purchase_receipts(docname: str, rows: Union[list, str]) -> None:
 	rows = json.loads(rows) if isinstance(rows, str) else rows
 	doc = frappe.get_doc("Purchase Order", docname)
-	forwarding = frappe._dict()
-	for row in doc.items:
-		if row.name in rows:
-			if row.company in forwarding:
-				forwarding[row.company].append(row.name)
-			else:
-				forwarding[row.company] = [row.name]
+	inventory_tools_settings = frappe.get_doc("Inventory Tools Settings", doc.company)
 
-	for company, rows in forwarding.items():
+	forwarding = frappe._dict()
+	for row_name in rows:
+		for row in doc.items:
+			if row_name == row.name:
+				company = frappe.get_value("Material Request", row.material_request, "company")
+				if company in forwarding:
+					forwarding[company].append(row.name)
+				else:
+					forwarding[company] = [row.name]
+
+	for company, _rows in forwarding.items():
 		pr = make_purchase_receipt(docname)
 		pr.company = company
+		filtered_rows = []
 		for row in pr.items:
-			if row.purchase_order_item in rows:
-				continue
-			else:
-				pr.items.remove(row)
+			if row.purchase_order_item in _rows:
+				if inventory_tools_settings.aggregated_purchasing_warehouse is not None:
+					row.warehouse = inventory_tools_settings.aggregated_purchasing_warehouse
+				else:
+					warehouse, cost_center = frappe.get_value(
+						"Material Request Item", row.material_request_item, ["warehouse", "cost_center"]
+					)
+					row.warehouse = warehouse
+					row.cost_center = cost_center
+				filtered_rows.append(row)
+		pr.items = filtered_rows
 		pr.save()
 
 
@@ -223,6 +257,12 @@ def make_sales_invoices(docname: str, rows: Union[list, str]) -> None:
 
 @frappe.whitelist()
 def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=True):
+	"""
+	HASH: 5c5349ed16680a22a8fd16a1f6f9ed16957069b4
+	REPO: https://github.com/frappe/erpnext/
+	PATH: erpnext/stock/get_item_details.py
+	METHOD: get_item_details
+	"""
 	import erpnext.stock.get_item_details
 
 	erpnext.stock.get_item_details.validate_item_details = validate_item_details
@@ -234,6 +274,12 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 @frappe.whitelist()
 def validate_item_details(args, item):
+	"""
+	HASH: 5c5349ed16680a22a8fd16a1f6f9ed16957069b4
+	REPO: https://github.com/frappe/erpnext/
+	PATH: erpnext/stock/get_item_details.py
+	METHOD: validate_item_details
+	"""
 	if not args.company:
 		throw(_("Please specify Company"))
 

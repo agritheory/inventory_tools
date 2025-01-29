@@ -5,11 +5,18 @@ import json
 
 import frappe
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import PurchaseReceipt
+from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 from frappe.utils.data import cint
 
 
 class InventoryToolsPurchaseReceipt(PurchaseReceipt):
 	def validate_with_previous_doc(self):
+		"""
+		HASH: 106c154a16efce956357524309215cd62cc3c3ec
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/stock/doctype/purchase_receipt/purchase_receipt.py
+		METHOD: validate_with_previous_doc
+		"""
 		config = {
 			"Purchase Order": {
 				"ref_dn_field": "purchase_order",

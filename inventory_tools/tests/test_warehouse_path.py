@@ -2,7 +2,7 @@ import frappe
 import pytest
 
 
-# @pytest.mark.order(1)
+@pytest.mark.order(1)
 def test_warehouse_path():
 	"""
 	In the setup script this feature is turned on

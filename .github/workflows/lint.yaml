@@ -4,7 +4,11 @@ on:
   push:
     branches:
       - version-14
+      - version-15
   pull_request:
+    branches:
+      - version-14
+      - version-15
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -15,21 +19,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 2
 
       - name: Setup Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
       - name: Install mypy
         run: pip install mypy
 
-      # - name: Install mypy types
-      #   run: mypy ./aterp/. --install-types
+      - name: Install mypy types
+        run: mypy ./inventory_tools/. --install-types
 
       - name: Run mypy
         uses: sasanquaneuf/mypy-github-action@releases/v1
@@ -38,12 +42,33 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  black:
+    needs: [ py_json_merge ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 2
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Black (Frappe)
+        run: pip install git+https://github.com/frappe/black.git
+    
+      - name: Run Black (Frappe)
+        run: black --check .
+
   prettier:
     needs: [ py_json_merge ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 2
@@ -59,21 +84,21 @@ jobs:
         shell: bash
         run: |
           echo "The following files are not formatted:"
-          echo "${{steps.prettier-run.outputs.prettier_output}}"
+          echo "${{steps.prettier-run.outputs.prettier_output}}" >> $GITHUB_OUTPUT
 
   json_diff:
     needs: [ py_json_merge ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
           fetch-depth: 2
 
       - name: Find JSON changes
         id: changed-json
-        uses: tj-actions/changed-files@v36
+        uses: tj-actions/changed-files@v43
         with:
           files: |
             **/*.json
@@ -121,13 +146,13 @@ jobs:
   py_json_merge:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Fetch validator
         run: git clone --depth 1 https://gist.github.com/f1bf2c11f78331b2417189c385022c28.git validate_json
 
       - name: Validate JSON
-        run: python3 validate_json/validate_json.py ./aterp/aterp/
+        run: python3 validate_json/validate_json.py ./inventory_tools/inventory_tools/
 
       - name: Compile
         run: python3 -m compileall -q ./

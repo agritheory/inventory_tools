@@ -7,25 +7,42 @@ frappe.ui.form.on('Work Order', {
 	},
 	refresh: frm => {
 		manage_subcontracting_buttons(frm)
+		get_workstations(frm)
+	},
+	operation: frm => {
+		get_workstations(frm)
 	},
 })
+
+function get_workstations(frm) {
+	frm.set_query('workstation', 'operations', (doc, cdt, cdn) => {
+		var d = locals[cdt][cdn]
+		if (!d.operation) {
+			frappe.throw('Please select a Operation first.')
+		}
+		return {
+			query: 'inventory_tools.inventory_tools.overrides.workstation.get_alternative_workstations',
+			filters: {
+				operation: d.operation,
+				company: frm.doc.company,
+			},
+		}
+	})
+}
 
 function manage_subcontracting_buttons(frm) {
 	if (frm.doc.company) {
 		frappe.db.get_value('BOM', { name: frm.doc.bom_no }, 'is_subcontracted').then(r => {
 			if (r && r.message && r.message.is_subcontracted) {
-				frappe.db
-					.get_value('Inventory Tools Settings', { company: frm.doc.company }, 'enable_work_order_subcontracting')
-					.then(r => {
-						if (r && r.message && r.message.enable_work_order_subcontracting && frm.doc.docstatus == 1) {
-							frm.add_custom_button(
-								__('Create Subcontract PO'),
-								() => make_subcontracting_po(frm),
-								__('Subcontracting')
-							)
-							frm.add_custom_button(__('Add to Existing PO'), () => add_to_existing_po(frm), __('Subcontracting'))
-						}
-					})
+				if (
+					frm.doc.docstatus &&
+					frappe.boot.inventory_tools_settings &&
+					frappe.boot.inventory_tools_settings[frm.doc.company] &&
+					frappe.boot.inventory_tools_settings[frm.doc.company].enable_work_order_subcontracting
+				) {
+					frm.add_custom_button(__('Create Subcontract PO'), () => make_subcontracting_po(frm), __('Subcontracting'))
+					frm.add_custom_button(__('Add to Existing PO'), () => add_to_existing_po(frm), __('Subcontracting'))
+				}
 			}
 		})
 	}
