@@ -1,12 +1,18 @@
 {
 	"actions": [],
-	"allow_rename": 1,
+	"allow_import": 1,
+	"autoname": "format:{reference_document}-{dimension_type}-{uom}",
 	"creation": "2025-01-30 06:32:13.516968",
 	"doctype": "DocType",
 	"engine": "InnoDB",
 	"field_order": [
+		"reference_section",
+		"reference_doctype",
+		"column_break_hjwd",
+		"reference_document",
 		"details_section",
 		"dimension_type",
+		"uom",
 		"column_break_oyfz",
 		"orientation",
 		"item_section",
@@ -23,29 +29,13 @@
 		"column_break_qgzh",
 		"case_weight",
 		"case_volume",
-		"us_pallet_section",
-		"us_pallet_height",
-		"us_pallet_length",
-		"us_pallet_breadth",
-		"column_break_sqzu",
-		"us_pallet_levels",
-		"us_pallet_cases_per_level",
-		"us_pallet_cases",
-		"euro_pallet_section",
-		"euro_pallet_height",
-		"euro_pallet_length",
-		"euro_pallet_breadth",
-		"column_break_mmvq",
-		"euro_pallet_levels",
-		"euro_pallet_cases_per_level",
-		"euro_pallet_cases",
 		"visualization_section",
-		"3d_visualization",
-		"links_section",
-		"links"
+		"visualization"
 	],
 	"fields": [
 		{
+			"collapsible": 1,
+			"collapsible_depends_on": "reference_document",
 			"fieldname": "item_section",
 			"fieldtype": "Section Break",
 			"label": "Item"
@@ -76,6 +66,8 @@
 			"read_only": 1
 		},
 		{
+			"collapsible": 1,
+			"collapsible_depends_on": "reference_document",
 			"fieldname": "case_section",
 			"fieldtype": "Section Break",
 			"label": "Case"
@@ -116,107 +108,20 @@
 			"label": "Height"
 		},
 		{
-			"fieldname": "us_pallet_section",
-			"fieldtype": "Section Break",
-			"label": "US Pallet"
-		},
-		{
-			"fieldname": "us_pallet_height",
-			"fieldtype": "Float",
-			"label": "Pallet Height"
-		},
-		{
-			"fieldname": "us_pallet_length",
-			"fieldtype": "Float",
-			"label": "Pallet Length"
-		},
-		{
-			"fieldname": "us_pallet_breadth",
-			"fieldtype": "Float",
-			"label": "Pallet Breadth"
-		},
-		{
-			"fieldname": "column_break_sqzu",
-			"fieldtype": "Column Break"
-		},
-		{
-			"fieldname": "us_pallet_levels",
-			"fieldtype": "Int",
-			"label": "Number of Levels"
-		},
-		{
-			"fieldname": "us_pallet_cases_per_level",
-			"fieldtype": "Int",
-			"label": "Cases per Level"
-		},
-		{
-			"fieldname": "us_pallet_cases",
-			"fieldtype": "Int",
-			"label": "Total Cases",
-			"read_only": 1
-		},
-		{
-			"fieldname": "euro_pallet_section",
-			"fieldtype": "Section Break",
-			"label": "Euro Pallet"
-		},
-		{
-			"fieldname": "euro_pallet_height",
-			"fieldtype": "Float",
-			"label": "Pallet Height"
-		},
-		{
-			"fieldname": "euro_pallet_length",
-			"fieldtype": "Float",
-			"label": "Pallet Length"
-		},
-		{
-			"fieldname": "euro_pallet_breadth",
-			"fieldtype": "Float",
-			"label": "Pallet Breadth"
-		},
-		{
-			"fieldname": "column_break_mmvq",
-			"fieldtype": "Column Break"
-		},
-		{
-			"fieldname": "euro_pallet_levels",
-			"fieldtype": "Int",
-			"label": "Number of Levels"
-		},
-		{
-			"fieldname": "euro_pallet_cases_per_level",
-			"fieldtype": "Int",
-			"label": "Cases per Level"
-		},
-		{
-			"fieldname": "euro_pallet_cases",
-			"fieldtype": "Int",
-			"label": "Total Cases",
-			"read_only": 1
-		},
-		{
 			"collapsible": 1,
-			"fieldname": "links_section",
-			"fieldtype": "Section Break",
-			"label": "Links"
-		},
-		{
-			"fieldname": "links",
-			"fieldtype": "Table",
-			"label": "Links",
-			"options": "Dynamic Link"
-		},
-		{
+			"collapsible_depends_on": "reference_document",
 			"fieldname": "details_section",
 			"fieldtype": "Section Break",
 			"label": "Details"
 		},
 		{
+			"default": "Exterior",
 			"fieldname": "dimension_type",
 			"fieldtype": "Select",
+			"in_list_view": 1,
 			"label": "Dimension Type",
-			"options": "\nInterior\nExterior"
+			"options": "Exterior\nInterior",
+			"reqd": 1
 		},
 		{
 			"fieldname": "column_break_oyfz",
@@ -235,17 +140,51 @@
 			"label": "Visualization"
 		},
 		{
-			"fieldname": "3d_visualization",
-			"fieldtype": "Attach",
+			"fieldname": "reference_section",
+			"fieldtype": "Section Break",
+			"label": "Reference"
+		},
+		{
+			"fieldname": "reference_doctype",
+			"fieldtype": "Link",
+			"label": "Reference Doctype",
+			"options": "DocType",
+			"reqd": 1
+		},
+		{
+			"fieldname": "column_break_hjwd",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "reference_document",
+			"fieldtype": "Dynamic Link",
+			"in_list_view": 1,
+			"label": "Reference Document",
+			"options": "reference_doctype",
+			"reqd": 1
+		},
+		{
+			"fieldname": "uom",
+			"fieldtype": "Link",
+			"in_list_view": 1,
+			"label": "UOM",
+			"options": "UOM",
+			"reqd": 1
+		},
+		{
+			"fieldname": "visualization",
+			"fieldtype": "Attach Image",
 			"label": "3D Visualization"
 		}
 	],
+	"image_field": "visualization",
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2025-01-30 07:00:30.038758",
+	"modified": "2025-01-31 01:34:42.903793",
 	"modified_by": "Administrator",
 	"module": "Inventory Tools",
-	"name": "Item Dimension",
+	"name": "Physical Dimension",
+	"naming_rule": "Expression",
 	"owner": "Administrator",
 	"permissions": [
 		{
@@ -261,6 +200,8 @@
 			"write": 1
 		}
 	],
+	"show_name_in_global_search": 1,
+	"show_preview_popup": 1,
 	"sort_field": "modified",
 	"sort_order": "DESC",
 	"states": []

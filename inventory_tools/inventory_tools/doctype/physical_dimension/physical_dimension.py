@@ -6,14 +6,13 @@ from frappe.model.document import Document
 from frappe.utils import flt
 
 
-class ItemDimension(Document):
+class PhysicalDimension(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.core.doctype.dynamic_link.dynamic_link import DynamicLink
 		from frappe.types import DF
 
 		case_height: DF.Float
@@ -21,33 +20,22 @@ class ItemDimension(Document):
 		case_volume: DF.Float
 		case_weight: DF.Float
 		case_width: DF.Float
-		dimension_type: DF.Literal["", "Interior", "Exterior"]
-		euro_pallet_breadth: DF.Float
-		euro_pallet_cases: DF.Int
-		euro_pallet_cases_per_level: DF.Int
-		euro_pallet_height: DF.Float
-		euro_pallet_length: DF.Float
-		euro_pallet_levels: DF.Int
+		dimension_type: DF.Literal["Exterior", "Interior"]
 		item_height: DF.Float
 		item_length: DF.Float
 		item_volume: DF.Float
 		item_weight: DF.Float
 		item_width: DF.Float
-		links: DF.Table[DynamicLink]
 		orientation: DF.Check
-		us_pallet_breadth: DF.Float
-		us_pallet_cases: DF.Int
-		us_pallet_cases_per_level: DF.Int
-		us_pallet_height: DF.Float
-		us_pallet_length: DF.Float
-		us_pallet_levels: DF.Int
+		reference_doctype: DF.Link
+		reference_document: DF.DynamicLink
+		uom: DF.Link
+		visualization: DF.AttachImage | None
 	# end: auto-generated types
 
 	def validate(self):
 		self.calculate_item_volume()
 		self.calculate_case_volume()
-		self.calculate_us_pallet_cases()
-		self.calculate_euro_pallet_cases()
 		self.validate_item_case_fit()
 
 	def calculate_item_volume(self):
@@ -55,12 +43,6 @@ class ItemDimension(Document):
 
 	def calculate_case_volume(self):
 		self.case_volume = flt(self.case_height) * flt(self.case_length) * flt(self.case_width)
-
-	def calculate_us_pallet_cases(self):
-		self.us_pallet_cases = flt(self.us_pallet_cases_per_level) * flt(self.us_pallet_levels)
-
-	def calculate_euro_pallet_cases(self):
-		self.euro_pallet_cases = flt(self.euro_pallet_cases_per_level) * flt(self.euro_pallet_levels)
 
 	def validate_item_case_fit(self):
 		if self.item_volume > self.case_volume:

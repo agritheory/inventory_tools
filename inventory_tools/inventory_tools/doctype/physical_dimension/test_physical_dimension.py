@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestItemDimension(FrappeTestCase):
+class TestPhysicalDimension(FrappeTestCase):
 	pass
