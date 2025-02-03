@@ -20,15 +20,7 @@
 		"item_length",
 		"item_width",
 		"column_break_ptpe",
-		"item_weight",
 		"item_volume",
-		"case_section",
-		"case_height",
-		"case_length",
-		"case_width",
-		"column_break_qgzh",
-		"case_weight",
-		"case_volume",
 		"visualization_section",
 		"visualization"
 	],
@@ -43,21 +35,18 @@
 		{
 			"fieldname": "item_length",
 			"fieldtype": "Float",
-			"label": "Length"
+			"label": "Length",
+			"non_negative": 1
 		},
 		{
 			"fieldname": "item_width",
 			"fieldtype": "Float",
-			"label": "Width"
+			"label": "Width",
+			"non_negative": 1
 		},
 		{
 			"fieldname": "column_break_ptpe",
 			"fieldtype": "Column Break"
-		},
-		{
-			"fieldname": "item_weight",
-			"fieldtype": "Float",
-			"label": "Weight"
 		},
 		{
 			"fieldname": "item_volume",
@@ -66,46 +55,10 @@
 			"read_only": 1
 		},
 		{
-			"collapsible": 1,
-			"collapsible_depends_on": "reference_document",
-			"fieldname": "case_section",
-			"fieldtype": "Section Break",
-			"label": "Case"
-		},
-		{
-			"fieldname": "case_height",
-			"fieldtype": "Float",
-			"label": "Height"
-		},
-		{
-			"fieldname": "case_length",
-			"fieldtype": "Float",
-			"label": "Length"
-		},
-		{
-			"fieldname": "case_width",
-			"fieldtype": "Float",
-			"label": "Width"
-		},
-		{
-			"fieldname": "column_break_qgzh",
-			"fieldtype": "Column Break"
-		},
-		{
-			"fieldname": "case_weight",
-			"fieldtype": "Float",
-			"label": "Weight"
-		},
-		{
-			"fieldname": "case_volume",
-			"fieldtype": "Float",
-			"label": "Volume",
-			"read_only": 1
-		},
-		{
 			"fieldname": "item_height",
 			"fieldtype": "Float",
-			"label": "Height"
+			"label": "Height",
+			"non_negative": 1
 		},
 		{
 			"collapsible": 1,
@@ -178,9 +131,8 @@
 		}
 	],
 	"image_field": "visualization",
-	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2025-01-31 01:34:42.903793",
+	"modified": "2025-02-03 11:24:26.208224",
 	"modified_by": "Administrator",
 	"module": "Inventory Tools",
 	"name": "Physical Dimension",
@@ -198,6 +150,45 @@
 			"role": "System Manager",
 			"share": 1,
 			"write": 1
+		},
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Item Manager",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Stock User",
+			"share": 1
+		},
+		{
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Purchase User",
+			"share": 1
+		},
+		{
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Sales User",
+			"share": 1
 		}
 	],
 	"show_name_in_global_search": 1,
