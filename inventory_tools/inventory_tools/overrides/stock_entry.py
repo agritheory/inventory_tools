@@ -12,7 +12,7 @@ from inventory_tools.inventory_tools.overrides.work_order import get_allowance_p
 class InventoryToolsStockEntry(StockEntry):
 	def check_if_operations_completed(self):
 		"""
-		HASH: 54791e938bd56eb81f7d8d923381a006998919fe
+		HASH: 32bfc2f5553661c2ba46109e6b22bdbea963a108
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
 		METHOD: check_if_operations_completed
@@ -54,7 +54,7 @@ class InventoryToolsStockEntry(StockEntry):
 
 	def validate_finished_goods(self):
 		"""
-		HASH: 54791e938bd56eb81f7d8d923381a006998919fe
+		HASH: 32bfc2f5553661c2ba46109e6b22bdbea963a108
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
 		METHOD: validate_finished_goods
@@ -120,7 +120,7 @@ class InventoryToolsStockEntry(StockEntry):
 
 	def get_pending_raw_materials(self, backflush_based_on=None):
 		"""
-		HASH: 54791e938bd56eb81f7d8d923381a006998919fe
+		HASH: 32bfc2f5553661c2ba46109e6b22bdbea963a108
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
 		METHOD: get_pending_raw_materials
