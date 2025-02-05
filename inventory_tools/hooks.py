@@ -300,3 +300,5 @@ inventory_tools_uom_enforcement = {
 	"Stock Entry": {"Stock Entry Detail": {"items": ["uom"]}},
 	"Supplier Quotation": {"Supplier Quotation Item": {"items": ["uom"]}},
 }
+
+export_python_type_annotations = True
