@@ -1,6 +1,26 @@
 # CHANGELOG
 
 
+## v15.3.0 (2025-02-05)
+
+### Features
+
+- Add physical dimension doctype ([#124](https://github.com/agritheory/inventory_tools/pull/124),
+  [`1e624d4`](https://github.com/agritheory/inventory_tools/commit/1e624d480531f0d42277c0102ba54049876aed97))
+
+* feat: add item dimension doctype
+
+* feat: rename doctype to physical dimension
+
+* feat: remove case section, make dimensions non-negative
+
+---------
+
+Co-authored-by: Rohan Bansal <rohan@agritheory.dev>
+
+Co-authored-by: Tyler Matteson <tyler@agritheory.com>
+
+
 ## v15.2.1 (2025-01-15)
 
 ### Bug Fixes
