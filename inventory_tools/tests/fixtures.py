@@ -1178,3 +1178,23 @@ attributes = {
 		"Color": ["Yellow", "Red"],
 	},
 }
+
+items_stockentry = {
+	"Butter": {"qty": 51, "item_code": "Butter", "warehouse": "Refrigerator - APC"},
+	"Cornstarch": {"qty": 1, "item_code": "Cornstarch", "warehouse": "Storeroom - APC"},
+	"Cloudberry": {"qty": 5, "item_code": "Cloudberry", "warehouse": "Refrigerator - APC"},
+	"Flour": {"qty": 12, "item_code": "Flour", "warehouse": "Storeroom - APC"},
+	"Hairless Rambutan": {"qty": 3, "item_code": "Hairless Rambutan", "warehouse": "Storeroom - APC"},
+	"Parchment Paper": {"qty": 1, "item_code": "Parchment Paper", "warehouse": "Storeroom - APC"},
+	"Pie Tin": {"qty": 4, "item_code": "Pie Tin", "warehouse": "Storeroom - APC"},
+	"Pie Box": {"qty": 8, "item_code": "Pie Box", "warehouse": "Storeroom - APC"},
+	"Salt": {"qty": 1, "item_code": "Salt", "warehouse": "Storeroom - APC"},
+	"Sugar": {"qty": 2, "item_code": "Sugar", "warehouse": "Storeroom - APC"},
+	"Tayberry": {"qty": 3, "item_code": "Tayberry", "warehouse": "Refrigerator - APC"},
+	"Water": {"qty": 1, "item_code": "Water", "warehouse": "Kitchen - APC"},
+	"Cocoplum": {"qty": 3, "item_code": "Cocoplum", "warehouse": "Refrigerator - APC"},
+	"Damson Plum": {"qty": 7, "item_code": "Damson Plum", "warehouse": "Refrigerator - APC"},
+	"Gooseberry": {"qty": 15, "item_code": "Gooseberry", "warehouse": "Refrigerator - APC"},
+	"Kaduka Lime": {"qty": 9, "item_code": "Kaduka Lime", "warehouse": "Refrigerator - APC"},
+	"Limequat": {"qty": 4, "item_code": "Limequat", "warehouse": "Refrigerator - APC"},
+}

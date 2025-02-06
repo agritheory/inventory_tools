@@ -20,6 +20,7 @@ from inventory_tools.tests.fixtures import (
 	specifications,
 	suppliers,
 	workstations,
+	items_stockentry,
 )
 
 
@@ -106,6 +107,7 @@ def create_test_data():
 	create_fruit_material_request(settings)
 	create_quotations(settings)
 	create_specifications(settings)
+	create_stock_entries(settings)
 
 
 def create_suppliers(settings):
@@ -836,3 +838,22 @@ def create_demo_specification_values():
 	test_generate_values()
 	test_generate_values_on_overlapping_items()
 	test_manual_attribute_addition()
+
+
+def create_stock_entries(settings):
+	# Add items to warehouse
+	se = frappe.new_doc("Stock Entry")
+	se.posting_date = settings.day
+	se.set_posting_time = 1
+	se.stock_entry_type = "Material Receipt"
+	for item in items_stockentry:
+		se.append(
+			"items",
+			{
+				"t_warehouse": items_stockentry[item]["warehouse"],
+				"item_code": items_stockentry[item]["item_code"],
+				"qty": items_stockentry[item]["qty"],
+			},
+		)
+	se.save()
+	se.submit()
