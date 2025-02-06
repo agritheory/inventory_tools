@@ -18,6 +18,7 @@ from inventory_tools.tests.fixtures import (
 	operations,
 	suppliers,
 	workstations,
+	# items_stockentry,
 )
 
 
@@ -127,7 +128,7 @@ def create_test_data():
 	create_specifications(settings)
 	create_item_dimensions()
 	create_warehouse_dimensions()
-	create_stock_entries()
+	# create_stock_entries()
 
 
 def copy_fixture_files():
@@ -421,10 +422,10 @@ def create_warehouse_plan(cfc):
 	warehouse_plan.update(
 		{
 			"company": cfc.name,
-			"horizontal": 24,
-			"vertical": 16,
-			"uom": "Foot",
-			"offset": "0.6,1.6,1.4,0.4",
+			"horizontal": 50,
+			"vertical": 32,
+			"uom": "Meter",
+			"offset": "1,1,0,0",
 			"floor_plan": "/files/warehouse_plan.png",
 			"group_warehouse": root_wh,
 		}
@@ -958,5 +959,6 @@ def create_warehouse_locations():
 	for item in warehouse_locations:
 		whl = frappe.new_doc("Warehouse")
 		whl.update(item)
+		whl.warehouse_plan = 'All Warehouses - CFC'
 		whl.save()
 		whl.submit()
