@@ -126,9 +126,13 @@ def create_test_data():
 	create_fruit_material_request(settings)
 	create_quotations(settings)
 	create_specifications(settings)
+<<<<<<< HEAD
 	create_item_dimensions()
 	create_warehouse_dimensions()
 	# create_stock_entries()
+=======
+	# create_stock_entries(settings)
+>>>>>>> 8d8df6d (warehouse)
 
 
 def copy_fixture_files():
