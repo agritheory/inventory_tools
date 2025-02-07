@@ -570,7 +570,12 @@ boms = [
 		"uom": "Nos",
 		"items": [
 			{"item_code": "Bayberry Pie", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
-			{"item_code": "Bayberry Pocket", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
+			{
+				"item_code": "Bayberry Pocket",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos",
+			},
 		],
 		"operations": [
 			{
@@ -586,8 +591,18 @@ boms = [
 		"quantity": 5.0,
 		"uom": "Nos",
 		"items": [
-			{"item_code": "Bayberry Pocket", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
-			{"item_code": "Bayberry Popper", "qty": 10.0, "qty_consumed_per_unit": 2.0, "uom": "Nos"},
+			{
+				"item_code": "Bayberry Pocket",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos",
+			},
+			{
+				"item_code": "Bayberry Popper",
+				"qty": 10.0,
+				"qty_consumed_per_unit": 2.0,
+				"uom": "Nos",
+			},
 			{"item_code": "Pie Box", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
 		],
 		"operations": [
@@ -607,7 +622,12 @@ boms = [
 			{"item_code": "Flour", "qty": 1.5, "qty_consumed_per_unit": 0.3, "uom": "Pound"},
 			{"item_code": "Butter", "qty": 0.75, "qty_consumed_per_unit": 0.15, "uom": "Pound"},
 			{"item_code": "Sugar", "qty": 0.1, "qty_consumed_per_unit": 0.02, "uom": "Pound"},
-			{"item_code": "Bayberry Popper", "qty": 15.0, "qty_consumed_per_unit": 3.0, "uom": "Nos"},
+			{
+				"item_code": "Bayberry Popper",
+				"qty": 15.0,
+				"qty_consumed_per_unit": 3.0,
+				"uom": "Nos",
+			},
 		],
 		"operations": [
 			{
@@ -670,7 +690,12 @@ boms = [
 				"time_in_mins": 10.0,
 				"workstation": "Food Prep Table 2",
 			},
-			{"batch_size": 1, "operation": "Bake Op", "time_in_mins": 50.0, "workstation": "Oven Station"},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station",
+			},
 			{
 				"batch_size": 1,
 				"operation": "Cool Pie Op",
@@ -706,7 +731,12 @@ boms = [
 				"time_in_mins": 10.0,
 				"workstation": "Food Prep Table 2",
 			},
-			{"batch_size": 1, "operation": "Bake Op", "time_in_mins": 50.0, "workstation": "Oven Station"},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station",
+			},
 			{
 				"batch_size": 1,
 				"operation": "Cool Pie Op",
@@ -742,7 +772,12 @@ boms = [
 				"time_in_mins": 10.0,
 				"workstation": "Food Prep Table 2",
 			},
-			{"batch_size": 1, "operation": "Bake Op", "time_in_mins": 50.0, "workstation": "Oven Station"},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station",
+			},
 			{
 				"batch_size": 1,
 				"operation": "Cool Pie Op",
@@ -778,7 +813,12 @@ boms = [
 				"time_in_mins": 10.0,
 				"workstation": "Food Prep Table 2",
 			},
-			{"batch_size": 1, "operation": "Bake Op", "time_in_mins": 50.0, "workstation": "Oven Station"},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station",
+			},
 			{
 				"batch_size": 1,
 				"operation": "Cool Pie Op",
@@ -800,7 +840,12 @@ boms = [
 		"overproduction_percentage_for_work_order": 100,
 		"items": [
 			{"item_code": "Pie Crust", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
-			{"item_code": "Ambrosia Pie Filling", "qty": 20.0, "qty_consumed_per_unit": 4.0, "uom": "Cup"},
+			{
+				"item_code": "Ambrosia Pie Filling",
+				"qty": 20.0,
+				"qty_consumed_per_unit": 4.0,
+				"uom": "Cup",
+			},
 			{"item_code": "Pie Box", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
 		],
 		"operations": [
@@ -810,7 +855,12 @@ boms = [
 				"time_in_mins": 10.0,
 				"workstation": "Food Prep Table 2",
 			},
-			{"batch_size": 1, "operation": "Bake Op", "time_in_mins": 50.0, "workstation": "Oven Station"},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station",
+			},
 			{
 				"batch_size": 1,
 				"operation": "Cool Pie Op",
@@ -831,10 +881,25 @@ boms = [
 		"uom": "Cup",
 		"items": [
 			{"item_code": "Sugar", "qty": 0.5, "qty_consumed_per_unit": 0.025, "uom": "Pound"},
-			{"item_code": "Cornstarch", "qty": 0.1, "qty_consumed_per_unit": 0.005, "uom": "Pound"},
+			{
+				"item_code": "Cornstarch",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.005,
+				"uom": "Pound",
+			},
 			{"item_code": "Water", "qty": 1.25, "qty_consumed_per_unit": 0.0625, "uom": "Cup"},
-			{"item_code": "Butter", "qty": 0.313, "qty_consumed_per_unit": 0.01565, "uom": "Pound"},
-			{"item_code": "Bayberry", "qty": 15.0, "qty_consumed_per_unit": 0.05025, "uom": "Pound"},
+			{
+				"item_code": "Butter",
+				"qty": 0.313,
+				"qty_consumed_per_unit": 0.01565,
+				"uom": "Pound",
+			},
+			{
+				"item_code": "Bayberry",
+				"qty": 15.0,
+				"qty_consumed_per_unit": 0.05025,
+				"uom": "Pound",
+			},
 		],
 		"operations": [
 			{
@@ -857,11 +922,31 @@ boms = [
 		"uom": "Cup",
 		"items": [
 			{"item_code": "Sugar", "qty": 0.5, "qty_consumed_per_unit": 0.025, "uom": "Pound"},
-			{"item_code": "Cornstarch", "qty": 0.1, "qty_consumed_per_unit": 0.005, "uom": "Pound"},
+			{
+				"item_code": "Cornstarch",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.005,
+				"uom": "Pound",
+			},
 			{"item_code": "Water", "qty": 1.25, "qty_consumed_per_unit": 0.0625, "uom": "Cup"},
-			{"item_code": "Butter", "qty": 0.313, "qty_consumed_per_unit": 0.01565, "uom": "Pound"},
-			{"item_code": "Cocoplum", "qty": 7.5, "qty_consumed_per_unit": 0.02515, "uom": "Pound"},
-			{"item_code": "Damson Plum", "qty": 7.5, "qty_consumed_per_unit": 0.02515, "uom": "Pound"},
+			{
+				"item_code": "Butter",
+				"qty": 0.313,
+				"qty_consumed_per_unit": 0.01565,
+				"uom": "Pound",
+			},
+			{
+				"item_code": "Cocoplum",
+				"qty": 7.5,
+				"qty_consumed_per_unit": 0.02515,
+				"uom": "Pound",
+			},
+			{
+				"item_code": "Damson Plum",
+				"qty": 7.5,
+				"qty_consumed_per_unit": 0.02515,
+				"uom": "Pound",
+			},
 		],
 		"operations": [
 			{
@@ -884,11 +969,31 @@ boms = [
 		"uom": "Cup",
 		"items": [
 			{"item_code": "Sugar", "qty": 0.5, "qty_consumed_per_unit": 0.025, "uom": "Pound"},
-			{"item_code": "Cornstarch", "qty": 0.1, "qty_consumed_per_unit": 0.005, "uom": "Pound"},
+			{
+				"item_code": "Cornstarch",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.005,
+				"uom": "Pound",
+			},
 			{"item_code": "Water", "qty": 1.25, "qty_consumed_per_unit": 0.0625, "uom": "Cup"},
-			{"item_code": "Butter", "qty": 0.313, "qty_consumed_per_unit": 0.01565, "uom": "Pound"},
-			{"item_code": "Kaduka Lime", "qty": 10.0, "qty_consumed_per_unit": 0.0335, "uom": "Pound"},
-			{"item_code": "Limequat", "qty": 5.0, "qty_consumed_per_unit": 0.01675, "uom": "Pound"},
+			{
+				"item_code": "Butter",
+				"qty": 0.313,
+				"qty_consumed_per_unit": 0.01565,
+				"uom": "Pound",
+			},
+			{
+				"item_code": "Kaduka Lime",
+				"qty": 10.0,
+				"qty_consumed_per_unit": 0.0335,
+				"uom": "Pound",
+			},
+			{
+				"item_code": "Limequat",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 0.01675,
+				"uom": "Pound",
+			},
 		],
 		"operations": [
 			{
@@ -911,10 +1016,25 @@ boms = [
 		"uom": "Cup",
 		"items": [
 			{"item_code": "Sugar", "qty": 0.5, "qty_consumed_per_unit": 0.025, "uom": "Pound"},
-			{"item_code": "Cornstarch", "qty": 0.1, "qty_consumed_per_unit": 0.005, "uom": "Pound"},
+			{
+				"item_code": "Cornstarch",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.005,
+				"uom": "Pound",
+			},
 			{"item_code": "Water", "qty": 1.25, "qty_consumed_per_unit": 0.0625, "uom": "Cup"},
-			{"item_code": "Butter", "qty": 0.313, "qty_consumed_per_unit": 0.01565, "uom": "Pound"},
-			{"item_code": "Gooseberry", "qty": 15.0, "qty_consumed_per_unit": 0.05025, "uom": "Pound"},
+			{
+				"item_code": "Butter",
+				"qty": 0.313,
+				"qty_consumed_per_unit": 0.01565,
+				"uom": "Pound",
+			},
+			{
+				"item_code": "Gooseberry",
+				"qty": 15.0,
+				"qty_consumed_per_unit": 0.05025,
+				"uom": "Pound",
+			},
 		],
 		"operations": [
 			{
@@ -937,8 +1057,18 @@ boms = [
 		"uom": "Cup",
 		"items": [
 			{"item_code": "Sugar", "qty": 0.5, "qty_consumed_per_unit": 0.025, "uom": "Pound"},
-			{"item_code": "Cornstarch", "qty": 0.1, "qty_consumed_per_unit": 0.005, "uom": "Pound"},
-			{"item_code": "Butter", "qty": 0.313, "qty_consumed_per_unit": 0.01565, "uom": "Pound"},
+			{
+				"item_code": "Cornstarch",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.005,
+				"uom": "Pound",
+			},
+			{
+				"item_code": "Butter",
+				"qty": 0.313,
+				"qty_consumed_per_unit": 0.01565,
+				"uom": "Pound",
+			},
 			{
 				"item_code": "Hairless Rambutan",
 				"qty": 5.0,
@@ -946,7 +1076,12 @@ boms = [
 				"uom": "Pound",
 			},
 			{"item_code": "Tayberry", "qty": 2.5, "qty_consumed_per_unit": 0.0084, "uom": "Pound"},
-			{"item_code": "Cloudberry", "qty": 7.5, "qty_consumed_per_unit": 0.02515, "uom": "Pound"},
+			{
+				"item_code": "Cloudberry",
+				"qty": 7.5,
+				"qty_consumed_per_unit": 0.02515,
+				"uom": "Pound",
+			},
 			{"item_code": "Water", "qty": 1.25, "qty_consumed_per_unit": 0.0625, "uom": "Cup"},
 		],
 		"operations": [
@@ -976,7 +1111,12 @@ boms = [
 			{"item_code": "Butter", "qty": 2.5, "qty_consumed_per_unit": 0.5, "uom": "Pound"},
 			# {"item_code": "Ice Water", "qty": 2.5, "qty_consumed_per_unit": 0.5, "uom": "Cup"},
 			{"item_code": "Salt", "qty": 0.05, "qty_consumed_per_unit": 0.01, "uom": "Pound"},
-			{"item_code": "Parchment Paper", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
+			{
+				"item_code": "Parchment Paper",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos",
+			},
 			{"item_code": "Pie Tin", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
 		],
 		"operations": [],  # Subcontracted item -> operations done by supplier
@@ -990,7 +1130,12 @@ boms = [
 			{"item_code": "Butter", "qty": 2.5, "qty_consumed_per_unit": 0.5, "uom": "Pound"},
 			{"item_code": "Ice Water", "qty": 2.5, "qty_consumed_per_unit": 0.5, "uom": "Cup"},
 			{"item_code": "Salt", "qty": 0.05, "qty_consumed_per_unit": 0.01, "uom": "Pound"},
-			{"item_code": "Parchment Paper", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
+			{
+				"item_code": "Parchment Paper",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos",
+			},
 			{"item_code": "Pie Tin", "qty": 5.0, "qty_consumed_per_unit": 1.0, "uom": "Nos"},
 		],
 		"operations": [
@@ -1180,21 +1325,21 @@ attributes = {
 }
 
 items_stockentry = {
-	"Butter": {"qty": 46, "item_code": "Butter"},
-	"Cornstarch": {"qty": 2, "item_code": "Cornstarch"},
-	"Cloudberry": {"qty": 45, "item_code": "Cloudberry"},
-	"Flour": {"qty": 68, "item_code": "Flour"},
-	"Hairless Rambutan": {"qty": 30, "item_code": "Hairless Rambutan"},
-	"Parchment Paper": {"qty": 80, "item_code": "Parchment Paper"},
-	"Pie Tin": {"qty": 80, "item_code": "Pie Tin"},
-	"Pie Box": {"qty": 80, "item_code": "Pie Box"},
-	"Salt": {"qty": 1, "item_code": "Salt"},
-	"Sugar": {"qty": 8, "item_code": "Sugar"},
-	"Tayberry": {"qty": 15, "item_code": "Tayberry"},
-	"Water": {"qty": 20, "item_code": "Water"},
-	"Cocoplum": {"qty": 45, "item_code": "Cocoplum"},
-	"Damson Plum": {"qty": 45, "item_code": "Damson Plum"},
-	"Gooseberry": {"qty": 30, "item_code": "Gooseberry"},
-	"Kaduka Lime": {"qty": 20, "item_code": "Kaduka Lime"},
-	"Limequat": {"qty": 10, "item_code": "Limequat"},
+	"Butter": {"qty": 46, "warehouse": "Refrigerator - APC"},
+	"Cornstarch": {"qty": 2, "warehouse": "Storeroom - APC"},
+	"Flour": {"qty": 68, "warehouse": "Storeroom - APC"},
+	"Kaduka Lime": {"qty": 20, "warehouse": "Refrigerator - APC"},
+	"Limequat": {"qty": 10, "warehouse": "Refrigerator - APC"},
+	"Parchment Paper": {"qty": 80, "warehouse": "Storeroom - APC"},
+	"Pie Tin": {"qty": 80, "warehouse": "Storeroom - APC"},
+	"Pie Box": {"qty": 80, "warehouse": "Storeroom - APC"},
+	"Salt": {"qty": 1, "warehouse": "Storeroom - APC"},
+	"Sugar": {"qty": 8, "warehouse": "Storeroom - APC"},
+	"Water": {"qty": 20, "warehouse": "Kitchen - APC"},
+	"Cocoplum": {"qty": 45, "warehouse": "Refrigerator - APC"},
+	"Damson Plum": {"qty": 45, "warehouse": "Refrigerator - APC"},
+	"Cloudberry": {"qty": 45, "warehouse": "Refrigerator - APC"},
+	"Hairless Rambutan": {"qty": 30, "warehouse": "Storeroom - APC"},
+	"Tayberry": {"qty": 15, "warehouse": "Refrigerator - APC"},
+	"Gooseberry": {"qty": 30, "warehouse": "Refrigerator - APC"},
 }

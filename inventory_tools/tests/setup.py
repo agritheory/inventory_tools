@@ -107,7 +107,7 @@ def create_test_data():
 	create_fruit_material_request(settings)
 	create_quotations(settings)
 	create_specifications(settings)
-	create_stock_entries(settings)
+	# create_stock_entries(settings)
 
 
 def create_suppliers(settings):
@@ -851,7 +851,7 @@ def create_stock_entries(settings):
 			"items",
 			{
 				"t_warehouse": items_stockentry[item]["warehouse"],
-				"item_code": items_stockentry[item]["item_code"],
+				"item_code": item,
 				"qty": items_stockentry[item]["qty"],
 			},
 		)
