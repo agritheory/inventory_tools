@@ -137,6 +137,7 @@ def copy_fixture_files():
 		if path.is_file():
 			public_file_path = Path(frappe.get_site_path("public", "files", path.name))
 			shutil.copy(path.resolve(), public_file_path.resolve())
+	create_item_dimensions(settings)
 
 
 def create_suppliers(settings):
