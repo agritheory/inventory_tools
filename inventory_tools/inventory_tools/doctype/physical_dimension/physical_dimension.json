@@ -143,48 +143,6 @@
 			"fieldtype": "Float",
 			"label": "Weight",
 			"non_negative": 1
-		},
-		{
-			"collapsible": 1,
-			"collapsible_depends_on": "reference_document",
-			"fieldname": "case_section",
-			"fieldtype": "Section Break",
-			"label": "Case"
-		},
-		{
-			"fieldname": "case_height",
-			"fieldtype": "Float",
-			"label": "Height",
-			"non_negative": 1
-		},
-		{
-			"fieldname": "case_length",
-			"fieldtype": "Float",
-			"label": "Length",
-			"non_negative": 1
-		},
-		{
-			"fieldname": "case_width",
-			"fieldtype": "Float",
-			"label": "Width",
-			"non_negative": 1
-		},
-		{
-			"fieldname": "column_break_qgzh",
-			"fieldtype": "Column Break"
-		},
-		{
-			"fieldname": "case_weight",
-			"fieldtype": "Float",
-			"label": "Weight",
-			"non_negative": 1
-		},
-		{
-			"fieldname": "case_volume",
-			"fieldtype": "Float",
-			"label": "Volume",
-			"non_negative": 1,
-			"read_only": 1
 		}
 	],
 	"image_field": "visualization",
