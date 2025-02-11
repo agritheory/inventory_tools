@@ -15,10 +15,16 @@ class PhysicalDimension(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		case_height: DF.Float
+		case_length: DF.Float
+		case_volume: DF.Float
+		case_weight: DF.Float
+		case_width: DF.Float
 		dimension_type: DF.Literal["Exterior", "Interior"]
 		item_height: DF.Float
 		item_length: DF.Float
 		item_volume: DF.Float
+		item_weight: DF.Float
 		item_width: DF.Float
 		orientation: DF.Check
 		reference_doctype: DF.Link
