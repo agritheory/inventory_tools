@@ -841,19 +841,41 @@ def create_demo_specification_values():
 
 
 def create_stock_entries(settings):
+	j = len(items_stockentry) // 2
 	# Add items to warehouse
 	se = frappe.new_doc("Stock Entry")
 	se.posting_date = settings.day
 	se.set_posting_time = 1
 	se.stock_entry_type = "Material Receipt"
-	for item in items_stockentry:
+
+	for item in items_stockentry[0:j]:
 		se.append(
 			"items",
 			{
-				"t_warehouse": items_stockentry[item]["warehouse"],
-				"item_code": item,
-				"qty": items_stockentry[item]["qty"],
+				"t_warehouse": item["warehouse"],
+				"item_code": item["item_code"],
+				"qty": item["qty"],
 			},
 		)
+
+	se.save()
+	se.submit()
+
+	# Second entry offset time for FIFO/LIFO
+	se = frappe.new_doc("Stock Entry")
+	se.posting_date = settings.day
+	se.set_posting_time = 2
+	se.stock_entry_type = "Material Receipt"
+
+	for item in items_stockentry[j:]:
+		se.append(
+			"items",
+			{
+				"t_warehouse": item["warehouse"],
+				"item_code": item["item_code"],
+				"qty": item["qty"],
+			},
+		)
+
 	se.save()
 	se.submit()

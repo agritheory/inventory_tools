@@ -1324,22 +1324,18 @@ attributes = {
 	},
 }
 
-items_stockentry = {
-	"Butter": {"qty": 46, "warehouse": "Refrigerator - APC"},
-	"Cornstarch": {"qty": 2, "warehouse": "Storeroom - APC"},
-	"Flour": {"qty": 68, "warehouse": "Storeroom - APC"},
-	"Kaduka Lime": {"qty": 20, "warehouse": "Refrigerator - APC"},
-	"Limequat": {"qty": 10, "warehouse": "Refrigerator - APC"},
-	"Parchment Paper": {"qty": 80, "warehouse": "Storeroom - APC"},
-	"Pie Tin": {"qty": 80, "warehouse": "Storeroom - APC"},
-	"Pie Box": {"qty": 80, "warehouse": "Storeroom - APC"},
-	"Salt": {"qty": 1, "warehouse": "Storeroom - APC"},
-	"Sugar": {"qty": 8, "warehouse": "Storeroom - APC"},
-	"Water": {"qty": 20, "warehouse": "Kitchen - APC"},
-	"Cocoplum": {"qty": 45, "warehouse": "Refrigerator - APC"},
-	"Damson Plum": {"qty": 45, "warehouse": "Refrigerator - APC"},
-	"Cloudberry": {"qty": 45, "warehouse": "Refrigerator - APC"},
-	"Hairless Rambutan": {"qty": 30, "warehouse": "Storeroom - APC"},
-	"Tayberry": {"qty": 15, "warehouse": "Refrigerator - APC"},
-	"Gooseberry": {"qty": 30, "warehouse": "Refrigerator - APC"},
-}
+items_stockentry = [
+	{"item_code": "Butter", "qty": 44, "warehouse": "Refrigerator - APC"},
+	{"item_code": "Bayberry", "qty": 82, "warehouse": "Refrigerator - APC"},
+	{"item_code": "Cornstarch", "qty": 2, "warehouse": "Storeroom - APC"},
+	{"item_code": "Flour", "qty": 71, "warehouse": "Storeroom - APC"},
+	{"item_code": "Parchment Paper", "qty": 60, "warehouse": "Storeroom - APC"},
+	{"item_code": "Pie Tin", "qty": 60, "warehouse": "Storeroom - APC"},
+	{"item_code": "Pie Box", "qty": 70, "warehouse": "Storeroom - APC"},
+	{"item_code": "Sugar", "qty": 8, "warehouse": "Storeroom - APC"},
+	{"item_code": "Salt", "qty": 1, "warehouse": "Storeroom - APC"},
+	{"item_code": "Water", "qty": 15, "warehouse": "Kitchen - APC"},
+	{"item_code": "Gooseberry", "qty": 30, "warehouse": "Refrigerator - APC"},
+	{"item_code": "Cocoplum", "qty": 45, "warehouse": "Refrigerator - APC"},
+	{"item_code": "Damson Plum", "qty": 45, "warehouse": "Refrigerator - APC"},
+]
