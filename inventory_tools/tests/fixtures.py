@@ -271,6 +271,7 @@ attributes = {
 <<<<<<< HEAD
 =======
 
+<<<<<<< HEAD
 items_stockentry = {
 	"Butter": {"qty": 46, "warehouse": "Refrigerator - APC"},
 	"Cornstarch": {"qty": 2, "warehouse": "Storeroom - APC"},
@@ -291,3 +292,20 @@ items_stockentry = {
 	"Gooseberry": {"qty": 30, "warehouse": "Refrigerator - APC"},
 }
 >>>>>>> 8d8df6d (warehouse)
+=======
+items_stockentry = [
+	{"item_code": "Butter", "qty": 44, "warehouse": "Refrigerator - APC"},
+	{"item_code": "Bayberry", "qty": 82, "warehouse": "Refrigerator - APC"},
+	{"item_code": "Cornstarch", "qty": 2, "warehouse": "Storeroom - APC"},
+	{"item_code": "Flour", "qty": 71, "warehouse": "Storeroom - APC"},
+	{"item_code": "Parchment Paper", "qty": 60, "warehouse": "Storeroom - APC"},
+	{"item_code": "Pie Tin", "qty": 60, "warehouse": "Storeroom - APC"},
+	{"item_code": "Pie Box", "qty": 70, "warehouse": "Storeroom - APC"},
+	{"item_code": "Sugar", "qty": 8, "warehouse": "Storeroom - APC"},
+	{"item_code": "Salt", "qty": 1, "warehouse": "Storeroom - APC"},
+	{"item_code": "Water", "qty": 15, "warehouse": "Kitchen - APC"},
+	{"item_code": "Gooseberry", "qty": 30, "warehouse": "Refrigerator - APC"},
+	{"item_code": "Cocoplum", "qty": 45, "warehouse": "Refrigerator - APC"},
+	{"item_code": "Damson Plum", "qty": 45, "warehouse": "Refrigerator - APC"},
+]
+>>>>>>> d1de7e2 (split by time for LIFO/FIFO)
