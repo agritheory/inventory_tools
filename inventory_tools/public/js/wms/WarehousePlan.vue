@@ -16,10 +16,10 @@
 				class="grid-overlay"
 				:style="{
 					backgroundImage: `linear-gradient(90deg, ${gridLines}), linear-gradient(180deg, ${gridLines})`,
-					top: `${(offsetValues.top / plan.horizontal) * 100}%`,
-					left: `${(offsetValues.left / plan.horizontal) * 100}%`,
-					right: `${(offsetValues.right / plan.horizontal) * 100}%`,
-					bottom: `${(offsetValues.bottom / plan.horizontal) * 100}%`,
+					top: `${(offsetGrids.top / plan.vertical) * 100}%`,
+					left: `${(offsetGrids.left / plan.horizontal) * 100}%`,
+					right: `${(offsetGrids.right / plan.horizontal) * 100}%`,
+					bottom: `${(offsetGrids.bottom / plan.vertical) * 100}%`,
 				}" />
 
 			<!-- Walkable Cells with Corrected Offset -->
@@ -28,10 +28,10 @@
 				:key="x"
 				class="cell-container"
 				:style="{
-					top: `${(offsetValues.top / plan.horizontal) * 100}%`,
-					left: `${(offsetValues.left / plan.horizontal) * 100}%`,
-					right: `${(offsetValues.right / plan.horizontal) * 100}%`,
-					bottom: `${(offsetValues.bottom / plan.horizontal) * 100}%`,
+					top: `${(offsetGrids.top / plan.vertical) * 100}%`,
+					left: `${(offsetGrids.left / plan.horizontal) * 100}%`,
+					right: `${(offsetGrids.right / plan.horizontal) * 100}%`,
+					bottom: `${(offsetGrids.bottom / plan.vertical) * 100}%`,
 				}">
 				<div
 					v-for="y in plan.vertical"
@@ -44,27 +44,24 @@
 						width: `${100 / plan.horizontal}%`,
 						height: `${100 / plan.vertical}%`,
 					}" />
-			</div>
 
-			<!-- Hover Indicator with Corrected Offset -->
-			<div
-				class="hover-indicator"
-				:style="{
-					left: `${(mouseCell.x / plan.horizontal) * 100}%`,
-					top: `${(mouseCell.y / plan.vertical) * 100}%`,
-					width: `${100 / plan.horizontal}%`,
-					height: `${100 / plan.vertical}%`,
-					opacity: isHoverValid ? '0.5' : '0',
-					transform: `translate(${(offsetValues.left / plan.horizontal) * 100}%, ${
-						(offsetValues.top / plan.horizontal) * 100
-					}%)`,
-				}" />
+				<!-- Hover Indicator with Corrected Offset -->
+				<div
+					class="hover-indicator"
+					:style="{
+						left: `${(hoverCell.x / plan.horizontal) * 100}%`,
+						top: `${(hoverCell.y / plan.vertical) * 100}%`,
+						width: `${100 / plan.horizontal}%`,
+						height: `${100 / plan.vertical}%`,
+						opacity: isHoverValid ? '0.5' : '0',
+					}" />
+			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { useElementBounding, useElementSize, useMouseInElement } from '@vueuse/core'
+import { useElementSize, useMouseInElement } from '@vueuse/core'
 import { computed, onMounted, ref, useTemplateRef } from 'vue'
 
 export type WarehousePlan = {
@@ -79,7 +76,6 @@ export type WarehousePlan = {
 const emit = defineEmits(['update:walkableCells'])
 
 const containerRef = useTemplateRef('container')
-const { left, top } = useElementBounding(containerRef)
 const { width, height } = useElementSize(containerRef)
 const { elementX, elementY } = useMouseInElement(containerRef)
 const isPainting = ref(false)
@@ -103,14 +99,14 @@ const plan = computed(() => {
 	}
 })
 
-const offsetValues = computed(() => {
+const offsetGrids = computed(() => {
 	const [top, left, bottom, right] = plan.value.offset.split(',').map(v => parseFloat(v) || 0)
 	return { top, left, bottom, right }
 })
 
 const availableDimensions = computed(() => {
-	const widthOffset = offsetValues.value.left + offsetValues.value.right
-	const heightOffset = offsetValues.value.top + offsetValues.value.bottom
+	const widthOffset = offsetGrids.value.left + offsetGrids.value.right
+	const heightOffset = offsetGrids.value.top + offsetGrids.value.bottom
 	const availableWidth = width.value * (1 - widthOffset / plan.value.horizontal)
 	const availableHeight = height.value * (1 - heightOffset / plan.value.vertical)
 	return { width: availableWidth, height: availableHeight }
@@ -121,9 +117,9 @@ const availableCellDimension = computed(() => ({
 	height: availableDimensions.value.height / plan.value.vertical,
 }))
 
-const mouseCell = computed(() => {
-	const adjustedX = elementX.value - (width.value * offsetValues.value.left) / plan.value.horizontal
-	const adjustedY = elementY.value - (height.value * offsetValues.value.top) / plan.value.horizontal
+const hoverCell = computed(() => {
+	const adjustedX = elementX.value - (width.value * offsetGrids.value.left) / plan.value.horizontal
+	const adjustedY = elementY.value - (height.value * offsetGrids.value.top) / plan.value.vertical
 
 	return {
 		x: Math.floor(adjustedX / availableCellDimension.value.width),
@@ -133,10 +129,10 @@ const mouseCell = computed(() => {
 
 const isHoverValid = computed(() => {
 	return (
-		mouseCell.value.x >= 0 &&
-		mouseCell.value.x < plan.value.horizontal &&
-		mouseCell.value.y >= 0 &&
-		mouseCell.value.y < plan.value.vertical
+		hoverCell.value.x >= 0 &&
+		hoverCell.value.x < plan.value.horizontal &&
+		hoverCell.value.y >= 0 &&
+		hoverCell.value.y < plan.value.vertical
 	)
 })
 
@@ -173,37 +169,28 @@ const initializeFromMatrix = (matrixString?: string) => {
 	}
 }
 
-const getCellFromEvent = (event: MouseEvent) => {
-	const adjustedX = event.clientX - left.value - (width.value * offsetValues.value.left) / plan.value.horizontal
-	const adjustedY = event.clientY - top.value - (height.value * offsetValues.value.top) / plan.value.horizontal
-
-	const x = Math.floor(adjustedX / availableCellDimension.value.width)
-	const y = Math.floor(adjustedY / availableCellDimension.value.height)
-
-	if (x >= 0 && x < plan.value.horizontal && y >= 0 && y < plan.value.vertical) {
-		return { x, y }
-	}
-	return null
+const getCellFromEvent = () => {
+	const { x, y } = hoverCell.value
+	if (isHoverValid.value) return { x, y }
 }
 
-const startPainting = (event: MouseEvent) => {
+const startPainting = () => {
 	isPainting.value = true
-	const cell = getCellFromEvent(event)
+	const cell = getCellFromEvent()
 	if (cell) {
 		paintMode.value = !isCellWalkable(cell.x, cell.y)
 		updateCell(cell.x, cell.y)
 	}
 }
 
-const stopPainting = (event: MouseEvent) => {
-	paint(event)
+const stopPainting = () => {
 	isPainting.value = false
 	paintMode.value = null
 }
 
-const paint = (event: MouseEvent) => {
+const paint = () => {
 	if (!isPainting.value || paintMode.value === null) return
-	const cell = getCellFromEvent(event)
+	const cell = getCellFromEvent()
 	if (cell) {
 		updateCell(cell.x, cell.y)
 	}
@@ -224,18 +211,9 @@ const updateCell = (x: number, y: number) => {
 	}
 }
 
-const emitUpdate = () => {
-	const walkableArray = Array.from(walkableCells.value).map(key => {
-		const [x, y] = key.split(',').map(Number)
-		return { x, y }
-	})
+const emitUpdate = () => emit('update:walkableCells', getWalkableCells())
 
-	emit('update:walkableCells', walkableArray)
-}
-
-const isCellWalkable = (x: number, y: number) => walkableCells.value.has(`${x},${y}`)
-
-// Optional helper methods:
+// Helper methods
 const getMatrixArray = () => {
 	// Create empty matrix filled with zeros
 	const matrix = Array(plan.value.vertical)
@@ -243,29 +221,29 @@ const getMatrixArray = () => {
 		.map(() => Array(plan.value.horizontal).fill(0))
 
 	// Fill in walkable cells with 1's
-	walkableCells.value.forEach(cellKey => {
-		const [x, y] = cellKey.split(',').map(Number)
+	const cells = getWalkableCells()
+	for (const { x, y } of cells) {
 		if (x >= 0 && x < plan.value.horizontal && y >= 0 && y < plan.value.vertical) {
 			matrix[y][x] = 1
 		}
-	})
+	}
 
 	return matrix
 }
 
+const isCellWalkable = (x: number, y: number) => walkableCells.value.has(`${x},${y}`)
 const getMatrixString = () => JSON.stringify(getMatrixArray())
-const getCellValue = (x: number, y: number) => (walkableCells.value.has(`${x},${y}`) ? 1 : 0)
-const getWalkableCellsArray = () =>
+const getWalkableCells = () =>
 	Array.from(walkableCells.value).map(cell => {
 		const [x, y] = cell.split(',').map(Number)
 		return { x, y }
 	})
 
 defineExpose({
+	isCellWalkable,
 	getMatrixArray,
 	getMatrixString,
-	getCellValue,
-	getWalkableCellsArray,
+	getWalkableCells,
 })
 </script>
 
