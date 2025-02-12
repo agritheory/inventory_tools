@@ -2,5 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Warehouse Plan', {
-	refresh(frm) {},
+	onload_post_render: frm => {
+		inventory_tools.mount_warehouse_plan(frm)
+	},
+	refresh: frm => {
+		frm.page.wrapper.find('.layout-side-section').hide()
+	},
 })

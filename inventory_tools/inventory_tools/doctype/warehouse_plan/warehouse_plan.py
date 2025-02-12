@@ -17,5 +17,9 @@ class WarehousePlan(Document):
 		company: DF.Link | None
 		floor_plan: DF.AttachImage | None
 		group_warehouse: DF.Link | None
+		horizontal: DF.Float
 		matrix: DF.LongText | None
+		offset: DF.Data | None
+		uom: DF.Link | None
+		vertical: DF.Float
 	# end: auto-generated types

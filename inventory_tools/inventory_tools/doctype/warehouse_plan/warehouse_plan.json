@@ -1,6 +1,6 @@
 {
 	"actions": [],
-	"allow_rename": 1,
+	"autoname": "field:group_warehouse",
 	"creation": "2025-02-11 17:29:08.253737",
 	"doctype": "DocType",
 	"engine": "InnoDB",
@@ -8,9 +8,14 @@
 		"plan_tab",
 		"warehouse_plan",
 		"details_tab",
+		"horizontal",
+		"vertical",
+		"column_break_ocmz",
+		"uom",
+		"offset",
+		"column_break_rjyh",
 		"company",
 		"group_warehouse",
-		"column_break_rjyh",
 		"floor_plan",
 		"section_break_aokq",
 		"matrix"
@@ -40,7 +45,8 @@
 			"fieldname": "group_warehouse",
 			"fieldtype": "Link",
 			"label": "Group Warehouse",
-			"options": "Warehouse"
+			"options": "Warehouse",
+			"unique": 1
 		},
 		{
 			"fieldname": "matrix",
@@ -59,14 +65,41 @@
 		{
 			"fieldname": "section_break_aokq",
 			"fieldtype": "Section Break"
+		},
+		{
+			"fieldname": "horizontal",
+			"fieldtype": "Float",
+			"label": "Horizontal"
+		},
+		{
+			"fieldname": "vertical",
+			"fieldtype": "Float",
+			"label": "Vertical"
+		},
+		{
+			"fieldname": "uom",
+			"fieldtype": "Link",
+			"label": "UOM",
+			"options": "UOM"
+		},
+		{
+			"default": "0,0,0,0",
+			"fieldname": "offset",
+			"fieldtype": "Data",
+			"label": "Offset"
+		},
+		{
+			"fieldname": "column_break_ocmz",
+			"fieldtype": "Column Break"
 		}
 	],
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2025-02-11 17:32:05.466796",
+	"modified": "2025-02-11 20:39:20.872130",
 	"modified_by": "Administrator",
 	"module": "Inventory Tools",
 	"name": "Warehouse Plan",
+	"naming_rule": "By fieldname",
 	"owner": "Administrator",
 	"permissions": [
 		{
@@ -78,6 +111,18 @@
 			"read": 1,
 			"report": 1,
 			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Stock Manager",
 			"share": 1,
 			"write": 1
 		}
