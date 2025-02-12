@@ -2,7 +2,13 @@
 	<div v-if="gridWidth && gridHeight" class="grid-container">
 		<div class="dimension-display">{{ gridWidth }}x{{ gridHeight }} {{ uom }}</div>
 
-		<div ref="containerRef" class="grid-wrapper" @click="handleClick">
+		<div
+			ref="containerRef"
+			class="grid-wrapper"
+			@mousedown="startPainting"
+			@mousemove="paint"
+			@mouseup="stopPainting"
+			@mouseleave="stopPainting">
 			<img :src="floor_plan" class="background-image" @dragstart.prevent />
 
 			<!-- Grid Overlay with Corrected Offset -->
@@ -62,7 +68,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, defineExpose, defineProps, defineEmits, onMounted } from 'vue'
 import { useMouseInElement, useElementSize } from '@vueuse/core'
 
 const props = defineProps({
@@ -84,11 +90,12 @@ const gridHeight = ref(0)
 const floor_plan = ref()
 const uom = ref()
 const offsetString = ref('')
+const isPainting = ref(false)
+const paintMode = ref(null) // true for adding cells, false for removing
 
 const { width, height } = useElementSize(containerRef)
 const { elementX, elementY } = useMouseInElement(containerRef)
 
-// Parse offset values from string, now as raw numbers
 const offsetValues = computed(() => {
 	const defaultOffsets = { top: 0, left: 0, bottom: 0, right: 0 }
 	if (!offsetString.value) return defaultOffsets
@@ -102,7 +109,6 @@ const offsetValues = computed(() => {
 	}
 })
 
-// Adjust available space based on offsets divided by horizontal count
 const adjustedDimensions = computed(() => {
 	const availableWidth = width.value * (1 - (offsetValues.value.left + offsetValues.value.right) / gridWidth.value)
 	const availableHeight = height.value * (1 - (offsetValues.value.top + offsetValues.value.bottom) / gridWidth.value)
@@ -155,9 +161,13 @@ const watchFrappeFields = () => {
 	gridWidth.value = window.cur_frm.doc.horizontal || 0
 	gridHeight.value = window.cur_frm.doc.vertical || 0
 	offsetString.value = window.cur_frm.doc.offset || '0,0,0,0'
+	if (window.cur_frm.doc.matrix) {
+		walkableCells.value = initializeFromMatrix(window.cur_frm.doc.matrix)
+		emitUpdate()
+	}
 }
 
-const handleClick = event => {
+const getCellFromEvent = event => {
 	const rect = containerRef.value.getBoundingClientRect()
 	const adjustedX = event.clientX - rect.left - (width.value * offsetValues.value.left) / gridWidth.value
 	const adjustedY = event.clientY - rect.top - (height.value * offsetValues.value.top) / gridWidth.value
@@ -166,20 +176,50 @@ const handleClick = event => {
 	const y = Math.floor(adjustedY / cellDimensions.value.height)
 
 	if (x >= 0 && x < gridWidth.value && y >= 0 && y < gridHeight.value) {
-		toggleCell(x, y)
+		return { x, y }
+	}
+	return null
+}
+
+const startPainting = event => {
+	isPainting.value = true
+	const cell = getCellFromEvent(event)
+	if (cell) {
+		paintMode.value = !isCellWalkable(cell.x, cell.y)
+		updateCell(cell.x, cell.y)
 	}
 }
 
-const isCellWalkable = (x, y) => walkableCells.value.has(`${x},${y}`)
+const stopPainting = () => {
+	isPainting.value = false
+	paintMode.value = null
+}
 
-const toggleCell = (x, y) => {
-	const cellKey = `${x},${y}`
-	if (walkableCells.value.has(cellKey)) {
-		walkableCells.value.delete(cellKey)
-	} else {
-		walkableCells.value.add(cellKey)
+const paint = event => {
+	if (!isPainting.value || paintMode.value === null) return
+
+	const cell = getCellFromEvent(event)
+	if (cell) {
+		updateCell(cell.x, cell.y)
 	}
+}
 
+const updateCell = (x, y) => {
+	const cellKey = `${x},${y}`
+	const currentState = walkableCells.value.has(cellKey)
+
+	if (currentState !== paintMode.value) {
+		if (paintMode.value) {
+			walkableCells.value.add(cellKey)
+		} else {
+			walkableCells.value.delete(cellKey)
+		}
+
+		emitUpdate()
+	}
+}
+
+const emitUpdate = () => {
 	const walkableArray = Array.from(walkableCells.value).map(key => {
 		const [x, y] = key.split(',').map(Number)
 		return { x, y }
@@ -188,11 +228,74 @@ const toggleCell = (x, y) => {
 	emit('update:walkableCells', walkableArray)
 }
 
+const initializeFromMatrix = matrixString => {
+	try {
+		// Parse the string to get the array of arrays
+		const matrix = JSON.parse(matrixString)
+		const cells = new Set()
+
+		// Convert matrix 1's to coordinates
+		matrix.forEach((row, y) => {
+			row.forEach((cell, x) => {
+				if (cell === 1) {
+					cells.add(`${x},${y}`)
+				}
+			})
+		})
+
+		return cells
+	} catch (e) {
+		console.warn('Error parsing matrix string:', e)
+		return new Set()
+	}
+}
+
+const isCellWalkable = (x, y) => walkableCells.value.has(`${x},${y}`)
+
 onMounted(() => {
 	watchFrappeFields()
 })
-</script>
 
+const getMatrixArray = () => {
+	// Create empty matrix filled with zeros
+	const matrix = Array(gridHeight.value)
+		.fill(0)
+		.map(() => Array(gridWidth.value).fill(0))
+
+	// Fill in walkable cells with 1's
+	walkableCells.value.forEach(cellKey => {
+		const [x, y] = cellKey.split(',').map(Number)
+		if (x >= 0 && x < gridWidth.value && y >= 0 && y < gridHeight.value) {
+			matrix[y][x] = 1
+		}
+	})
+
+	return matrix
+}
+
+const getMatrixString = () => {
+	return JSON.stringify(getMatrixArray())
+}
+
+// Optional helper methods:
+const getCellValue = (x, y) => {
+	return walkableCells.value.has(`${x},${y}`) ? 1 : 0
+}
+
+const getWalkableCellsArray = () => {
+	return Array.from(walkableCells.value).map(cell => {
+		const [x, y] = cell.split(',').map(Number)
+		return { x, y }
+	})
+}
+
+defineExpose({
+	getMatrixArray,
+	getMatrixString,
+	getCellValue,
+	getWalkableCellsArray,
+})
+</script>
 <style scoped>
 .grid-container {
 	position: relative;
@@ -235,7 +338,7 @@ onMounted(() => {
 }
 
 .grid-cell.walkable {
-	background-color: rgba(255, 115, 0, 0.3);
+	background-color: rgba(0, 255, 0, 0.3);
 }
 
 .hover-indicator {

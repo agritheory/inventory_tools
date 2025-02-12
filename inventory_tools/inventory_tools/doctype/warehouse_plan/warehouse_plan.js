@@ -8,4 +8,10 @@ frappe.ui.form.on('Warehouse Plan', {
 	refresh: frm => {
 		frm.page.wrapper.find('.layout-side-section').hide()
 	},
+	validate: frm => {
+		// not working
+		const matrix = frm.warehouse_plan._instance.exposed.getMatrixString()
+		console.log(matrix)
+		// frm.set_value('matrix', matrix)
+	},
 })
