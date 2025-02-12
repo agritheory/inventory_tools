@@ -1,6 +1,14 @@
 # CHANGELOG
 
 
+## v15.3.1 (2025-02-11)
+
+### Bug Fixes
+
+- Add missing physical dimension fields
+  ([`e3f47a1`](https://github.com/agritheory/inventory_tools/commit/e3f47a1e1e138682a11cca5ea1c7d6d160023400))
+
+
 ## v15.3.0 (2025-02-05)
 
 ### Features

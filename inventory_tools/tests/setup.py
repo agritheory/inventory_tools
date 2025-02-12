@@ -20,6 +20,7 @@ from inventory_tools.tests.fixtures import (
 	specifications,
 	suppliers,
 	workstations,
+	item_dimensions,
 	items_stockentry,
 )
 
@@ -107,6 +108,7 @@ def create_test_data():
 	create_fruit_material_request(settings)
 	create_quotations(settings)
 	create_specifications(settings)
+	create_item_dimensions(settings)
 	create_stock_entries(settings)
 
 
@@ -838,6 +840,14 @@ def create_demo_specification_values():
 	test_generate_values()
 	test_generate_values_on_overlapping_items()
 	test_manual_attribute_addition()
+
+
+def create_item_dimensions(settings):
+	for item in item_dimensions:
+		pyd = frappe.new_doc("Physical Dimension")
+		pyd.update(item)
+		pyd.save()
+		pyd.submit()
 
 
 def create_stock_entries(settings):

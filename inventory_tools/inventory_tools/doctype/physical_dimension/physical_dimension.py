@@ -15,10 +15,16 @@ class PhysicalDimension(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		case_height: DF.Float
+		case_length: DF.Float
+		case_volume: DF.Float
+		case_weight: DF.Float
+		case_width: DF.Float
 		dimension_type: DF.Literal["Exterior", "Interior"]
 		item_height: DF.Float
 		item_length: DF.Float
 		item_volume: DF.Float
+		item_weight: DF.Float
 		item_width: DF.Float
 		orientation: DF.Check
 		reference_doctype: DF.Link
@@ -41,8 +47,12 @@ class PhysicalDimension(Document):
 	def validate_item_case_fit(self):
 		if self.item_volume > self.case_volume:
 			frappe.throw("Item volume should not be greater than case volume")
+		if self.item_volume == 0:
+			frappe.throw("Item volume cannot be zero")
+		if self.case_volume == 0:
+			frappe.throw("Case volume cannot be zero")
 
-		if max(self.item_height, self.item_length, self.item_width) > min(
-			self.case_height, self.case_length, self.case_width
-		):
-			frappe.throw("The longest item dimension does not fit within any case dimension")
+		item_dims = sorted([self.item_length, self.item_width, self.item_height])
+		case_dims = sorted([self.case_length, self.case_width, self.case_height])
+		if any(item_dim > case_dim for item_dim, case_dim in zip(item_dims, case_dims)):
+			frappe.throw("Item dimensions do not fit within the case dimensions")
