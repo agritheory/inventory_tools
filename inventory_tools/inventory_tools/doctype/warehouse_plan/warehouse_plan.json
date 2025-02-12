@@ -1,0 +1,88 @@
+{
+	"actions": [],
+	"allow_rename": 1,
+	"creation": "2025-02-11 17:29:08.253737",
+	"doctype": "DocType",
+	"engine": "InnoDB",
+	"field_order": [
+		"plan_tab",
+		"warehouse_plan",
+		"details_tab",
+		"company",
+		"group_warehouse",
+		"column_break_rjyh",
+		"floor_plan",
+		"section_break_aokq",
+		"matrix"
+	],
+	"fields": [
+		{
+			"fieldname": "plan_tab",
+			"fieldtype": "Tab Break",
+			"label": "Plan"
+		},
+		{
+			"fieldname": "warehouse_plan",
+			"fieldtype": "HTML"
+		},
+		{
+			"fieldname": "details_tab",
+			"fieldtype": "Tab Break",
+			"label": "Details"
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"label": "Company",
+			"options": "Company"
+		},
+		{
+			"fieldname": "group_warehouse",
+			"fieldtype": "Link",
+			"label": "Group Warehouse",
+			"options": "Warehouse"
+		},
+		{
+			"fieldname": "matrix",
+			"fieldtype": "Long Text",
+			"hidden": 1
+		},
+		{
+			"fieldname": "column_break_rjyh",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "floor_plan",
+			"fieldtype": "Attach Image",
+			"label": "Floor Plan"
+		},
+		{
+			"fieldname": "section_break_aokq",
+			"fieldtype": "Section Break"
+		}
+	],
+	"index_web_pages_for_search": 1,
+	"links": [],
+	"modified": "2025-02-11 17:32:05.466796",
+	"modified_by": "Administrator",
+	"module": "Inventory Tools",
+	"name": "Warehouse Plan",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": []
+}

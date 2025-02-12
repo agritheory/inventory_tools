@@ -17,9 +17,6 @@
 <script setup>
 import { computed, onMounted, ref, markRaw, watch, unref } from 'vue'
 import { useElementSize, useResizeObserver } from '@vueuse/core'
-// import { Canvas, Rect } from 'fabric'; // browser
-import * as fabric from 'fabric'
-// import { StaticCanvas, Rect } from 'fabric/node'; // node
 
 let plant_floor_layout = ref(null)
 let diagram = ref(null)
@@ -34,18 +31,6 @@ let plant_floor_layout_height = computed(() => {
 		const dimensions = entry.contentRect
 		return `${dimensions.width.value * 0.78}px`
 	})
-})
-
-let canvas = new fabric.Canvas(diagram)
-window.plant_floor_layout = canvas
-
-onMounted(() => {
-	const rect = new fabric.Rect({
-		fill: 'red',
-		width: 20,
-		height: 20,
-	})
-	canvas.add(markRaw(rect))
 })
 </script>
 <style scoped></style>
