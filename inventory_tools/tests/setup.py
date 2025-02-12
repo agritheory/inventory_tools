@@ -107,7 +107,7 @@ def create_test_data():
 	create_fruit_material_request(settings)
 	create_quotations(settings)
 	create_specifications(settings)
-	# create_stock_entries(settings)
+	create_stock_entries(settings)
 
 
 def create_suppliers(settings):
