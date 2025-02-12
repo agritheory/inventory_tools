@@ -18,5 +18,5 @@ inventory_tools.mount_warehouse_plan = frm => {
 		$('<div id="warehouse-plan" style="min-height: 60vh"></div>').get(0)
 	)
 	frm.warehouse_plan = createApp(WarehousePlan)
-	frm.warehouse_plan.mount('#warehouse-plan')
+	inventory_tools.$warehouse_plan = frm.warehouse_plan.mount('#warehouse-plan')
 }

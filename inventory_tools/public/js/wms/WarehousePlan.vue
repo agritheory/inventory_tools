@@ -1,9 +1,9 @@
 <template>
-	<div v-if="gridWidth && gridHeight" class="grid-container">
-		<div class="dimension-display">{{ gridWidth }}x{{ gridHeight }} {{ uom }}</div>
+	<div v-if="horizontalGrids && verticalGrids" class="grid-container">
+		<div class="dimension-display">{{ document.horizontal }}x{{ verticalGrids }} {{ uom }}</div>
 
 		<div
-			ref="containerRef"
+			ref="container"
 			class="grid-wrapper"
 			@mousedown="startPainting"
 			@mousemove="paint"
@@ -15,37 +15,34 @@
 			<div
 				class="grid-overlay"
 				:style="{
-					backgroundImage: `
-            linear-gradient(90deg, ${gridLines}),
-            linear-gradient(180deg, ${gridLines})
-          `,
-					top: `${(offsetValues.top / gridWidth) * 100}%`,
-					left: `${(offsetValues.left / gridWidth) * 100}%`,
-					right: `${(offsetValues.right / gridWidth) * 100}%`,
-					bottom: `${(offsetValues.bottom / gridWidth) * 100}%`,
+					backgroundImage: `linear-gradient(90deg, ${gridLines}), linear-gradient(180deg, ${gridLines})`,
+					top: `${(offsetValues.top / horizontalGrids) * 100}%`,
+					left: `${(offsetValues.left / horizontalGrids) * 100}%`,
+					right: `${(offsetValues.right / horizontalGrids) * 100}%`,
+					bottom: `${(offsetValues.bottom / horizontalGrids) * 100}%`,
 				}" />
 
 			<!-- Walkable Cells with Corrected Offset -->
 			<div
-				v-for="x in gridWidth"
+				v-for="x in horizontalGrids"
 				:key="x"
 				class="cell-container"
 				:style="{
-					top: `${(offsetValues.top / gridWidth) * 100}%`,
-					left: `${(offsetValues.left / gridWidth) * 100}%`,
-					right: `${(offsetValues.right / gridWidth) * 100}%`,
-					bottom: `${(offsetValues.bottom / gridWidth) * 100}%`,
+					top: `${(offsetValues.top / horizontalGrids) * 100}%`,
+					left: `${(offsetValues.left / horizontalGrids) * 100}%`,
+					right: `${(offsetValues.right / horizontalGrids) * 100}%`,
+					bottom: `${(offsetValues.bottom / horizontalGrids) * 100}%`,
 				}">
 				<div
-					v-for="y in gridHeight"
+					v-for="y in verticalGrids"
 					:key="`${x - 1},${y - 1}`"
 					class="grid-cell"
 					:class="{ walkable: isCellWalkable(x - 1, y - 1) }"
 					:style="{
-						left: `${((x - 1) / gridWidth) * 100}%`,
-						top: `${((y - 1) / gridHeight) * 100}%`,
-						width: `${100 / gridWidth}%`,
-						height: `${100 / gridHeight}%`,
+						left: `${((x - 1) / horizontalGrids) * 100}%`,
+						top: `${((y - 1) / verticalGrids) * 100}%`,
+						width: `${100 / horizontalGrids}%`,
+						height: `${100 / verticalGrids}%`,
 					}" />
 			</div>
 
@@ -53,45 +50,50 @@
 			<div
 				class="hover-indicator"
 				:style="{
-					left: `${(mouseCell.x / gridWidth) * 100}%`,
-					top: `${(mouseCell.y / gridHeight) * 100}%`,
-					width: `${100 / gridWidth}%`,
-					height: `${100 / gridHeight}%`,
+					left: `${(mouseCell.x / horizontalGrids) * 100}%`,
+					top: `${(mouseCell.y / verticalGrids) * 100}%`,
+					width: `${100 / horizontalGrids}%`,
+					height: `${100 / verticalGrids}%`,
 					opacity: isHoverValid ? '0.5' : '0',
-					transform: `translate(
-            ${(offsetValues.left / gridWidth) * 100}%,
-            ${(offsetValues.top / gridWidth) * 100}%
-          )`,
+					transform: `translate(${(offsetValues.left / horizontalGrids) * 100}%, ${
+						(offsetValues.top / horizontalGrids) * 100
+					}%)`,
 				}" />
 		</div>
 	</div>
 </template>
 
-<script setup>
-import { ref, computed, defineExpose, defineProps, defineEmits, onMounted } from 'vue'
-import { useMouseInElement, useElementSize } from '@vueuse/core'
+<script setup lang="ts">
+import { useElementBounding, useElementSize, useMouseInElement } from '@vueuse/core'
+import { computed, onMounted, ref, useTemplateRef } from 'vue'
 
-const props = defineProps({
-	imageUrl: {
-		type: String,
-		required: true,
-	},
-	initialWalkableCells: {
-		type: Array,
-		default: () => [],
-	},
-})
+export type WarehousePlan = {
+	floor_plan: string
+	uom: string
+	horizontal: number
+	vertical: number
+	offset: string
+	matrix?: string
+}
+
+const { imageUrl, initialWalkableCells = [] } = defineProps<{
+	imageUrl: string
+	initialWalkableCells?: { x: number; y: number }[]
+}>()
 
 const emit = defineEmits(['update:walkableCells'])
 
-const containerRef = ref(null)
-const gridWidth = ref(0)
-const gridHeight = ref(0)
+const containerRef = useTemplateRef('container')
+const containerRect = useElementBounding(containerRef)
+
+const horizontalGrids = ref(0)
+const verticalGrids = ref(0)
 const floor_plan = ref()
 const uom = ref()
 const offsetString = ref('')
 const isPainting = ref(false)
-const paintMode = ref(null) // true for adding cells, false for removing
+const paintMode = ref(false) // true for adding cells, false for removing
+const walkableCells = ref(new Set(initialWalkableCells.map(cell => `${cell.x},${cell.y}`)))
 
 const { width, height } = useElementSize(containerRef)
 const { elementX, elementY } = useMouseInElement(containerRef)
@@ -110,21 +112,21 @@ const offsetValues = computed(() => {
 })
 
 const adjustedDimensions = computed(() => {
-	const availableWidth = width.value * (1 - (offsetValues.value.left + offsetValues.value.right) / gridWidth.value)
-	const availableHeight = height.value * (1 - (offsetValues.value.top + offsetValues.value.bottom) / gridWidth.value)
+	const availableWidth =
+		width.value * (1 - (offsetValues.value.left + offsetValues.value.right) / horizontalGrids.value)
+	const availableHeight =
+		height.value * (1 - (offsetValues.value.top + offsetValues.value.bottom) / horizontalGrids.value)
 	return { width: availableWidth, height: availableHeight }
 })
 
-const walkableCells = ref(new Set(props.initialWalkableCells.map(cell => `${cell.x},${cell.y}`)))
-
 const cellDimensions = computed(() => ({
-	width: adjustedDimensions.value.width / gridWidth.value,
-	height: adjustedDimensions.value.height / gridHeight.value,
+	width: adjustedDimensions.value.width / horizontalGrids.value,
+	height: adjustedDimensions.value.height / verticalGrids.value,
 }))
 
 const mouseCell = computed(() => {
-	const adjustedX = elementX.value - (width.value * offsetValues.value.left) / gridWidth.value
-	const adjustedY = elementY.value - (height.value * offsetValues.value.top) / gridWidth.value
+	const adjustedX = elementX.value - (width.value * offsetValues.value.left) / horizontalGrids.value
+	const adjustedY = elementY.value - (height.value * offsetValues.value.top) / horizontalGrids.value
 
 	return {
 		x: Math.floor(adjustedX / cellDimensions.value.width),
@@ -135,20 +137,38 @@ const mouseCell = computed(() => {
 const isHoverValid = computed(() => {
 	return (
 		mouseCell.value.x >= 0 &&
-		mouseCell.value.x < gridWidth.value &&
+		mouseCell.value.x < horizontalGrids.value &&
 		mouseCell.value.y >= 0 &&
-		mouseCell.value.y < gridHeight.value
+		mouseCell.value.y < verticalGrids.value
 	)
 })
 
 const gridLines = computed(() => {
-	const lines = []
-	const dimension = gridWidth.value
+	const lines: string[] = []
+	const dimension = horizontalGrids.value
 	for (let i = 1; i < dimension; i++) {
 		const percentage = (i / dimension) * 100
 		lines.push(`rgba(0,0,0,0.1) ${percentage}%`)
 	}
 	return lines.join(',')
+})
+
+const document = computed(() => {
+	const warehousePlan = window.cur_frm.doc as WarehousePlan
+
+	// if (warehousePlan.matrix) {
+	// 	walkableCells.value = initializeFromMatrix(warehousePlan.matrix)
+	// 	emitUpdate()
+	// }
+
+	return {
+		image: warehousePlan.floor_plan,
+		uom: warehousePlan.uom,
+		horizontal: warehousePlan.horizontal,
+		vertical: warehousePlan.vertical,
+		offset: warehousePlan.offset,
+		matrix: warehousePlan.matrix,
+	}
 })
 
 const watchFrappeFields = () => {
@@ -158,30 +178,31 @@ const watchFrappeFields = () => {
 	}
 	floor_plan.value = window.cur_frm.doc.floor_plan
 	uom.value = window.cur_frm.doc.uom
-	gridWidth.value = window.cur_frm.doc.horizontal || 0
-	gridHeight.value = window.cur_frm.doc.vertical || 0
+	horizontalGrids.value = window.cur_frm.doc.horizontal || 0
+	verticalGrids.value = window.cur_frm.doc.vertical || 0
 	offsetString.value = window.cur_frm.doc.offset || '0,0,0,0'
 	if (window.cur_frm.doc.matrix) {
-		walkableCells.value = initializeFromMatrix(window.cur_frm.doc.matrix)
+		walkableCells.value = initializeFromMatrix(window.cur_frm.doc.matrix) as Set<string>
 		emitUpdate()
 	}
 }
 
-const getCellFromEvent = event => {
-	const rect = containerRef.value.getBoundingClientRect()
-	const adjustedX = event.clientX - rect.left - (width.value * offsetValues.value.left) / gridWidth.value
-	const adjustedY = event.clientY - rect.top - (height.value * offsetValues.value.top) / gridWidth.value
+const getCellFromEvent = (event: MouseEvent) => {
+	const adjustedX =
+		event.clientX - (containerRect.left.value || 0) - (width.value * offsetValues.value.left) / horizontalGrids.value
+	const adjustedY =
+		event.clientY - (containerRect.top.value || 0) - (height.value * offsetValues.value.top) / horizontalGrids.value
 
 	const x = Math.floor(adjustedX / cellDimensions.value.width)
 	const y = Math.floor(adjustedY / cellDimensions.value.height)
 
-	if (x >= 0 && x < gridWidth.value && y >= 0 && y < gridHeight.value) {
+	if (x >= 0 && x < horizontalGrids.value && y >= 0 && y < verticalGrids.value) {
 		return { x, y }
 	}
 	return null
 }
 
-const startPainting = event => {
+const startPainting = (event: MouseEvent) => {
 	isPainting.value = true
 	const cell = getCellFromEvent(event)
 	if (cell) {
@@ -192,10 +213,10 @@ const startPainting = event => {
 
 const stopPainting = () => {
 	isPainting.value = false
-	paintMode.value = null
+	paintMode.value = false
 }
 
-const paint = event => {
+const paint = (event: MouseEvent) => {
 	if (!isPainting.value || paintMode.value === null) return
 
 	const cell = getCellFromEvent(event)
@@ -204,7 +225,7 @@ const paint = event => {
 	}
 }
 
-const updateCell = (x, y) => {
+const updateCell = (x: number, y: number) => {
 	const cellKey = `${x},${y}`
 	const currentState = walkableCells.value.has(cellKey)
 
@@ -228,11 +249,12 @@ const emitUpdate = () => {
 	emit('update:walkableCells', walkableArray)
 }
 
-const initializeFromMatrix = matrixString => {
+const initializeFromMatrix = (matrixString: string) => {
+	const cells = new Set<string>()
+
 	try {
 		// Parse the string to get the array of arrays
-		const matrix = JSON.parse(matrixString)
-		const cells = new Set()
+		const matrix: number[][] = JSON.parse(matrixString)
 
 		// Convert matrix 1's to coordinates
 		matrix.forEach((row, y) => {
@@ -246,11 +268,11 @@ const initializeFromMatrix = matrixString => {
 		return cells
 	} catch (e) {
 		console.warn('Error parsing matrix string:', e)
-		return new Set()
+		return cells
 	}
 }
 
-const isCellWalkable = (x, y) => walkableCells.value.has(`${x},${y}`)
+const isCellWalkable = (x: number, y: number) => walkableCells.value.has(`${x},${y}`)
 
 onMounted(() => {
 	watchFrappeFields()
@@ -258,14 +280,14 @@ onMounted(() => {
 
 const getMatrixArray = () => {
 	// Create empty matrix filled with zeros
-	const matrix = Array(gridHeight.value)
+	const matrix = Array(verticalGrids.value)
 		.fill(0)
-		.map(() => Array(gridWidth.value).fill(0))
+		.map(() => Array(horizontalGrids.value).fill(0))
 
 	// Fill in walkable cells with 1's
 	walkableCells.value.forEach(cellKey => {
 		const [x, y] = cellKey.split(',').map(Number)
-		if (x >= 0 && x < gridWidth.value && y >= 0 && y < gridHeight.value) {
+		if (x >= 0 && x < horizontalGrids.value && y >= 0 && y < verticalGrids.value) {
 			matrix[y][x] = 1
 		}
 	})
@@ -278,7 +300,7 @@ const getMatrixString = () => {
 }
 
 // Optional helper methods:
-const getCellValue = (x, y) => {
+const getCellValue = (x: number, y: number) => {
 	return walkableCells.value.has(`${x},${y}`) ? 1 : 0
 }
 
@@ -296,6 +318,7 @@ defineExpose({
 	getWalkableCellsArray,
 })
 </script>
+
 <style scoped>
 .grid-container {
 	position: relative;
