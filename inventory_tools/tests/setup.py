@@ -22,6 +22,7 @@ from inventory_tools.tests.fixtures import (
 	workstations,
 	item_dimensions,
 	items_stockentry,
+	warehouse_dimensions,
 )
 
 
@@ -108,7 +109,8 @@ def create_test_data():
 	create_fruit_material_request(settings)
 	create_quotations(settings)
 	create_specifications(settings)
-	create_item_dimensions(settings)
+	create_item_dimensions()
+	create_warehouse_dimensions()
 	create_stock_entries(settings)
 
 
@@ -842,12 +844,20 @@ def create_demo_specification_values():
 	test_manual_attribute_addition()
 
 
-def create_item_dimensions(settings):
+def create_item_dimensions():
 	for item in item_dimensions:
 		pyd = frappe.new_doc("Physical Dimension")
 		pyd.update(item)
 		pyd.save()
 		pyd.submit()
+
+
+def create_warehouse_dimensions():
+	for item in warehouse_dimensions:
+		wyd = frappe.new_doc("Physical Dimension")
+		wyd.update(item)
+		wyd.save()
+		wyd.submit()
 
 
 def create_stock_entries(settings):
