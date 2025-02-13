@@ -1,26 +1,24 @@
 // Copyright (c) 2024, AgriTheory and contributors
 // For license information, please see license.txt
 
-import { defineConfig } from 'vite'
+import { resolve } from 'node:path'
 import vue from '@vitejs/plugin-vue'
-import path from 'path'
+import { defineConfig } from 'vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [vue()],
 	build: {
 		lib: {
-			entry: path.resolve(__dirname, './inventory_tools.js'),
-			name: 'check_run',
-			fileName: format => `inventory_tools.js`, // creates module only output
+			entry: resolve(__dirname, './inventory_tools.js'),
+			name: 'inventory_tools',
+			fileName: format => `inventory_tools.js`,
 		},
 		outDir: './inventory_tools/public/dist/js',
-		root: './',
-		target: 'es2015',
+		target: 'esnext',
 		emptyOutDir: false,
-		minify: false,
+		sourcemap: 'inline',
 	},
-	optimizeDeps: {},
 	define: {
 		'process.env': process.env,
 	},

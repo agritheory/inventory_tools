@@ -211,7 +211,10 @@ const updateCell = (x: number, y: number) => {
 	}
 }
 
-const emitUpdate = () => emit('update:walkableCells', getWalkableCells())
+const emitUpdate = () => {
+	window.cur_frm.dirty()
+	emit('update:walkableCells', getWalkableCells())
+}
 
 // Helper methods
 const getMatrixArray = () => {

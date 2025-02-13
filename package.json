@@ -7,8 +7,8 @@
 		"url": "https://github.com/agritheory/inventory_tools.git"
 	},
 	"scripts": {
-		"build": "vite build --config=./inventory_tools/public/js/vite.config.js",
-		"dev": "vite build --watch --config=./inventory_tools/public/js/vite.config.js"
+		"build": "vite build --config=./inventory_tools/public/js/vite.config.ts",
+		"dev": "vite build --watch --config=./inventory_tools/public/js/vite.config.ts"
 	},
 	"dependencies": {
 		"@vueuse/core": "^10.11.0",
