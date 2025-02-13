@@ -22,28 +22,29 @@
 					bottom: `${(offsetGrids.bottom / plan.vertical) * 100}%`,
 				}" />
 
-			<!-- Walkable Cells with Corrected Offset -->
+			<!-- Grid Container with Corrected Offset -->
 			<div
-				v-for="x in plan.horizontal"
-				:key="x"
-				class="cell-container"
+				class="grid-cell-container"
 				:style="{
 					top: `${(offsetGrids.top / plan.vertical) * 100}%`,
 					left: `${(offsetGrids.left / plan.horizontal) * 100}%`,
 					right: `${(offsetGrids.right / plan.horizontal) * 100}%`,
 					bottom: `${(offsetGrids.bottom / plan.vertical) * 100}%`,
 				}">
-				<div
-					v-for="y in plan.vertical"
-					:key="`${x - 1},${y - 1}`"
-					class="grid-cell"
-					:class="{ walkable: isCellWalkable(x - 1, y - 1) }"
-					:style="{
-						left: `${((x - 1) / plan.horizontal) * 100}%`,
-						top: `${((y - 1) / plan.vertical) * 100}%`,
-						width: `${100 / plan.horizontal}%`,
-						height: `${100 / plan.vertical}%`,
-					}" />
+				<!-- Walkable Cells with Corrected Offset -->
+				<div v-for="x in plan.horizontal" :key="x">
+					<div
+						v-for="y in plan.vertical"
+						:key="`${x - 1},${y - 1}`"
+						class="grid-cell"
+						:class="{ walkable: isCellWalkable(x - 1, y - 1) }"
+						:style="{
+							left: `${((x - 1) / plan.horizontal) * 100}%`,
+							top: `${((y - 1) / plan.vertical) * 100}%`,
+							width: `${100 / plan.horizontal}%`,
+							height: `${100 / plan.vertical}%`,
+						}" />
+				</div>
 
 				<!-- Hover Indicator with Corrected Offset -->
 				<div
@@ -282,7 +283,7 @@ defineExpose({
 	pointer-events: none;
 }
 
-.cell-container {
+.grid-cell-container {
 	position: absolute;
 }
 
