@@ -1,91 +1,104 @@
 <template>
-	<div v-if="plan.horizontal && plan.vertical" class="grid-container">
+	<div v-if="plan.horizontal && plan.vertical">
 		<div class="dimension-display">{{ plan.horizontal }}x{{ plan.vertical }} {{ plan.uom }}</div>
 
-		<div
-			ref="container"
-			class="grid-wrapper"
-			@mousedown="startPainting"
-			@mousemove="paint"
-			@mouseup="stopPainting"
-			@mouseleave="stopPainting">
-			<img :src="plan.image" class="background-image" @dragstart.prevent />
+		<div ref="container">
+			<konva-stage
+				ref="stage"
+				:config="stageConfig"
+				@mousedown="startPainting"
+				@mousemove="paint"
+				@mouseup="stopPainting"
+				@mouseleave="stopPainting">
+				<!-- Background Image Layer -->
+				<konva-layer ref="image">
+					<konva-image :config="imageConfig" />
+				</konva-layer>
 
-			<!-- Grid Overlay with Corrected Offset -->
-			<div
-				class="grid-overlay"
-				:style="{
-					backgroundImage: `linear-gradient(90deg, ${gridLines}), linear-gradient(180deg, ${gridLines})`,
-					top: `${(offsetGrids.top / plan.vertical) * 100}%`,
-					left: `${(offsetGrids.left / plan.horizontal) * 100}%`,
-					right: `${(offsetGrids.right / plan.horizontal) * 100}%`,
-					bottom: `${(offsetGrids.bottom / plan.vertical) * 100}%`,
-				}" />
+				<!-- Grid Lines Layer -->
+				<konva-layer ref="grid">
+					<konva-rect :config="gridConfig" />
 
-			<!-- Grid Container with Corrected Offset -->
-			<div
-				class="grid-cell-container"
-				:style="{
-					top: `${(offsetGrids.top / plan.vertical) * 100}%`,
-					left: `${(offsetGrids.left / plan.horizontal) * 100}%`,
-					right: `${(offsetGrids.right / plan.horizontal) * 100}%`,
-					bottom: `${(offsetGrids.bottom / plan.vertical) * 100}%`,
-				}">
-				<!-- Walkable Cells with Corrected Offset -->
-				<div v-for="x in plan.horizontal" :key="x">
-					<div
-						v-for="y in plan.vertical"
-						:key="`${x - 1},${y - 1}`"
-						class="grid-cell"
-						:class="{ walkable: isCellWalkable(x - 1, y - 1) }"
-						:style="{
-							left: `${((x - 1) / plan.horizontal) * 100}%`,
-							top: `${((y - 1) / plan.vertical) * 100}%`,
-							width: `${100 / plan.horizontal}%`,
-							height: `${100 / plan.vertical}%`,
-						}" />
-				</div>
+					<!-- Vertical Grid Lines -->
+					<konva-line v-for="i in plan.horizontal - 1" :key="`v-${i}`" :config="getVerticalGridConfig(i)" />
 
-				<!-- Hover Indicator with Corrected Offset -->
-				<div
-					class="hover-indicator"
-					:style="{
-						left: `${(hoverCell.x / plan.horizontal) * 100}%`,
-						top: `${(hoverCell.y / plan.vertical) * 100}%`,
-						width: `${100 / plan.horizontal}%`,
-						height: `${100 / plan.vertical}%`,
-						opacity: isHoverValid ? '0.5' : '0',
-					}" />
-			</div>
+					<!-- Horizontal Grid Lines -->
+					<konva-line v-for="i in plan.vertical - 1" :key="`h-${i}`" :config="getHorizontalGridConfig(i)" />
+				</konva-layer>
+
+				<!-- Walkable Cells Layer -->
+				<konva-layer ref="cells">
+					<konva-rect
+						v-for="cell in walkableCellsArray"
+						:key="`cell-${cell.x}-${cell.y}`"
+						:config="getWalkableCellConfig(cell.x, cell.y)" />
+				</konva-layer>
+
+				<!-- Hover Indicator Layer -->
+				<konva-layer ref="hover">
+					<konva-rect :config="hoverConfig" />
+				</konva-layer>
+			</konva-stage>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { useElementSize, useMouseInElement } from '@vueuse/core'
-import { computed, onMounted, ref, useTemplateRef } from 'vue'
+import { useElementSize } from '@vueuse/core'
+import { type Layer } from 'konva/lib/Layer'
+import type { KonvaEventObject } from 'konva/lib/Node'
+import type { ImageConfig } from 'konva/lib/shapes/Image'
+import type { RectConfig } from 'konva/lib/shapes/Rect'
+import { Stage, type StageConfig } from 'konva/lib/Stage'
+import { ref, computed, onMounted, watch, useTemplateRef } from 'vue'
 
 export type WarehousePlan = {
 	floor_plan: string
 	uom: string
 	horizontal: number
 	vertical: number
-	offset: string
+	/**
+	 * Offset relative to number of total horizontal and vertical blocks
+	 * (in the format "top,left,bottom,right")
+	 */
+	offset: `${number},${number},${number},${number}`
 	matrix?: string
 }
 
 const emit = defineEmits(['update:walkableCells'])
 
+// References
 const containerRef = useTemplateRef('container')
+const stageRef = useTemplateRef<Stage>('stage')
+const cellsRef = useTemplateRef<Layer>('cells')
+const hoverRef = useTemplateRef<Layer>('hover')
+const backgroundImage = ref<HTMLImageElement | null>(null)
+
+// State
 const { width, height } = useElementSize(containerRef)
-const { elementX, elementY } = useMouseInElement(containerRef)
 const isPainting = ref(false)
 const paintMode = ref<boolean | null>(null) // true for adding cells, false for removing
 const walkableCells = ref<Set<string>>(new Set())
+const hoverCell = ref({ x: 0, y: 0 })
 
 onMounted(() => {
+	// Load floor plan image into Konva's image layer
+	if (plan.value.image) {
+		const img = new Image()
+		img.onload = () => {
+			backgroundImage.value = img
+		}
+		img.src = plan.value.image
+	}
+
 	// Initialize walkable cells from matrix
 	walkableCells.value = initializeFromMatrix(plan.value.matrix)
+
+	if (stageRef.value) {
+		// Initialize stage event handlers
+		const stage = stageRef.value.getStage()
+		stage.on('mousemove', updateHoverPosition)
+	}
 })
 
 const plan = computed(() => {
@@ -100,33 +113,77 @@ const plan = computed(() => {
 	}
 })
 
+// Konva configurations
+const stageConfig = computed(
+	(): StageConfig => ({
+		width: width.value || 1200,
+		height: height.value || 800,
+	})
+)
+
+const imageConfig = computed(
+	(): ImageConfig => ({
+		image: backgroundImage.value!,
+		width: stageConfig.value.width,
+		height: stageConfig.value.height,
+		listening: false,
+	})
+)
+
+const gridConfig = computed(
+	(): RectConfig => ({
+		x: offsetPixels.value.left,
+		y: offsetPixels.value.top,
+		width: availableDimensions.value.width,
+		height: availableDimensions.value.height,
+		stroke: 'rgba(0,0,0,0.1)',
+		strokeWidth: 1,
+		listening: false,
+	})
+)
+
+const hoverConfig = computed(
+	(): RectConfig => ({
+		x: offsetPixels.value.left + hoverCell.value.x * cellSize.value.width,
+		y: offsetPixels.value.top + hoverCell.value.y * cellSize.value.height,
+		width: cellSize.value.width,
+		height: cellSize.value.height,
+		stroke: 'tomato',
+		strokeWidth: 2,
+		opacity: isHoverValid.value ? 0.5 : 0,
+		listening: false,
+	})
+)
+
 const offsetGrids = computed(() => {
 	const [top, left, bottom, right] = plan.value.offset.split(',').map(v => parseFloat(v) || 0)
 	return { top, left, bottom, right }
 })
 
+const offsetPixels = computed(() => ({
+	top: (offsetGrids.value.top / plan.value.vertical) * stageConfig.value.height!,
+	left: (offsetGrids.value.left / plan.value.horizontal) * stageConfig.value.width!,
+}))
+
 const availableDimensions = computed(() => {
 	const widthOffset = offsetGrids.value.left + offsetGrids.value.right
 	const heightOffset = offsetGrids.value.top + offsetGrids.value.bottom
-	const availableWidth = width.value * (1 - widthOffset / plan.value.horizontal)
-	const availableHeight = height.value * (1 - heightOffset / plan.value.vertical)
+	const availableWidth = stageConfig.value.width! * (1 - widthOffset / plan.value.horizontal)
+	const availableHeight = stageConfig.value.height! * (1 - heightOffset / plan.value.vertical)
 	return { width: availableWidth, height: availableHeight }
 })
 
-const availableCellDimension = computed(() => ({
+const cellSize = computed(() => ({
 	width: availableDimensions.value.width / plan.value.horizontal,
 	height: availableDimensions.value.height / plan.value.vertical,
 }))
 
-const hoverCell = computed(() => {
-	const adjustedX = elementX.value - (width.value * offsetGrids.value.left) / plan.value.horizontal
-	const adjustedY = elementY.value - (height.value * offsetGrids.value.top) / plan.value.vertical
-
-	return {
-		x: Math.floor(adjustedX / availableCellDimension.value.width),
-		y: Math.floor(adjustedY / availableCellDimension.value.height),
-	}
-})
+const walkableCellsArray = computed(() =>
+	Array.from(walkableCells.value).map(cell => {
+		const [x, y] = cell.split(',').map(Number)
+		return { x, y }
+	})
+)
 
 const isHoverValid = computed(() => {
 	return (
@@ -137,13 +194,37 @@ const isHoverValid = computed(() => {
 	)
 })
 
-const gridLines = computed(() => {
-	const lines: string[] = []
-	for (let i = 1; i < plan.value.horizontal; i++) {
-		const percentage = (i / plan.value.horizontal) * 100
-		lines.push(`rgba(0,0,0,0.1) ${percentage}%`)
-	}
-	return lines.join(',')
+const getVerticalGridConfig = (index: number) => ({
+	points: [
+		offsetPixels.value.left + index * cellSize.value.width,
+		offsetPixels.value.top,
+		offsetPixels.value.left + index * cellSize.value.width,
+		offsetPixels.value.top + availableDimensions.value.height,
+	],
+	stroke: 'rgba(0,0,0,0.1)',
+	strokeWidth: 1,
+	listening: false,
+})
+
+const getHorizontalGridConfig = (index: number) => ({
+	points: [
+		offsetPixels.value.left,
+		offsetPixels.value.top + index * cellSize.value.height,
+		offsetPixels.value.left + availableDimensions.value.width,
+		offsetPixels.value.top + index * cellSize.value.height,
+	],
+	stroke: 'rgba(0,0,0,0.1)',
+	strokeWidth: 1,
+	listening: false,
+})
+
+const getWalkableCellConfig = (x: number, y: number) => ({
+	x: offsetPixels.value.left + x * cellSize.value.width,
+	y: offsetPixels.value.top + y * cellSize.value.height,
+	width: cellSize.value.width,
+	height: cellSize.value.height,
+	fill: 'rgba(0, 255, 0, 0.3)',
+	listening: false,
 })
 
 const initializeFromMatrix = (matrixString?: string) => {
@@ -170,9 +251,28 @@ const initializeFromMatrix = (matrixString?: string) => {
 	}
 }
 
+const updateHoverPosition = (e: KonvaEventObject<MouseEvent>) => {
+	const stage = e.target.getStage()
+	if (!stage) return
+
+	const pointerPosition = stage.getPointerPosition()
+	if (!pointerPosition) return
+
+	const adjustedX = pointerPosition.x - offsetPixels.value.left
+	const adjustedY = pointerPosition.y - offsetPixels.value.top
+
+	hoverCell.value = {
+		x: Math.floor(adjustedX / cellSize.value.width),
+		y: Math.floor(adjustedY / cellSize.value.height),
+	}
+
+	if (hoverRef.value) {
+		hoverRef.value.getStage().batchDraw()
+	}
+}
+
 const getCellFromEvent = () => {
-	const { x, y } = hoverCell.value
-	if (isHoverValid.value) return { x, y }
+	if (isHoverValid.value) return hoverCell.value
 }
 
 const startPainting = () => {
@@ -208,6 +308,10 @@ const updateCell = (x: number, y: number) => {
 			walkableCells.value.delete(cellKey)
 		}
 
+		if (cellsRef.value) {
+			cellsRef.value.getStage().batchDraw()
+		}
+
 		emitUpdate()
 	}
 }
@@ -237,12 +341,20 @@ const getMatrixArray = () => {
 
 const isCellWalkable = (x: number, y: number) => walkableCells.value.has(`${x},${y}`)
 const getMatrixString = () => JSON.stringify(getMatrixArray())
-const getWalkableCells = () =>
-	Array.from(walkableCells.value).map(cell => {
-		const [x, y] = cell.split(',').map(Number)
-		return { x, y }
-	})
+const getWalkableCells = () => walkableCellsArray.value
 
+// Watch for changes
+watch(
+	walkableCells,
+	() => {
+		if (cellsRef.value) {
+			cellsRef.value.getStage().batchDraw()
+		}
+	},
+	{ deep: true }
+)
+
+// Expose public methods
 defineExpose({
 	isCellWalkable,
 	getMatrixArray,
@@ -252,10 +364,6 @@ defineExpose({
 </script>
 
 <style scoped>
-.grid-container {
-	position: relative;
-}
-
 .dimension-display {
 	position: absolute;
 	top: 8px;
@@ -265,40 +373,5 @@ defineExpose({
 	border-radius: 4px;
 	font-size: 14px;
 	z-index: 1;
-}
-
-.grid-wrapper {
-	position: relative;
-	overflow: hidden;
-}
-
-.background-image {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-}
-
-.grid-overlay {
-	position: absolute;
-	pointer-events: none;
-}
-
-.grid-cell-container {
-	position: absolute;
-}
-
-.grid-cell {
-	position: absolute;
-	transition: background-color 0.2s;
-}
-
-.grid-cell.walkable {
-	background-color: rgba(0, 255, 0, 0.3);
-}
-
-.hover-indicator {
-	position: absolute;
-	border: 2px solid tomato;
-	pointer-events: none;
 }
 </style>
