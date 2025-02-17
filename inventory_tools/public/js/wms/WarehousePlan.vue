@@ -20,10 +20,13 @@
 					<konva-rect :config="gridConfig" />
 
 					<!-- Vertical Grid Lines -->
-					<konva-line v-for="i in plan.horizontal - 1" :key="`v-${i}`" :config="getVerticalGridConfig(i)" />
+					<konva-line
+						v-for="index in plan.horizontal - 1"
+						:key="`v-${index}`"
+						:config="getHorizontalGridConfig(index)" />
 
 					<!-- Horizontal Grid Lines -->
-					<konva-line v-for="i in plan.vertical - 1" :key="`h-${i}`" :config="getHorizontalGridConfig(i)" />
+					<konva-line v-for="index in plan.vertical - 1" :key="`h-${index}`" :config="getVerticalGridConfig(index)" />
 				</konva-layer>
 
 				<!-- Walkable Cells Layer -->
@@ -48,6 +51,7 @@ import { useElementSize } from '@vueuse/core'
 import { type Layer } from 'konva/lib/Layer'
 import type { KonvaEventObject } from 'konva/lib/Node'
 import type { ImageConfig } from 'konva/lib/shapes/Image'
+import { LineConfig } from 'konva/lib/shapes/Line'
 import type { RectConfig } from 'konva/lib/shapes/Rect'
 import { Stage, type StageConfig } from 'konva/lib/Stage'
 import { ref, computed, onMounted, watch, useTemplateRef } from 'vue'
@@ -155,6 +159,39 @@ const hoverConfig = computed(
 	})
 )
 
+const getHorizontalGridConfig = (index: number): LineConfig => ({
+	points: [
+		offsetPixels.value.left + index * cellSize.value.width,
+		offsetPixels.value.top,
+		offsetPixels.value.left + index * cellSize.value.width,
+		offsetPixels.value.top + availableDimensions.value.height,
+	],
+	stroke: 'rgba(0,0,0,0.1)',
+	strokeWidth: 1,
+	listening: false,
+})
+
+const getVerticalGridConfig = (index: number): LineConfig => ({
+	points: [
+		offsetPixels.value.left,
+		offsetPixels.value.top + index * cellSize.value.height,
+		offsetPixels.value.left + availableDimensions.value.width,
+		offsetPixels.value.top + index * cellSize.value.height,
+	],
+	stroke: 'rgba(0,0,0,0.1)',
+	strokeWidth: 1,
+	listening: false,
+})
+
+const getWalkableCellConfig = (x: number, y: number): RectConfig => ({
+	x: offsetPixels.value.left + x * cellSize.value.width,
+	y: offsetPixels.value.top + y * cellSize.value.height,
+	width: cellSize.value.width,
+	height: cellSize.value.height,
+	fill: 'rgba(0, 255, 0, 0.3)',
+	listening: false,
+})
+
 const offsetGrids = computed(() => {
 	const [top, left, bottom, right] = plan.value.offset.split(',').map(v => parseFloat(v) || 0)
 	return { top, left, bottom, right }
@@ -192,39 +229,6 @@ const isHoverValid = computed(() => {
 		hoverCell.value.y >= 0 &&
 		hoverCell.value.y < plan.value.vertical
 	)
-})
-
-const getVerticalGridConfig = (index: number) => ({
-	points: [
-		offsetPixels.value.left + index * cellSize.value.width,
-		offsetPixels.value.top,
-		offsetPixels.value.left + index * cellSize.value.width,
-		offsetPixels.value.top + availableDimensions.value.height,
-	],
-	stroke: 'rgba(0,0,0,0.1)',
-	strokeWidth: 1,
-	listening: false,
-})
-
-const getHorizontalGridConfig = (index: number) => ({
-	points: [
-		offsetPixels.value.left,
-		offsetPixels.value.top + index * cellSize.value.height,
-		offsetPixels.value.left + availableDimensions.value.width,
-		offsetPixels.value.top + index * cellSize.value.height,
-	],
-	stroke: 'rgba(0,0,0,0.1)',
-	strokeWidth: 1,
-	listening: false,
-})
-
-const getWalkableCellConfig = (x: number, y: number) => ({
-	x: offsetPixels.value.left + x * cellSize.value.width,
-	y: offsetPixels.value.top + y * cellSize.value.height,
-	width: cellSize.value.width,
-	height: cellSize.value.height,
-	fill: 'rgba(0, 255, 0, 0.3)',
-	listening: false,
 })
 
 const initializeFromMatrix = (matrixString?: string) => {
