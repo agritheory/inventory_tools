@@ -29,13 +29,10 @@
 					<konva-rect :config="gridConfig" />
 
 					<!-- Vertical Grid Lines -->
-					<konva-line
-						v-for="index in plan.horizontal - 1"
-						:key="`v-${index}`"
-						:config="getHorizontalGridConfig(index)" />
+					<konva-line v-for="index in plan.horizontal - 1" :key="`v-${index}`" :config="getVerticalLineConfig(index)" />
 
 					<!-- Horizontal Grid Lines -->
-					<konva-line v-for="index in plan.vertical - 1" :key="`h-${index}`" :config="getVerticalGridConfig(index)" />
+					<konva-line v-for="index in plan.vertical - 1" :key="`h-${index}`" :config="getHorizontalLineConfig(index)" />
 				</konva-layer>
 
 				<!-- Walkable Cells Layer -->
@@ -98,9 +95,9 @@ onMounted(() => {
 	walkableCells.value = initializeFromMatrix(plan.value.matrix)
 
 	if (stageRef.value) {
-		// Initialize stage event handlers
+		// Initialize stage mouse handlers
 		const stageLayer = getLayer(stageRef)
-		stageLayer?.on('mousemove', updateHoverPosition)
+		stageLayer!.on('mousemove', updateHoverPosition)
 	}
 })
 
@@ -137,8 +134,8 @@ const gridConfig = computed(
 	(): RectConfig => ({
 		x: offsetPixels.value.left,
 		y: offsetPixels.value.top,
-		width: availableDimensions.value.width,
-		height: availableDimensions.value.height,
+		width: canvasDimensions.value.width,
+		height: canvasDimensions.value.height,
 		stroke: GRID_CELL_COLOR,
 		strokeWidth: 1,
 		listening: false,
@@ -158,29 +155,29 @@ const hoverConfig = computed(
 	})
 )
 
-const getHorizontalGridConfig = (index: number): LineConfig => ({
-	points: [
-		offsetPixels.value.left + index * cellSize.value.width,
-		offsetPixels.value.top,
-		offsetPixels.value.left + index * cellSize.value.width,
-		offsetPixels.value.top + availableDimensions.value.height,
-	],
-	stroke: GRID_CELL_COLOR,
-	strokeWidth: 1,
-	listening: false,
-})
+const getVerticalLineConfig = (index: number): LineConfig => {
+	const fixedX = offsetPixels.value.left + index * cellSize.value.width
+	const startY = offsetPixels.value.top
+	const endY = offsetPixels.value.top + canvasDimensions.value.height
+	return {
+		points: [fixedX, startY, fixedX, endY],
+		stroke: GRID_CELL_COLOR,
+		strokeWidth: 1,
+		listening: false,
+	}
+}
 
-const getVerticalGridConfig = (index: number): LineConfig => ({
-	points: [
-		offsetPixels.value.left,
-		offsetPixels.value.top + index * cellSize.value.height,
-		offsetPixels.value.left + availableDimensions.value.width,
-		offsetPixels.value.top + index * cellSize.value.height,
-	],
-	stroke: GRID_CELL_COLOR,
-	strokeWidth: 1,
-	listening: false,
-})
+const getHorizontalLineConfig = (index: number): LineConfig => {
+	const fixedY = offsetPixels.value.top + index * cellSize.value.height
+	const startX = offsetPixels.value.left
+	const endX = offsetPixels.value.left + canvasDimensions.value.width
+	return {
+		points: [startX, fixedY, endX, fixedY],
+		stroke: GRID_CELL_COLOR,
+		strokeWidth: 1,
+		listening: false,
+	}
+}
 
 const getWalkableCellConfig = (x: number, y: number): RectConfig => ({
 	x: offsetPixels.value.left + x * cellSize.value.width,
@@ -201,17 +198,17 @@ const offsetPixels = computed(() => ({
 	left: (offsetGrids.value.left / plan.value.horizontal) * stageConfig.value.width!,
 }))
 
-const availableDimensions = computed(() => {
+const canvasDimensions = computed(() => {
 	const widthOffset = offsetGrids.value.left + offsetGrids.value.right
 	const heightOffset = offsetGrids.value.top + offsetGrids.value.bottom
-	const availableWidth = stageConfig.value.width! * (1 - widthOffset / plan.value.horizontal)
-	const availableHeight = stageConfig.value.height! * (1 - heightOffset / plan.value.vertical)
-	return { width: availableWidth, height: availableHeight }
+	const canvasWidth = stageConfig.value.width! * (1 - widthOffset / plan.value.horizontal)
+	const canvasHeight = stageConfig.value.height! * (1 - heightOffset / plan.value.vertical)
+	return { width: canvasWidth, height: canvasHeight }
 })
 
 const cellSize = computed(() => ({
-	width: availableDimensions.value.width / plan.value.horizontal,
-	height: availableDimensions.value.height / plan.value.vertical,
+	width: canvasDimensions.value.width / plan.value.horizontal,
+	height: canvasDimensions.value.height / plan.value.vertical,
 }))
 
 const walkableCellsArray = computed(() =>
