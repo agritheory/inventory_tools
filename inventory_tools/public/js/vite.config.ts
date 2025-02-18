@@ -17,7 +17,7 @@ export default defineConfig({
 		outDir: './inventory_tools/public/dist/js',
 		target: 'esnext',
 		emptyOutDir: false,
-		sourcemap: 'inline',
+		sourcemap: true,
 	},
 	define: {
 		'process.env': process.env,

@@ -1,8 +1,17 @@
 <template>
 	<div v-if="plan.horizontal && plan.vertical">
-		<div class="dimension-display">{{ plan.horizontal }}x{{ plan.vertical }} {{ plan.uom }}</div>
+		<div class="toolbar">
+			<button v-if="walkableRef" @click="toggleWalkable" class="btn btn-primary toolbar-walkable">
+				Toggle Walkable
+			</button>
+			<button v-if="gridRef" @click="toggleGrid" class="btn btn-primary toolbar-grid">Toggle Grid</button>
+		</div>
 
-		<div ref="container">
+		<div class="overlay">
+			<div class="overlay-dimension">{{ plan.horizontal }}x{{ plan.vertical }} {{ plan.uom }}</div>
+		</div>
+
+		<div ref="container" class="container">
 			<konva-stage
 				ref="stage"
 				:config="stageConfig"
@@ -30,7 +39,7 @@
 				</konva-layer>
 
 				<!-- Walkable Cells Layer -->
-				<konva-layer ref="cells">
+				<konva-layer ref="walkable">
 					<konva-rect
 						v-for="cell in walkableCellsArray"
 						:key="`cell-${cell.x}-${cell.y}`"
@@ -48,39 +57,29 @@
 
 <script setup lang="ts">
 import { useElementSize } from '@vueuse/core'
-import { type Layer } from 'konva/lib/Layer'
+import type { Layer } from 'konva/lib/Layer'
 import type { KonvaEventObject } from 'konva/lib/Node'
 import type { ImageConfig } from 'konva/lib/shapes/Image'
-import { LineConfig } from 'konva/lib/shapes/Line'
+import type { LineConfig } from 'konva/lib/shapes/Line'
 import type { RectConfig } from 'konva/lib/shapes/Rect'
 import { Stage, type StageConfig } from 'konva/lib/Stage'
-import { ref, computed, onMounted, watch, useTemplateRef } from 'vue'
+import { ref, computed, onMounted, watch, useTemplateRef, type ShallowRef } from 'vue'
 
-export type WarehousePlan = {
-	floor_plan: string
-	uom: string
-	horizontal: number
-	vertical: number
-	/**
-	 * Offset relative to number of total horizontal and vertical blocks
-	 * (in the format "top,left,bottom,right")
-	 */
-	offset: `${number},${number},${number},${number}`
-	matrix?: string
-}
+import { WarehousePlan } from './types'
 
 const emit = defineEmits(['update:walkableCells'])
 
-// References
 const containerRef = useTemplateRef('container')
 const stageRef = useTemplateRef<Stage>('stage')
-const cellsRef = useTemplateRef<Layer>('cells')
+const gridRef = useTemplateRef<Layer>('grid')
+const walkableRef = useTemplateRef<Layer>('walkable')
 const hoverRef = useTemplateRef<Layer>('hover')
-const backgroundImage = ref<HTMLImageElement | null>(null)
 
-// State
+const GRID_CELL_COLOR = 'rgba(0,0,0,0.1)'
+const WALKABLE_CELL_COLOR = 'rgba(0, 255, 0, 0.3)'
 const { width, height } = useElementSize(containerRef)
 const isPainting = ref(false)
+const backgroundImage = ref<HTMLImageElement | null>(null)
 const paintMode = ref<boolean | null>(null) // true for adding cells, false for removing
 const walkableCells = ref<Set<string>>(new Set())
 const hoverCell = ref({ x: 0, y: 0 })
@@ -100,8 +99,8 @@ onMounted(() => {
 
 	if (stageRef.value) {
 		// Initialize stage event handlers
-		const stage = stageRef.value.getStage()
-		stage.on('mousemove', updateHoverPosition)
+		const stageLayer = getLayer(stageRef)
+		stageLayer?.on('mousemove', updateHoverPosition)
 	}
 })
 
@@ -140,7 +139,7 @@ const gridConfig = computed(
 		y: offsetPixels.value.top,
 		width: availableDimensions.value.width,
 		height: availableDimensions.value.height,
-		stroke: 'rgba(0,0,0,0.1)',
+		stroke: GRID_CELL_COLOR,
 		strokeWidth: 1,
 		listening: false,
 	})
@@ -166,7 +165,7 @@ const getHorizontalGridConfig = (index: number): LineConfig => ({
 		offsetPixels.value.left + index * cellSize.value.width,
 		offsetPixels.value.top + availableDimensions.value.height,
 	],
-	stroke: 'rgba(0,0,0,0.1)',
+	stroke: GRID_CELL_COLOR,
 	strokeWidth: 1,
 	listening: false,
 })
@@ -178,7 +177,7 @@ const getVerticalGridConfig = (index: number): LineConfig => ({
 		offsetPixels.value.left + availableDimensions.value.width,
 		offsetPixels.value.top + index * cellSize.value.height,
 	],
-	stroke: 'rgba(0,0,0,0.1)',
+	stroke: GRID_CELL_COLOR,
 	strokeWidth: 1,
 	listening: false,
 })
@@ -188,7 +187,7 @@ const getWalkableCellConfig = (x: number, y: number): RectConfig => ({
 	y: offsetPixels.value.top + y * cellSize.value.height,
 	width: cellSize.value.width,
 	height: cellSize.value.height,
-	fill: 'rgba(0, 255, 0, 0.3)',
+	fill: WALKABLE_CELL_COLOR,
 	listening: false,
 })
 
@@ -231,6 +230,28 @@ const isHoverValid = computed(() => {
 	)
 })
 
+const getLayer = (entity: Readonly<ShallowRef<Stage | Layer | null>>) => entity.value?.getStage()
+
+const toggleWalkable = () => {
+	const walkableLayer = getLayer(walkableRef)
+	if (!walkableLayer) return
+	if (walkableLayer.isVisible()) {
+		walkableLayer.hide()
+	} else {
+		walkableLayer.show()
+	}
+}
+
+const toggleGrid = () => {
+	const gridLayer = getLayer(gridRef)
+	if (!gridLayer) return
+	if (gridLayer.isVisible()) {
+		gridLayer.hide()
+	} else {
+		gridLayer.show()
+	}
+}
+
 const initializeFromMatrix = (matrixString?: string) => {
 	const cells = new Set<string>()
 	if (!matrixString) return cells
@@ -270,9 +291,8 @@ const updateHoverPosition = (e: KonvaEventObject<MouseEvent>) => {
 		y: Math.floor(adjustedY / cellSize.value.height),
 	}
 
-	if (hoverRef.value) {
-		hoverRef.value.getStage().batchDraw()
-	}
+	const hoverLayer = getLayer(hoverRef)
+	hoverLayer?.batchDraw()
 }
 
 const getCellFromEvent = () => {
@@ -312,9 +332,8 @@ const updateCell = (x: number, y: number) => {
 			walkableCells.value.delete(cellKey)
 		}
 
-		if (cellsRef.value) {
-			cellsRef.value.getStage().batchDraw()
-		}
+		const walkableLayer = getLayer(walkableRef)
+		walkableLayer?.batchDraw()
 
 		emitUpdate()
 	}
@@ -351,9 +370,8 @@ const getWalkableCells = () => walkableCellsArray.value
 watch(
 	walkableCells,
 	() => {
-		if (cellsRef.value) {
-			cellsRef.value.getStage().batchDraw()
-		}
+		const walkableLayer = getLayer(walkableRef)
+		walkableLayer?.batchDraw()
 	},
 	{ deep: true }
 )
@@ -368,9 +386,16 @@ defineExpose({
 </script>
 
 <style scoped>
-.dimension-display {
+.toolbar {
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: center;
+	gap: 8px;
+}
+
+.overlay-dimension {
 	position: absolute;
-	top: 8px;
+	top: 38px;
 	right: 8px;
 	background-color: rgba(255, 255, 255, 0.8);
 	padding: 4px 8px;
