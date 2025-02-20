@@ -78,6 +78,7 @@ def create_test_data():
 	company_address.is_your_company_address = 1
 	company_address.append("links", {"link_doctype": "Company", "link_name": settings.company})
 	company_address.save()
+
 	cfc = frappe.new_doc("Company")
 	cfc.company_name = "Chelsea Fruit Co"
 	cfc.default_currency = "USD"
@@ -86,8 +87,10 @@ def create_test_data():
 	cfc.abbr = "CFC"
 	cfc.save()
 
+	copy_fixture_files()
 	frappe.db.set_single_value("Stock Settings", "valuation_method", "Moving Average")
 	frappe.db.set_single_value("Stock Settings", "default_warehouse", "")
+	create_warehouse_plan(settings)
 	create_warehouses(settings)
 	setup_manufacturing_settings(settings)
 	create_workstations(settings)
@@ -107,6 +110,14 @@ def create_test_data():
 	create_fruit_material_request(settings)
 	create_quotations(settings)
 	create_specifications(settings)
+
+
+def copy_fixture_files():
+	fixtures_dir = Path(frappe.get_app_path("inventory_tools", "tests", "fixtures"))
+	for path in fixtures_dir.iterdir():
+		if path.is_file():
+			public_file_path = Path(frappe.get_site_path("public", "files", path.name))
+			shutil.copy(path.resolve(), public_file_path.resolve())
 
 
 def create_suppliers(settings):
@@ -205,17 +216,7 @@ def setup_manufacturing_settings(settings):
 
 
 def create_workstations(settings):
-	fixtures_dir = (
-		Path(frappe.get_site_path()).resolve().parent.parent
-		/ "apps"
-		/ "inventory_tools"
-		/ "inventory_tools"
-		/ "tests"
-		/ "fixtures"
-	)
 	if not frappe.db.exists("Plant Floor", "Kitchen"):
-		public_file_path = Path(frappe.get_site_path("public", "files", "floor_plan.png"))
-		shutil.copy((fixtures_dir / "floor_plan.png").resolve(), public_file_path.resolve())
 		pf = frappe.new_doc("Plant Floor")
 		pf.floor_name = "Kitchen"
 		pf.company = settings.company
@@ -225,9 +226,6 @@ def create_workstations(settings):
 	for ws in workstations:
 		if frappe.db.exists("Workstation", ws[0]):
 			continue
-		public_file_path = Path(frappe.get_site_path("public", "files", ws[2]))
-		shutil.copy((fixtures_dir / ws[2]).resolve(), public_file_path.resolve())
-		shutil.copy((fixtures_dir / ws[3]).resolve(), public_file_path.resolve())
 		work = frappe.new_doc("Workstation")
 		work.workstation_name = ws[0]
 		work.production_capacity = ws[1]
@@ -395,6 +393,25 @@ def create_items(settings):
 			website_item = frappe.get_doc("Website Item", website_item[0])
 			website_item.route = f"products/{frappe.scrub(i.name)}"
 			website_item.save()
+
+
+def create_warehouse_plan(settings):
+	root_wh = frappe.get_value(
+		"Warehouse", {"company": settings.company, "is_group": True, "parent_warehouse": ""}
+	)
+	warehouse_plan = frappe.new_doc("Warehouse Plan")
+	warehouse_plan.update(
+		{
+			"company": settings.company,
+			"horizontal": 24,
+			"vertical": 16,
+			"uom": "Foot",
+			"offset": "0.6,1.6,1.4,0.4",
+			"floor_plan": "/files/warehouse_plan.png",
+			"group_warehouse": root_wh,
+		}
+	)
+	warehouse_plan.save()
 
 
 def create_warehouses(settings):
