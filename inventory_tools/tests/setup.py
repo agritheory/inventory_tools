@@ -97,6 +97,7 @@ def create_test_data():
 	create_suppliers(settings)
 	create_customers(settings)
 	create_items(settings)
+	create_item_dimensions(settings)
 	create_boms(settings)
 	prod_plan_from_doc = "Sales Order"
 	if prod_plan_from_doc == "Sales Order":
@@ -107,7 +108,6 @@ def create_test_data():
 	create_fruit_material_request(settings)
 	create_quotations(settings)
 	create_specifications(settings)
-	create_item_dimensions(settings)
 
 
 def create_suppliers(settings):
@@ -842,7 +842,7 @@ def create_demo_specification_values():
 
 def create_item_dimensions(settings):
 	for item in item_dimensions:
-		pyd = frappe.new_doc("Physical Dimension")
-		pyd.update(item)
-		pyd.save()
-		pyd.submit()
+		dimension = frappe.new_doc("Physical Dimension")
+		dimension.update(item)
+		dimension.save()
+		dimension.submit()
