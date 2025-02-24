@@ -45,12 +45,13 @@ doctype_js = {
 	"Item": "public/js/custom/item_custom.js",
 	"Job Card": "public/js/custom/job_card_custom.js",
 	"Operation": "public/js/custom/operation_custom.js",
+	"Pick List": "public/js/custom/pick_list_custom.js",
+	"Plant Floor": "public/js/custom/plant_floor_custom.js",
 	"Purchase Invoice": "public/js/custom/purchase_invoice_custom.js",
 	"Purchase Order": "public/js/custom/purchase_order_custom.js",
 	"Stock Entry": "public/js/custom/stock_entry_custom.js",
 	"Work Order": "public/js/custom/work_order_custom.js",
 	"Workstation": "public/js/custom/workstation_custom.js",
-	"Plant Floor": "public/js/custom/plant_floor_custom.js",
 }
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 doctype_tree_js = {"Warehouse": "public/js/custom/warehouse_tree.js"}
