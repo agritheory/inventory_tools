@@ -15,7 +15,7 @@ Set up a new bench, substitute a path to the python version to use, which should
 
 ```
 # for linux development
-bench init --frappe-branch version-14 {{ bench name }} --python ~/.pyenv/versions/3.10.10/bin/python3
+bench init --frappe-branch version-15 {{ bench name }} --python ~/.pyenv/versions/3.10.16/bin/python3
 ```
 Create a new site in that bench
 ```
@@ -23,13 +23,17 @@ cd {{ bench name }}
 bench new-site {{ site name }} --force --db-name {{ site name }}
 bench use {{ site name }}
 ```
-Download the ERPNext app
+Download the ERPNext app, other dependencies, and this application
 ```
-bench get-app erpnext --branch version-14
+bench get-app erpnext --branch version-15
+bench get-app hrms --branch version-15
+bench get-app payments --branch version-15
+bench get-app webshop --branch version-15
+bench get-app inventory_tools --branch version-15 git@github.com:agritheory/inventory_tools.git
 ```
-Download this application and install all apps
+Install all apps into the site
 ```
-bench get-app inventory_tools git@github.com:agritheory/inventory_tools.git
+bench install-app erpnext hrms payments webshop inventory_tools
 ```
 Set developer mode in `site_config.json`
 ```
@@ -66,5 +70,5 @@ mypy ./apps/inventory_tools/inventory_tools --ignore-missing-imports
 To run pytest
 ```shell
 source env/bin/activate
-pytest ~/frappe-bench/apps/inventory_tools/inventory_tools/tests -s
+pytest ./apps/inventory_tools/inventory_tools/tests -s
 ```
