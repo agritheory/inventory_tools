@@ -2,6 +2,7 @@
 // For license information, please see license.txt
 
 export type WarehousePlan = {
+	company: string
 	floor_plan: string
 	uom: string
 	horizontal: number
@@ -12,4 +13,11 @@ export type WarehousePlan = {
 	 */
 	offset: `${number},${number},${number},${number}`
 	matrix?: string
+}
+
+export type WarehouseDialogFields = {
+	warehouse: string
+	warehouse_length: number
+	warehouse_width: number
+	warehouse_uom: string
 }

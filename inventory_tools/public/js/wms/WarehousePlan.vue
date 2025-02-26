@@ -1,10 +1,9 @@
 <template>
 	<div v-if="plan.horizontal && plan.vertical">
 		<div class="toolbar">
-			<button v-if="walkableRef" @click="toggleWalkable" class="btn btn-primary toolbar-walkable">
-				Toggle Walkable
-			</button>
-			<button v-if="gridRef" @click="toggleGrid" class="btn btn-primary toolbar-grid">Toggle Grid</button>
+			<button v-if="walkableRef" @click="toggleWalkable" class="btn btn-toggle-walkable">Toggle Walkable</button>
+			<button v-if="gridRef" @click="toggleGrid" class="btn btn-toggle-grid">Toggle Grid</button>
+			<button @click="addWarehouse" class="btn btn-primary btn-add-warehouse">Add Warehouse</button>
 		</div>
 
 		<div class="overlay">
@@ -43,6 +42,9 @@
 						:config="getWalkableCellConfig(cell.x, cell.y)" />
 				</konva-layer>
 
+				<!-- Warehouse Layer -->
+				<konva-layer ref="warehouse" />
+
 				<!-- Hover Indicator Layer -->
 				<konva-layer ref="hover">
 					<konva-rect :config="hoverConfig" />
@@ -58,11 +60,13 @@ import type { Layer } from 'konva/lib/Layer'
 import type { KonvaEventObject } from 'konva/lib/Node'
 import type { ImageConfig } from 'konva/lib/shapes/Image'
 import type { LineConfig } from 'konva/lib/shapes/Line'
-import type { RectConfig } from 'konva/lib/shapes/Rect'
+import { Rect, type RectConfig } from 'konva/lib/shapes/Rect'
 import { Stage, type StageConfig } from 'konva/lib/Stage'
 import { ref, computed, onMounted, watch, useTemplateRef, type ShallowRef } from 'vue'
 
-import { WarehousePlan } from './types'
+import { WarehouseDialogFields, WarehousePlan } from './types'
+
+declare const frappe: any
 
 const emit = defineEmits(['update:walkableCells'])
 
@@ -70,12 +74,14 @@ const containerRef = useTemplateRef('container')
 const stageRef = useTemplateRef<Stage>('stage')
 const gridRef = useTemplateRef<Layer>('grid')
 const walkableRef = useTemplateRef<Layer>('walkable')
+const warehouseRef = useTemplateRef<Layer>('warehouse')
 const hoverRef = useTemplateRef<Layer>('hover')
 
 const GRID_CELL_COLOR = 'rgba(0,0,0,0.1)'
 const WALKABLE_CELL_COLOR = 'rgba(0, 255, 0, 0.3)'
 const { width, height } = useElementSize(containerRef)
 const isPainting = ref(false)
+const isDraggingWarehouse = ref(false)
 const backgroundImage = ref<HTMLImageElement | null>(null)
 const paintMode = ref<boolean | null>(null) // true for adding cells, false for removing
 const walkableCells = ref<Set<string>>(new Set())
@@ -101,8 +107,16 @@ onMounted(() => {
 	}
 })
 
+const frm = computed(() => {
+	return window.cur_frm
+})
+
+const doc = computed(() => {
+	return frm.value.doc as WarehousePlan
+})
+
 const plan = computed(() => {
-	const warehousePlan = window.cur_frm.doc as WarehousePlan
+	const warehousePlan = doc.value
 	return {
 		image: warehousePlan.floor_plan,
 		uom: warehousePlan.uom,
@@ -249,6 +263,89 @@ const toggleGrid = () => {
 	}
 }
 
+const addWarehouse = () => {
+	const dialog = frappe.prompt(
+		[
+			{
+				label: 'Warehouse',
+				fieldname: 'warehouse',
+				fieldtype: 'Link',
+				options: 'Warehouse',
+				get_query: () => ({ filters: { company: doc.value.company, is_group: false } }),
+				change: async () => {
+					const values = dialog.get_values()
+					if (values.warehouse) {
+						const response = await frappe.xcall(
+							'inventory_tools.inventory_tools.doctype.warehouse_plan.warehouse_plan.get_warehouse_dimensions',
+							{
+								warehouse: values.warehouse,
+								plan_uom: doc.value.uom,
+							}
+						)
+						dialog.set_value('warehouse_length', response.item_length || 0)
+						dialog.set_value('warehouse_width', response.item_width || 0)
+					} else {
+						dialog.set_value('warehouse_length', 0)
+						dialog.set_value('warehouse_width', 0)
+					}
+				},
+			},
+			{
+				label: 'Length',
+				fieldname: 'warehouse_length',
+				fieldtype: 'Float',
+				default: 0,
+				depends_on: 'eval:doc.warehouse',
+			},
+			{
+				label: 'Width',
+				fieldname: 'warehouse_width',
+				fieldtype: 'Float',
+				default: 0,
+				depends_on: 'eval:doc.warehouse',
+			},
+			{
+				label: 'Dimension UOM',
+				fieldname: 'warehouse_uom',
+				fieldtype: 'Link',
+				options: 'UOM',
+				default: doc.value.uom,
+				read_only: true,
+			},
+		],
+		(values: WarehouseDialogFields) => {
+			const warehouseRect = new Rect({
+				x: 0,
+				y: 0,
+				width: values.warehouse_length * cellSize.value.width,
+				height: values.warehouse_width * cellSize.value.height,
+				fill: 'rgba(0, 0, 255, 0.3)',
+				draggable: true,
+				dragBoundFunc: function (position) {
+					// TODO: do something with the final position
+					const newX = Math.max(0, Math.min(position.x, canvasDimensions.value.width - this.width()))
+					const newY = Math.max(0, Math.min(position.y, canvasDimensions.value.height - this.height()))
+					return { x: newX, y: newY }
+				},
+			})
+
+			// Since drag event handlers are not configurable while building the shape,
+			// adding drag event handlers individually to track dragging state
+			warehouseRect.on('dragstart', () => (isDraggingWarehouse.value = true))
+			warehouseRect.on('dragend', () => (isDraggingWarehouse.value = false))
+
+			// A `mousedown` event on the shape will also trigger a `mousedown` event on the stage
+			// which will start painting cells. To prevent this, we cancel the bubble.
+			warehouseRect.on('mousedown', event => (event.cancelBubble = true))
+
+			// Add the warehouse shape to the warehouse layer
+			const warehouseLayer = getLayer(warehouseRef) as unknown as Layer
+			warehouseLayer.add(warehouseRect)
+		},
+		'Add Warehouse'
+	)
+}
+
 const initializeFromMatrix = (matrixString?: string) => {
 	const cells = new Set<string>()
 	if (!matrixString) return cells
@@ -267,14 +364,14 @@ const initializeFromMatrix = (matrixString?: string) => {
 		})
 
 		return cells
-	} catch (e) {
-		console.warn('Error parsing matrix string:', e)
+	} catch (error) {
+		console.warn('Error parsing matrix string:', error)
 		return cells
 	}
 }
 
-const updateHoverPosition = (e: KonvaEventObject<MouseEvent>) => {
-	const stage = e.target.getStage()
+const updateHoverPosition = (event: KonvaEventObject<MouseEvent>) => {
+	const stage = event.target.getStage()
 	if (!stage) return
 
 	const pointerPosition = stage.getPointerPosition()
@@ -296,7 +393,8 @@ const getCellFromEvent = () => {
 	if (isHoverValid.value) return hoverCell.value
 }
 
-const startPainting = () => {
+const startPainting = (event: KonvaEventObject<MouseEvent>) => {
+	if (isDraggingWarehouse.value) return
 	isPainting.value = true
 	const cell = getCellFromEvent()
 	if (cell) {
@@ -311,7 +409,7 @@ const stopPainting = () => {
 }
 
 const paint = () => {
-	if (!isPainting.value || paintMode.value === null) return
+	if (!isPainting.value || paintMode.value === null || isDraggingWarehouse.value) return
 	const cell = getCellFromEvent()
 	if (cell) {
 		updateCell(cell.x, cell.y)

@@ -48,7 +48,12 @@ class PhysicalDimension(Document):
 		if self.item_volume > self.case_volume:
 			frappe.throw("Item volume should not be greater than case volume")
 
-		if max(self.item_height, self.item_length, self.item_width) > min(
-			self.case_height, self.case_length, self.case_width
-		):
-			frappe.throw("The longest item dimension does not fit within any case dimension")
+		if self.item_volume == 0:
+			frappe.throw("Item volume cannot be zero")
+		if self.case_volume == 0:
+			frappe.throw("Case volume cannot be zero")
+
+		item_dims = sorted([self.item_length, self.item_width, self.item_height])
+		case_dims = sorted([self.case_length, self.case_width, self.case_height])
+		if any(item_dim > case_dim for item_dim, case_dim in zip(item_dims, case_dims)):
+			frappe.throw("Item dimensions do not fit within the case dimensions")
