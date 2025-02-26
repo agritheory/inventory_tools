@@ -1,6 +1,21 @@
 # CHANGELOG
 
 
+## v15.4.0 (2025-02-26)
+
+### Features
+
+- Replace global monkey patch get_item_details with PO method override
+  ([#126](https://github.com/agritheory/inventory_tools/pull/126),
+  [`0ec777b`](https://github.com/agritheory/inventory_tools/commit/0ec777b970832d93c7eb0563fb650e5b96e601de))
+
+* ci: update version variable, README
+
+* feat: replace global get_item_details monkey patch with PO method override
+
+* chore: update track overrides commit hashes
+
+
 ## v15.3.1 (2025-02-11)
 
 ### Bug Fixes
