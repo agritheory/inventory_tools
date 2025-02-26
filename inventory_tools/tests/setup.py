@@ -360,8 +360,16 @@ def create_items(settings):
 			or item.get("is_sub_contracted_item")
 			else 0
 		)
-		i.is_sales_item = 1 if item.get("item_group") == "Baked Goods" else 0
-		i.sales_uom = "Nos" if i.is_sales_item else None
+		if item.get("item_group") == "Baked Goods":
+			i.is_sales_item = 1
+			i.sales_uom = "Nos"
+		elif item.get("item_group") == "Ingredients":
+			i.is_sales_item = 1
+			i.sales_uom = "Pound"
+		else:
+			i.is_sales_item = 0
+			i.sales_uom = None
+
 		i.shelf_life_in_days = 7 if i.is_sales_item else None
 		i.brand = "Ambrosia Pie Co" if i.is_sales_item else None
 		i.append(
@@ -930,6 +938,7 @@ def create_stock_entries():
 				"t_warehouse": item["warehouse"],
 				"item_code": item["item_code"],
 				"qty": item["qty"],
+				"allow_zero_valuation_rate": 1,
 			},
 		)
 
@@ -949,6 +958,7 @@ def create_stock_entries():
 				"t_warehouse": item["warehouse"],
 				"item_code": item["item_code"],
 				"qty": item["qty"],
+				"allow_zero_valuation_rate": 1,
 			},
 		)
 
