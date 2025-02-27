@@ -1,6 +1,8 @@
 // Copyright (c) 2025, AgriTheory and contributors
 // For license information, please see license.txt
 
+import { Rect } from 'konva/lib/shapes/Rect'
+
 export type WarehousePlan = {
 	company: string
 	floor_plan: string
@@ -13,6 +15,14 @@ export type WarehousePlan = {
 	 */
 	offset: `${number},${number},${number},${number}`
 	matrix?: string
+}
+
+export type WarehouseContextMenu = {
+	visible: boolean
+	x: number
+	y: number
+	options: { text: string; action?: string }[]
+	target?: Rect | null
 }
 
 export type WarehouseDialogFields = {

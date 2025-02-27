@@ -1,8 +1,8 @@
 <template>
 	<div v-if="plan.horizontal && plan.vertical">
 		<div class="toolbar">
-			<button v-if="walkableRef" @click="toggleWalkable" class="btn btn-toggle-walkable">Toggle Walkable</button>
 			<button v-if="gridRef" @click="toggleGrid" class="btn btn-toggle-grid">Toggle Grid</button>
+			<button v-if="walkableRef" @click="toggleWalkable" class="btn btn-toggle-walkable">Toggle Walkable</button>
 			<button @click="addWarehouse" class="btn btn-primary btn-add-warehouse">Add Warehouse</button>
 		</div>
 
@@ -50,11 +50,29 @@
 					<konva-rect :config="hoverConfig" />
 				</konva-layer>
 			</konva-stage>
+
+			<!-- Context Menu -->
+			<div
+				v-if="contextMenu.visible"
+				v-on-click-outside="hideContextMenu"
+				class="context-menu"
+				:style="{
+					top: `${contextMenu.y}px`,
+					left: `${contextMenu.x}px`,
+				}">
+				<div
+					v-for="(option, index) in contextMenu.options"
+					v-html="option.text"
+					:key="index"
+					class="context-menu-item"
+					@click="option.action && runContextAction(option.action)" />
+			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
+import { vOnClickOutside } from '@vueuse/components'
 import { useElementSize } from '@vueuse/core'
 import type { Layer } from 'konva/lib/Layer'
 import type { KonvaEventObject } from 'konva/lib/Node'
@@ -64,7 +82,7 @@ import { Rect, type RectConfig } from 'konva/lib/shapes/Rect'
 import { Stage, type StageConfig } from 'konva/lib/Stage'
 import { ref, computed, onMounted, watch, useTemplateRef, type ShallowRef } from 'vue'
 
-import { WarehouseDialogFields, WarehousePlan } from './types'
+import type { WarehouseContextMenu, WarehouseDialogFields, WarehousePlan } from './types'
 
 declare const frappe: any
 
@@ -80,12 +98,13 @@ const hoverRef = useTemplateRef<Layer>('hover')
 const GRID_CELL_COLOR = 'rgba(0,0,0,0.1)'
 const WALKABLE_CELL_COLOR = 'rgba(0, 255, 0, 0.3)'
 const { width, height } = useElementSize(containerRef)
-const isPainting = ref(false)
-const isDraggingWarehouse = ref(false)
 const backgroundImage = ref<HTMLImageElement | null>(null)
+const contextMenu = ref<WarehouseContextMenu>({ visible: false, x: 0, y: 0, options: [] })
+const hoverCell = ref({ x: 0, y: 0 })
+const isDraggingWarehouse = ref(false)
+const isPainting = ref(false)
 const paintMode = ref<boolean | null>(null) // true for adding cells, false for removing
 const walkableCells = ref<Set<string>>(new Set())
-const hoverCell = ref({ x: 0, y: 0 })
 
 onMounted(() => {
 	// Load floor plan image into Konva's image layer
@@ -243,109 +262,6 @@ const isHoverValid = computed(() => {
 
 const getLayer = (entity: Readonly<ShallowRef<Stage | Layer | null>>) => entity.value?.getStage()
 
-const toggleWalkable = () => {
-	const walkableLayer = getLayer(walkableRef)
-	if (!walkableLayer) return
-	if (walkableLayer.isVisible()) {
-		walkableLayer.hide()
-	} else {
-		walkableLayer.show()
-	}
-}
-
-const toggleGrid = () => {
-	const gridLayer = getLayer(gridRef)
-	if (!gridLayer) return
-	if (gridLayer.isVisible()) {
-		gridLayer.hide()
-	} else {
-		gridLayer.show()
-	}
-}
-
-const addWarehouse = () => {
-	const dialog = frappe.prompt(
-		[
-			{
-				label: 'Warehouse',
-				fieldname: 'warehouse',
-				fieldtype: 'Link',
-				options: 'Warehouse',
-				get_query: () => ({ filters: { company: doc.value.company, is_group: false } }),
-				change: async () => {
-					const values = dialog.get_values()
-					if (values.warehouse) {
-						const response = await frappe.xcall(
-							'inventory_tools.inventory_tools.doctype.warehouse_plan.warehouse_plan.get_warehouse_dimensions',
-							{
-								warehouse: values.warehouse,
-								plan_uom: doc.value.uom,
-							}
-						)
-						dialog.set_value('warehouse_length', response.item_length || 0)
-						dialog.set_value('warehouse_width', response.item_width || 0)
-					} else {
-						dialog.set_value('warehouse_length', 0)
-						dialog.set_value('warehouse_width', 0)
-					}
-				},
-			},
-			{
-				label: 'Length',
-				fieldname: 'warehouse_length',
-				fieldtype: 'Float',
-				default: 0,
-				depends_on: 'eval:doc.warehouse',
-			},
-			{
-				label: 'Width',
-				fieldname: 'warehouse_width',
-				fieldtype: 'Float',
-				default: 0,
-				depends_on: 'eval:doc.warehouse',
-			},
-			{
-				label: 'Dimension UOM',
-				fieldname: 'warehouse_uom',
-				fieldtype: 'Link',
-				options: 'UOM',
-				default: doc.value.uom,
-				read_only: true,
-			},
-		],
-		(values: WarehouseDialogFields) => {
-			const warehouseRect = new Rect({
-				x: 0,
-				y: 0,
-				width: values.warehouse_length * cellSize.value.width,
-				height: values.warehouse_width * cellSize.value.height,
-				fill: 'rgba(0, 0, 255, 0.3)',
-				draggable: true,
-				dragBoundFunc: function (position) {
-					// TODO: do something with the final position
-					const newX = Math.max(0, Math.min(position.x, canvasDimensions.value.width - this.width()))
-					const newY = Math.max(0, Math.min(position.y, canvasDimensions.value.height - this.height()))
-					return { x: newX, y: newY }
-				},
-			})
-
-			// Since drag event handlers are not configurable while building the shape,
-			// adding drag event handlers individually to track dragging state
-			warehouseRect.on('dragstart', () => (isDraggingWarehouse.value = true))
-			warehouseRect.on('dragend', () => (isDraggingWarehouse.value = false))
-
-			// A `mousedown` event on the shape will also trigger a `mousedown` event on the stage
-			// which will start painting cells. To prevent this, we cancel the bubble.
-			warehouseRect.on('mousedown', event => (event.cancelBubble = true))
-
-			// Add the warehouse shape to the warehouse layer
-			const warehouseLayer = getLayer(warehouseRef) as unknown as Layer
-			warehouseLayer.add(warehouseRect)
-		},
-		'Add Warehouse'
-	)
-}
-
 const initializeFromMatrix = (matrixString?: string) => {
 	const cells = new Set<string>()
 	if (!matrixString) return cells
@@ -385,10 +301,261 @@ const updateHoverPosition = (event: KonvaEventObject<MouseEvent>) => {
 		y: Math.floor(adjustedY / cellSize.value.height),
 	}
 
-	const hoverLayer = getLayer(hoverRef)
-	hoverLayer?.batchDraw()
+	redrawLayer(hoverRef)
 }
 
+// #################################################################
+// ######################## TOGGLE ACTIONS #########################
+// #################################################################
+const toggleWalkable = () => {
+	const walkableLayer = getLayer(walkableRef)
+	if (!walkableLayer) return
+	if (walkableLayer.isVisible()) {
+		walkableLayer.hide()
+	} else {
+		walkableLayer.show()
+	}
+}
+
+const toggleGrid = () => {
+	const gridLayer = getLayer(gridRef)
+	if (!gridLayer) return
+	if (gridLayer.isVisible()) {
+		gridLayer.hide()
+	} else {
+		gridLayer.show()
+	}
+}
+
+// #################################################################
+// ######################### CONTEXT MENU ##########################
+// #################################################################
+const showContextMenu = (event: KonvaEventObject<MouseEvent, Rect>, shape: Rect) => {
+	event.evt.preventDefault()
+
+	// Get the position of the context menu
+	const stage = event.target.getStage()
+	if (!stage) return
+	const pointerPosition = stage.getPointerPosition()
+	if (!pointerPosition) return
+
+	const warehouseData = shape.getAttr('warehouseData')
+	contextMenu.value = {
+		visible: true,
+		x: pointerPosition.x,
+		y: pointerPosition.y,
+		options: [
+			{
+				text: `
+					<p><strong>${warehouseData.warehouse_name || 'Warehouse'}</strong></p>
+					<p style="margin-bottom: 0"><strong>Size:</strong> ${warehouseData.warehouse_length} x ${warehouseData.warehouse_width} ${doc.value.uom}</p>
+				`,
+			},
+			{ text: `Edit`, action: 'edit' },
+			{ text: 'Rotate', action: 'rotate' },
+			{ text: 'Delete', action: 'delete' },
+		],
+		target: shape,
+	}
+}
+
+const hideContextMenu = () => {
+	contextMenu.value.visible = false
+	contextMenu.value.target = null
+}
+
+const runContextAction = (action: string) => {
+	const shape = contextMenu.value.target as Rect | null
+	if (shape) {
+		switch (action) {
+			case 'edit':
+				editWarehouse(shape)
+				break
+			case 'rotate':
+				rotateWarehouse(shape)
+				break
+			case 'delete':
+				deleteWarehouse(shape)
+				break
+		}
+	}
+	hideContextMenu()
+}
+
+const showWarehouseDialog = (
+	callback: (values: WarehouseDialogFields) => void,
+	title: string,
+	primaryLabel?: string,
+	fieldDefaults?: Record<string, any>
+) => {
+	const dialog = frappe.prompt(
+		[
+			{
+				label: 'Warehouse',
+				fieldname: 'warehouse',
+				fieldtype: 'Link',
+				options: 'Warehouse',
+				default: fieldDefaults?.warehouse || '',
+				get_query: () => ({ filters: { company: doc.value.company, is_group: false } }),
+				change: async () => {
+					const values = dialog.get_values()
+					if (values.warehouse) {
+						const response = await frappe.xcall(
+							'inventory_tools.inventory_tools.doctype.warehouse_plan.warehouse_plan.get_warehouse_dimensions',
+							{
+								warehouse: values.warehouse,
+								plan_uom: doc.value.uom,
+							}
+						)
+						dialog.set_value('warehouse_length', response.item_length || 0)
+						dialog.set_value('warehouse_width', response.item_width || 0)
+					} else {
+						dialog.set_value('warehouse_length', 0)
+						dialog.set_value('warehouse_width', 0)
+					}
+				},
+			},
+			{
+				label: 'Length',
+				fieldname: 'warehouse_length',
+				fieldtype: 'Float',
+				default: fieldDefaults?.warehouse_length || 0,
+				depends_on: 'eval:doc.warehouse',
+			},
+			{
+				label: 'Width',
+				fieldname: 'warehouse_width',
+				fieldtype: 'Float',
+				default: fieldDefaults?.warehouse_width || 0,
+				depends_on: 'eval:doc.warehouse',
+			},
+			{
+				label: 'Dimension UOM',
+				fieldname: 'warehouse_uom',
+				fieldtype: 'Link',
+				options: 'UOM',
+				default: fieldDefaults?.warehouse_uom || doc.value.uom,
+				read_only: true,
+			},
+		],
+		callback,
+		title,
+		primaryLabel
+	)
+}
+
+// #################################################################
+// ####################### WAREHOUSE ACTIONS #######################
+// #################################################################
+const addWarehouse = () => {
+	showWarehouseDialog((values: WarehouseDialogFields) => {
+		const warehouseRect: Rect = new Rect({
+			x: canvasDimensions.value.width / 2,
+			y: canvasDimensions.value.height / 2,
+			width: values.warehouse_length * cellSize.value.width,
+			height: values.warehouse_width * cellSize.value.height,
+			fill: 'rgba(0, 0, 255, 0.3)',
+			draggable: true,
+			listening: true,
+			dragBoundFunc: position => {
+				// set the bounds of dragging to be inside the drawn canvas, minus the shape's dimensions
+				const minPos = { x: offsetPixels.value.left, y: offsetPixels.value.top }
+				const maxPos = {
+					x: minPos.x + canvasDimensions.value.width - warehouseRect.width(),
+					y: minPos.y + canvasDimensions.value.height - warehouseRect.height(),
+				}
+
+				return {
+					x: Math.max(minPos.x, Math.min(position.x, maxPos.x)),
+					y: Math.max(minPos.y, Math.min(position.y, maxPos.y)),
+				}
+			},
+		})
+
+		// Add custom data to the warehouse rect
+		warehouseRect.setAttr('warehouseData', {
+			warehouse_name: values.warehouse,
+			warehouse_length: values.warehouse_length,
+			warehouse_width: values.warehouse_width,
+		})
+
+		warehouseRect.on('contextmenu', event => showContextMenu(event, warehouseRect))
+
+		// Since drag event handlers are not configurable while building the shape,
+		// adding drag event handlers individually to track dragging state
+		warehouseRect.on('dragstart', () => (isDraggingWarehouse.value = true))
+		warehouseRect.on('dragend', () => (isDraggingWarehouse.value = false))
+
+		// A `mousedown` event on the shape will also trigger a `mousedown` event on the stage
+		// which will start painting cells. To prevent this, we cancel the bubble.
+		warehouseRect.on('mousedown', event => (event.cancelBubble = true))
+
+		// Add the warehouse shape to the warehouse layer
+		const warehouseLayer = getLayer(warehouseRef) as unknown as Layer | undefined
+		warehouseLayer?.add(warehouseRect)
+	}, 'Add Warehouse')
+}
+
+const editWarehouse = (shape: Rect) => {
+	const warehouseData = shape.getAttr('warehouseData')
+	showWarehouseDialog(
+		(values: WarehouseDialogFields) => {
+			const widthDelta = values.warehouse_length * cellSize.value.width - shape.width()
+			const heightDelta = values.warehouse_width * cellSize.value.height - shape.height()
+
+			shape
+				.width(values.warehouse_length * cellSize.value.width)
+				.height(values.warehouse_width * cellSize.value.height)
+				.move({ x: -widthDelta, y: -heightDelta })
+				.setAttr('warehouseData', {
+					...warehouseData,
+					warehouse_name: values.warehouse,
+					warehouse_length: values.warehouse_length,
+					warehouse_width: values.warehouse_width,
+				})
+
+			redrawLayer(warehouseRef)
+		},
+		'Edit Warehouse',
+		undefined,
+		{
+			warehouse: warehouseData.warehouse_name,
+			warehouse_length: warehouseData.warehouse_length,
+			warehouse_width: warehouseData.warehouse_width,
+			warehouse_uom: doc.value.uom,
+		}
+	)
+}
+
+const rotateWarehouse = (shape: Rect) => {
+	frappe.prompt(
+		[
+			{
+				label: 'Rotate by',
+				fieldname: 'rotate_by',
+				fieldtype: 'Float',
+				default: 0,
+			},
+		],
+		(values: { rotate_by: number }) => {
+			shape.rotate(values.rotate_by)
+			redrawLayer(warehouseRef)
+		},
+		'Rotate Warehouse'
+	)
+}
+
+const deleteWarehouse = (shape: Rect) => {
+	const { warehouse_name } = shape.getAttr('warehouseData')
+	frappe.confirm(`Are you sure you want to remove <strong>${warehouse_name}</strong> from the plan?`, () => {
+		shape.destroy()
+		redrawLayer(warehouseRef)
+	})
+}
+
+// #################################################################
+// ######################### DRAW ACTIONS ##########################
+// #################################################################
 const getCellFromEvent = () => {
 	if (isHoverValid.value) return hoverCell.value
 }
@@ -416,6 +583,11 @@ const paint = () => {
 	}
 }
 
+const redrawLayer = (ref: Readonly<ShallowRef<Stage | Layer | null>>) => {
+	const layer = getLayer(ref)
+	layer?.batchDraw()
+}
+
 const updateCell = (x: number, y: number) => {
 	const cellKey = `${x},${y}`
 	const currentState = walkableCells.value.has(cellKey)
@@ -427,19 +599,19 @@ const updateCell = (x: number, y: number) => {
 			walkableCells.value.delete(cellKey)
 		}
 
-		const walkableLayer = getLayer(walkableRef)
-		walkableLayer?.batchDraw()
-
+		redrawLayer(walkableRef)
 		emitUpdate()
 	}
 }
 
 const emitUpdate = () => {
-	window.cur_frm.dirty()
+	frm.value.dirty()
 	emit('update:walkableCells', getWalkableCells())
 }
 
-// Helper methods
+// #################################################################
+// ######################### HELPER METHODS ########################
+// #################################################################
 const getMatrixArray = () => {
 	// Create empty matrix filled with zeros
 	const matrix = Array(plan.value.vertical)
@@ -462,14 +634,7 @@ const getMatrixString = () => JSON.stringify(getMatrixArray())
 const getWalkableCells = () => walkableCellsArray.value
 
 // Watch for changes
-watch(
-	walkableCells,
-	() => {
-		const walkableLayer = getLayer(walkableRef)
-		walkableLayer?.batchDraw()
-	},
-	{ deep: true }
-)
+watch(walkableCells, () => redrawLayer(walkableRef), { deep: true })
 
 // Expose public methods
 defineExpose({
@@ -497,5 +662,28 @@ defineExpose({
 	border-radius: 4px;
 	font-size: 14px;
 	z-index: 1;
+}
+
+.context-menu {
+	position: absolute;
+	background: white;
+	border: 1px solid #ccc;
+	box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+	border-radius: 4px;
+	z-index: 1000;
+	min-width: 150px;
+}
+
+.context-menu-item {
+	padding: 8px 12px;
+	cursor: pointer;
+}
+
+.context-menu-item:hover {
+	background-color: #f0f0f0;
+}
+
+.context-menu-item:not(:last-child) {
+	border-bottom: 1px solid #eee;
 }
 </style>
