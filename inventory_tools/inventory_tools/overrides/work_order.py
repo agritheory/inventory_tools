@@ -17,7 +17,7 @@ from frappe.utils import cint, flt, get_link_to_form, getdate
 class InventoryToolsWorkOrder(WorkOrder):
 	def onload(self):
 		"""
-		HASH: ef2553edf967612bdbf580357d5886c6afacaea2
+		HASH: 46a2b7a07e5326ad5fde89d030460a5e9f2b67b0
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: onload
@@ -113,7 +113,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 
 	def update_work_order_qty(self):
 		"""
-		HASH: ef2553edf967612bdbf580357d5886c6afacaea2
+		HASH: 46a2b7a07e5326ad5fde89d030460a5e9f2b67b0
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: update_work_order_qty
@@ -159,7 +159,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 
 	def update_operation_status(self):
 		"""
-		HASH: ef2553edf967612bdbf580357d5886c6afacaea2
+		HASH: 46a2b7a07e5326ad5fde89d030460a5e9f2b67b0
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: update_operation_status
@@ -182,7 +182,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 
 	def validate_qty(self):
 		"""
-		HASH: ef2553edf967612bdbf580357d5886c6afacaea2
+		HASH: 46a2b7a07e5326ad5fde89d030460a5e9f2b67b0
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: validate_qty
