@@ -90,7 +90,7 @@ def create_test_data():
 	copy_fixture_files()
 	frappe.db.set_single_value("Stock Settings", "valuation_method", "Moving Average")
 	frappe.db.set_single_value("Stock Settings", "default_warehouse", "")
-	create_warehouse_plan(settings)
+	create_warehouse_plan(cfc)
 	create_warehouses(settings)
 	setup_manufacturing_settings(settings)
 	create_workstations(settings)
@@ -395,14 +395,14 @@ def create_items(settings):
 			website_item.save()
 
 
-def create_warehouse_plan(settings):
+def create_warehouse_plan(cfc):
 	root_wh = frappe.get_value(
-		"Warehouse", {"company": settings.company, "is_group": True, "parent_warehouse": ""}
+		"Warehouse", {"company": cfc.name, "is_group": True, "parent_warehouse": ""}
 	)
 	warehouse_plan = frappe.new_doc("Warehouse Plan")
 	warehouse_plan.update(
 		{
-			"company": settings.company,
+			"company": cfc.name,
 			"horizontal": 24,
 			"vertical": 16,
 			"uom": "Foot",
