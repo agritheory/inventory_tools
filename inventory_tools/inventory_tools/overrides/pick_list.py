@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING
 
 import frappe
 from frappe.utils import safe_json_loads
-from inventory_tools.inventory_tools.doctype.warehouse_plan.warehouse_plan import Grid
 
 if TYPE_CHECKING:
 	from erpnext.stock.doctype.pick_list_item.pick_list_item import PickListItem
@@ -19,46 +18,48 @@ def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
 def validate_warehouse_has_plan(items):
 	warehouses = []
 	for item in items:
-		warehouses.append(item["source_warehouse"])
+		item_list = {}
+		item_list["item"] = item
+		root_warehouse = []
+		item_warehouses = frappe.get_all("Bin", fields=["warehouse"], filters={"item_code": item})
+		item_warehouses = [i["warehouse"] for i in item_warehouses]
+		item_list["item_warehouses"] = item_warehouses
+		for wh in item_warehouses:
+			root_warehouse.append(get_root_warehouse(wh))
 
-	# get master warehouse
-	master_warehose_grid = [1]
-	waypoints = [1]
-	pickup_node = [0]
-	return master_warehose_grid, waypoints, pickup_node
+		item_list["root_warehouse"] = root_warehouse
+		item_wh_list.append(item_list)
+	return item_wh_list
 
 
-def get_node(item, method):
-	if method == "fifo":
+def get_node(doc, method):
+	items = [item["item_code"] for item in doc["locations"]]
+	item_wh_list = get_all_warehouses(items)
+	if method == "FIFO":
 		pass
-	elif method == "lifo":
+	elif method == "LIFO":
 		pass
-	elif method == "deplete_max_bins":
+	elif method == "Deplete maximum number of Bins":
 		pass
-	elif method == "deplete_min_bins":
+	elif method == "Deplete minimum number of Bins":
+		pass
+	elif method == "Shortest Path":
 		pass
 	return 1
 
 
 @frappe.whitelist()
-def optimize_route_sales_order(doc, method=None):
-	pass
+def optimize_route_picklist(items, method):
+	# grid, waypoints, pickup_node = get_all_warehouses(items)
+	# nodes = []
+	# item_nodes = {}
+	# for item in items:
+	# 	node = get_node(item, method)
+	# 	nodes.append(node)
+	# 	item_nodes[item] = node
 
+	# g = Grid(grid, waypoints)
+	# tsp_route, tsp_distance, pickup_order = g.tsp(pickup_node, nodes)
 
-@frappe.whitelist()
-def optimize_route_work_order(doc, method):
-	items = doc.required_items
-
-	grid, waypoints, pickup_node = validate_warehouse_has_plan(items)
-	nodes = []
-	item_nodes = {}
-	for item in items:
-		node = get_node(item, method)
-		nodes.append(node)
-		item_nodes[item] = node
-
-	g = Grid(grid, waypoints)
-	tsp_route, tsp_distance, pickup_order = g.tsp(pickup_node, nodes)
-
-	# order item list using item_nodes
+	# # order item list using item_nodes
 	return 1
