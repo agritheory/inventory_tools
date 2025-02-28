@@ -301,7 +301,11 @@ def create_items(settings):
 			or item.get("is_sub_contracted_item")
 			else 0
 		)
-		i.is_sales_item = 1 if item.get("item_group") == "Baked Goods" else 0
+		i.is_sales_item = (
+			1
+			if (item.get("item_group") == "Baked Goods" or item.get("item_code") in ["Butter", "Sugar"])
+			else 0
+		)
 		i.append(
 			"item_defaults",
 			{

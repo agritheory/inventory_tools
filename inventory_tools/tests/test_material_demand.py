@@ -256,3 +256,76 @@ def test_report_po_with_aggregation_and_no_aggregation_warehouse():
 		# frappe.delete_doc("Purchase Order", po.name)
 
 		po.submit()
+
+
+@pytest.mark.order(25)
+def test_report_po_without_aggregation_for_sales_order():
+	def create_so():
+		so = frappe.new_doc("Sales Order")
+		so.transaction_date = frappe.utils.getdate()
+		so.customer = "Almacs Food Group"
+		so.order_type = "Sales"
+		so.currency = "USD"
+		so.selling_price_list = "Bakery Wholesale"
+		so.append(
+			"items",
+			{
+				"item_code": "Sugar",
+				"delivery_date": so.transaction_date,
+				"qty": 10,
+				"warehouse": "Storeroom - APC",
+				"rate": 1.05,
+			},
+		)
+		so.append(
+			"items",
+			{
+				"item_code": "Butter",
+				"delivery_date": so.transaction_date,
+				"qty": 5,
+				"warehouse": "Storeroom - APC",
+				"rate": 6.70,
+			},
+		)
+		so.save()
+		so.submit()
+		return so
+
+	so = create_so()
+
+	filters = frappe._dict(
+		{
+			"end_date": getdate(),
+			"company": "Ambrosia Pie Company",
+			"price_list": "Bakery Wholesale",
+			"source": "Sales Order",
+		}
+	)
+	columns, rows = execute_material_demand(filters)
+	assert len(rows) == 5
+	assert rows[1].get("supplier") == "Chelsea Fruit Co"
+
+	selected_rows = [rows[1], rows[4]]
+
+	frappe.call(
+		"inventory_tools.inventory_tools.report.material_demand.material_demand.create",
+		**{
+			"company": "Ambrosia Pie Company",
+			"email_template": "",
+			"filters": filters,
+			"creation_type": "po",
+			"rows": frappe.as_json(selected_rows),
+		},
+	)
+
+	pos = frappe.get_all("Purchase Order", ["name", "supplier", "grand_total"])
+	for po in pos:
+		if po.supplier == "Chelsea Fruit Co":
+			assert po.grand_total == flt(4.5, 2)
+		elif po.supplier == "Freedom Provisions":
+			assert po.grand_total == flt(6, 2)
+		else:
+			raise AssertionError(f"{po.supplier} should not be in this test")
+		frappe.delete_doc("Purchase Order", po.name)
+
+	frappe.delete_doc("Sales Order", so.name)
