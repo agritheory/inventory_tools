@@ -297,11 +297,11 @@ def create_items(settings):
 				i.append("uoms", {"uom": uom, "conversion_factor": cf})
 		i.is_purchase_item = (
 			1
-			if item.get("item_group") in ("Bakery Supplies", "Ingredients")
+			if item.get("item_group") in ("Bakery Supplies", "Ingredients", "Products")
 			or item.get("is_sub_contracted_item")
 			else 0
 		)
-		i.is_sales_item = 1 if item.get("item_group") == "Baked Goods" else 0
+		i.is_sales_item = 1 if item.get("item_group") in ("Baked Goods", "Products") else 0
 		i.append(
 			"item_defaults",
 			{

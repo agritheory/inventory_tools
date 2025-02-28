@@ -1,5 +1,5 @@
 exclude: 'node_modules|.git'
-default_stages: [commit]
+default_stages: [pre-commit]
 fail_fast: false
 
 repos:
@@ -56,7 +56,7 @@ repos:
           - tomli
 
   - repo: https://github.com/agritheory/test_utils
-    rev: v0.15.0
+    rev: v0.17.0
     hooks:
       - id: update_pre_commit_config
       - id: mypy
