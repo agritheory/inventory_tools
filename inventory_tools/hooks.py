@@ -15,7 +15,7 @@ required_apps = ["erpnext", "hrms", "webshop"]
 
 # include js, css files in header of desk.html
 app_include_css = [
-	"/assets/inventory_tools/dist/js/style.css",
+	"/assets/inventory_tools/dist/js/assets/style.css",
 ]
 app_include_js = [
 	"inventory_tools.bundle.js",
@@ -24,7 +24,7 @@ app_include_js = [
 
 # include js, css files in header of web template
 web_include_css = [
-	"/assets/inventory_tools/dist/js/style.css",
+	"/assets/inventory_tools/dist/js/assets/style.css",
 ]
 web_include_js = [
 	"/assets/inventory_tools/dist/js/inventory_tools.js",

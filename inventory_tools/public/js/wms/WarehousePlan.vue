@@ -348,7 +348,9 @@ const showContextMenu = (event: KonvaEventObject<MouseEvent, Rect>, shape: Rect)
 			{
 				text: `
 					<p><strong>${warehouseData.warehouse_name || 'Warehouse'}</strong></p>
-					<p style="margin-bottom: 0"><strong>Size:</strong> ${warehouseData.warehouse_length} x ${warehouseData.warehouse_width} ${doc.value.uom}</p>
+					<p style="margin-bottom: 0"><strong>Size:</strong> ${warehouseData.warehouse_length} x ${
+						warehouseData.warehouse_width
+					} ${doc.value.uom}</p>
 				`,
 			},
 			{ text: `Edit`, action: 'edit' },
@@ -383,10 +385,11 @@ const runContextAction = (action: string) => {
 }
 
 const showWarehouseDialog = (
+	action: 'Add' | 'Edit',
 	callback: (values: WarehouseDialogFields) => void,
-	title: string,
-	primaryLabel?: string,
-	fieldDefaults?: Record<string, any>
+	title?: string,
+	btnLabel?: string,
+	defaults?: Record<string, any>
 ) => {
 	const dialog = frappe.prompt(
 		[
@@ -395,7 +398,8 @@ const showWarehouseDialog = (
 				fieldname: 'warehouse',
 				fieldtype: 'Link',
 				options: 'Warehouse',
-				default: fieldDefaults?.warehouse || '',
+				default: action === 'Edit' ? defaults?.warehouse || '' : '',
+				read_only: action === 'Edit',
 				get_query: () => ({ filters: { company: doc.value.company, is_group: false } }),
 				change: async () => {
 					const values = dialog.get_values()
@@ -419,14 +423,14 @@ const showWarehouseDialog = (
 				label: 'Length',
 				fieldname: 'warehouse_length',
 				fieldtype: 'Float',
-				default: fieldDefaults?.warehouse_length || 0,
+				default: action === 'Edit' ? defaults?.warehouse_length || 0 : 0,
 				depends_on: 'eval:doc.warehouse',
 			},
 			{
 				label: 'Width',
 				fieldname: 'warehouse_width',
 				fieldtype: 'Float',
-				default: fieldDefaults?.warehouse_width || 0,
+				default: action === 'Edit' ? defaults?.warehouse_width || 0 : 0,
 				depends_on: 'eval:doc.warehouse',
 			},
 			{
@@ -434,13 +438,13 @@ const showWarehouseDialog = (
 				fieldname: 'warehouse_uom',
 				fieldtype: 'Link',
 				options: 'UOM',
-				default: fieldDefaults?.warehouse_uom || doc.value.uom,
+				default: action === 'Edit' ? defaults?.warehouse_uom || doc.value.uom : doc.value.uom,
 				read_only: true,
 			},
 		],
 		callback,
 		title,
-		primaryLabel
+		btnLabel
 	)
 }
 
@@ -448,57 +452,62 @@ const showWarehouseDialog = (
 // ####################### WAREHOUSE ACTIONS #######################
 // #################################################################
 const addWarehouse = () => {
-	showWarehouseDialog((values: WarehouseDialogFields) => {
-		const warehouseRect: Rect = new Rect({
-			x: canvasDimensions.value.width / 2,
-			y: canvasDimensions.value.height / 2,
-			width: values.warehouse_length * cellSize.value.width,
-			height: values.warehouse_width * cellSize.value.height,
-			fill: 'rgba(0, 0, 255, 0.3)',
-			draggable: true,
-			listening: true,
-			dragBoundFunc: position => {
-				// set the bounds of dragging to be inside the drawn canvas, minus the shape's dimensions
-				const minPos = { x: offsetPixels.value.left, y: offsetPixels.value.top }
-				const maxPos = {
-					x: minPos.x + canvasDimensions.value.width - warehouseRect.width(),
-					y: minPos.y + canvasDimensions.value.height - warehouseRect.height(),
-				}
+	showWarehouseDialog(
+		'Add',
+		(values: WarehouseDialogFields) => {
+			const warehouseRect: Rect = new Rect({
+				x: canvasDimensions.value.width / 2,
+				y: canvasDimensions.value.height / 2,
+				width: values.warehouse_length * cellSize.value.width,
+				height: values.warehouse_width * cellSize.value.height,
+				fill: 'rgba(0, 0, 255, 0.3)',
+				draggable: true,
+				listening: true,
+				dragBoundFunc: position => {
+					// set the bounds of dragging to be inside the drawn canvas, minus the shape's dimensions
+					const minPos = { x: offsetPixels.value.left, y: offsetPixels.value.top }
+					const maxPos = {
+						x: minPos.x + canvasDimensions.value.width - warehouseRect.width(),
+						y: minPos.y + canvasDimensions.value.height - warehouseRect.height(),
+					}
 
-				return {
-					x: Math.max(minPos.x, Math.min(position.x, maxPos.x)),
-					y: Math.max(minPos.y, Math.min(position.y, maxPos.y)),
-				}
-			},
-		})
+					return {
+						x: Math.max(minPos.x, Math.min(position.x, maxPos.x)),
+						y: Math.max(minPos.y, Math.min(position.y, maxPos.y)),
+					}
+				},
+			})
 
-		// Add custom data to the warehouse rect
-		warehouseRect.setAttr('warehouseData', {
-			warehouse_name: values.warehouse,
-			warehouse_length: values.warehouse_length,
-			warehouse_width: values.warehouse_width,
-		})
+			// Add custom data to the warehouse rect
+			warehouseRect.setAttr('warehouseData', {
+				warehouse_name: values.warehouse,
+				warehouse_length: values.warehouse_length,
+				warehouse_width: values.warehouse_width,
+			})
 
-		warehouseRect.on('contextmenu', event => showContextMenu(event, warehouseRect))
+			warehouseRect.on('contextmenu', event => showContextMenu(event, warehouseRect))
 
-		// Since drag event handlers are not configurable while building the shape,
-		// adding drag event handlers individually to track dragging state
-		warehouseRect.on('dragstart', () => (isDraggingWarehouse.value = true))
-		warehouseRect.on('dragend', () => (isDraggingWarehouse.value = false))
+			// Since drag event handlers are not configurable while building the shape,
+			// adding drag event handlers individually to track dragging state
+			warehouseRect.on('dragstart', () => (isDraggingWarehouse.value = true))
+			warehouseRect.on('dragend', () => (isDraggingWarehouse.value = false))
 
-		// A `mousedown` event on the shape will also trigger a `mousedown` event on the stage
-		// which will start painting cells. To prevent this, we cancel the bubble.
-		warehouseRect.on('mousedown', event => (event.cancelBubble = true))
+			// A `mousedown` event on the shape will also trigger a `mousedown` event on the stage
+			// which will start painting cells. To prevent this, we cancel the bubble.
+			warehouseRect.on('mousedown', event => (event.cancelBubble = true))
 
-		// Add the warehouse shape to the warehouse layer
-		const warehouseLayer = getLayer(warehouseRef) as unknown as Layer | undefined
-		warehouseLayer?.add(warehouseRect)
-	}, 'Add Warehouse')
+			// Add the warehouse shape to the warehouse layer
+			const warehouseLayer = getLayer(warehouseRef) as unknown as Layer | undefined
+			warehouseLayer?.add(warehouseRect)
+		},
+		'Add Warehouse'
+	)
 }
 
 const editWarehouse = (shape: Rect) => {
 	const warehouseData = shape.getAttr('warehouseData')
 	showWarehouseDialog(
+		'Edit',
 		(values: WarehouseDialogFields) => {
 			const widthDelta = values.warehouse_length * cellSize.value.width - shape.width()
 			const heightDelta = values.warehouse_width * cellSize.value.height - shape.height()
@@ -528,17 +537,23 @@ const editWarehouse = (shape: Rect) => {
 }
 
 const rotateWarehouse = (shape: Rect) => {
+	const warehouseData = shape.getAttr('warehouseData')
+	const currentRotation = warehouseData.warehouse_rotation || 0
 	frappe.prompt(
 		[
 			{
-				label: 'Rotate by',
+				label: 'Rotation (degrees)',
 				fieldname: 'rotate_by',
 				fieldtype: 'Float',
-				default: 0,
+				default: currentRotation,
 			},
 		],
 		(values: { rotate_by: number }) => {
-			shape.rotate(values.rotate_by)
+			const delta = values.rotate_by - currentRotation
+			shape.rotate(delta).setAttr('warehouseData', {
+				...warehouseData,
+				warehouse_rotation: values.rotate_by,
+			})
 			redrawLayer(warehouseRef)
 		},
 		'Rotate Warehouse'

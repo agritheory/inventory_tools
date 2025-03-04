@@ -9,15 +9,21 @@ import { defineConfig } from 'vite'
 export default defineConfig({
 	plugins: [vue()],
 	build: {
+		outDir: './inventory_tools/public/dist/js',
+		target: 'esnext',
+		emptyOutDir: false,
+		sourcemap: true,
 		lib: {
 			entry: resolve(__dirname, './inventory_tools.js'),
 			name: 'inventory_tools',
 			fileName: format => `inventory_tools.js`,
 		},
-		outDir: './inventory_tools/public/dist/js',
-		target: 'esnext',
-		emptyOutDir: false,
-		sourcemap: true,
+		rollupOptions: {
+			output: {
+				chunkFileNames: 'chunks/[name].[hash].js',
+				assetFileNames: 'assets/[name].[ext]',
+			},
+		},
 	},
 	define: {
 		'process.env': process.env,
