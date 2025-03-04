@@ -10,7 +10,12 @@ from inventory_tools.inventory_tools.report.material_demand.material_demand impo
 @pytest.mark.order(20)
 def test_report_po_without_aggregation():
 	filters = frappe._dict(
-		{"end_date": getdate(), "price_list": "Bakery Buying", "company": "Ambrosia Pie Company"}
+		{
+			"end_date": getdate(),
+			"price_list": "Bakery Buying",
+			"company": "Ambrosia Pie Company",
+			"source": "Material Request",
+		}
 	)
 	columns, rows = execute_material_demand(filters)
 	assert len(rows) == 34
@@ -48,7 +53,12 @@ def test_report_po_without_aggregation():
 @pytest.mark.order(21)
 def test_report_rfq_without_aggregation():
 	filters = frappe._dict(
-		{"end_date": getdate(), "price_list": "Bakery Buying", "company": "Ambrosia Pie Company"}
+		{
+			"end_date": getdate(),
+			"price_list": "Bakery Buying",
+			"company": "Ambrosia Pie Company",
+			"source": "Material Request",
+		}
 	)
 	columns, rows = execute_material_demand(filters)
 	assert len(rows) == 34
@@ -94,7 +104,12 @@ def test_report_rfq_without_aggregation():
 @pytest.mark.order(22)
 def test_report_item_based_without_aggregation():
 	filters = frappe._dict(
-		{"end_date": getdate(), "price_list": "Bakery Buying", "company": "Ambrosia Pie Company"}
+		{
+			"end_date": getdate(),
+			"price_list": "Bakery Buying",
+			"company": "Ambrosia Pie Company",
+			"source": "Material Request",
+		}
 	)
 	columns, rows = execute_material_demand(filters)
 	assert len(rows) == 34
@@ -145,7 +160,9 @@ def test_report_po_with_aggregation_and_aggregation_warehouse():
 	settings.update_warehouse_path = True
 	settings.save()
 
-	filters = frappe._dict({"end_date": getdate(), "price_list": "Bakery Buying"})
+	filters = frappe._dict(
+		{"end_date": getdate(), "price_list": "Bakery Buying", "source": "Material Request"}
+	)
 	columns, rows = execute_material_demand(filters)
 	assert len(rows) == 50
 	assert rows[1].get("supplier") == "Chelsea Fruit Co"
@@ -194,13 +211,15 @@ def test_report_po_with_aggregation_and_no_aggregation_warehouse():
 	settings.update_warehouse_path = True
 	settings.save()
 
-	filters = frappe._dict({"end_date": getdate(), "price_list": "Bakery Buying"})
+	filters = frappe._dict(
+		{"end_date": getdate(), "price_list": "Bakery Buying", "source": "Material Request"}
+	)
 	columns, rows = execute_material_demand(filters)
-	assert len(rows) == 50
+	assert len(rows) == 52
 	assert rows[1].get("supplier") == "Chelsea Fruit Co"
 
 	selected_rows = [
-		row for row in rows if row.get("supplier") not in ["Chelsea Fruit Co", "Unity Bakery Supply"]
+		row for row in rows if row.get("supplier") not in ["Chelsea Fruit Co", "Unity Bakery Supply", "No Supplier"]
 	]
 
 	frappe.call(
