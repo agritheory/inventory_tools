@@ -313,9 +313,24 @@ def create_items(settings):
 		)
 		if i.is_purchase_item and item.get("supplier"):
 			if isinstance(item.get("supplier"), list):
-				[i.append("supplier_items", {"supplier": s, "requires_rfq":  True if item.get("item_code") == "Bottled Coffee" else False}) for s in item.get("supplier")]
+				[
+					i.append(
+						"supplier_items",
+						{
+							"supplier": s,
+							"requires_rfq": True if item.get("item_code") == "Bottled Coffee" else False,
+						},
+					)
+					for s in item.get("supplier")
+				]
 			else:
-				i.append("supplier_items", {"supplier": item.get("supplier"), "requires_rfq":  True if item.get("item_code") == "Bottled Coffee" else False})
+				i.append(
+					"supplier_items",
+					{
+						"supplier": item.get("supplier"),
+						"requires_rfq": True if item.get("item_code") == "Bottled Coffee" else False,
+					},
+				)
 		i.save()
 		if item.get("item_price"):
 			ip = frappe.new_doc("Item Price")

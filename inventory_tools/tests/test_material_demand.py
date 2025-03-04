@@ -168,7 +168,9 @@ def test_report_po_with_aggregation_and_aggregation_warehouse():
 	assert rows[1].get("supplier") == "Chelsea Fruit Co"
 
 	selected_rows = [
-		row for row in rows if row.get("supplier") not in ["Chelsea Fruit Co", "Unity Bakery Supply", "No Supplier"]
+		row
+		for row in rows
+		if row.get("supplier") not in ["Chelsea Fruit Co", "Unity Bakery Supply", "No Supplier"]
 	]
 
 	frappe.call(
@@ -219,7 +221,9 @@ def test_report_po_with_aggregation_and_no_aggregation_warehouse():
 	assert rows[1].get("supplier") == "Chelsea Fruit Co"
 
 	selected_rows = [
-		row for row in rows if row.get("supplier") not in ["Chelsea Fruit Co", "Unity Bakery Supply", "No Supplier"]
+		row
+		for row in rows
+		if row.get("supplier") not in ["Chelsea Fruit Co", "Unity Bakery Supply", "No Supplier"]
 	]
 
 	frappe.call(
@@ -466,7 +470,7 @@ def test_report_po_with_aggregation_and_aggregation_warehouse_for_sales_order():
 		if po.supplier == "Chelsea Fruit Co":
 			assert po.grand_total == flt(5.98, 2)
 		elif po.supplier == "Freedom Provisions":
-			assert po.grand_total == flt( 9.48, 2)
+			assert po.grand_total == flt(9.48, 2)
 		else:
 			raise AssertionError(f"{po.supplier} should not be in this test")
 
@@ -475,7 +479,7 @@ def test_report_po_with_aggregation_and_aggregation_warehouse_for_sales_order():
 			assert wh_company == po.company
 
 		frappe.delete_doc("Purchase Order", po.name)
-	
+
 	so.cancel()
 	frappe.delete_doc("Sales Order", so.name)
 
@@ -519,7 +523,7 @@ def test_report_po_with_aggregation_and_no_aggregation_warehouse_for_sales_order
 			assert po.grand_total == flt(3.50, 2)
 		else:
 			raise AssertionError(f"{po.supplier} should not be in this test")
-	
+
 		for item in po.items:
 			mr_wh = frappe.get_value("Sales Order Item", item.sales_order_item, "warehouse")
 			assert item.warehouse == mr_wh
@@ -527,6 +531,6 @@ def test_report_po_with_aggregation_and_no_aggregation_warehouse_for_sales_order
 		# NOTE: Don't delete so Purchase Receipt / aggregation workflows can be tested
 		# frappe.delete_doc("Purchase Order", po.name)
 		po.submit()
-	
+
 	so.cancel()
 	frappe.delete_doc("Sales Order", so.name)
