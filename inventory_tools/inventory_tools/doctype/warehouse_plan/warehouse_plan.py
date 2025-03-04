@@ -24,32 +24,70 @@ class WarehousePlan(Document):
 		vertical: DF.Float
 	# end: auto-generated types
 
-
-@frappe.whitelist()
-def get_warehouse_dimensions(warehouse: str, plan_uom: str):
-	warehouse_doc = frappe.get_doc("Warehouse", warehouse)
-	dimensions = frappe.get_all(
-		"Physical Dimension",
-		filters={"reference_doctype": "Warehouse", "reference_document": warehouse_doc.name},
-		fields=["item_length", "item_width", "uom"],
-	)
-
-	if not dimensions:
-		return {}
-
-	dimension = dimensions[0]
-
-	# convert warehouse dimension UOM using UOM Conversion records
-	if dimension.uom != plan_uom:
-		uom_conversion = frappe.get_all(
-			"UOM Conversion Factor",
-			filters={"category": "Length", "from_uom": dimension.uom, "to_uom": plan_uom},
-			pluck="value",
-			limit=1,
+	@frappe.whitelist()
+	def get_plan_warehouses(self):
+		return frappe.get_all(
+			"Warehouse",
+			filters={"warehouse_plan": self.name},
+			fields=["name", "warehouse_plan_coordinates", "rotation", "accessible_path"],
 		)
 
-		if uom_conversion:
-			dimension.item_length *= uom_conversion[0]
-			dimension.item_width *= uom_conversion[0]
+	@frappe.whitelist()
+	def set_warehouse_plan_details(self, warehouses: list):
+		existing_warehouses = frappe.get_all(
+			"Warehouse",
+			filters={"warehouse_plan": self.name},
+			pluck="name",
+		)
 
-	return dimension
+		for warehouse in warehouses:
+			warehouse_doc = frappe.get_doc("Warehouse", warehouse.get("warehouse_name"))
+			warehouse_doc.update(
+				{
+					"warehouse_plan": self.name,
+					"warehouse_plan_coordinates": warehouse.get("coordinates"),
+					"rotation": warehouse.get("rotation"),
+					"accessible_path": warehouse.get("accessible_path"),
+				}
+			)
+			warehouse_doc.save()
+
+			if warehouse_doc.name in existing_warehouses:
+				existing_warehouses.remove(warehouse_doc.name)
+
+		# if warehouses are deleted, remove them from the warehouse plan
+		if len(existing_warehouses) > 0:
+			for warehouse in existing_warehouses:
+				frappe.db.set_value("Warehouse", warehouse, "warehouse_plan", None)
+				frappe.db.set_value("Warehouse", warehouse, "warehouse_plan_coordinates", None)
+				frappe.db.set_value("Warehouse", warehouse, "rotation", 0)
+				frappe.db.set_value("Warehouse", warehouse, "accessible_path", None)
+
+	@frappe.whitelist()
+	def get_warehouse_dimensions(self, warehouse: str):
+		warehouse_doc = frappe.get_doc("Warehouse", warehouse)
+		dimensions = frappe.get_all(
+			"Physical Dimension",
+			filters={"reference_doctype": "Warehouse", "reference_document": warehouse_doc.name},
+			fields=["item_length", "item_width", "uom"],
+		)
+
+		if not dimensions:
+			return {}
+
+		dimension = dimensions[0]
+
+		# convert warehouse dimension UOM using UOM Conversion records
+		if dimension.uom != self.uom:
+			uom_conversion = frappe.get_all(
+				"UOM Conversion Factor",
+				filters={"category": "Length", "from_uom": dimension.uom, "to_uom": self.uom},
+				pluck="value",
+				limit=1,
+			)
+
+			if uom_conversion:
+				dimension.item_length *= uom_conversion[0]
+				dimension.item_width *= uom_conversion[0]
+
+		return dimension

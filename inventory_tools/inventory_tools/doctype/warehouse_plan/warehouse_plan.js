@@ -11,7 +11,12 @@ frappe.ui.form.on('Warehouse Plan', {
 		frm.page.wrapper.find('.layout-side-section').hide()
 	},
 	validate: frm => {
-		const matrix = inventory_tools.$warehouse_plan.getMatrixString()
-		frm.set_value('matrix', matrix)
+		// set the walkable matrix directly into the plan
+		const walkable_matrix = inventory_tools.$warehouse_plan.getWalkableString()
+		frm.set_value('matrix', walkable_matrix)
+
+		// set the drawn details for each warehouse
+		const warehouses = inventory_tools.$warehouse_plan.getWarehouseArray()
+		frm.call('set_warehouse_plan_details', { warehouses })
 	},
 })

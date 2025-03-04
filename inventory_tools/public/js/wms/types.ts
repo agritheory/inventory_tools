@@ -31,3 +31,10 @@ export type WarehouseDialogFields = {
 	warehouse_width: number
 	warehouse_uom: string
 }
+
+export type WarehousePlanDetails = {
+	warehouse_name: string
+	coordinates: string
+	rotation: string
+	accessible_path: string
+}

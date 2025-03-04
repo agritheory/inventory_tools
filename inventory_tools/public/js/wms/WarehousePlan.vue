@@ -82,7 +82,7 @@ import { Rect, type RectConfig } from 'konva/lib/shapes/Rect'
 import { Stage, type StageConfig } from 'konva/lib/Stage'
 import { ref, computed, onMounted, watch, useTemplateRef, type ShallowRef } from 'vue'
 
-import type { WarehouseContextMenu, WarehouseDialogFields, WarehousePlan } from './types'
+import type { WarehouseContextMenu, WarehouseDialogFields, WarehousePlan, WarehousePlanDetails } from './types'
 
 declare const frappe: any
 
@@ -106,7 +106,7 @@ const isPainting = ref(false)
 const paintMode = ref<boolean | null>(null) // true for adding cells, false for removing
 const walkableCells = ref<Set<string>>(new Set())
 
-onMounted(() => {
+onMounted(async () => {
 	// Load floor plan image into Konva's image layer
 	if (plan.value.image) {
 		const img = new Image()
@@ -117,7 +117,8 @@ onMounted(() => {
 	}
 
 	// Initialize walkable cells from matrix
-	walkableCells.value = initializeFromMatrix(plan.value.matrix)
+	walkableCells.value = initializePath(plan.value.matrix)
+	await initializeWarehouses()
 
 	if (stageRef.value) {
 		// Initialize stage mouse handlers
@@ -262,7 +263,7 @@ const isHoverValid = computed(() => {
 
 const getLayer = (entity: Readonly<ShallowRef<Stage | Layer | null>>) => entity.value?.getStage()
 
-const initializeFromMatrix = (matrixString?: string) => {
+const initializePath = (matrixString?: string) => {
 	const cells = new Set<string>()
 	if (!matrixString) return cells
 
@@ -283,6 +284,17 @@ const initializeFromMatrix = (matrixString?: string) => {
 	} catch (error) {
 		console.warn('Error parsing matrix string:', error)
 		return cells
+	}
+}
+
+const initializeWarehouses = async () => {
+	const { message: warehouses } = await frm.value.call('get_plan_warehouses')
+	for (const warehouse of warehouses) {
+		const [x, y, length, width] = warehouse.warehouse_plan_coordinates.split(',').map(Number)
+		const adjustedX = offsetPixels.value.left + x * cellSize.value.width
+		const adjustedY = offsetPixels.value.top + y * cellSize.value.height
+
+		addWarehouseRect(warehouse.name, length, width, adjustedX, adjustedY, warehouse.rotation)
 	}
 }
 
@@ -339,7 +351,7 @@ const showContextMenu = (event: KonvaEventObject<MouseEvent, Rect>, shape: Rect)
 	const pointerPosition = stage.getPointerPosition()
 	if (!pointerPosition) return
 
-	const warehouseData = shape.getAttr('warehouseData')
+	const { warehouse_name, warehouse_length, warehouse_width } = shape.getAttr('warehouseData')
 	contextMenu.value = {
 		visible: true,
 		x: pointerPosition.x,
@@ -347,10 +359,10 @@ const showContextMenu = (event: KonvaEventObject<MouseEvent, Rect>, shape: Rect)
 		options: [
 			{
 				text: `
-					<p><strong>${warehouseData.warehouse_name || 'Warehouse'}</strong></p>
-					<p style="margin-bottom: 0"><strong>Size:</strong> ${warehouseData.warehouse_length} x ${
-						warehouseData.warehouse_width
-					} ${doc.value.uom}</p>
+					<p><strong>${warehouse_name || 'Warehouse'}</strong></p>
+					<p style="margin-bottom: 0">
+						${warehouse_length.toFixed(2)} x ${warehouse_width.toFixed(2)} ${doc.value.uom} (LxW)
+					</p>
 				`,
 			},
 			{ text: `Edit`, action: 'edit' },
@@ -404,15 +416,11 @@ const showWarehouseDialog = (
 				change: async () => {
 					const values = dialog.get_values()
 					if (values.warehouse) {
-						const response = await frappe.xcall(
-							'inventory_tools.inventory_tools.doctype.warehouse_plan.warehouse_plan.get_warehouse_dimensions',
-							{
-								warehouse: values.warehouse,
-								plan_uom: doc.value.uom,
-							}
-						)
-						dialog.set_value('warehouse_length', response.item_length || 0)
-						dialog.set_value('warehouse_width', response.item_width || 0)
+						const { message } = await frm.value.call('get_warehouse_dimensions', {
+							warehouse: values.warehouse,
+						})
+						dialog.set_value('warehouse_length', message.item_length || 0)
+						dialog.set_value('warehouse_width', message.item_width || 0)
 					} else {
 						dialog.set_value('warehouse_length', 0)
 						dialog.set_value('warehouse_width', 0)
@@ -455,53 +463,62 @@ const addWarehouse = () => {
 	showWarehouseDialog(
 		'Add',
 		(values: WarehouseDialogFields) => {
-			const warehouseRect: Rect = new Rect({
-				x: canvasDimensions.value.width / 2,
-				y: canvasDimensions.value.height / 2,
-				width: values.warehouse_length * cellSize.value.width,
-				height: values.warehouse_width * cellSize.value.height,
-				fill: 'rgba(0, 0, 255, 0.3)',
-				draggable: true,
-				listening: true,
-				dragBoundFunc: position => {
-					// set the bounds of dragging to be inside the drawn canvas, minus the shape's dimensions
-					const minPos = { x: offsetPixels.value.left, y: offsetPixels.value.top }
-					const maxPos = {
-						x: minPos.x + canvasDimensions.value.width - warehouseRect.width(),
-						y: minPos.y + canvasDimensions.value.height - warehouseRect.height(),
-					}
-
-					return {
-						x: Math.max(minPos.x, Math.min(position.x, maxPos.x)),
-						y: Math.max(minPos.y, Math.min(position.y, maxPos.y)),
-					}
-				},
-			})
-
-			// Add custom data to the warehouse rect
-			warehouseRect.setAttr('warehouseData', {
-				warehouse_name: values.warehouse,
-				warehouse_length: values.warehouse_length,
-				warehouse_width: values.warehouse_width,
-			})
-
-			warehouseRect.on('contextmenu', event => showContextMenu(event, warehouseRect))
-
-			// Since drag event handlers are not configurable while building the shape,
-			// adding drag event handlers individually to track dragging state
-			warehouseRect.on('dragstart', () => (isDraggingWarehouse.value = true))
-			warehouseRect.on('dragend', () => (isDraggingWarehouse.value = false))
-
-			// A `mousedown` event on the shape will also trigger a `mousedown` event on the stage
-			// which will start painting cells. To prevent this, we cancel the bubble.
-			warehouseRect.on('mousedown', event => (event.cancelBubble = true))
-
-			// Add the warehouse shape to the warehouse layer
-			const warehouseLayer = getLayer(warehouseRef) as unknown as Layer | undefined
-			warehouseLayer?.add(warehouseRect)
+			addWarehouseRect(values.warehouse, values.warehouse_length, values.warehouse_width)
 		},
 		'Add Warehouse'
 	)
+}
+
+const addWarehouseRect = (name: string, length: number, width: number, x?: number, y?: number, rotation?: number) => {
+	const warehouseRect: Rect = new Rect({
+		x: x || canvasDimensions.value.width / 2,
+		y: y || canvasDimensions.value.height / 2,
+		width: length * cellSize.value.width,
+		height: width * cellSize.value.height,
+		fill: 'rgba(0, 0, 255, 0.3)',
+		rotation: rotation || 0,
+		draggable: true,
+		listening: true,
+		dragBoundFunc: position => {
+			// set the bounds of dragging to be inside the drawn canvas, minus the shape's dimensions
+			const minPos = { x: offsetPixels.value.left, y: offsetPixels.value.top }
+			const maxPos = {
+				x: minPos.x + canvasDimensions.value.width - warehouseRect.width(),
+				y: minPos.y + canvasDimensions.value.height - warehouseRect.height(),
+			}
+
+			return {
+				x: Math.max(minPos.x, Math.min(position.x, maxPos.x)),
+				y: Math.max(minPos.y, Math.min(position.y, maxPos.y)),
+			}
+		},
+	})
+
+	// Add custom data to the warehouse rect
+	warehouseRect.setAttr('warehouseData', {
+		warehouse_name: name,
+		warehouse_length: length,
+		warehouse_width: width,
+		warehouse_rotation: rotation || 0,
+	})
+
+	warehouseRect.on('contextmenu', event => showContextMenu(event, warehouseRect))
+
+	// Since drag event handlers are not configurable while building the shape,
+	// adding drag event handlers individually to track dragging state
+	warehouseRect.on('dragstart', () => (isDraggingWarehouse.value = true))
+	warehouseRect.on('dragend', () => {
+		frm.value.dirty()
+		isDraggingWarehouse.value = false
+	})
+
+	// A `mousedown` event on the shape will also trigger a `mousedown` event on the stage
+	// which will start painting cells. To prevent this, we cancel the bubble.
+	warehouseRect.on('mousedown', event => (event.cancelBubble = true))
+
+	// Add the warehouse shape to the warehouse layer
+	const warehouseLayer = getLayer(warehouseRef) as unknown as Layer | undefined
+	warehouseLayer?.add(warehouseRect)
 }
 
 const editWarehouse = (shape: Rect) => {
@@ -601,6 +618,7 @@ const paint = () => {
 const redrawLayer = (ref: Readonly<ShallowRef<Stage | Layer | null>>) => {
 	const layer = getLayer(ref)
 	layer?.batchDraw()
+	frm.value.dirty()
 }
 
 const updateCell = (x: number, y: number) => {
@@ -627,7 +645,7 @@ const emitUpdate = () => {
 // #################################################################
 // ######################### HELPER METHODS ########################
 // #################################################################
-const getMatrixArray = () => {
+const getWalkableArray = () => {
 	// Create empty matrix filled with zeros
 	const matrix = Array(plan.value.vertical)
 		.fill(0)
@@ -644,8 +662,30 @@ const getMatrixArray = () => {
 	return matrix
 }
 
+const getWarehouseArray = () => {
+	const warehouseLayer = getLayer(warehouseRef) as unknown as Layer | undefined
+	const children = warehouseLayer?.children || []
+	const warehouseDetails: WarehousePlanDetails[] = []
+
+	for (const child of children) {
+		const { warehouse_name, warehouse_length, warehouse_width, warehouse_rotation } = child.getAttr('warehouseData')
+		const { x, y } = child.getPosition()
+		const horizontalGrid = (x - offsetPixels.value.left) / cellSize.value.width
+		const verticalGrid = (y - offsetPixels.value.top) / cellSize.value.height
+		warehouseDetails.push({
+			warehouse_name,
+			coordinates: `${horizontalGrid.toFixed(2)},${verticalGrid.toFixed(2)},${warehouse_length},${warehouse_width}`,
+			rotation: warehouse_rotation,
+			// TODO: generate workflow to link a warehouse shape with a walkable cell
+			accessible_path: '',
+		})
+	}
+
+	return warehouseDetails
+}
+
 const isCellWalkable = (x: number, y: number) => walkableCells.value.has(`${x},${y}`)
-const getMatrixString = () => JSON.stringify(getMatrixArray())
+const getWalkableString = () => JSON.stringify(getWalkableArray())
 const getWalkableCells = () => walkableCellsArray.value
 
 // Watch for changes
@@ -654,9 +694,10 @@ watch(walkableCells, () => redrawLayer(walkableRef), { deep: true })
 // Expose public methods
 defineExpose({
 	isCellWalkable,
-	getMatrixArray,
-	getMatrixString,
+	getWalkableArray,
+	getWalkableString,
 	getWalkableCells,
+	getWarehouseArray,
 })
 </script>
 
