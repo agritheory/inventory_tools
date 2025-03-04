@@ -90,6 +90,7 @@ async function create(type) {
 	let email_template = undefined
 	if (type != 'po') {
 		values = await select_company_and_email_template(values.company)
+		values['price_list'] = frappe.query_report.get_filter_values()['price_list']
 		company = values['company']
 		email_template = values['email_template']
 	} else {

@@ -410,6 +410,7 @@ def create_pos(company, filters, rows):
 				po.multi_company_purchase_order = True
 			else:
 				po.company = requesting_company
+
 			for row in rows:
 				if not row.get("item_code"):
 					continue
@@ -441,6 +442,7 @@ def create_pos(company, filters, rows):
 								"material_request_company": row.get("company"),
 								"material_request": row.get("source_reference"),
 								"material_request_item": row.get("material_request_item"),
+								"warehouse": warehouse
 							}
 						)
 
@@ -450,8 +452,10 @@ def create_pos(company, filters, rows):
 						)
 						i.update(
 							{
+								"material_request_company": row.get("company"),
 								"sales_order": row.get("source_reference"),
 								"sales_order_item": row.get("material_request_item"),
+								"warehouse": warehouse
 							}
 						)
 					po.append("items", i)
