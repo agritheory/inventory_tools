@@ -3,12 +3,10 @@ import types
 from itertools import groupby
 
 import frappe
-from erpnext.accounts.doctype.account.account import update_account_number
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 )
-from erpnext.setup.utils import enable_all_roles_and_domains, set_defaults_for_tests
-from erpnext.stock.get_item_details import get_item_details
+from erpnext.setup.utils import set_defaults_for_tests
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 from frappe.utils import add_months, nowdate
 from frappe.utils.data import flt, getdate
@@ -299,11 +297,11 @@ def create_items(settings):
 				i.append("uoms", {"uom": uom, "conversion_factor": cf})
 		i.is_purchase_item = (
 			1
-			if item.get("item_group") in ("Bakery Supplies", "Ingredients")
+			if item.get("item_group") in ("Bakery Supplies", "Ingredients", "Products")
 			or item.get("is_sub_contracted_item")
 			else 0
 		)
-		i.is_sales_item = 1 if item.get("item_group") == "Baked Goods" else 0
+		i.is_sales_item = 1 if item.get("item_group") in ("Baked Goods", "Products") else 0
 		i.append(
 			"item_defaults",
 			{
@@ -315,9 +313,24 @@ def create_items(settings):
 		)
 		if i.is_purchase_item and item.get("supplier"):
 			if isinstance(item.get("supplier"), list):
-				[i.append("supplier_items", {"supplier": s}) for s in item.get("supplier")]
+				[
+					i.append(
+						"supplier_items",
+						{
+							"supplier": s,
+							"requires_rfq": True if item.get("item_code") == "Bottled Coffee" else False,
+						},
+					)
+					for s in item.get("supplier")
+				]
 			else:
-				i.append("supplier_items", {"supplier": item.get("supplier")})
+				i.append(
+					"supplier_items",
+					{
+						"supplier": item.get("supplier"),
+						"requires_rfq": True if item.get("item_code") == "Bottled Coffee" else False,
+					},
+				)
 		i.save()
 		if item.get("item_price"):
 			ip = frappe.new_doc("Item Price")

@@ -27,6 +27,12 @@ frappe.query_reports['Material Demand'] = {
 			fieldtype: 'Link',
 			options: 'Price List',
 		},
+		{
+			fieldname: 'source',
+			label: __('Source'),
+			fieldtype: 'Select',
+			options: ['', 'Material Request', 'Sales Order'],
+		},
 	],
 	get_datatable_options(options) {
 		return Object.assign(options, {
@@ -84,6 +90,7 @@ async function create(type) {
 	let email_template = undefined
 	if (type != 'po') {
 		values = await select_company_and_email_template(values.company)
+		values['price_list'] = frappe.query_report.get_filter_values()['price_list']
 		company = values['company']
 		email_template = values['email_template']
 	} else {
@@ -146,11 +153,11 @@ function update_selected_qty() {
 				total_selected = `<span style="color: red">${total_selected}</span>`
 				selected_price = `<span style="color: red">${selected_price}</span>`
 			}
-			frappe.query_report.datatable.cellmanager.updateCell(9, index, total_selected, true)
-			frappe.query_report.datatable.cellmanager.updateCell(12, index, selected_price, true)
+			frappe.query_report.datatable.cellmanager.updateCell(11, index, total_selected, true)
+			frappe.query_report.datatable.cellmanager.updateCell(13, index, selected_price, true)
 		} else {
-			frappe.query_report.datatable.cellmanager.updateCell(9, index, '', true)
-			frappe.query_report.datatable.cellmanager.updateCell(12, index, '', true)
+			frappe.query_report.datatable.cellmanager.updateCell(11, index, '', true)
+			frappe.query_report.datatable.cellmanager.updateCell(13, index, '', true)
 		}
 	})
 }
