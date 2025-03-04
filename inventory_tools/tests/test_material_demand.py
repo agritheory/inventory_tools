@@ -219,7 +219,9 @@ def test_report_po_with_aggregation_and_no_aggregation_warehouse():
 	assert rows[1].get("supplier") == "Chelsea Fruit Co"
 
 	selected_rows = [
-		row for row in rows if row.get("supplier") not in ["Chelsea Fruit Co", "Unity Bakery Supply", "No Supplier"]
+		row
+		for row in rows
+		if row.get("supplier") not in ["Chelsea Fruit Co", "Unity Bakery Supply", "No Supplier"]
 	]
 
 	frappe.call(
