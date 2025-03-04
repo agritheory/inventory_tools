@@ -33,8 +33,19 @@ def validate_warehouse_has_plan(items):
 
 
 def get_node(doc, method):
+	# Get root warehouse for all items in doc
 	items = [item["item_code"] for item in doc["locations"]]
-	item_wh_list = get_all_warehouses(items)
+	root_warehouses = [get_root_warehouse(w["warehouse"]) for w in doc["locations"]]
+	all_same = all(wh == root_warehouses[0] for wh in root_warehouses)
+	if all_same is True:
+		root_warehouse = root_warehouses[0]
+
+	# Get all item locations for items in doctype
+	# Filter by root warehouse
+	item_wh_list = list(
+		filter(lambda d: d["root_warehouse"] == root_warehouse, get_all_warehouses(items))
+	)
+
 	if method == "FIFO":
 		pass
 	elif method == "LIFO":
