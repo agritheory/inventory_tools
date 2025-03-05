@@ -219,9 +219,7 @@ def test_report_po_with_aggregation_and_no_aggregation_warehouse():
 	assert rows[1].get("supplier") == "Chelsea Fruit Co"
 
 	selected_rows = [
-		row
-		for row in rows
-		if row.get("supplier") not in ["Chelsea Fruit Co", "Unity Bakery Supply"]
+		row for row in rows if row.get("supplier") not in ["Chelsea Fruit Co", "Unity Bakery Supply"]
 	]
 
 	frappe.call(
@@ -321,10 +319,7 @@ def test_report_po_without_aggregation_for_sales_order():
 	)
 
 	pos = frappe.get_list(
-		"Purchase Order",
-		fields=["name", "supplier", "grand_total"],
-		order_by="creation DESC",
-		limit=2
+		"Purchase Order", fields=["name", "supplier", "grand_total"], order_by="creation DESC", limit=2
 	)
 	for po in pos:
 		if po.supplier == "Chelsea Fruit Co":
@@ -369,7 +364,8 @@ def test_report_rfq_without_aggregation_for_sales_order():
 	)
 
 	rfqs = [
-		frappe.get_doc("Request for Quotation", r) for r in frappe.get_all("Request for Quotation", order_by="creation DESC", limit=2, pluck="name")
+		frappe.get_doc("Request for Quotation", r)
+		for r in frappe.get_all("Request for Quotation", order_by="creation DESC", limit=2, pluck="name")
 	]
 	for rfq in rfqs:
 		if len(rfq.suppliers) == 1 and [r.supplier for r in rfq.suppliers] == ["Chelsea Fruit Co"]:
@@ -413,10 +409,7 @@ def test_report_item_based_without_aggregation_for_sales_order():
 	)
 
 	pos = frappe.get_list(
-		"Purchase Order",
-		fields=["name", "supplier", "grand_total"],
-		order_by="creation DESC",
-		limit=2
+		"Purchase Order", fields=["name", "supplier", "grand_total"], order_by="creation DESC", limit=2
 	)
 	for po in pos:
 		assert not po.multi_company_purchase_order
@@ -429,7 +422,8 @@ def test_report_item_based_without_aggregation_for_sales_order():
 		frappe.delete_doc("Purchase Order", po.name)
 
 	rfqs = [
-		frappe.get_doc("Request for Quotation", r) for r in frappe.get_all("Request for Quotation", order_by="creation DESC", limit=1, pluck="name")
+		frappe.get_doc("Request for Quotation", r)
+		for r in frappe.get_all("Request for Quotation", order_by="creation DESC", limit=1, pluck="name")
 	]
 	for rfq in rfqs:
 		if len(rfq.suppliers) == 1 and [r.supplier for r in rfq.suppliers] == ["Freedom Provisions"]:
@@ -471,7 +465,8 @@ def test_report_po_with_aggregation_and_aggregation_warehouse_for_sales_order():
 	)
 
 	pos = [
-		frappe.get_doc("Purchase Order", r) for r in frappe.get_all("Purchase Order", order_by="creation DESC", limit=2, pluck="name")
+		frappe.get_doc("Purchase Order", r)
+		for r in frappe.get_all("Purchase Order", order_by="creation DESC", limit=2, pluck="name")
 	]
 	for po in pos:
 		assert po.multi_company_purchase_order
@@ -523,7 +518,8 @@ def test_report_po_with_aggregation_and_no_aggregation_warehouse_for_sales_order
 	)
 
 	pos = [
-		frappe.get_doc("Purchase Order", r) for r in frappe.get_all("Purchase Order", order_by="creation DESC", limit=2, pluck="name")
+		frappe.get_doc("Purchase Order", r)
+		for r in frappe.get_all("Purchase Order", order_by="creation DESC", limit=2, pluck="name")
 	]
 	for po in pos:
 		assert po.multi_company_purchase_order
