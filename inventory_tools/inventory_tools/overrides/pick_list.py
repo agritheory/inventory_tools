@@ -33,18 +33,35 @@ def validate_warehouse_has_plan(items):
 
 
 def get_node(doc, method):
-	# Get root warehouse for all items in doc
-	items = [item["item_code"] for item in doc["locations"]]
-	root_warehouses = [get_root_warehouse(w["warehouse"]) for w in doc["locations"]]
-	all_same = all(wh == root_warehouses[0] for wh in root_warehouses)
-	if all_same is True:
-		root_warehouse = root_warehouses[0]
+	# Extract item codes and root warehouses from document locations
+	items = [loc["item_code"] for loc in doc["locations"]]
+	root_warehouses = [get_root_warehouse(loc["warehouse"]) for loc in doc["locations"]]
 
-	# Get all item locations for items in doctype
-	# Filter by root warehouse
-	item_wh_list = list(
-		filter(lambda d: d["root_warehouse"] == root_warehouse, get_all_warehouses(items))
-	)
+	# Ensure all locations share the same root warehouse
+	if not all(wh == root_warehouses[0] for wh in root_warehouses):
+		frappe.ValidationError("All items in pick list do not share a common warehouse plan")
+		return
+
+	root_warehouse = root_warehouses[0]
+
+	# Accumulate warehouse entries for each item, filtering by the common root warehouse
+	item_wh_list = [
+		entry
+		for item in items
+		for entry in get_all_warehouses(item)
+		if entry["root_warehouse"] == root_warehouse
+	]
+
+	# Build the final list with item, warehouse, and quantity
+	item_wh_qty_list = [
+		{
+			"item_code": entry["item_code"],
+			"warehouse": entry["warehouse"],
+			"qty": get_item_qty(entry["item_code"], entry["warehouse"]),
+			"modified": get_bin_modified(entry["item_code"], entry["warehouse"]),
+		}
+		for entry in item_wh_list
+	]
 
 	if method == "FIFO":
 		pass
