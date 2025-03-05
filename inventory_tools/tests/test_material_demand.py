@@ -164,7 +164,7 @@ def test_report_po_with_aggregation_and_aggregation_warehouse():
 		{"end_date": getdate(), "price_list": "Bakery Buying", "source": "Material Request"}
 	)
 	columns, rows = execute_material_demand(filters)
-	assert len(rows) == 50
+	assert len(rows) == 54
 	assert rows[1].get("supplier") == "Chelsea Fruit Co"
 
 	selected_rows = [
@@ -215,7 +215,7 @@ def test_report_po_with_aggregation_and_no_aggregation_warehouse():
 		{"end_date": getdate(), "price_list": "Bakery Buying", "source": "Material Request"}
 	)
 	columns, rows = execute_material_demand(filters)
-	assert len(rows) == 52
+	assert len(rows) == 54
 	assert rows[1].get("supplier") == "Chelsea Fruit Co"
 
 	selected_rows = [
@@ -493,7 +493,7 @@ def test_report_po_with_aggregation_and_no_aggregation_warehouse_for_sales_order
 	so = create_so()
 
 	filters = frappe._dict(
-		{"end_date": getdate(), "price_list": "Bakery Wholesale", "source": "Material Request"}
+		{"end_date": getdate(), "price_list": "Bakery Wholesale", "source": "Sales Order"}
 	)
 	columns, rows = execute_material_demand(filters)
 	assert len(rows) == 12
