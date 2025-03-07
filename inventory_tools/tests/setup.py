@@ -21,6 +21,7 @@ from inventory_tools.tests.fixtures import (
 	specifications,
 	suppliers,
 	workstations,
+	warehouse_locations,
 )
 
 
@@ -92,6 +93,7 @@ def create_test_data():
 	frappe.db.set_single_value("Stock Settings", "default_warehouse", "")
 	create_warehouse_plan(cfc)
 	create_warehouses(settings)
+	create_warehouse_locations()
 	setup_manufacturing_settings(settings)
 	create_workstations(settings)
 	create_operations()
@@ -877,3 +879,11 @@ def create_demo_specification_values():
 	test_generate_values()
 	test_generate_values_on_overlapping_items()
 	test_manual_attribute_addition()
+
+
+def create_warehouse_locations():
+	for item in warehouse_locations:
+		whl = frappe.new_doc("Warehouse")
+		whl.update(item)
+		whl.save()
+		whl.submit()
