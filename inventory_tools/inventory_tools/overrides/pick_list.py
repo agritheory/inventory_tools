@@ -6,6 +6,7 @@ from frappe.utils import safe_json_loads
 if TYPE_CHECKING:
 	from erpnext.stock.doctype.pick_list_item.pick_list_item import PickListItem
 	from erpnext.stock.doctype.pick_list.pick_list import PickList
+	from frappe.utils.data import nowdate
 
 
 @frappe.whitelist()
@@ -44,24 +45,24 @@ def get_node(doc, method):
 
 	root_warehouse = root_warehouses[0]
 
-	# Accumulate warehouse entries for each item, filtering by the common root warehouse
-	item_wh_list = [
-		entry
-		for item in items
-		for entry in get_all_warehouses(item)
-		if entry["root_warehouse"] == root_warehouse
-	]
+	# # Accumulate warehouse entries for each item, filtering by the common root warehouse
+	# item_wh_list = [
+	# 	entry
+	# 	for item in items
+	# 	for entry in get_all_warehouses(item)
+	# 	if entry["root_warehouse"] == root_warehouse
+	# ]
 
-	# Build the final list with item, warehouse, and quantity
-	item_wh_qty_list = [
-		{
-			"item_code": entry["item_code"],
-			"warehouse": entry["warehouse"],
-			"qty": get_item_qty(entry["item_code"], entry["warehouse"]),
-			"modified": get_bin_modified(entry["item_code"], entry["warehouse"]),
-		}
-		for entry in item_wh_list
-	]
+	# # Build the final list with item, warehouse, and quantity
+	# item_wh_qty_list = [
+	# 	{
+	# 		"item_code": entry["item_code"],
+	# 		"warehouse": entry["warehouse"],
+	# 		"qty": get_item_qty(entry["item_code"], entry["warehouse"]),
+	# 		"modified": get_bin_modified(entry["item_code"], entry["warehouse"]),
+	# 	}
+	# 	for entry in item_wh_list
+	# ]
 
 	if method == "FIFO":
 		pass
