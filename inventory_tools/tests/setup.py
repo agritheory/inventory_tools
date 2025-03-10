@@ -111,7 +111,7 @@ def create_test_data():
 	create_specifications(settings)
 	create_item_dimensions()
 	create_warehouse_dimensions()
-	create_stock_entries(settings)
+	create_stock_entries()
 
 
 def create_suppliers(settings):
@@ -860,11 +860,11 @@ def create_warehouse_dimensions():
 		wyd.submit()
 
 
-def create_stock_entries(settings):
+def create_stock_entries():
 	j = len(items_stockentry) // 2
 	# Add items to warehouse
 	se = frappe.new_doc("Stock Entry")
-	se.posting_date = settings.day
+	se.posting_date = getdate().replace(month=1, day=1)
 	se.set_posting_time = 1
 	se.stock_entry_type = "Material Receipt"
 
@@ -883,8 +883,8 @@ def create_stock_entries(settings):
 
 	# Second entry offset time for FIFO/LIFO
 	se = frappe.new_doc("Stock Entry")
-	se.posting_date = settings.day
-	se.set_posting_time = 2
+	se.posting_date = getdate().replace(month=1, day=2)
+	se.set_posting_time = 1
 	se.stock_entry_type = "Material Receipt"
 
 	for item in items_stockentry[j:]:
