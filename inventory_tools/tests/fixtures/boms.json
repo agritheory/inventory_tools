@@ -1,0 +1,803 @@
+[
+	{
+		"item": "Tower of Bay-bel",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"items": [
+			{
+				"item_code": "Bayberry Pie",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			},
+			{
+				"item_code": "Bayberry Pocket",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			}
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Assemble Combination Product",
+				"time_in_mins": 2.0,
+				"workstation": "Food Prep Table 1"
+			}
+		]
+	},
+	{
+		"item": "Pocketful of Bay",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"items": [
+			{
+				"item_code": "Bayberry Pocket",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			},
+			{
+				"item_code": "Bayberry Popper",
+				"qty": 10.0,
+				"qty_consumed_per_unit": 2.0,
+				"uom": "Nos"
+			},
+			{
+				"item_code": "Pie Box",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			}
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Assemble Combination Product",
+				"time_in_mins": 2.0,
+				"workstation": "Food Prep Table 1"
+			}
+		]
+	},
+	{
+		"item": "Bayberry Pocket",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"items": [
+			{
+				"item_code": "Flour",
+				"qty": 1.5,
+				"qty_consumed_per_unit": 0.3,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Butter",
+				"qty": 0.75,
+				"qty_consumed_per_unit": 0.15,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Sugar",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.02,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Bayberry Popper",
+				"qty": 15.0,
+				"qty_consumed_per_unit": 3.0,
+				"uom": "Nos"
+			}
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Mix Dough Op",
+				"time_in_mins": 5.0,
+				"workstation": "Mixer Station"
+			},
+			{
+				"batch_size": 5,
+				"operation": "Assemble Pocket Op",
+				"time_in_mins": 2.0,
+				"workstation": "Food Prep Table 1"
+			}
+		]
+	},
+	{
+		"item": "Bayberry Popper",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"items": [
+			{
+				"item_code": "Flour",
+				"qty": 0.5,
+				"qty_consumed_per_unit": 0.1,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Butter",
+				"qty": 0.25,
+				"qty_consumed_per_unit": 0.05,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Sugar",
+				"qty": 0.05,
+				"qty_consumed_per_unit": 0.01,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Bayberry",
+				"qty": 1.0,
+				"qty_consumed_per_unit": 0.2,
+				"uom": "Pound"
+			}
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Mix Dough Op",
+				"time_in_mins": 5.0,
+				"workstation": "Mixer Station"
+			},
+			{
+				"batch_size": 5,
+				"operation": "Assemble Popper Op",
+				"time_in_mins": 1.0,
+				"workstation": "Food Prep Table 1"
+			}
+		]
+	},
+	{
+		"item": "Bayberry Pie",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"items": [
+			{
+				"item_code": "Pie Crust",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			},
+			{
+				"item_code": "Bayberry Pie Filling",
+				"qty": 20.0,
+				"qty_consumed_per_unit": 4.0,
+				"uom": "Cup"
+			},
+			{
+				"item_code": "Pie Box",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			}
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Assemble Pie Op",
+				"time_in_mins": 10.0,
+				"workstation": "Food Prep Table 2"
+			},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station"
+			},
+			{
+				"batch_size": 1,
+				"operation": "Cool Pie Op",
+				"time_in_mins": 30.0,
+				"workstation": "Cooling Racks Station"
+			},
+			{
+				"batch_size": 5,
+				"operation": "Box Pie Op",
+				"time_in_mins": 5.0,
+				"workstation": "Packaging Station"
+			}
+		]
+	},
+	{
+		"item": "Double Plum Pie",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"items": [
+			{
+				"item_code": "Pie Crust",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			},
+			{
+				"item_code": "Double Plum Pie Filling",
+				"qty": 20.0,
+				"qty_consumed_per_unit": 4.0,
+				"uom": "Cup"
+			},
+			{
+				"item_code": "Pie Box",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			}
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Assemble Pie Op",
+				"time_in_mins": 10.0,
+				"workstation": "Food Prep Table 2"
+			},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station"
+			},
+			{
+				"batch_size": 1,
+				"operation": "Cool Pie Op",
+				"time_in_mins": 30.0,
+				"workstation": "Cooling Racks Station"
+			},
+			{
+				"batch_size": 5,
+				"operation": "Box Pie Op",
+				"time_in_mins": 5.0,
+				"workstation": "Packaging Station"
+			}
+		]
+	},
+	{
+		"item": "Kaduka Key Lime Pie",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"items": [
+			{
+				"item_code": "Pie Crust",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			},
+			{
+				"item_code": "Kaduka Key Lime Pie Filling",
+				"qty": 20.0,
+				"qty_consumed_per_unit": 4.0,
+				"uom": "Cup"
+			},
+			{
+				"item_code": "Pie Box",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			}
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Assemble Pie Op",
+				"time_in_mins": 10.0,
+				"workstation": "Food Prep Table 2"
+			},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station"
+			},
+			{
+				"batch_size": 1,
+				"operation": "Cool Pie Op",
+				"time_in_mins": 30.0,
+				"workstation": "Cooling Racks Station"
+			},
+			{
+				"batch_size": 5,
+				"operation": "Box Pie Op",
+				"time_in_mins": 5.0,
+				"workstation": "Packaging Station"
+			}
+		]
+	},
+	{
+		"item": "Gooseberry Pie",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"items": [
+			{
+				"item_code": "Pie Crust",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			},
+			{
+				"item_code": "Gooseberry Pie Filling",
+				"qty": 20.0,
+				"qty_consumed_per_unit": 4.0,
+				"uom": "Cup"
+			},
+			{
+				"item_code": "Pie Box",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			}
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Assemble Pie Op",
+				"time_in_mins": 10.0,
+				"workstation": "Food Prep Table 2"
+			},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station"
+			},
+			{
+				"batch_size": 1,
+				"operation": "Cool Pie Op",
+				"time_in_mins": 30.0,
+				"workstation": "Cooling Racks Station"
+			},
+			{
+				"batch_size": 5,
+				"operation": "Box Pie Op",
+				"time_in_mins": 5.0,
+				"workstation": "Packaging Station"
+			}
+		]
+	},
+	{
+		"item": "Ambrosia Pie",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"overproduction_percentage_for_work_order": 100,
+		"items": [
+			{
+				"item_code": "Pie Crust",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			},
+			{
+				"item_code": "Ambrosia Pie Filling",
+				"qty": 20.0,
+				"qty_consumed_per_unit": 4.0,
+				"uom": "Cup"
+			},
+			{
+				"item_code": "Pie Box",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			}
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Assemble Pie Op",
+				"time_in_mins": 10.0,
+				"workstation": "Food Prep Table 2"
+			},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station"
+			},
+			{
+				"batch_size": 1,
+				"operation": "Cool Pie Op",
+				"time_in_mins": 30.0,
+				"workstation": "Cooling Racks Station"
+			},
+			{
+				"batch_size": 5,
+				"operation": "Box Pie Op",
+				"time_in_mins": 5.0,
+				"workstation": "Packaging Station"
+			}
+		]
+	},
+	{
+		"item": "Bayberry Pie Filling",
+		"quantity": 20.0,
+		"uom": "Cup",
+		"items": [
+			{
+				"item_code": "Sugar",
+				"qty": 0.5,
+				"qty_consumed_per_unit": 0.025,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Cornstarch",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.005,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Water",
+				"qty": 1.25,
+				"qty_consumed_per_unit": 0.0625,
+				"uom": "Cup"
+			},
+			{
+				"item_code": "Butter",
+				"qty": 0.313,
+				"qty_consumed_per_unit": 0.01565,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Bayberry",
+				"qty": 15.0,
+				"qty_consumed_per_unit": 0.05025,
+				"uom": "Pound"
+			}
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Gather Pie Filling Ingredients",
+				"time_in_mins": 5.0,
+				"workstation": "Food Prep Table 1"
+			},
+			{
+				"batch_size": 5,
+				"operation": "Cook Pie Filling Operation",
+				"time_in_mins": 15.0,
+				"workstation": "Range Station"
+			}
+		]
+	},
+	{
+		"item": "Double Plum Pie Filling",
+		"quantity": 20.0,
+		"uom": "Cup",
+		"items": [
+			{
+				"item_code": "Sugar",
+				"qty": 0.5,
+				"qty_consumed_per_unit": 0.025,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Cornstarch",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.005,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Water",
+				"qty": 1.25,
+				"qty_consumed_per_unit": 0.0625,
+				"uom": "Cup"
+			},
+			{
+				"item_code": "Butter",
+				"qty": 0.313,
+				"qty_consumed_per_unit": 0.01565,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Cocoplum",
+				"qty": 7.5,
+				"qty_consumed_per_unit": 0.02515,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Damson Plum",
+				"qty": 7.5,
+				"qty_consumed_per_unit": 0.02515,
+				"uom": "Pound"
+			}
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Gather Pie Filling Ingredients",
+				"time_in_mins": 5.0,
+				"workstation": "Food Prep Table 1"
+			},
+			{
+				"batch_size": 5,
+				"operation": "Cook Pie Filling Operation",
+				"time_in_mins": 15.0,
+				"workstation": "Range Station"
+			}
+		]
+	},
+	{
+		"item": "Kaduka Key Lime Pie Filling",
+		"quantity": 20.0,
+		"uom": "Cup",
+		"items": [
+			{
+				"item_code": "Sugar",
+				"qty": 0.5,
+				"qty_consumed_per_unit": 0.025,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Cornstarch",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.005,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Water",
+				"qty": 1.25,
+				"qty_consumed_per_unit": 0.0625,
+				"uom": "Cup"
+			},
+			{
+				"item_code": "Butter",
+				"qty": 0.313,
+				"qty_consumed_per_unit": 0.01565,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Kaduka Lime",
+				"qty": 10.0,
+				"qty_consumed_per_unit": 0.0335,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Limequat",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 0.01675,
+				"uom": "Pound"
+			}
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Gather Pie Filling Ingredients",
+				"time_in_mins": 5.0,
+				"workstation": "Food Prep Table 1"
+			},
+			{
+				"batch_size": 5,
+				"operation": "Cook Pie Filling Operation",
+				"time_in_mins": 15.0,
+				"workstation": "Range Station"
+			}
+		]
+	},
+	{
+		"item": "Gooseberry Pie Filling",
+		"quantity": 20.0,
+		"uom": "Cup",
+		"items": [
+			{
+				"item_code": "Sugar",
+				"qty": 0.5,
+				"qty_consumed_per_unit": 0.025,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Cornstarch",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.005,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Water",
+				"qty": 1.25,
+				"qty_consumed_per_unit": 0.0625,
+				"uom": "Cup"
+			},
+			{
+				"item_code": "Butter",
+				"qty": 0.313,
+				"qty_consumed_per_unit": 0.01565,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Gooseberry",
+				"qty": 15.0,
+				"qty_consumed_per_unit": 0.05025,
+				"uom": "Pound"
+			}
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Gather Pie Filling Ingredients",
+				"time_in_mins": 5.0,
+				"workstation": "Food Prep Table 1"
+			},
+			{
+				"batch_size": 5,
+				"operation": "Cook Pie Filling Operation",
+				"time_in_mins": 15.0,
+				"workstation": "Range Station"
+			}
+		]
+	},
+	{
+		"item": "Ambrosia Pie Filling",
+		"quantity": 20.0,
+		"uom": "Cup",
+		"items": [
+			{
+				"item_code": "Sugar",
+				"qty": 0.5,
+				"qty_consumed_per_unit": 0.025,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Cornstarch",
+				"qty": 0.1,
+				"qty_consumed_per_unit": 0.005,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Butter",
+				"qty": 0.313,
+				"qty_consumed_per_unit": 0.01565,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Hairless Rambutan",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 0.01675,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Tayberry",
+				"qty": 2.5,
+				"qty_consumed_per_unit": 0.0084,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Cloudberry",
+				"qty": 7.5,
+				"qty_consumed_per_unit": 0.02515,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Water",
+				"qty": 1.25,
+				"qty_consumed_per_unit": 0.0625,
+				"uom": "Cup"
+			}
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Gather Pie Filling Ingredients",
+				"time_in_mins": 5.0,
+				"workstation": "Food Prep Table 1"
+			},
+			{
+				"batch_size": 5,
+				"operation": "Cook Pie Filling Operation",
+				"time_in_mins": 15.0,
+				"workstation": "Range Station"
+			}
+		]
+	},
+	{
+		"item": "Pie Crust",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"is_default": 0,
+		"is_subcontracted": 1,
+		"with_operations": 0,
+		"items": [
+			{
+				"item_code": "Flour",
+				"qty": 4.25,
+				"qty_consumed_per_unit": 0.85,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Butter",
+				"qty": 2.5,
+				"qty_consumed_per_unit": 0.5,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Salt",
+				"qty": 0.05,
+				"qty_consumed_per_unit": 0.01,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Parchment Paper",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			},
+			{
+				"item_code": "Pie Tin",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			}
+		],
+		"operations": []
+	},
+	{
+		"item": "Pie Crust",
+		"quantity": 5.0,
+		"uom": "Nos",
+		"items": [
+			{
+				"item_code": "Flour",
+				"qty": 4.25,
+				"qty_consumed_per_unit": 0.85,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Butter",
+				"qty": 2.5,
+				"qty_consumed_per_unit": 0.5,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Ice Water",
+				"qty": 2.5,
+				"qty_consumed_per_unit": 0.5,
+				"uom": "Cup"
+			},
+			{
+				"item_code": "Salt",
+				"qty": 0.05,
+				"qty_consumed_per_unit": 0.01,
+				"uom": "Pound"
+			},
+			{
+				"item_code": "Parchment Paper",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			},
+			{
+				"item_code": "Pie Tin",
+				"qty": 5.0,
+				"qty_consumed_per_unit": 1.0,
+				"uom": "Nos"
+			}
+		],
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Gather Pie Crust Ingredients",
+				"time_in_mins": 5.0,
+				"workstation": "Food Prep Table 2"
+			},
+			{
+				"batch_size": 5,
+				"operation": "Mix Dough Op",
+				"time_in_mins": 5.0,
+				"workstation": "Mixer Station"
+			},
+			{
+				"batch_size": 1,
+				"operation": "Divide Dough Op",
+				"time_in_mins": 2.0,
+				"workstation": "Food Prep Table 2"
+			},
+			{
+				"batch_size": 1,
+				"operation": "Chill Pie Crust Op",
+				"time_in_mins": 30.0,
+				"workstation": "Refrigerator Station"
+			},
+			{
+				"batch_size": 5,
+				"operation": "Roll Pie Crust Op",
+				"time_in_mins": 10.0,
+				"workstation": "Food Prep Table 2"
+			}
+		]
+	}
+]

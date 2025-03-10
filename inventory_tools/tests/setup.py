@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import datetime
+import json
 import shutil
 import frappe
 from pathlib import Path
@@ -14,18 +15,27 @@ from frappe.utils.data import add_months, flt, getdate, nowdate, get_datetime
 from webshop.webshop.doctype.website_item.website_item import make_website_item
 
 from inventory_tools.tests.fixtures import (
-	boms,
-	customers,
-	items,
 	operations,
-	specifications,
 	suppliers,
 	workstations,
-	item_dimensions,
-	items_stockentry,
-	warehouse_dimensions,
-	warehouse_locations,
 )
+
+
+def read_json(name):
+	fixture_dir = Path(__file__).parent / "fixtures" / f"{name}.json"
+	with open(fixture_dir) as file:
+		data = json.load(file)
+	return data
+
+
+boms = read_json("boms")
+customers = read_json("customers")
+items = read_json("items")
+specifications = read_json("specifications")
+item_dimensions = read_json("item_dimensions")
+items_stockentry = read_json("items_stockentry")
+warehouse_dimensions = read_json("warehouse_dimensions")
+warehouse_locations = read_json("warehouse_locations")
 
 
 def before_test():
