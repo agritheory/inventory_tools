@@ -21,6 +21,9 @@ from inventory_tools.tests.fixtures import (
 	specifications,
 	suppliers,
 	workstations,
+	item_dimensions,
+	items_stockentry,
+	warehouse_dimensions,
 	warehouse_locations,
 )
 
@@ -112,6 +115,9 @@ def create_test_data():
 	create_fruit_material_request(settings)
 	create_quotations(settings)
 	create_specifications(settings)
+	create_item_dimensions()
+	create_warehouse_dimensions()
+	create_stock_entries()
 
 
 def copy_fixture_files():
@@ -879,6 +885,63 @@ def create_demo_specification_values():
 	test_generate_values()
 	test_generate_values_on_overlapping_items()
 	test_manual_attribute_addition()
+
+
+def create_item_dimensions():
+	for item in item_dimensions:
+		pyd = frappe.new_doc("Physical Dimension")
+		pyd.update(item)
+		pyd.save()
+		pyd.submit()
+
+
+def create_warehouse_dimensions():
+	for item in warehouse_dimensions:
+		wyd = frappe.new_doc("Physical Dimension")
+		wyd.update(item)
+		wyd.save()
+		wyd.submit()
+
+
+def create_stock_entries():
+	j = len(items_stockentry) // 2
+	# Add items to warehouse
+	se = frappe.new_doc("Stock Entry")
+	se.posting_date = getdate().replace(month=1, day=1)
+	se.set_posting_time = 1
+	se.stock_entry_type = "Material Receipt"
+
+	for item in items_stockentry[0:j]:
+		se.append(
+			"items",
+			{
+				"t_warehouse": item["warehouse"],
+				"item_code": item["item_code"],
+				"qty": item["qty"],
+			},
+		)
+
+	se.save()
+	se.submit()
+
+	# Second entry offset time for FIFO/LIFO
+	se = frappe.new_doc("Stock Entry")
+	se.posting_date = getdate().replace(month=1, day=2)
+	se.set_posting_time = 1
+	se.stock_entry_type = "Material Receipt"
+
+	for item in items_stockentry[j:]:
+		se.append(
+			"items",
+			{
+				"t_warehouse": item["warehouse"],
+				"item_code": item["item_code"],
+				"qty": item["qty"],
+			},
+		)
+
+	se.save()
+	se.submit()
 
 
 def create_warehouse_locations():

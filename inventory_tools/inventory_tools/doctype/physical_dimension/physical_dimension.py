@@ -47,7 +47,6 @@ class PhysicalDimension(Document):
 	def validate_item_case_fit(self):
 		if self.item_volume > self.case_volume:
 			frappe.throw("Item volume should not be greater than case volume")
-
 		if self.item_volume == 0:
 			frappe.throw("Item volume cannot be zero")
 		if self.case_volume == 0:
