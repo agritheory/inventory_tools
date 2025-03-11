@@ -39,6 +39,14 @@ class WarehousePlan(Document):
 			filters={"warehouse_plan": self.name},
 			pluck="name",
 		)
+	
+class Grid_TSP:
+	def __init__(self, grid, waypoints, scale=1):
+		self.grid = grid
+		self.waypoints = waypoints
+		self.scale = scale
+		self.G = nx.Graph()
+		self.make_graph()
 
 		for warehouse in warehouses:
 			warehouse_doc = frappe.get_doc("Warehouse", warehouse.get("warehouse_name"))

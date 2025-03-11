@@ -3,6 +3,9 @@ from typing import TYPE_CHECKING
 import frappe
 from frappe.utils import safe_json_loads
 from frappe.utils.data import nowdate
+import numpy as np
+
+from inventory_tools.inventory_tools.doctype.warehouse_plan.warehouse_plan import Grid_TSP
 
 if TYPE_CHECKING:
 	from erpnext.stock.doctype.pick_list_item.pick_list_item import PickListItem
@@ -70,31 +73,23 @@ def optimize_picklist(doc, method):
 	new_items = []
 	for item in itemdict.keys():
 		if method == "FIFO":
-			new_items.append(
-				Rules.FIFO(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
-			)
+			new_items += Rules.FIFO(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
 		elif method == "LIFO":
-			new_items.append(
-				Rules.LIFO(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
-			)
+			new_items += Rules.LIFO(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
 		elif method == "Deplete maximum number of Bins":
-			new_items.append(
-				Rules.deplete_max_bins(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
+			new_items += Rules.deplete_max_bins(
+				item, itemdict[item]["qty"], company, root_warehouse=root_warehouse
 			)
 		elif method == "Deplete minimum number of Bins":
-			new_items.append(
-				Rules.deplete_max_bins(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
+			new_items += Rules.deplete_max_bins(
+				item, itemdict[item]["qty"], company, root_warehouse=root_warehouse
 			)
-		elif method == "Shortest Path":
-			# TODO: Select warehouses closest to pickup point
-			pass
 
-	op_list = optimize_route_picklist(new_items)
-	return op_list
+	return optimize_route_picklist(new_items, root_warehouse)
 
 
 @frappe.whitelist()
-def optimize_route_picklist(item_wh: list):
+def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
 	"""
 	Optimize the pick-up route for a list of items.
 
