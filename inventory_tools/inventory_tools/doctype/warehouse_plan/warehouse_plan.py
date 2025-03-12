@@ -103,25 +103,26 @@ class Grid_TSP:
 		distance = sum(self.G[u][v]["weight"] for u, v in zip(path, path[1:]))
 		return path, distance
 
-	def tsp(self, pickup_node: list, nodes: list):
+	def tsp(self, pickup_node: list, nodes: list, debug: bool = False):
 		tsp = nx.approximation.traveling_salesman_problem
 		pickup_list = pickup_node + nodes
 		tsp_route = tsp(self.G, nodes=pickup_list)
-		tsp_distance = sum(self.G[u][v]["weight"] for u, v in zip(tsp_route, tsp_route[1:]))
-
 		pickup_order = list(dict.fromkeys(node for node in tsp_route if node in pickup_list))[1:]
+		if debug:
+			tsp_distance = sum(self.G[u][v]["weight"] for u, v in zip(tsp_route, tsp_route[1:]))
+			return pickup_order, tsp_route, tsp_distance
+		else:
+			return (pickup_order,)
 
-		return tsp_route, tsp_distance, pickup_order
-
-	def _plot(self, path: list = None):
+	def _plot(self, tsp_route: list = None):
 		# This function is meant for debugging purposes only
 		import matplotlib.pyplot as plt
 
 		plt.imshow(self.grid, cmap="gray")
 		plt.grid(True)
-		if path:
+		if tsp_route:
 			# Plot the path
-			path_coords = [self.node2pos(wp) for wp in path]
+			path_coords = [self.node2pos(wp) for wp in tsp_route]
 			path_coords = np.array(path_coords)
 			plt.plot(path_coords[:, 1], path_coords[:, 0], "r-")
 		plt.show()

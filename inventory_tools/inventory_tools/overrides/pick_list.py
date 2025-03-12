@@ -111,7 +111,7 @@ def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
 	pickup_list = list(warehouse_to_node.values())
 
 	# Solve
-	tsp_route, tsp_distance, pickup_order = g.tsp(dropoff, pickup_list)
+	pickup_order, *rest = g.tsp(dropoff, pickup_list)
 
 	# Map warehouse name to its order
 	warehouse_order_map = {}
