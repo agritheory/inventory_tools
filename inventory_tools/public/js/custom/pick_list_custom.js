@@ -21,20 +21,48 @@ function path_dialog(frm) {
 				label: __('Strategy'),
 				fieldname: 'strategy',
 				fieldtype: 'Select',
-				options: ['FIFO', 'LIFO', 'Deplete maximum number of Bins', 'Deplete minimum number of Bins', 'Shortest Path'],
+				options: ['FIFO', 'LIFO', 'Deplete maximum number of Bins', 'Deplete minimum number of Bins'],
 				reqd: 1,
-				default: 'Shortest Path',
+				default: 'Deplete maximum number of Bins',
 			},
 		],
 		primary_action: async () => {
 			let data = await d.get_values()
+
 			frappe
 				.xcall('inventory_tools.inventory_tools.overrides.pick_list.optimize_path', {
 					doc: frm.doc.name,
 					strategy: data.strategy,
 				})
 				.then(r => {
-					d.hide()
+					if (!Array.isArray(r)) {
+						console.error('Invalid response format:', r)
+						frappe.msgprint(__('Invalid response received from server.'))
+						return
+					}
+
+					// Clear and repopulate the child table
+					frm.clear_table('child_table_fieldname')
+					r.forEach(item => {
+						let child = frm.add_child('child_table_fieldname')
+						child.item_code = item.item_code
+						child.qty = item.qty
+					})
+					frm.refresh_field('child_table_fieldname')
+				})
+				.catch(error => {
+					console.error('Error optimizing path:', error)
+					frappe.msgprint({
+						title: __('Error'),
+						indicator: 'red',
+						message: __('Failed to optimize path. Please try again.'),
+					})
+				})
+				.finally(() => {
+					setTimeout(() => {
+						d.hide()
+						frm.refresh()
+					}, 200)
 				})
 		},
 		primary_action_label: __('Optimize Path'),

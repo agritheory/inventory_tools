@@ -437,6 +437,7 @@ def create_warehouse_plan(cfc):
 			"offset": "1,1,0,0",
 			"floor_plan": "/files/warehouse_plan.png",
 			"group_warehouse": root_wh,
+			"matrix": warehouse_plan_matrix,
 		}
 	)
 	warehouse_plan.save()

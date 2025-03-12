@@ -46,6 +46,18 @@ def validate_warehouse_has_plan(items):
 		item_list["item_warehouses"] = item_warehouses
 		for wh in item_warehouses:
 			root_warehouse.append(get_root_warehouse(wh))
+def get_root_warehouse(warehouse):
+	# Finds closest parent warehouse with a walkable floor plan; otherwise returns None
+	wh_plans = [wh["name"] for wh in frappe.get_all("Warehouse Plan")]
+	if warehouse in wh_plans:
+		wp_doc = frappe.get_doc("Warehouse Plan", warehouse)
+		if wp_doc.as_dict()["matrix"] is not None:
+			return warehouse
+	parent_warehouse = frappe.get_doc("Warehouse", warehouse).as_dict()["parent_warehouse"]
+	if parent_warehouse == "":
+		frappe.ValidationError("Warehouse does not have a parent warehouse")
+		return None
+	return get_root_warehouse(parent_warehouse)
 
 
 @frappe.whitelist()
@@ -121,13 +133,12 @@ def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
 
 	Parameters:
 	        doc (PickList or str):
-	                The picklist document to optimize. This may be provided either as a JSON string or a
-	                Python dictionary. The document must include:
-	                        - "company": The name of the company.
+	                The picklist document to optimize. The document must include:
+	                        - "company".
 	                        - "locations": A list of location dictionaries, each containing:
-	                                - "item_code": Identifier for the item.
-	                                - "qty": Quantity of the item at that location.
-	                                - "warehouse": The warehouse identifier for the location.
+	                                - "item_code".
+	                                - "qty".
+	                                - "warehouse".
 	        strategy (str):
 	                The strategy to apply when determining the pick order. Supported strategies include:
 	                        - "FIFO".
@@ -143,8 +154,8 @@ def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
 	                If the locations in the picklist document do not all share the same root warehouse,
 	                indicating an inconsistency in the warehouse plan.
 	"""
-	doc = safe_json_loads(doc) if isinstance(doc, str) else doc
-
+	if isinstance(doc, str):
+		doc = frappe.get_doc("Pick List", doc).as_dict()
 	# Extract item codes and root warehouses from document locations
 	itemdict = {}
 	for loc in doc["locations"]:
