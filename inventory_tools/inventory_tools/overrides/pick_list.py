@@ -118,6 +118,9 @@ def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
 
 @frappe.whitelist()
 def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
+	"""
+	Queries items for a given pick list determined by the given strategy
+	"""
 	doc = safe_json_loads(doc) if isinstance(doc, str) else doc
 
 	# Extract item codes and root warehouses from document locations
@@ -148,7 +151,7 @@ def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
 				item, itemdict[item]["qty"], company, root_warehouse=root_warehouse
 			)
 		elif strategy == "Deplete minimum number of Bins":
-			item_whs += Rules.deplete_max_bins(
+			item_whs += Rules.deplete_min_bins(
 				item, itemdict[item]["qty"], company, root_warehouse=root_warehouse
 			)
 
