@@ -50,8 +50,7 @@ def validate_warehouse_has_plan(items):
 
 @frappe.whitelist()
 def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
-	"""
-	Optimize the pick-up route for a list of items.
+	"""Optimize the pick-up route for a list of items.
 
 	This function takes a list of dictionaries, each representing an item along with its warehouse
 	location, and returns the list reordered based on an optimized pick-up sequence.
@@ -118,8 +117,31 @@ def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
 
 @frappe.whitelist()
 def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
-	"""
-	Queries items for a given pick list determined by the given strategy
+	"""Optimize the picklist route based on the specified strategy.
+
+	Parameters:
+	        doc (PickList or str):
+	                The picklist document to optimize. This may be provided either as a JSON string or a
+	                Python dictionary. The document must include:
+	                        - "company": The name of the company.
+	                        - "locations": A list of location dictionaries, each containing:
+	                                - "item_code": Identifier for the item.
+	                                - "qty": Quantity of the item at that location.
+	                                - "warehouse": The warehouse identifier for the location.
+	        strategy (str):
+	                The strategy to apply when determining the pick order. Supported strategies include:
+	                        - "FIFO".
+	                        - "LIFO".
+	                        - "Deplete maximum number of Bins".
+	                        - "Deplete minimum number of Bins".
+	Returns:
+	        list[PickListItem]:
+	                A list of optimized picklist items generated based on the input strategy and common warehouse.
+
+	Raises:
+	        frappe.ValidationError:
+	                If the locations in the picklist document do not all share the same root warehouse,
+	                indicating an inconsistency in the warehouse plan.
 	"""
 	doc = safe_json_loads(doc) if isinstance(doc, str) else doc
 

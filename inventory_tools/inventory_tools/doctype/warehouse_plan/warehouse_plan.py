@@ -41,6 +41,19 @@ class WarehousePlan(Document):
 		)
 	
 class Grid_TSP:
+	"""Constructs a graph from a 2D grid and solves path and TSP problems using NetworkX.
+
+	Navigable nodes are grid cells with value 1. Nodes connect to their west and north neighbors,
+	with edge weights scaled by the provided factor. The class offers methods to validate graph
+	connectivity, convert between grid positions and node indices, compute shortest paths, approximate
+	a TSP route for given nodes, and visualize the grid and routes for debugging.
+
+	Attributes:
+	    grid (np.ndarray): 2D array representing the grid (1 indicates a pathway).
+	    scale (int or float): Factor to scale edge weights.
+	    G (nx.Graph): Graph built from the grid.
+	"""
+
 	def __init__(self, grid, scale=1):
 		self.grid = grid
 		self.scale = scale
@@ -62,13 +75,19 @@ class Grid_TSP:
 			if warehouse_doc.name in existing_warehouses:
 				existing_warehouses.remove(warehouse_doc.name)
 
-	def pos2node(self, pos: tuple):
+	def validate(self) -> bool:
+		if nx.is_connected(self.G):
+			return True
+		else:
+			return False
+
+	def pos2node(self, pos: tuple) -> int:
 		return pos[1] * self.grid.shape[1] + pos[0]
 
-	def node2pos(self, node: int):
+	def node2pos(self, node: int) -> tuple:
 		return (node // self.grid.shape[1], node % self.grid.shape[1])
 
-	def find_path(self, start, end):
+	def find_path(self, start: int, end: int):
 		try:
 			path = nx.shortest_path(self.G, start, end)
 		except nx.NetworkXNoPath:
