@@ -41,9 +41,8 @@ class WarehousePlan(Document):
 		)
 	
 class Grid_TSP:
-	def __init__(self, grid, waypoints, scale=1):
+	def __init__(self, grid, scale=1):
 		self.grid = grid
-		self.waypoints = waypoints
 		self.scale = scale
 		self.G = nx.Graph()
 		self.make_graph()
@@ -63,13 +62,50 @@ class Grid_TSP:
 			if warehouse_doc.name in existing_warehouses:
 				existing_warehouses.remove(warehouse_doc.name)
 
-		# if warehouses are deleted, remove them from the warehouse plan
-		if len(existing_warehouses) > 0:
-			for warehouse in existing_warehouses:
-				frappe.db.set_value("Warehouse", warehouse, "warehouse_plan", None)
-				frappe.db.set_value("Warehouse", warehouse, "warehouse_plan_coordinates", None)
-				frappe.db.set_value("Warehouse", warehouse, "rotation", 0)
-				frappe.db.set_value("Warehouse", warehouse, "accessible_path", None)
+	def pos2node(self, pos: tuple):
+		return pos[1] * self.grid.shape[1] + pos[0]
+
+	def node2pos(self, node: int):
+		return (node // self.grid.shape[1], node % self.grid.shape[1])
+
+	def find_path(self, start, end):
+		try:
+			path = nx.shortest_path(self.G, start, end)
+		except nx.NetworkXNoPath:
+			print("No path found between the given nodes.")
+			path = []
+		except nx.NodeNotFound as e:
+			print(f"Error: {e}")
+			path = []
+		except Exception as e:
+			print(f"Unexpected error: {e}")
+			path = []
+
+		distance = sum(self.G[u][v]["weight"] for u, v in zip(path, path[1:]))
+		return path, distance
+
+	def tsp(self, pickup_node: list, nodes: list):
+		tsp = nx.approximation.traveling_salesman_problem
+		pickup_list = pickup_node + nodes
+		tsp_route = tsp(self.G, nodes=pickup_list)
+		tsp_distance = sum(self.G[u][v]["weight"] for u, v in zip(tsp_route, tsp_route[1:]))
+
+		pickup_order = list(dict.fromkeys(node for node in tsp_route if node in pickup_list))[1:]
+
+		return tsp_route, tsp_distance, pickup_order
+
+	def _plot(self, path: list = None):
+		# This function is meant for debugging purposes only
+		import matplotlib.pyplot as plt
+
+		plt.imshow(self.grid, cmap="gray")
+		plt.grid(True)
+		if path:
+			# Plot the path
+			path_coords = [self.node2pos(wp) for wp in path]
+			path_coords = np.array(path_coords)
+			plt.plot(path_coords[:, 1], path_coords[:, 0], "r-")
+		plt.show()
 
 	@frappe.whitelist()
 	def get_warehouse_dimensions(self, warehouse: str):

@@ -47,12 +47,79 @@ def validate_warehouse_has_plan(items):
 		for wh in item_warehouses:
 			root_warehouse.append(get_root_warehouse(wh))
 
-		item_list["root_warehouse"] = root_warehouse
-		item_wh_list.append(item_list)
-	return item_wh_list
+
+@frappe.whitelist()
+def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
+	"""
+	Optimize the pick-up route for a list of items.
+
+	This function takes a list of dictionaries, each representing an item along with its warehouse
+	location, and returns the list reordered based on an optimized pick-up sequence.
+
+	Expected format of `item_whs`:
+	        [
+	                {
+	                        'item_code': <str>,   # The code identifying the item.
+	                        'warehouse': <str>    # The warehouse where the item is located.
+	                },
+	                ...
+	        ]
+
+	Returns:
+	        list: A reordered list of dictionaries, optimized for the pick-up route.
+	"""
+
+	# Grid
+	grid = np.array(
+		safe_json_loads(frappe.get_doc("Warehouse Plan", root_warehouse).as_dict()["matrix"])
+	)
+
+	# Scale
+	imaginary_x = grid.shape[1]
+	real_x = frappe.get_doc("Warehouse Plan", root_warehouse).as_dict()["horizontal"]
+	scale = real_x / imaginary_x
+
+	# TODO: Get dropoff node from doctype
+	dropoff = [0]
+
+	# Create the TSP solver instance.
+	g = Grid_TSP(grid, scale=scale)
+
+	# Waypoints
+	unique_whs = list({item_wh["warehouse"] for item_wh in item_whs})
+
+	# Build a mapping from warehouse to its coordinate and node.
+	warehouse_to_node = {}
+	for wh in unique_whs:
+		loc = frappe.get_doc("Warehouse", wh).as_dict()
+		coordinate = (loc["accessible_path_x"], loc["accessible_path_y"])
+		warehouse_to_node[wh] = g.pos2node(coordinate)
+	node_to_warehouse = {node: wh for wh, node in warehouse_to_node.items()}
+
+	# For the TSP solver, create a list of nodes corresponding to each unique warehouse.
+	pickup_list = list(warehouse_to_node.values())
+
+	# Solve
+	tsp_route, tsp_distance, pickup_order = g.tsp(dropoff, pickup_list)
+
+	# Map warehouse name to its order
+	warehouse_order_map = {}
+	for order_index, node in enumerate(pickup_order):
+		wh = node_to_warehouse[node]
+		warehouse_order_map[wh] = order_index
+
+	# Sort original item_whs
+	sorted_item_whs = sorted(
+		item_whs,
+		key=lambda item: (warehouse_order_map[item["warehouse"]], item["item_code"], item["qty"]),
+	)
+	return sorted_item_whs
 
 
-def optimize_picklist(doc, method):
+@frappe.whitelist()
+def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
+	doc = safe_json_loads(doc) if isinstance(doc, str) else doc
+
 	# Extract item codes and root warehouses from document locations
 	itemdict = {}
 	for loc in doc["locations"]:
@@ -70,42 +137,19 @@ def optimize_picklist(doc, method):
 
 	root_warehouse = root_warehouses[0]
 
-	new_items = []
+	item_whs = []
 	for item in itemdict.keys():
-		if method == "FIFO":
-			new_items += Rules.FIFO(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
-		elif method == "LIFO":
-			new_items += Rules.LIFO(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
-		elif method == "Deplete maximum number of Bins":
-			new_items += Rules.deplete_max_bins(
+		if strategy == "FIFO":
+			item_whs += Rules.FIFO(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
+		elif strategy == "LIFO":
+			item_whs += Rules.LIFO(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
+		elif strategy == "Deplete maximum number of Bins":
+			item_whs += Rules.deplete_max_bins(
 				item, itemdict[item]["qty"], company, root_warehouse=root_warehouse
 			)
-		elif method == "Deplete minimum number of Bins":
-			new_items += Rules.deplete_max_bins(
+		elif strategy == "Deplete minimum number of Bins":
+			item_whs += Rules.deplete_max_bins(
 				item, itemdict[item]["qty"], company, root_warehouse=root_warehouse
 			)
 
-	return optimize_route_picklist(new_items, root_warehouse)
-
-
-@frappe.whitelist()
-def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
-	"""
-	Optimize the pick-up route for a list of items.
-
-	This function takes a list of dictionaries, each representing an item along with its warehouse
-	location, and returns the list reordered based on an optimized pick-up sequence.
-
-	Expected format of `item_wh`:
-	        [
-	                {
-	                        'item_code': <str>,   # The code identifying the item.
-	                        'warehouse': <str>    # The warehouse where the item is located.
-	                },
-	                ...
-	        ]
-
-	Returns:
-	        list: A reordered list of dictionaries, optimized for the pick-up route."
-	"""
-	return 1
+	return optimize_route_picklist(item_whs, root_warehouse)
