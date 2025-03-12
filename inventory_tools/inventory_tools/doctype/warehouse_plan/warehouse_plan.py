@@ -112,7 +112,7 @@ class Grid_TSP:
 			tsp_distance = sum(self.G[u][v]["weight"] for u, v in zip(tsp_route, tsp_route[1:]))
 			return pickup_order, tsp_route, tsp_distance
 		else:
-			return (pickup_order,)
+			return (pickup_order, None, None)
 
 	def _plot(self, tsp_route: list = None):
 		# This function is meant for debugging purposes only
