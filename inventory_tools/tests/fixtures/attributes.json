@@ -1,0 +1,68 @@
+{
+	"Ambrosia Pie": {
+		"Fruits": ["Hairless Rambutan", "Cloudberry", "Tayberry"],
+		"Price": 11.0,
+		"Color": ["Blue", "Red"],
+		"Brand": "Chelsea Fruit Co"
+	},
+	"Double Plum Pie": {
+		"Fruits": ["Cocoplum", "Damson Plum"],
+		"Price": 10.5,
+		"Color": ["Purple"],
+		"Brand": "Chelsea Fruit Co"
+	},
+	"Gooseberry Pie": {
+		"Fruits": "Gooseberry",
+		"Price": 12.0,
+		"Color": ["Yellow"],
+		"Brand": "Chelsea Fruit Co"
+	},
+	"Kaduka Key Lime Pie": {
+		"Fruits": ["Kaduka Lime", "Limequat"],
+		"Price": 11.5,
+		"Color": ["Green", "Yellow"],
+		"Brand": "Chelsea Fruit Co"
+	},
+	"Tayberry": {
+		"Color": ["Red"]
+	},
+	"Limequat": {
+		"Color": ["Yellow", "Green"]
+	},
+	"Kaduka Lime": {
+		"Color": ["Green"]
+	},
+	"Hairless Rambutan": {
+		"Color": ["Red"]
+	},
+	"Gooseberry": {
+		"Color": ["Yellow"]
+	},
+	"Damson Plum": {
+		"Color": ["Purple"]
+	},
+	"Cocoplum": {
+		"Color": ["Purple", "Black"]
+	},
+	"Bayberry": {
+		"Color": ["Red", "Green", "Blue"]
+	},
+	"Sugar": {
+		"Color": ["White"]
+	},
+	"Salt": {
+		"Color": ["White"]
+	},
+	"Flour": {
+		"Color": ["White"]
+	},
+	"Cornstarch": {
+		"Color": ["White"]
+	},
+	"Butter": {
+		"Color": ["Yellow"]
+	},
+	"Cloudberry": {
+		"Color": ["Yellow", "Red"]
+	}
+}
