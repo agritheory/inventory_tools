@@ -3,6 +3,8 @@
 
 import frappe
 from frappe.model.document import Document
+import networkx as nx
+import numpy as np
 
 
 class WarehousePlan(Document):
@@ -39,26 +41,6 @@ class WarehousePlan(Document):
 			filters={"warehouse_plan": self.name},
 			pluck="name",
 		)
-	
-class Grid_TSP:
-	"""Constructs a graph from a 2D grid and solves path and TSP problems using NetworkX.
-
-	Navigable nodes are grid cells with value 1. Nodes connect to their west and north neighbors,
-	with edge weights scaled by the provided factor. The class offers methods to validate graph
-	connectivity, convert between grid positions and node indices, compute shortest paths, approximate
-	a TSP route for given nodes, and visualize the grid and routes for debugging.
-
-	Attributes:
-	    grid (np.ndarray): 2D array representing the grid (1 indicates a pathway).
-	    scale (int or float): Factor to scale edge weights.
-	    G (nx.Graph): Graph built from the grid.
-	"""
-
-	def __init__(self, grid, scale=1):
-		self.grid = grid
-		self.scale = scale
-		self.G = nx.Graph()
-		self.make_graph()
 
 		for warehouse in warehouses:
 			warehouse_doc = frappe.get_doc("Warehouse", warehouse.get("warehouse_name"))
@@ -74,6 +56,78 @@ class Grid_TSP:
 
 			if warehouse_doc.name in existing_warehouses:
 				existing_warehouses.remove(warehouse_doc.name)
+
+		# if warehouses are deleted, remove them from the warehouse plan
+		if len(existing_warehouses) > 0:
+			for warehouse in existing_warehouses:
+				frappe.db.set_value("Warehouse", warehouse, "warehouse_plan", None)
+				frappe.db.set_value("Warehouse", warehouse, "warehouse_plan_coordinates", None)
+				frappe.db.set_value("Warehouse", warehouse, "rotation", 0)
+				frappe.db.set_value("Warehouse", warehouse, "accessible_path", None)
+
+	@frappe.whitelist()
+	def get_warehouse_dimensions(self, warehouse: str):
+		warehouse_doc = frappe.get_doc("Warehouse", warehouse)
+		dimensions = frappe.get_all(
+			"Physical Dimension",
+			filters={"reference_doctype": "Warehouse", "reference_document": warehouse_doc.name},
+			fields=["item_length", "item_width", "uom"],
+		)
+
+		if not dimensions:
+			return {}
+
+		dimension = dimensions[0]
+
+		# convert warehouse dimension UOM using UOM Conversion records
+		if dimension.uom != self.uom:
+			uom_conversion = frappe.get_all(
+				"UOM Conversion Factor",
+				filters={"category": "Length", "from_uom": dimension.uom, "to_uom": self.uom},
+				pluck="value",
+				limit=1,
+			)
+
+			if uom_conversion:
+				dimension.item_length *= uom_conversion[0]
+				dimension.item_width *= uom_conversion[0]
+
+		return dimension
+
+
+class Grid_TSP:
+	"""Constructs a graph from a 2D grid and solves path and TSP problems using NetworkX.
+
+	Navigable nodes are grid cells with value 1. Nodes connect to their west and north neighbors,
+	with edge weights scaled by the provided factor. The class offers methods to validate graph
+	connectivity, convert between grid positions and node indices, compute shortest paths, approximate
+	a TSP route for given nodes, and visualize the grid and routes for debugging.
+
+	Attributes:
+	        grid (np.ndarray): 2D array representing the grid (1 indicates a pathway).
+	        scale (int or float): Factor to scale edge weights.
+	        G (nx.Graph): Graph built from the grid.
+	"""
+
+	def __init__(self, grid, scale=1):
+		self.grid = grid
+		self.scale = scale
+		self.G = nx.Graph()
+		self.make_graph()
+
+	def make_graph(self):
+		x_shape = self.grid.shape[1]
+		for n, pos in enumerate(np.ndindex(self.grid.shape)):
+			x = pos[1]
+			y = pos[0]
+			if self.grid[pos] == 1:
+				self.G.add_node(n, pos=(x, -y))
+				# Add edged to north and west neighbors if pathway
+				if x > 0 and self.grid[y, x - 1] == 1:
+					self.G.add_edge(n, n - 1, weight=self.scale)
+				if y > 0 and self.grid[y - 1, x] == 1:
+					north_neighbor = n - x_shape
+					self.G.add_edge(n, north_neighbor, weight=self.scale)
 
 	def validate(self) -> bool:
 		if nx.is_connected(self.G):

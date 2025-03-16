@@ -18,6 +18,7 @@ from inventory_tools.tests.fixtures import (
 	operations,
 	suppliers,
 	workstations,
+	warehouse_plan_matrix,
 	# items_stockentry,
 )
 
@@ -137,7 +138,6 @@ def copy_fixture_files():
 		if path.is_file():
 			public_file_path = Path(frappe.get_site_path("public", "files", path.name))
 			shutil.copy(path.resolve(), public_file_path.resolve())
-	create_item_dimensions(settings)
 
 
 def create_suppliers(settings):
@@ -971,6 +971,6 @@ def create_warehouse_locations():
 	for item in warehouse_locations:
 		whl = frappe.new_doc("Warehouse")
 		whl.update(item)
-		whl.warehouse_plan = 'All Warehouses - CFC'
+		whl.warehouse_plan = "All Warehouses - CFC"
 		whl.save()
 		whl.submit()

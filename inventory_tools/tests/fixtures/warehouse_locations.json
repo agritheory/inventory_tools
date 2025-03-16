@@ -1,536 +1,536 @@
 [
-  {
-    "warehouse_name": "Fruit Basket 0",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "0,3"
-  },
-  {
-    "warehouse_name": "Fruit Basket 1",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "0,4"
-  },
-  {
-    "warehouse_name": "Fruit Basket 2",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "0,5"
-  },
-  {
-    "warehouse_name": "Fruit Basket 3",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "0,6"
-  },
-  {
-    "warehouse_name": "Fruit Basket 4",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "1,4"
-  },
-  {
-    "warehouse_name": "Fruit Basket 5",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "2,4"
-  },
-  {
-    "warehouse_name": "Fruit Basket 6",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "2,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 7",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "2,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 8",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "3,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 9",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "3,2"
-  },
-  {
-    "warehouse_name": "Fruit Basket 10",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "3,3"
-  },
-  {
-    "warehouse_name": "Fruit Basket 11",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "3,4"
-  },
-  {
-    "warehouse_name": "Fruit Basket 12",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "3,5"
-  },
-  {
-    "warehouse_name": "Fruit Basket 13",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "3,6"
-  },
-  {
-    "warehouse_name": "Fruit Basket 14",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "3,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 15",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "3,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 16",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "4,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 17",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "4,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 18",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "4,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 19",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "5,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 20",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "5,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 21",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "5,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 22",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "6,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 23",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "6,2"
-  },
-  {
-    "warehouse_name": "Fruit Basket 24",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "6,3"
-  },
-  {
-    "warehouse_name": "Fruit Basket 25",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "6,4"
-  },
-  {
-    "warehouse_name": "Fruit Basket 26",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "6,5"
-  },
-  {
-    "warehouse_name": "Fruit Basket 27",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "6,6"
-  },
-  {
-    "warehouse_name": "Fruit Basket 28",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "6,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 29",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "6,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 30",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "7,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 31",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "7,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 32",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "7,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 33",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "8,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 34",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "9,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 35",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "9,2"
-  },
-  {
-    "warehouse_name": "Fruit Basket 36",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "9,3"
-  },
-  {
-    "warehouse_name": "Fruit Basket 37",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "9,4"
-  },
-  {
-    "warehouse_name": "Fruit Basket 38",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "9,5"
-  },
-  {
-    "warehouse_name": "Fruit Basket 39",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "9,6"
-  },
-  {
-    "warehouse_name": "Fruit Basket 40",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "10,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 41",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "10,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 42",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "10,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 43",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "11,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 44",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "11,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 45",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "11,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 46",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "12,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 47",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "12,2"
-  },
-  {
-    "warehouse_name": "Fruit Basket 48",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "12,3"
-  },
-  {
-    "warehouse_name": "Fruit Basket 49",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "12,4"
-  },
-  {
-    "warehouse_name": "Fruit Basket 50",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "12,5"
-  },
-  {
-    "warehouse_name": "Fruit Basket 51",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "12,6"
-  },
-  {
-    "warehouse_name": "Fruit Basket 52",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "12,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 53",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "12,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 54",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "13,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 55",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "13,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 56",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "13,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 57",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "14,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 58",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "14,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 59",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "14,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 60",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "15,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 61",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "15,2"
-  },
-  {
-    "warehouse_name": "Fruit Basket 62",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "15,3"
-  },
-  {
-    "warehouse_name": "Fruit Basket 63",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "15,4"
-  },
-  {
-    "warehouse_name": "Fruit Basket 64",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "15,5"
-  },
-  {
-    "warehouse_name": "Fruit Basket 65",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "15,6"
-  },
-  {
-    "warehouse_name": "Fruit Basket 66",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "15,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 67",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "15,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 68",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "16,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 69",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "17,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 70",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "18,0"
-  },
-  {
-    "warehouse_name": "Fruit Basket 71",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "18,1"
-  },
-  {
-    "warehouse_name": "Fruit Basket 72",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "18,2"
-  },
-  {
-    "warehouse_name": "Fruit Basket 73",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "18,3"
-  },
-  {
-    "warehouse_name": "Fruit Basket 74",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "18,4"
-  },
-  {
-    "warehouse_name": "Fruit Basket 75",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "18,5"
-  },
-  {
-    "warehouse_name": "Fruit Basket 76",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "18,6"
-  },
-  {
-    "warehouse_name": "Fruit Basket 77",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "18,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 78",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "18,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 79",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "19,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 80",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "19,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 81",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "20,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 82",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "20,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 83",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "21,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 84",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "21,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 85",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "22,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 86",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "22,14"
-  },
-  {
-    "warehouse_name": "Fruit Basket 87",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "23,11"
-  },
-  {
-    "warehouse_name": "Fruit Basket 88",
-    "parent_warehouse": "All Warehouses - CFC",
-    "company": "Chelsea Fruit Co",
-    "accessible_path": "23,14"
-  }
+	{
+		"warehouse_name": "Fruit Basket 0",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "0,3"
+	},
+	{
+		"warehouse_name": "Fruit Basket 1",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "0,4"
+	},
+	{
+		"warehouse_name": "Fruit Basket 2",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "0,5"
+	},
+	{
+		"warehouse_name": "Fruit Basket 3",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "0,6"
+	},
+	{
+		"warehouse_name": "Fruit Basket 4",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "1,4"
+	},
+	{
+		"warehouse_name": "Fruit Basket 5",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "2,4"
+	},
+	{
+		"warehouse_name": "Fruit Basket 6",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "2,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 7",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "2,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 8",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "3,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 9",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "3,2"
+	},
+	{
+		"warehouse_name": "Fruit Basket 10",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "3,3"
+	},
+	{
+		"warehouse_name": "Fruit Basket 11",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "3,4"
+	},
+	{
+		"warehouse_name": "Fruit Basket 12",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "3,5"
+	},
+	{
+		"warehouse_name": "Fruit Basket 13",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "3,6"
+	},
+	{
+		"warehouse_name": "Fruit Basket 14",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "3,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 15",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "3,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 16",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "4,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 17",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "4,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 18",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "4,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 19",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "5,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 20",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "5,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 21",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "5,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 22",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "6,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 23",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "6,2"
+	},
+	{
+		"warehouse_name": "Fruit Basket 24",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "6,3"
+	},
+	{
+		"warehouse_name": "Fruit Basket 25",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "6,4"
+	},
+	{
+		"warehouse_name": "Fruit Basket 26",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "6,5"
+	},
+	{
+		"warehouse_name": "Fruit Basket 27",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "6,6"
+	},
+	{
+		"warehouse_name": "Fruit Basket 28",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "6,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 29",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "6,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 30",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "7,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 31",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "7,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 32",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "7,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 33",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "8,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 34",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "9,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 35",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "9,2"
+	},
+	{
+		"warehouse_name": "Fruit Basket 36",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "9,3"
+	},
+	{
+		"warehouse_name": "Fruit Basket 37",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "9,4"
+	},
+	{
+		"warehouse_name": "Fruit Basket 38",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "9,5"
+	},
+	{
+		"warehouse_name": "Fruit Basket 39",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "9,6"
+	},
+	{
+		"warehouse_name": "Fruit Basket 40",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "10,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 41",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "10,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 42",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "10,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 43",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "11,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 44",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "11,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 45",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "11,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 46",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "12,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 47",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "12,2"
+	},
+	{
+		"warehouse_name": "Fruit Basket 48",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "12,3"
+	},
+	{
+		"warehouse_name": "Fruit Basket 49",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "12,4"
+	},
+	{
+		"warehouse_name": "Fruit Basket 50",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "12,5"
+	},
+	{
+		"warehouse_name": "Fruit Basket 51",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "12,6"
+	},
+	{
+		"warehouse_name": "Fruit Basket 52",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "12,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 53",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "12,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 54",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "13,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 55",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "13,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 56",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "13,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 57",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "14,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 58",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "14,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 59",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "14,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 60",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "15,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 61",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "15,2"
+	},
+	{
+		"warehouse_name": "Fruit Basket 62",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "15,3"
+	},
+	{
+		"warehouse_name": "Fruit Basket 63",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "15,4"
+	},
+	{
+		"warehouse_name": "Fruit Basket 64",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "15,5"
+	},
+	{
+		"warehouse_name": "Fruit Basket 65",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "15,6"
+	},
+	{
+		"warehouse_name": "Fruit Basket 66",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "15,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 67",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "15,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 68",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "16,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 69",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "17,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 70",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "18,0"
+	},
+	{
+		"warehouse_name": "Fruit Basket 71",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "18,1"
+	},
+	{
+		"warehouse_name": "Fruit Basket 72",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "18,2"
+	},
+	{
+		"warehouse_name": "Fruit Basket 73",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "18,3"
+	},
+	{
+		"warehouse_name": "Fruit Basket 74",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "18,4"
+	},
+	{
+		"warehouse_name": "Fruit Basket 75",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "18,5"
+	},
+	{
+		"warehouse_name": "Fruit Basket 76",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "18,6"
+	},
+	{
+		"warehouse_name": "Fruit Basket 77",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "18,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 78",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "18,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 79",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "19,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 80",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "19,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 81",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "20,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 82",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "20,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 83",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "21,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 84",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "21,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 85",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "22,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 86",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "22,14"
+	},
+	{
+		"warehouse_name": "Fruit Basket 87",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "23,11"
+	},
+	{
+		"warehouse_name": "Fruit Basket 88",
+		"parent_warehouse": "All Warehouses - CFC",
+		"company": "Chelsea Fruit Co",
+		"accessible_path": "23,14"
+	}
 ]

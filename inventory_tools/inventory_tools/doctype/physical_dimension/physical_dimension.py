@@ -1,7 +1,6 @@
 # Copyright (c) 2025, AgriTheory and contributors
 # For license information, please see license.txt
 
-import frappe
 from frappe.model.document import Document
 from frappe.utils import flt
 
@@ -14,6 +13,7 @@ class PhysicalDimension(Document):
 
 	if TYPE_CHECKING:
 		from frappe.types import DF
+
 		dimension_type: DF.Literal["Exterior", "Interior"]
 		item_height: DF.Float
 		item_length: DF.Float
@@ -32,4 +32,3 @@ class PhysicalDimension(Document):
 
 	def calculate_item_volume(self):
 		self.item_volume = flt(self.item_height) * flt(self.item_length) * flt(self.item_width)
-

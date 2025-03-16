@@ -12,17 +12,72 @@ if TYPE_CHECKING:
 	from erpnext.stock.doctype.pick_list.pick_list import PickList
 
 
-@frappe.whitelist()
-def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
-	doc = safe_json_loads(doc) if isinstance(doc, str) else doc
-	return doc.locations
-	# returns a list of Pick List Item in the correct order
+class PathFinder:
+	@staticmethod
+	def _process_entries(item_code, qty, company, order_by, root_warehouse, to_date):
+		# Retrieve stock ledger entries with the provided filters and ordering.
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["actual_qty", "posting_date", "creation", "warehouse"],
+			filters={
+				"item_code": item_code,
+				"company": company,
+				"posting_date": ["<=", to_date],
+				"is_cancelled": 0,
+				"actual_qty": [">", 0],
+			},
+			order_by=order_by,
+		)
+
+		newsle = []
+		qty_obtained = 0
+
+		# Process each entry until the required quantity is fulfilled.
+		for entry in sle:
+			# If a root warehouse is specified, ensure the entry belongs to it.
+			if root_warehouse and get_root_warehouse(entry["warehouse"]) != root_warehouse:
+				continue
+
+			remaining_qty = qty - qty_obtained
+
+			if entry["actual_qty"] > remaining_qty:
+				newsle.append({"item_code": item_code, "warehouse": entry["warehouse"], "qty": remaining_qty})
+				qty_obtained += remaining_qty
+				break
+			else:
+				newsle.append(
+					{"item_code": item_code, "warehouse": entry["warehouse"], "qty": entry["actual_qty"]}
+				)
+				qty_obtained += entry["actual_qty"]
+
+		# If the accumulated quantity doesn't match the requested quantity, raise an error.
+		if (qty - qty_obtained) != 0:
+			raise frappe.ValidationError("Not enough items in root warehouse")
+		return newsle
+
+	@staticmethod
+	def FIFO(item_code, qty, company, root_warehouse=None, to_date=None):
+		# FIFO: Order by posting_date and creation in ascending order.
+		if to_date is None:
+			to_date = nowdate()
+		return PathFinder._process_entries(
+			item_code, qty, company, "posting_date, creation", root_warehouse, to_date
+		)
+
+	@staticmethod
+	def LIFO(item_code, qty, company, root_warehouse=None, to_date=None):
+		# LIFO: Order by posting_date and creation in descending order.
+		if to_date is None:
+			to_date = nowdate()
+		return PathFinder._process_entries(
+			item_code, qty, company, "posting_date desc, creation desc", root_warehouse, to_date
+		)
 
 	@staticmethod
 	def deplete_max_bins(item_code, qty, company, root_warehouse=None, to_date=None):
 		if to_date is None:
 			to_date = nowdate()
-		return Rules._process_entries(
+		return PathFinder._process_entries(
 			item_code, qty, company, "actual_qty, posting_date, creation", root_warehouse, to_date
 		)
 
@@ -30,22 +85,11 @@ def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
 	def deplete_min_bins(item_code, qty, company, root_warehouse=None, to_date=None):
 		if to_date is None:
 			to_date = nowdate()
-		return Rules._process_entries(
+		return PathFinder._process_entries(
 			item_code, qty, company, "actual_qty desc, posting_date, creation", root_warehouse, to_date
 		)
 
 
-def validate_warehouse_has_plan(items):
-	warehouses = []
-	for item in items:
-		item_list = {}
-		item_list["item"] = item
-		root_warehouse = []
-		item_warehouses = frappe.get_all("Bin", fields=["warehouse"], filters={"item_code": item})
-		item_warehouses = [i["warehouse"] for i in item_warehouses]
-		item_list["item_warehouses"] = item_warehouses
-		for wh in item_warehouses:
-			root_warehouse.append(get_root_warehouse(wh))
 def get_root_warehouse(warehouse):
 	# Finds closest parent warehouse with a walkable floor plan; otherwise returns None
 	wh_plans = [wh["name"] for wh in frappe.get_all("Warehouse Plan")]
@@ -147,14 +191,14 @@ def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
 	                        - "LIFO".
 	                        - "Deplete maximum number of Bins".
 	                        - "Deplete minimum number of Bins".
-	Returns:
-	        list[PickListItem]:
-	                A list of optimized picklist items generated based on the input strategy and common warehouse.
+	        Returns:
+	                list[PickListItem]:
+	                                A list of optimized picklist items generated based on the input strategy and common warehouse.
 
-	Raises:
-	        frappe.ValidationError:
-	                If the locations in the picklist document do not all share the same root warehouse,
-	                indicating an inconsistency in the warehouse plan.
+	        Raises:
+	                frappe.ValidationError:
+	                        If the locations in the picklist document do not all share the same root warehouse,
+	                        indicating an inconsistency in the warehouse plan.
 	"""
 	if isinstance(doc, str):
 		doc = frappe.get_doc("Pick List", doc).as_dict()
@@ -178,15 +222,15 @@ def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
 	item_whs = []
 	for item in itemdict.keys():
 		if strategy == "FIFO":
-			item_whs += Rules.FIFO(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
+			item_whs += PathFinder.FIFO(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
 		elif strategy == "LIFO":
-			item_whs += Rules.LIFO(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
+			item_whs += PathFinder.LIFO(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
 		elif strategy == "Deplete maximum number of Bins":
-			item_whs += Rules.deplete_max_bins(
+			item_whs += PathFinder.deplete_max_bins(
 				item, itemdict[item]["qty"], company, root_warehouse=root_warehouse
 			)
 		elif strategy == "Deplete minimum number of Bins":
-			item_whs += Rules.deplete_min_bins(
+			item_whs += PathFinder.deplete_min_bins(
 				item, itemdict[item]["qty"], company, root_warehouse=root_warehouse
 			)
 
