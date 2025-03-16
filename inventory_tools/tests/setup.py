@@ -18,6 +18,8 @@ from inventory_tools.tests.fixtures import (
 	operations,
 	suppliers,
 	workstations,
+	warehouse_plan_matrix,
+	# items_stockentry,
 )
 
 
@@ -127,7 +129,7 @@ def create_test_data():
 	create_specifications(settings)
 	create_item_dimensions()
 	create_warehouse_dimensions()
-	create_stock_entries()
+	# create_stock_entries()
 
 
 def copy_fixture_files():
@@ -358,8 +360,16 @@ def create_items(settings):
 			or item.get("is_sub_contracted_item")
 			else 0
 		)
-		i.is_sales_item = 1 if item.get("item_group") == "Baked Goods" else 0
-		i.sales_uom = "Nos" if i.is_sales_item else None
+		if item.get("item_group") == "Baked Goods":
+			i.is_sales_item = 1
+			i.sales_uom = "Nos"
+		elif item.get("item_group") == "Ingredients":
+			i.is_sales_item = 1
+			i.sales_uom = "Pound"
+		else:
+			i.is_sales_item = 0
+			i.sales_uom = None
+
 		i.shelf_life_in_days = 7 if i.is_sales_item else None
 		i.brand = "Ambrosia Pie Co" if i.is_sales_item else None
 		i.append(
@@ -421,12 +431,13 @@ def create_warehouse_plan(cfc):
 	warehouse_plan.update(
 		{
 			"company": cfc.name,
-			"horizontal": 24,
-			"vertical": 16,
-			"uom": "Foot",
-			"offset": "0.6,1.6,1.4,0.4",
+			"horizontal": 50,
+			"vertical": 32,
+			"uom": "Meter",
+			"offset": "1,1,0,0",
 			"floor_plan": "/files/warehouse_plan.png",
 			"group_warehouse": root_wh,
+			"matrix": warehouse_plan_matrix,
 		}
 	)
 	warehouse_plan.save()
@@ -928,6 +939,7 @@ def create_stock_entries():
 				"t_warehouse": item["warehouse"],
 				"item_code": item["item_code"],
 				"qty": item["qty"],
+				"allow_zero_valuation_rate": 1,
 			},
 		)
 
@@ -947,6 +959,7 @@ def create_stock_entries():
 				"t_warehouse": item["warehouse"],
 				"item_code": item["item_code"],
 				"qty": item["qty"],
+				"allow_zero_valuation_rate": 1,
 			},
 		)
 
@@ -958,5 +971,6 @@ def create_warehouse_locations():
 	for item in warehouse_locations:
 		whl = frappe.new_doc("Warehouse")
 		whl.update(item)
+		whl.warehouse_plan = "All Warehouses - CFC"
 		whl.save()
 		whl.submit()
