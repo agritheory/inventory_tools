@@ -30,7 +30,7 @@ class WarehousePlan(Document):
 	def get_plan_warehouses(self):
 		return frappe.get_all(
 			"Warehouse",
-			filters={"warehouse_plan": self.name},
+			filters={"warehouse_plan": self.name, "warehouse_plan_coordinates": ["is", "set"]},
 			fields=["name", "warehouse_plan_coordinates", "rotation", "accessible_path"],
 		)
 

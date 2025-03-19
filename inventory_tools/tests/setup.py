@@ -968,9 +968,8 @@ def create_stock_entries():
 
 
 def create_warehouse_locations():
-	for item in warehouse_locations:
-		whl = frappe.new_doc("Warehouse")
-		whl.update(item)
-		whl.warehouse_plan = "All Warehouses - CFC"
-		whl.save()
-		whl.submit()
+	for details in warehouse_locations:
+		warehouse = frappe.new_doc("Warehouse")
+		warehouse.update(details)
+		warehouse.warehouse_plan = "All Warehouses - CFC"
+		warehouse.save()

@@ -290,7 +290,6 @@ const initializePath = (matrixString?: string) => {
 const initializeWarehouses = async () => {
 	const { message: warehouses } = await frm.value.call('get_plan_warehouses')
 	for (const warehouse of warehouses) {
-		if (!warehouse.warehouse_plan_coordinates) continue
 		const [x, y, length, width] = warehouse.warehouse_plan_coordinates.split(',').map(Number)
 		const adjustedX = offsetPixels.value.left + x * cellSize.value.width
 		const adjustedY = offsetPixels.value.top + y * cellSize.value.height
