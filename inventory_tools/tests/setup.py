@@ -2,10 +2,10 @@
 # For license information, please see license.txt
 
 import datetime
-import json
 import shutil
-import frappe
 from pathlib import Path
+
+import frappe
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 )
@@ -19,25 +19,22 @@ from inventory_tools.tests.fixtures import (
 	suppliers,
 	workstations,
 	warehouse_plan_matrix,
-	# items_stockentry,
 )
 
 
 def read_json(name):
-	fixture_dir = Path(__file__).parent / "fixtures" / f"{name}.json"
-	with open(fixture_dir) as file:
-		data = json.load(file)
-	return data
+	fixtures_dir = Path(frappe.get_app_path("inventory_tools", "tests", "fixtures"))
+	return frappe.get_file_json(fixtures_dir / f"{name}.json")
 
 
-boms = read_json("boms")
-customers = read_json("customers")
-items = read_json("items")
-specifications = read_json("specifications")
-item_dimensions = read_json("item_dimensions")
-items_stockentry = read_json("items_stockentry")
-warehouse_dimensions = read_json("warehouse_dimensions")
-warehouse_locations = read_json("warehouse_locations")
+BOMS = read_json("boms")
+CUSTOMERS = read_json("customers")
+ITEM_DIMENSIONS = read_json("item_dimensions")
+ITEMS = read_json("items")
+ITEMS_STOCKENTRY = read_json("items_stockentry")
+SPECIFICATIONS = read_json("specifications")
+WAREHOUSE_DIMENSIONS = read_json("warehouse_dimensions")
+WAREHOUSE_LOCATIONS = read_json("warehouse_locations")
 
 
 def before_test():
@@ -103,7 +100,7 @@ def create_test_data():
 	cfc.abbr = "CFC"
 	cfc.save()
 
-	copy_fixture_files()
+	copy_image_fixtures()
 	frappe.db.set_single_value("Stock Settings", "valuation_method", "Moving Average")
 	frappe.db.set_single_value("Stock Settings", "default_warehouse", "")
 	create_warehouse_plan(cfc)
@@ -132,10 +129,10 @@ def create_test_data():
 	# create_stock_entries()
 
 
-def copy_fixture_files():
+def copy_image_fixtures():
 	fixtures_dir = Path(frappe.get_app_path("inventory_tools", "tests", "fixtures"))
 	for path in fixtures_dir.iterdir():
-		if path.is_file():
+		if path.is_file() and path.suffix in (".png", ".jpg", ".jpeg"):
 			public_file_path = Path(frappe.get_site_path("public", "files", path.name))
 			shutil.copy(path.resolve(), public_file_path.resolve())
 
@@ -187,7 +184,7 @@ def create_suppliers(settings):
 
 
 def create_customers(settings):
-	for customer_name in customers:
+	for customer_name in CUSTOMERS:
 		customer = frappe.new_doc("Customer")
 		customer.customer_name = customer_name
 		customer.customer_group = "Commercial"
@@ -329,7 +326,7 @@ def create_price_lists(settings):
 
 
 def create_items(settings):
-	for item in items:
+	for item in ITEMS:
 		if frappe.db.exists("Item", item.get("item_code")):
 			continue
 		i = frappe.new_doc("Item")
@@ -450,7 +447,7 @@ def create_warehouses(settings):
 	inventory_tools_settings.update_warehouse_path = 1
 	inventory_tools_settings.save()
 
-	warehouses = [item.get("default_warehouse") for item in items]
+	warehouses = [item.get("default_warehouse") for item in ITEMS]
 	root_wh = frappe.get_value("Warehouse", {"company": settings.company, "is_group": 1})
 	if frappe.db.exists("Warehouse", "Stores - APC"):
 		frappe.rename_doc("Warehouse", "Stores - APC", "Storeroom - APC", force=True)
@@ -460,7 +457,7 @@ def create_warehouses(settings):
 	for wh in frappe.get_all("Warehouse", {"company": settings.company}, ["name", "is_group"]):
 		if wh.name not in warehouses and not wh.is_group:
 			frappe.delete_doc("Warehouse", wh.name)
-	for item in items:
+	for item in ITEMS:
 		if frappe.db.exists("Warehouse", item.get("default_warehouse")):
 			continue
 		wh = frappe.new_doc("Warehouse")
@@ -481,7 +478,7 @@ def create_warehouses(settings):
 
 
 def create_boms(settings):
-	for bom in boms[::-1]:  # reversed
+	for bom in BOMS[::-1]:  # reversed
 		if frappe.db.exists("BOM", {"item": bom.get("item")}) and bom.get("item") != "Pie Crust":
 			continue
 		b = frappe.new_doc("BOM")
@@ -510,7 +507,7 @@ def create_boms(settings):
 def create_sales_order(settings):
 	so = frappe.new_doc("Sales Order")
 	so.transaction_date = settings.day
-	so.customer = customers[0]
+	so.customer = CUSTOMERS[0]
 	so.order_type = "Sales"
 	so.currency = "USD"
 	so.selling_price_list = "Bakery Wholesale"
@@ -876,7 +873,7 @@ def create_specifications(settings=None):
 			color.color = c[1]
 			color.save()
 
-	for spec in specifications:
+	for spec in SPECIFICATIONS:
 		if frappe.db.exists("Specification", spec.get("name")):
 			s = frappe.get_doc("Specification", spec.get("name"))
 		else:
@@ -909,30 +906,28 @@ def create_demo_specification_values():
 
 
 def create_item_dimensions():
-	for item in item_dimensions:
+	for item in ITEM_DIMENSIONS:
 		pyd = frappe.new_doc("Physical Dimension")
 		pyd.update(item)
 		pyd.save()
-		pyd.submit()
 
 
 def create_warehouse_dimensions():
-	for item in warehouse_dimensions:
+	for item in WAREHOUSE_DIMENSIONS:
 		wyd = frappe.new_doc("Physical Dimension")
 		wyd.update(item)
 		wyd.save()
-		wyd.submit()
 
 
 def create_stock_entries():
-	j = len(items_stockentry) // 2
+	j = len(ITEMS_STOCKENTRY) // 2
 	# Add items to warehouse
 	se = frappe.new_doc("Stock Entry")
 	se.posting_date = getdate().replace(month=1, day=1)
 	se.set_posting_time = 1
 	se.stock_entry_type = "Material Receipt"
 
-	for item in items_stockentry[0:j]:
+	for item in ITEMS_STOCKENTRY[0:j]:
 		se.append(
 			"items",
 			{
@@ -952,7 +947,7 @@ def create_stock_entries():
 	se.set_posting_time = 1
 	se.stock_entry_type = "Material Receipt"
 
-	for item in items_stockentry[j:]:
+	for item in ITEMS_STOCKENTRY[j:]:
 		se.append(
 			"items",
 			{
@@ -968,7 +963,7 @@ def create_stock_entries():
 
 
 def create_warehouse_locations():
-	for details in warehouse_locations:
+	for details in WAREHOUSE_LOCATIONS:
 		warehouse = frappe.new_doc("Warehouse")
 		warehouse.update(details)
 		warehouse.warehouse_plan = "All Warehouses - CFC"
