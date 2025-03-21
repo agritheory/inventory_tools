@@ -8,6 +8,13 @@
 
 		<div class="overlay">
 			<div class="overlay-dimension">{{ plan.horizontal }}x{{ plan.vertical }} {{ plan.uom }}</div>
+			<div v-if="isHoverValid" class="overlay-cell-info">
+				Cell: ({{ hoverCell.x }}, {{ hoverCell.y }})
+				<span v-if="isCellWalkable(hoverCell.x, hoverCell.y)" class="overlay-cell-status overlay-walkable">
+					Walkable
+				</span>
+				<span v-else class="overlay-cell-status overlay-non-walkable">Non-walkable</span>
+			</div>
 		</div>
 
 		<div ref="container" class="container">
@@ -776,6 +783,34 @@ defineExpose({
 	border-radius: 4px;
 	font-size: 14px;
 	z-index: 1;
+}
+
+.overlay-cell-info {
+	position: absolute;
+	top: 70px;
+	right: 8px;
+	background-color: rgba(255, 255, 255, 0.8);
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 14px;
+	z-index: 1;
+}
+
+.overlay-cell-status {
+	margin-left: 4px;
+	font-weight: bold;
+	border-radius: 3px;
+	padding: 1px 4px;
+}
+
+.overlay-walkable {
+	background-color: rgba(0, 255, 0, 0.2);
+	color: green;
+}
+
+.overlay-non-walkable {
+	background-color: rgba(255, 0, 0, 0.1);
+	color: #c53030;
 }
 
 .context-menu {
