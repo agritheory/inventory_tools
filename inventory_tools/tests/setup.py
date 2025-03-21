@@ -431,7 +431,7 @@ def create_warehouse_plan(cfc):
 			"horizontal": 50,
 			"vertical": 32,
 			"uom": "Meter",
-			"offset": "1,1,0,0",
+			"offset": "1,1,2.2,1",
 			"floor_plan": "/files/warehouse_plan.png",
 			"group_warehouse": root_wh,
 			"matrix": warehouse_plan_matrix,
