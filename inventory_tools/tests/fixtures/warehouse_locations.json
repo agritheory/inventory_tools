@@ -40,7 +40,7 @@
 		"parent_warehouse": "Refrigerator 1 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "11.03,0.09,1.5,2.5",
-		"accessible_path": "0,4",
+		"accessible_path": "12,2",
 		"rotation": 0
 	},
 	{
@@ -49,7 +49,7 @@
 		"parent_warehouse": "Refrigerator 1 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "11.03,2.58,1.5,2.5",
-		"accessible_path": "0,5",
+		"accessible_path": "12,4",
 		"rotation": 0
 	},
 	{
@@ -58,7 +58,7 @@
 		"parent_warehouse": "Refrigerator 1 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "11.03,5.07,1.5,2.5",
-		"accessible_path": "0,6",
+		"accessible_path": "12,6",
 		"rotation": 0
 	},
 	{
@@ -67,7 +67,7 @@
 		"parent_warehouse": "Refrigerator 1 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "11.03,7.56,1.5,2.5",
-		"accessible_path": "1,4",
+		"accessible_path": "12,9",
 		"rotation": 0
 	},
 	{
@@ -76,7 +76,7 @@
 		"parent_warehouse": "Refrigerator 1 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "11.03,10.04,1.5,2.5",
-		"accessible_path": "2,4",
+		"accessible_path": "12,11",
 		"rotation": 0
 	},
 	{
@@ -85,7 +85,7 @@
 		"parent_warehouse": "Refrigerator 1 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "11.03,12.53,1.5,2.5",
-		"accessible_path": "2,11",
+		"accessible_path": "12,13",
 		"rotation": 0
 	},
 	{
@@ -94,7 +94,7 @@
 		"parent_warehouse": "Refrigerator 1 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "14.97,0.09,1.5,2.5",
-		"accessible_path": "2,14",
+		"accessible_path": "13,1",
 		"rotation": 90
 	},
 	{
@@ -103,7 +103,7 @@
 		"parent_warehouse": "Refrigerator 1 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "17.43,0.09,1.5,2.5",
-		"accessible_path": "3,1",
+		"accessible_path": "15,1",
 		"rotation": 90
 	},
 	{
@@ -112,7 +112,7 @@
 		"parent_warehouse": "Refrigerator 1 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "15.85,2.53,1.5,2.5",
-		"accessible_path": "3,2",
+		"accessible_path": "15,4",
 		"rotation": 0
 	},
 	{
@@ -121,7 +121,7 @@
 		"parent_warehouse": "Refrigerator 1 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "15.85,5.02,1.5,2.5",
-		"accessible_path": "3,3",
+		"accessible_path": "15,6",
 		"rotation": 0
 	},
 	{
@@ -130,7 +130,7 @@
 		"parent_warehouse": "Refrigerator 1 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "15.85,7.51,1.5,2.5",
-		"accessible_path": "3,4",
+		"accessible_path": "15,9",
 		"rotation": 0
 	},
 	{
@@ -139,7 +139,7 @@
 		"parent_warehouse": "Refrigerator 1 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "15.85,10.00,1.5,2.5",
-		"accessible_path": "3,5",
+		"accessible_path": "15,11",
 		"rotation": 0
 	},
 	{
@@ -148,7 +148,7 @@
 		"parent_warehouse": "Refrigerator 1 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "15.85,12.49,1.5,2.5",
-		"accessible_path": "3,6",
+		"accessible_path": "15,14",
 		"rotation": 0
 	},
 	{
@@ -157,7 +157,7 @@
 		"parent_warehouse": "Refrigerator 2 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "17.65,0.09,1.5,2.5",
-		"accessible_path": "3,11",
+		"accessible_path": "19,2",
 		"rotation": 0
 	},
 	{
@@ -166,7 +166,7 @@
 		"parent_warehouse": "Refrigerator 2 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "17.65,2.58,1.5,2.5",
-		"accessible_path": "3,14",
+		"accessible_path": "19,4",
 		"rotation": 0
 	},
 	{
@@ -175,7 +175,7 @@
 		"parent_warehouse": "Refrigerator 2 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "17.65,5.07,1.5,2.5",
-		"accessible_path": "4,1",
+		"accessible_path": "19,6",
 		"rotation": 0
 	},
 	{
@@ -184,7 +184,7 @@
 		"parent_warehouse": "Refrigerator 2 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "17.65,7.56,1.5,2.5",
-		"accessible_path": "4,11",
+		"accessible_path": "19,9",
 		"rotation": 0
 	},
 	{
@@ -193,7 +193,7 @@
 		"parent_warehouse": "Refrigerator 2 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "17.65,10.04,1.5,2.5",
-		"accessible_path": "4,14",
+		"accessible_path": "19,11",
 		"rotation": 0
 	},
 	{
@@ -202,7 +202,7 @@
 		"parent_warehouse": "Refrigerator 2 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "17.65,12.53,1.5,2.5",
-		"accessible_path": "5,1",
+		"accessible_path": "19,13",
 		"rotation": 0
 	},
 	{
@@ -211,7 +211,7 @@
 		"parent_warehouse": "Refrigerator 2 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "21.59,0.09,1.5,2.5",
-		"accessible_path": "5,11",
+		"accessible_path": "20,1",
 		"rotation": 90
 	},
 	{
@@ -220,7 +220,7 @@
 		"parent_warehouse": "Refrigerator 2 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "24.05,0.09,1.5,2.5",
-		"accessible_path": "5,14",
+		"accessible_path": "22,1",
 		"rotation": 90
 	},
 	{
@@ -229,7 +229,7 @@
 		"parent_warehouse": "Refrigerator 2 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "22.47,2.53,1.5,2.5",
-		"accessible_path": "6,1",
+		"accessible_path": "22,4",
 		"rotation": 0
 	},
 	{
@@ -238,7 +238,7 @@
 		"parent_warehouse": "Refrigerator 2 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "22.47,5.02,1.5,2.5",
-		"accessible_path": "6,2",
+		"accessible_path": "22,6",
 		"rotation": 0
 	},
 	{
@@ -247,7 +247,7 @@
 		"parent_warehouse": "Refrigerator 2 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "22.47,7.51,1.5,2.5",
-		"accessible_path": "6,3",
+		"accessible_path": "22,9",
 		"rotation": 0
 	},
 	{
@@ -256,7 +256,7 @@
 		"parent_warehouse": "Refrigerator 2 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "22.47,10.00,1.5,2.5",
-		"accessible_path": "6,4",
+		"accessible_path": "22,11",
 		"rotation": 0
 	},
 	{
@@ -265,7 +265,7 @@
 		"parent_warehouse": "Refrigerator 2 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "22.47,12.49,1.5,2.5",
-		"accessible_path": "6,5",
+		"accessible_path": "22,14",
 		"rotation": 0
 	},
 	{
@@ -274,7 +274,7 @@
 		"parent_warehouse": "Refrigerator 3 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "24.35,0.09,1.5,2.5",
-		"accessible_path": "6,6",
+		"accessible_path": "26,2",
 		"rotation": 0
 	},
 	{
@@ -283,7 +283,7 @@
 		"parent_warehouse": "Refrigerator 3 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "24.35,2.58,1.5,2.5",
-		"accessible_path": "6,11",
+		"accessible_path": "26,4",
 		"rotation": 0
 	},
 	{
@@ -292,7 +292,7 @@
 		"parent_warehouse": "Refrigerator 3 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "24.35,5.07,1.5,2.5",
-		"accessible_path": "6,14",
+		"accessible_path": "26,6",
 		"rotation": 0
 	},
 	{
@@ -301,7 +301,7 @@
 		"parent_warehouse": "Refrigerator 3 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "24.35,7.56,1.5,2.5",
-		"accessible_path": "7,1",
+		"accessible_path": "26,9",
 		"rotation": 0
 	},
 	{
@@ -310,7 +310,7 @@
 		"parent_warehouse": "Refrigerator 3 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "24.35,10.04,1.5,2.5",
-		"accessible_path": "7,11",
+		"accessible_path": "26,11",
 		"rotation": 0
 	},
 	{
@@ -319,7 +319,7 @@
 		"parent_warehouse": "Refrigerator 3 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "24.35,12.53,1.5,2.5",
-		"accessible_path": "7,14",
+		"accessible_path": "26,13",
 		"rotation": 0
 	},
 	{
@@ -328,7 +328,7 @@
 		"parent_warehouse": "Refrigerator 3 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "28.29,0.09,1.5,2.5",
-		"accessible_path": "8,1",
+		"accessible_path": "27,1",
 		"rotation": 90
 	},
 	{
@@ -337,7 +337,7 @@
 		"parent_warehouse": "Refrigerator 3 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "30.75,0.09,1.5,2.5",
-		"accessible_path": "9,1",
+		"accessible_path": "29,1",
 		"rotation": 90
 	},
 	{
@@ -346,7 +346,7 @@
 		"parent_warehouse": "Refrigerator 3 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "29.17,2.53,1.5,2.5",
-		"accessible_path": "9,2",
+		"accessible_path": "29,4",
 		"rotation": 0
 	},
 	{
@@ -355,7 +355,7 @@
 		"parent_warehouse": "Refrigerator 3 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "29.17,5.02,1.5,2.5",
-		"accessible_path": "9,3",
+		"accessible_path": "29,6",
 		"rotation": 0
 	},
 	{
@@ -364,7 +364,7 @@
 		"parent_warehouse": "Refrigerator 3 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "29.17,7.51,1.5,2.5",
-		"accessible_path": "9,4",
+		"accessible_path": "29,9",
 		"rotation": 0
 	},
 	{
@@ -373,7 +373,7 @@
 		"parent_warehouse": "Refrigerator 3 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "29.17,10.00,1.5,2.5",
-		"accessible_path": "9,5",
+		"accessible_path": "29,11",
 		"rotation": 0
 	},
 	{
@@ -382,7 +382,7 @@
 		"parent_warehouse": "Refrigerator 3 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "29.17,12.49,1.5,2.5",
-		"accessible_path": "9,6",
+		"accessible_path": "29,14",
 		"rotation": 0
 	},
 	{
@@ -391,7 +391,7 @@
 		"parent_warehouse": "Refrigerator 4 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "31.06,0.09,1.5,2.5",
-		"accessible_path": "10,1",
+		"accessible_path": "32,2",
 		"rotation": 0
 	},
 	{
@@ -400,7 +400,7 @@
 		"parent_warehouse": "Refrigerator 4 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "31.06,2.58,1.5,2.5",
-		"accessible_path": "10,11",
+		"accessible_path": "32,4",
 		"rotation": 0
 	},
 	{
@@ -409,7 +409,7 @@
 		"parent_warehouse": "Refrigerator 4 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "31.06,5.07,1.5,2.5",
-		"accessible_path": "10,14",
+		"accessible_path": "32,6",
 		"rotation": 0
 	},
 	{
@@ -418,7 +418,7 @@
 		"parent_warehouse": "Refrigerator 4 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "31.06,7.56,1.5,2.5",
-		"accessible_path": "11,1",
+		"accessible_path": "32,9",
 		"rotation": 0
 	},
 	{
@@ -427,7 +427,7 @@
 		"parent_warehouse": "Refrigerator 4 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "31.06,10.04,1.5,2.5",
-		"accessible_path": "11,11",
+		"accessible_path": "32,11",
 		"rotation": 0
 	},
 	{
@@ -436,7 +436,7 @@
 		"parent_warehouse": "Refrigerator 4 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "31.06,12.53,1.5,2.5",
-		"accessible_path": "11,14",
+		"accessible_path": "32,13",
 		"rotation": 0
 	},
 	{
@@ -445,7 +445,7 @@
 		"parent_warehouse": "Refrigerator 4 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "35,0.09,1.5,2.5",
-		"accessible_path": "12,1",
+		"accessible_path": "33,1",
 		"rotation": 90
 	},
 	{
@@ -454,7 +454,7 @@
 		"parent_warehouse": "Refrigerator 4 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "37.46,0.09,1.5,2.5",
-		"accessible_path": "12,2",
+		"accessible_path": "35,1",
 		"rotation": 90
 	},
 	{
@@ -463,7 +463,7 @@
 		"parent_warehouse": "Refrigerator 4 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "35.88,2.53,1.5,2.5",
-		"accessible_path": "12,3",
+		"accessible_path": "35,4",
 		"rotation": 0
 	},
 	{
@@ -472,7 +472,7 @@
 		"parent_warehouse": "Refrigerator 4 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "35.88,5.02,1.5,2.5",
-		"accessible_path": "12,4",
+		"accessible_path": "35,6",
 		"rotation": 0
 	},
 	{
@@ -481,7 +481,7 @@
 		"parent_warehouse": "Refrigerator 4 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "35.88,7.51,1.5,2.5",
-		"accessible_path": "12,5",
+		"accessible_path": "35,9",
 		"rotation": 0
 	},
 	{
@@ -490,7 +490,7 @@
 		"parent_warehouse": "Refrigerator 4 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "35.88,10.00,1.5,2.5",
-		"accessible_path": "12,6",
+		"accessible_path": "35,11",
 		"rotation": 0
 	},
 	{
@@ -499,7 +499,7 @@
 		"parent_warehouse": "Refrigerator 4 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "35.88,12.49,1.5,2.5",
-		"accessible_path": "12,11",
+		"accessible_path": "35,14",
 		"rotation": 0
 	},
 	{
@@ -508,7 +508,7 @@
 		"parent_warehouse": "Refrigerator 5 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "40.27,0.09,1.5,2.5",
-		"accessible_path": "12,14",
+		"accessible_path": "38,1",
 		"rotation": 90
 	},
 	{
@@ -517,7 +517,7 @@
 		"parent_warehouse": "Refrigerator 5 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "39.08,2.13,1.5,2.5",
-		"accessible_path": "13,1",
+		"accessible_path": "39,3",
 		"rotation": -16
 	},
 	{
@@ -526,7 +526,7 @@
 		"parent_warehouse": "Refrigerator 5 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "39.79,4.53,1.5,2.5",
-		"accessible_path": "13,11",
+		"accessible_path": "40,6",
 		"rotation": -16
 	},
 	{
@@ -535,7 +535,7 @@
 		"parent_warehouse": "Refrigerator 5 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "40.49,6.93,1.5,2.5",
-		"accessible_path": "13,14",
+		"accessible_path": "40,8",
 		"rotation": -16
 	},
 	{
@@ -544,7 +544,7 @@
 		"parent_warehouse": "Refrigerator 5 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "41.19,9.33,1.5,2.5",
-		"accessible_path": "14,1",
+		"accessible_path": "41,10",
 		"rotation": -16
 	},
 	{
@@ -553,7 +553,7 @@
 		"parent_warehouse": "Refrigerator 5 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "41.89,11.73,1.5,2.5",
-		"accessible_path": "14,11",
+		"accessible_path": "42,13",
 		"rotation": -16
 	},
 	{
@@ -562,7 +562,7 @@
 		"parent_warehouse": "Refrigerator 5 - CFC",
 		"warehouse_plan": "All Warehouses - CFC",
 		"warehouse_plan_coordinates": "42.50,13.96,1.5,2.5",
-		"accessible_path": "14,14",
+		"accessible_path": "40,13",
 		"rotation": 90
 	},
 	{
