@@ -966,5 +966,4 @@ def create_warehouse_locations():
 	for details in WAREHOUSE_LOCATIONS:
 		warehouse = frappe.new_doc("Warehouse")
 		warehouse.update(details)
-		warehouse.warehouse_plan = "All Warehouses - CFC"
 		warehouse.save()
