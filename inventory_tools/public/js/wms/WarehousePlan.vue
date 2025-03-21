@@ -105,6 +105,7 @@ const isDraggingWarehouse = ref(false)
 const isPainting = ref(false)
 const paintMode = ref<boolean | null>(null) // true for adding cells, false for removing
 const walkableCells = ref<Set<string>>(new Set())
+const settingAccessibleCellFor = ref<Rect | null>(null)
 
 onMounted(async () => {
 	// Load floor plan image into Konva's image layer
@@ -124,6 +125,7 @@ onMounted(async () => {
 		// Initialize stage mouse handlers
 		const stageLayer = getLayer(stageRef)
 		stageLayer!.on('mousemove', updateHoverPosition)
+		stageLayer!.on('click', setAccessCell)
 	}
 })
 
@@ -182,9 +184,13 @@ const hoverConfig = computed(
 		y: offsetPixels.value.top + hoverCell.value.y * cellSize.value.height,
 		width: cellSize.value.width,
 		height: cellSize.value.height,
-		stroke: 'tomato',
+		stroke: settingAccessibleCellFor.value ? 'lime' : 'tomato',
 		strokeWidth: 2,
-		opacity: isHoverValid.value ? 0.5 : 0,
+		opacity: isHoverValid.value
+			? settingAccessibleCellFor.value && isCellWalkable(hoverCell.value.x, hoverCell.value.y)
+				? 0.7
+				: 0.5
+			: 0,
 		listening: false,
 	})
 )
@@ -294,7 +300,7 @@ const initializeWarehouses = async () => {
 		const adjustedX = offsetPixels.value.left + x * cellSize.value.width
 		const adjustedY = offsetPixels.value.top + y * cellSize.value.height
 
-		addWarehouseRect(warehouse.name, length, width, adjustedX, adjustedY, warehouse.rotation)
+		addWarehouseRect(warehouse.name, length, width, adjustedX, adjustedY, warehouse.rotation, warehouse.accessible_path)
 	}
 }
 
@@ -351,7 +357,15 @@ const showContextMenu = (event: KonvaEventObject<MouseEvent, Rect>, shape: Rect)
 	const pointerPosition = stage.getPointerPosition()
 	if (!pointerPosition) return
 
-	const { warehouse_name, warehouse_length, warehouse_width } = shape.getAttr('warehouseData')
+	const { warehouse_name, warehouse_length, warehouse_width, accessible_path } = shape.getAttr('warehouseData')
+
+	// Format the accessible path for display
+	let accessCell = 'Not Set'
+	if (accessible_path) {
+		const [pathX, pathY] = accessible_path.split(',').map(Number)
+		accessCell = `(${pathX}, ${pathY})`
+	}
+
 	contextMenu.value = {
 		visible: true,
 		x: pointerPosition.x,
@@ -360,13 +374,13 @@ const showContextMenu = (event: KonvaEventObject<MouseEvent, Rect>, shape: Rect)
 			{
 				text: `
 					<p><strong>${warehouse_name || 'Warehouse'}</strong></p>
-					<p style="margin-bottom: 0">
-						${warehouse_length.toFixed(2)} x ${warehouse_width.toFixed(2)} ${doc.value.uom} (LxW)
-					</p>
+					<p>${warehouse_length.toFixed(2)} x ${warehouse_width.toFixed(2)} ${doc.value.uom} (LxW)</p>
+					<p style="margin-bottom: 0">Accessible From: ${accessCell}</p>
 				`,
 			},
 			{ text: `Edit`, action: 'edit' },
 			{ text: 'Rotate', action: 'rotate' },
+			{ text: 'Set Access Cell', action: 'set-access' },
 			{ text: 'Delete', action: 'delete' },
 		],
 		target: shape,
@@ -388,12 +402,40 @@ const runContextAction = (action: string) => {
 			case 'rotate':
 				rotateWarehouse(shape)
 				break
+			case 'set-access':
+				startAccessCellSelection(shape)
+				break
 			case 'delete':
 				deleteWarehouse(shape)
 				break
 		}
 	}
 	hideContextMenu()
+}
+
+const startAccessCellSelection = (shape: Rect) => {
+	settingAccessibleCellFor.value = shape
+	frappe.show_alert('Click on a walkable cell to set as the nearest accessible cell', 15)
+}
+
+const setAccessCell = (event: KonvaEventObject<MouseEvent>) => {
+	if (settingAccessibleCellFor.value) {
+		const cell = getCellFromEvent()
+		if (cell && isCellWalkable(cell.x, cell.y)) {
+			setWarehouseAccessPath(settingAccessibleCellFor.value as Rect, cell.x, cell.y)
+			settingAccessibleCellFor.value = null
+			frm.value.dirty()
+		}
+	}
+}
+
+const setWarehouseAccessPath = (shape: Rect, x: number, y: number) => {
+	const warehouseData = shape.getAttr('warehouseData')
+	shape.setAttr('warehouseData', {
+		...warehouseData,
+		accessible_path: `${x},${y}`,
+	})
+	frappe.show_alert(`Path set for ${warehouseData.warehouse_name} to (${x}, ${y})`, 3)
 }
 
 const showWarehouseDialog = (
@@ -469,7 +511,15 @@ const addWarehouse = () => {
 	)
 }
 
-const addWarehouseRect = (name: string, length: number, width: number, x?: number, y?: number, rotation?: number) => {
+const addWarehouseRect = (
+	name: string,
+	length: number,
+	width: number,
+	x?: number,
+	y?: number,
+	rotation?: number,
+	accessiblePath?: string
+) => {
 	const warehouseRect: Rect = new Rect({
 		x: x || canvasDimensions.value.width / 2,
 		y: y || canvasDimensions.value.height / 2,
@@ -500,6 +550,7 @@ const addWarehouseRect = (name: string, length: number, width: number, x?: numbe
 		warehouse_length: length,
 		warehouse_width: width,
 		warehouse_rotation: rotation || 0,
+		accessible_path: accessiblePath || '',
 	})
 
 	warehouseRect.on('contextmenu', event => {
@@ -598,7 +649,7 @@ const getCellFromEvent = () => {
 }
 
 const startPainting = (event: KonvaEventObject<MouseEvent>) => {
-	if (isDraggingWarehouse.value) return
+	if (isDraggingWarehouse.value || settingAccessibleCellFor.value) return
 	isPainting.value = true
 	const cell = getCellFromEvent()
 	if (cell) {
@@ -673,16 +724,18 @@ const getWarehouseArray = () => {
 	const warehouseDetails: WarehousePlanDetails[] = []
 
 	for (const child of children) {
-		const { warehouse_name, warehouse_length, warehouse_width, warehouse_rotation } = child.getAttr('warehouseData')
+		const warehouseData = child.getAttr('warehouseData')
 		const { x, y } = child.getPosition()
 		const horizontalGrid = (x - offsetPixels.value.left) / cellSize.value.width
 		const verticalGrid = (y - offsetPixels.value.top) / cellSize.value.height
+
 		warehouseDetails.push({
-			warehouse_name,
-			coordinates: `${horizontalGrid.toFixed(2)},${verticalGrid.toFixed(2)},${warehouse_length},${warehouse_width}`,
-			rotation: warehouse_rotation,
-			// TODO: generate workflow to link a warehouse shape with a walkable cell
-			accessible_path: '',
+			warehouse_name: warehouseData.warehouse_name,
+			coordinates: `${horizontalGrid.toFixed(2)},${verticalGrid.toFixed(2)},${warehouseData.warehouse_length},${
+				warehouseData.warehouse_width
+			}`,
+			rotation: warehouseData.warehouse_rotation,
+			accessible_path: warehouseData.accessible_path || '',
 		})
 	}
 
