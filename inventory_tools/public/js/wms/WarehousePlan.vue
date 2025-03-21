@@ -502,7 +502,12 @@ const addWarehouseRect = (name: string, length: number, width: number, x?: numbe
 		warehouse_rotation: rotation || 0,
 	})
 
-	warehouseRect.on('contextmenu', event => showContextMenu(event, warehouseRect))
+	warehouseRect.on('contextmenu', event => {
+		event.evt.preventDefault()
+		event.evt.stopPropagation()
+		event.cancelBubble = true
+		showContextMenu(event, warehouseRect)
+	})
 
 	// Since drag event handlers are not configurable while building the shape,
 	// adding drag event handlers individually to track dragging state
