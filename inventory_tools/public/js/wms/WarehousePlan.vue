@@ -24,11 +24,12 @@
 
 			<!-- toolbar actions -->
 			<button
-				v-if="canEditPlan && editMode == 'warehouse'"
+				v-if="canEditPlan && editMode === 'warehouse'"
 				@click="addWarehouse"
 				class="btn btn-primary btn-add-warehouse">
 				Add Warehouse
 			</button>
+			<button v-if="editMode === 'warehouse'" @click="searchWarehouse" class="btn btn-default">Find Warehouse</button>
 			<button v-if="walkableRef" @click="toggleWalkable" class="btn btn-toggle-walkable">Toggle Walkable</button>
 			<button v-if="gridRef" @click="toggleGrid" class="btn btn-toggle-grid">Toggle Grid</button>
 		</div>
@@ -124,16 +125,20 @@ const hoverRef = useTemplateRef<Layer>('hover')
 
 const GRID_CELL_COLOR = 'rgba(0,0,0,0.1)'
 const WALKABLE_CELL_COLOR = 'rgba(0, 255, 0, 0.3)'
+const WAREHOUSE_COLOR = 'rgba(0, 0, 255, 0.3)'
+const HIGHLIGHTED_WAREHOUSE_COLOR = 'rgba(255, 215, 0, 0.5)'
 const { width, height } = useElementSize(containerRef)
+
 const backgroundImage = ref<HTMLImageElement | null>(null)
 const contextMenu = ref<WarehouseContextMenu>({ visible: false, x: 0, y: 0, options: [] })
+const editMode = ref<'warehouse' | 'walkable'>('walkable')
+const highlightedWarehouse = ref<Rect | null>(null)
 const hoverCell = ref({ x: 0, y: 0 })
 const isDraggingWarehouse = ref(false)
 const isPainting = ref(false)
 const paintMode = ref<boolean | null>(null) // true for adding cells, false for removing
-const walkableCells = ref<Set<string>>(new Set())
 const settingAccessibleCellFor = ref<Rect | null>(null)
-const editMode = ref<'warehouse' | 'walkable'>('walkable') // Default to warehouse editing mode
+const walkableCells = ref<Set<string>>(new Set())
 
 const setEditMode = (mode: 'warehouse' | 'walkable') => {
 	editMode.value = mode
@@ -382,6 +387,92 @@ const toggleGrid = () => {
 }
 
 // #################################################################
+// ####################### WAREHOUSE SEARCH ########################
+// #################################################################
+const searchWarehouse = () => {
+	const warehouseLayer = getLayer(warehouseRef) as unknown as Layer | undefined
+	if (!warehouseLayer) return
+
+	const warehouseChildren = warehouseLayer.children || []
+
+	// Build list of warehouse names
+	const warehouseOptions: string[] = []
+	for (const child of warehouseChildren) {
+		if (child instanceof Rect) {
+			const { warehouse_name } = child.getAttr('warehouseData')
+			if (warehouse_name) {
+				warehouseOptions.push(warehouse_name)
+			}
+		}
+	}
+
+	if (warehouseOptions.length === 0) {
+		frappe.msgprint('No warehouses found on the plan.')
+		return
+	}
+
+	frappe.prompt(
+		[
+			{
+				label: 'Warehouse',
+				fieldname: 'warehouse',
+				fieldtype: 'Link',
+				options: 'Warehouse',
+				get_query: () => ({
+					filters: {
+						name: ['in', warehouseOptions],
+					},
+				}),
+				reqd: 1,
+			},
+		],
+		(values: { warehouse: string }) => highlightWarehouse(values.warehouse),
+		'Find Warehouse'
+	)
+}
+
+const highlightWarehouse = (warehouseName: string) => {
+	resetWarehouseHighlight()
+
+	const warehouseLayer = getLayer(warehouseRef) as unknown as Layer | undefined
+	if (!warehouseLayer) return
+
+	const warehouseChildren = warehouseLayer.children || []
+	let foundRect: Rect | null = null
+
+	for (const child of warehouseChildren) {
+		if (child instanceof Rect) {
+			const { warehouse_name } = child.getAttr('warehouseData')
+			if (warehouse_name === warehouseName) {
+				foundRect = child
+				break
+			}
+		}
+	}
+
+	if (!foundRect) {
+		frappe.msgprint(`Warehouse "${warehouseName}" not found on the plan.`)
+		return
+	}
+
+	foundRect.fill(HIGHLIGHTED_WAREHOUSE_COLOR)
+	foundRect.stroke('gold')
+	foundRect.strokeWidth(3)
+	highlightedWarehouse.value = foundRect
+	redrawLayer(warehouseRef)
+}
+
+const resetWarehouseHighlight = () => {
+	if (!highlightedWarehouse.value) return
+	const rect = highlightedWarehouse.value
+	rect.fill(WAREHOUSE_COLOR)
+	rect.stroke('')
+	rect.strokeWidth(2)
+	highlightedWarehouse.value = null
+	redrawLayer(warehouseRef)
+}
+
+// #################################################################
 // ######################### CONTEXT MENU ##########################
 // #################################################################
 const showContextMenu = (event: KonvaEventObject<MouseEvent, Rect>, shape: Rect) => {
@@ -565,7 +656,7 @@ const addWarehouseRect = (
 		y: y || canvasDimensions.value.height / 2,
 		width: length * cellSize.value.width,
 		height: width * cellSize.value.height,
-		fill: 'rgba(0, 0, 255, 0.3)',
+		fill: WAREHOUSE_COLOR,
 		rotation: rotation || 0,
 		draggable: canEditPlan.value && editMode.value === 'warehouse',
 		listening: editMode.value === 'warehouse',
@@ -597,12 +688,17 @@ const addWarehouseRect = (
 		event.evt.preventDefault()
 		event.evt.stopPropagation()
 		event.cancelBubble = true
+		resetWarehouseHighlight()
 		showContextMenu(event, warehouseRect)
 	})
 
 	// Since drag event handlers are not configurable while building the shape,
 	// adding drag event handlers individually to track dragging state
-	warehouseRect.on('dragstart', () => (isDraggingWarehouse.value = true))
+	warehouseRect.on('dragstart', () => {
+		resetWarehouseHighlight()
+		isDraggingWarehouse.value = true
+	})
+
 	warehouseRect.on('dragend', () => {
 		frm.value.dirty()
 		isDraggingWarehouse.value = false
