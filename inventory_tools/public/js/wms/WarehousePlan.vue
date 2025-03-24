@@ -8,13 +8,6 @@
 
 		<div class="overlay">
 			<div class="overlay-dimension">{{ plan.horizontal }}x{{ plan.vertical }} {{ plan.uom }}</div>
-			<!-- <div v-if="isHoverValid" class="overlay-cell-info">
-				Cell: ({{ hoverCell.x }}, {{ hoverCell.y }})
-				<span v-if="isCellWalkable(hoverCell.x, hoverCell.y)" class="overlay-cell-status overlay-walkable">
-					Walkable
-				</span>
-				<span v-else class="overlay-cell-status overlay-non-walkable">Non-walkable</span>
-			</div> -->
 		</div>
 
 		<div ref="container" class="container">
