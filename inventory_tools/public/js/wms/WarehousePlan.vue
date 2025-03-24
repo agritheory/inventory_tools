@@ -1000,25 +1000,27 @@ defineExpose({
 
 .warehouse-context-menu {
 	position: absolute;
-	background: white;
-	border: 1px solid #ccc;
-	box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-	border-radius: 4px;
+	background-color: white;
+	border-radius: 6px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	font-size: 13px;
+	border: 1px solid #e3e8f1;
+	overflow: hidden;
 	z-index: 1000;
-	min-width: 150px;
 }
 
 .warehouse-context-menu-item {
-	padding: 8px 12px;
+	padding: 8px 15px;
 	cursor: pointer;
+	color: #1f272e;
 }
 
 .warehouse-context-menu-item:hover {
-	background-color: #f0f0f0;
+	background-color: #f8f9fb;
 }
 
 .warehouse-context-menu-item:not(:last-child) {
-	border-bottom: 1px solid #eee;
+	border-bottom: 1px solid #e3e8f1;
 }
 
 .warehouse-popup {
