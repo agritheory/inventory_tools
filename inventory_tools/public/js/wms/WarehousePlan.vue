@@ -1,9 +1,36 @@
 <template>
 	<div v-if="plan.horizontal && plan.vertical">
 		<div class="toolbar">
-			<button v-if="gridRef" @click="toggleGrid" class="btn btn-toggle-grid">Toggle Grid</button>
+			<!-- toolbar toggles -->
+			<div v-if="canEditPlan" class="toolbar-edit-mode">
+				<span>Edit Mode:</span>
+				<div class="btn-group">
+					<button
+						@click="setEditMode('walkable')"
+						class="btn"
+						:class="{ 'btn-primary': editMode === 'walkable', 'btn-default': editMode !== 'walkable' }">
+						Paths
+					</button>
+					<button
+						@click="setEditMode('warehouse')"
+						class="btn"
+						:class="{ 'btn-primary': editMode === 'warehouse', 'btn-default': editMode !== 'warehouse' }">
+						Warehouses
+					</button>
+				</div>
+			</div>
+
+			<div class="toolbar-space" />
+
+			<!-- toolbar actions -->
+			<button
+				v-if="canEditPlan && editMode == 'warehouse'"
+				@click="addWarehouse"
+				class="btn btn-primary btn-add-warehouse">
+				Add Warehouse
+			</button>
 			<button v-if="walkableRef" @click="toggleWalkable" class="btn btn-toggle-walkable">Toggle Walkable</button>
-			<button v-if="canEditPlan" @click="addWarehouse" class="btn btn-primary btn-add-warehouse">Add Warehouse</button>
+			<button v-if="gridRef" @click="toggleGrid" class="btn btn-toggle-grid">Toggle Grid</button>
 		</div>
 
 		<div class="overlay">
@@ -106,6 +133,14 @@ const isPainting = ref(false)
 const paintMode = ref<boolean | null>(null) // true for adding cells, false for removing
 const walkableCells = ref<Set<string>>(new Set())
 const settingAccessibleCellFor = ref<Rect | null>(null)
+const editMode = ref<'warehouse' | 'walkable'>('walkable') // Default to warehouse editing mode
+
+const setEditMode = (mode: 'warehouse' | 'walkable') => {
+	editMode.value = mode
+	// Reset any active operations when switching modes
+	stopPainting()
+	settingAccessibleCellFor.value = null
+}
 
 onMounted(async () => {
 	// Load floor plan image into Konva's image layer
@@ -132,6 +167,10 @@ onMounted(async () => {
 const frm = computed(() => window.cur_frm)
 const doc = computed(() => frm.value.doc as WarehousePlan)
 const canEditPlan = computed(() => frappe.boot.user.can_write.includes(frm.value.doctype))
+const canDrawPaths = computed(
+	() =>
+		canEditPlan.value && editMode.value === 'walkable' && !isDraggingWarehouse.value && !settingAccessibleCellFor.value
+)
 
 const plan = computed(() => {
 	const warehousePlan = doc.value
@@ -375,7 +414,7 @@ const showContextMenu = (event: KonvaEventObject<MouseEvent, Rect>, shape: Rect)
 					<p style="margin-bottom: 0">Accessible From: ${accessCell}</p>
 				`,
 			},
-			...(canEditPlan.value
+			...(canEditPlan.value && editMode.value === 'warehouse'
 				? [
 						{ text: `Edit`, action: 'edit' },
 						{ text: 'Rotate', action: 'rotate' },
@@ -528,8 +567,8 @@ const addWarehouseRect = (
 		height: width * cellSize.value.height,
 		fill: 'rgba(0, 0, 255, 0.3)',
 		rotation: rotation || 0,
-		draggable: canEditPlan.value,
-		listening: true, // allow mouse events for context menu
+		draggable: canEditPlan.value && editMode.value === 'warehouse',
+		listening: editMode.value === 'warehouse',
 		dragBoundFunc: position => {
 			// set the bounds of dragging to be inside the drawn canvas, minus the shape's dimensions
 			const minPos = { x: offsetPixels.value.left, y: offsetPixels.value.top }
@@ -650,7 +689,7 @@ const getCellFromEvent = () => {
 }
 
 const startPainting = (event: KonvaEventObject<MouseEvent>) => {
-	if (!canEditPlan.value || isDraggingWarehouse.value || settingAccessibleCellFor.value) return
+	if (!canDrawPaths.value) return
 	isPainting.value = true
 	const cell = getCellFromEvent()
 	if (cell) {
@@ -747,8 +786,23 @@ const isCellWalkable = (x: number, y: number) => walkableCells.value.has(`${x},$
 const getWalkableString = () => JSON.stringify(getWalkableArray())
 const getWalkableCells = () => walkableCellsArray.value
 
-// Watch for changes
 watch(walkableCells, () => redrawLayer(walkableRef), { deep: true })
+watch(editMode, newMode => {
+	// Update draggable property of all warehouse rectangles when mode changes
+	const warehouseLayer = getLayer(warehouseRef) as unknown as Layer | undefined
+	const children = warehouseLayer?.children || []
+
+	for (const child of children) {
+		if (child instanceof Rect) {
+			// When in warehouse mode, make rectangles interactive
+			// When in walkable mode, disable interaction to allow clicking through to walkable cells
+			child.draggable(canEditPlan.value && newMode === 'warehouse')
+			child.listening(newMode === 'warehouse')
+		}
+	}
+
+	redrawLayer(warehouseRef)
+})
 
 // Expose public methods
 defineExpose({
@@ -763,10 +817,20 @@ defineExpose({
 <style scoped>
 .toolbar {
 	display: flex;
-	flex-direction: row-reverse;
 	align-items: center;
 	gap: 8px;
 	margin-bottom: 8px;
+}
+
+.toolbar-space {
+	flex-grow: 1;
+}
+
+.toolbar-edit-mode {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-right: auto;
 }
 
 .overlay-dimension {
@@ -778,34 +842,6 @@ defineExpose({
 	border-radius: 4px;
 	font-size: 14px;
 	z-index: 1;
-}
-
-.overlay-cell-info {
-	position: absolute;
-	top: 70px;
-	right: 8px;
-	background-color: rgba(255, 255, 255, 0.8);
-	padding: 4px 8px;
-	border-radius: 4px;
-	font-size: 14px;
-	z-index: 1;
-}
-
-.overlay-cell-status {
-	margin-left: 4px;
-	font-weight: bold;
-	border-radius: 3px;
-	padding: 1px 4px;
-}
-
-.overlay-walkable {
-	background-color: rgba(0, 255, 0, 0.2);
-	color: green;
-}
-
-.overlay-non-walkable {
-	background-color: rgba(255, 0, 0, 0.1);
-	color: #c53030;
 }
 
 .context-menu {
