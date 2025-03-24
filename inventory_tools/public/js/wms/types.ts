@@ -32,6 +32,16 @@ export type WarehouseDialogFields = {
 	warehouse_uom: string
 }
 
+export type WarehousePopup = {
+	visible: boolean
+	x?: number
+	y?: number
+	title?: string
+	length?: number
+	width?: number
+	accessPoint?: string
+}
+
 export type WarehousePlanDetails = {
 	warehouse_name: string
 	coordinates: string

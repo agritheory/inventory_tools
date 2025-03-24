@@ -83,7 +83,7 @@
 			<div
 				v-if="contextMenu.visible"
 				v-on-click-outside="hideContextMenu"
-				class="context-menu"
+				class="warehouse-context-menu"
 				:style="{
 					top: `${contextMenu.y}px`,
 					left: `${contextMenu.x}px`,
@@ -92,8 +92,35 @@
 					v-for="(option, index) in contextMenu.options"
 					v-html="option.text"
 					:key="index"
-					class="context-menu-item"
+					class="warehouse-context-menu-item"
 					@click="option.action && runContextAction(option.action)" />
+			</div>
+
+			<!-- Warehouse Hover Popup -->
+			<div
+				v-if="warehousePopup.visible"
+				class="warehouse-popup"
+				:style="{
+					top: `${warehousePopup.y}px`,
+					left: `${warehousePopup.x}px`,
+				}">
+				<div class="warehouse-popup-header">
+					<span class="warehouse-popup-title">{{ warehousePopup.title }}</span>
+				</div>
+				<div class="warehouse-popup-content">
+					<div class="warehouse-popup-field">
+						<span class="field-label">Length:</span>
+						<span class="field-value">{{ warehousePopup.length }} {{ plan.uom }}</span>
+					</div>
+					<div class="warehouse-popup-field">
+						<span class="field-label">Width:</span>
+						<span class="field-value">{{ warehousePopup.width }} {{ plan.uom }}</span>
+					</div>
+					<div class="warehouse-popup-field">
+						<span class="field-label">Access Point:</span>
+						<span class="field-value">{{ warehousePopup.accessPoint }}</span>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -110,7 +137,13 @@ import { Rect, type RectConfig } from 'konva/lib/shapes/Rect'
 import { Stage, type StageConfig } from 'konva/lib/Stage'
 import { ref, computed, onMounted, watch, useTemplateRef, type ShallowRef } from 'vue'
 
-import type { WarehouseContextMenu, WarehouseDialogFields, WarehousePlan, WarehousePlanDetails } from './types'
+import type {
+	WarehouseContextMenu,
+	WarehouseDialogFields,
+	WarehousePlan,
+	WarehousePlanDetails,
+	WarehousePopup,
+} from './types'
 
 declare const frappe: any
 
@@ -139,6 +172,7 @@ const isPainting = ref(false)
 const paintMode = ref<boolean | null>(null) // true for adding cells, false for removing
 const settingAccessibleCellFor = ref<Rect | null>(null)
 const walkableCells = ref<Set<string>>(new Set())
+const warehousePopup = ref<WarehousePopup>({ visible: false })
 
 const setEditMode = (mode: 'warehouse' | 'walkable') => {
 	editMode.value = mode
@@ -346,10 +380,7 @@ const initializeWarehouses = async () => {
 }
 
 const updateHoverPosition = (event: KonvaEventObject<MouseEvent>) => {
-	const stage = event.target.getStage()
-	if (!stage) return
-
-	const pointerPosition = stage.getPointerPosition()
+	const pointerPosition = getPosition(event)
 	if (!pointerPosition) return
 
 	const adjustedX = pointerPosition.x - offsetPixels.value.left
@@ -477,43 +508,22 @@ const resetWarehouseHighlight = () => {
 // #################################################################
 const showContextMenu = (event: KonvaEventObject<MouseEvent, Rect>, shape: Rect) => {
 	event.evt.preventDefault()
-
-	// Get the position of the context menu
-	const stage = event.target.getStage()
-	if (!stage) return
-	const pointerPosition = stage.getPointerPosition()
+	const pointerPosition = getPosition(event)
 	if (!pointerPosition) return
-
-	const { warehouse_name, warehouse_length, warehouse_width, accessible_path } = shape.getAttr('warehouseData')
-
-	// Format the accessible path for display
-	let accessCell = 'Not Set'
-	if (accessible_path) {
-		const [pathX, pathY] = accessible_path.split(',').map(Number)
-		accessCell = `(${pathX}, ${pathY})`
-	}
 
 	contextMenu.value = {
 		visible: true,
 		x: pointerPosition.x,
 		y: pointerPosition.y,
-		options: [
-			{
-				text: `
-					<p><strong>${warehouse_name || 'Warehouse'}</strong></p>
-					<p>${warehouse_length.toFixed(2)} x ${warehouse_width.toFixed(2)} ${doc.value.uom} (LxW)</p>
-					<p style="margin-bottom: 0">Accessible From: ${accessCell}</p>
-				`,
-			},
-			...(canEditPlan.value && editMode.value === 'warehouse'
+		options:
+			canEditPlan.value && editMode.value === 'warehouse'
 				? [
 						{ text: `Edit`, action: 'edit' },
 						{ text: 'Rotate', action: 'rotate' },
 						{ text: 'Set Access Cell', action: 'set-access' },
 						{ text: 'Delete', action: 'delete' },
 					]
-				: []),
-		],
+				: [],
 		target: shape,
 	}
 }
@@ -684,17 +694,56 @@ const addWarehouseRect = (
 		accessible_path: accessiblePath || '',
 	})
 
+	// Add mouseenter and mouseleave event handlers for the popup
+	warehouseRect.on('mouseenter', (event: KonvaEventObject<MouseEvent>) => {
+		if (contextMenu.value.visible) return
+		const pointerPosition = getPosition(event)
+		if (!pointerPosition) return
+
+		const { warehouse_name, warehouse_length, warehouse_width, accessible_path } =
+			warehouseRect.getAttr('warehouseData')
+
+		let accessPoint = 'Not Set'
+		if (accessible_path) {
+			const [pathX, pathY] = accessible_path.split(',').map(Number)
+			accessPoint = `(${pathX}, ${pathY})`
+		}
+
+		warehousePopup.value = {
+			visible: true,
+			x: pointerPosition.x + 30,
+			y: pointerPosition.y + 10,
+			title: warehouse_name,
+			length: warehouse_length,
+			width: warehouse_width,
+			accessPoint,
+		}
+	})
+
+	warehouseRect.on('mouseleave', () => {
+		warehousePopup.value.visible = false
+	})
+
+	// Ensure the popup follows mouse movement
+	warehouseRect.on('mousemove', (event: KonvaEventObject<MouseEvent>) => {
+		if (!warehousePopup.value.visible) return
+		const pointerPosition = getPosition(event)
+		if (!pointerPosition) return
+		warehousePopup.value.x = pointerPosition.x + 30
+		warehousePopup.value.y = pointerPosition.y + 10
+	})
+
 	warehouseRect.on('contextmenu', event => {
 		event.evt.preventDefault()
 		event.evt.stopPropagation()
 		event.cancelBubble = true
+		warehousePopup.value.visible = false
 		resetWarehouseHighlight()
 		showContextMenu(event, warehouseRect)
 	})
 
-	// Since drag event handlers are not configurable while building the shape,
-	// adding drag event handlers individually to track dragging state
 	warehouseRect.on('dragstart', () => {
+		warehousePopup.value.visible = false
 		resetWarehouseHighlight()
 		isDraggingWarehouse.value = true
 	})
@@ -837,6 +886,12 @@ const emitUpdate = () => {
 // #################################################################
 // ######################### HELPER METHODS ########################
 // #################################################################
+const getPosition = (event: KonvaEventObject<MouseEvent>) => {
+	const stage = event.target.getStage()
+	if (!stage) return null
+	return stage.getPointerPosition()
+}
+
 const getWalkableArray = () => {
 	// Create empty matrix filled with zeros
 	const matrix = Array(plan.value.vertical)
@@ -884,6 +939,9 @@ const getWalkableCells = () => walkableCellsArray.value
 
 watch(walkableCells, () => redrawLayer(walkableRef), { deep: true })
 watch(editMode, newMode => {
+	// Hide the popup when switching edit modes
+	warehousePopup.value.visible = false
+
 	// Update draggable property of all warehouse rectangles when mode changes
 	const warehouseLayer = getLayer(warehouseRef) as unknown as Layer | undefined
 	const children = warehouseLayer?.children || []
@@ -940,7 +998,7 @@ defineExpose({
 	z-index: 1;
 }
 
-.context-menu {
+.warehouse-context-menu {
 	position: absolute;
 	background: white;
 	border: 1px solid #ccc;
@@ -950,16 +1008,60 @@ defineExpose({
 	min-width: 150px;
 }
 
-.context-menu-item {
+.warehouse-context-menu-item {
 	padding: 8px 12px;
 	cursor: pointer;
 }
 
-.context-menu-item:hover {
+.warehouse-context-menu-item:hover {
 	background-color: #f0f0f0;
 }
 
-.context-menu-item:not(:last-child) {
+.warehouse-context-menu-item:not(:last-child) {
 	border-bottom: 1px solid #eee;
+}
+
+.warehouse-popup {
+	position: absolute;
+	z-index: 1000;
+	background-color: white;
+	border-radius: 6px;
+	box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+	min-width: 220px;
+	pointer-events: none; /* Allow clicking through the popup */
+	font-size: 13px;
+	border: 1px solid #e3e8f1;
+	overflow: hidden;
+}
+
+.warehouse-popup-header {
+	padding: 8px 15px;
+	background-color: #f8f9fb;
+	border-bottom: 1px solid #e3e8f1;
+}
+
+.warehouse-popup-title {
+	font-weight: 600;
+	color: #4c5a67;
+}
+
+.warehouse-popup-content {
+	padding: 10px 15px;
+}
+
+.warehouse-popup-field {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 5px;
+}
+
+.field-label {
+	color: #8d99a6;
+	margin-right: 10px;
+}
+
+.field-value {
+	color: #1f272e;
+	font-weight: 500;
 }
 </style>
