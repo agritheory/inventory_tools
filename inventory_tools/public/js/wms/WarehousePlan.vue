@@ -669,7 +669,7 @@ const addWarehouseRect = (
 		fill: WAREHOUSE_COLOR,
 		rotation: rotation || 0,
 		draggable: canEditPlan.value && editMode.value === 'warehouse',
-		listening: editMode.value === 'warehouse',
+		listening: true,
 		dragBoundFunc: position => {
 			// set the bounds of dragging to be inside the drawn canvas, minus the shape's dimensions
 			const minPos = { x: offsetPixels.value.left, y: offsetPixels.value.top }
@@ -734,12 +734,22 @@ const addWarehouseRect = (
 	})
 
 	warehouseRect.on('contextmenu', event => {
-		event.evt.preventDefault()
-		event.evt.stopPropagation()
-		event.cancelBubble = true
-		warehousePopup.value.visible = false
-		resetWarehouseHighlight()
-		showContextMenu(event, warehouseRect)
+		if (editMode.value === 'warehouse') {
+			event.evt.preventDefault()
+			event.evt.stopPropagation()
+			event.cancelBubble = true
+			warehousePopup.value.visible = false
+			resetWarehouseHighlight()
+			showContextMenu(event, warehouseRect)
+		}
+	})
+
+	// A `mousedown` event on the shape will also trigger a `mousedown` event on the stage
+	// which will start painting cells. To prevent this, we cancel the bubble only in warehouse mode
+	warehouseRect.on('mousedown', event => {
+		if (editMode.value === 'warehouse') {
+			event.cancelBubble = true
+		}
 	})
 
 	warehouseRect.on('dragstart', () => {
@@ -752,10 +762,6 @@ const addWarehouseRect = (
 		frm.value.dirty()
 		isDraggingWarehouse.value = false
 	})
-
-	// A `mousedown` event on the shape will also trigger a `mousedown` event on the stage
-	// which will start painting cells. To prevent this, we cancel the bubble.
-	warehouseRect.on('mousedown', event => (event.cancelBubble = true))
 
 	// Add the warehouse shape to the warehouse layer
 	const warehouseLayer = getLayer(warehouseRef) as unknown as Layer | undefined
@@ -948,10 +954,7 @@ watch(editMode, newMode => {
 
 	for (const child of children) {
 		if (child instanceof Rect) {
-			// When in warehouse mode, make rectangles interactive
-			// When in walkable mode, disable interaction to allow clicking through to walkable cells
 			child.draggable(canEditPlan.value && newMode === 'warehouse')
-			child.listening(newMode === 'warehouse')
 		}
 	}
 
