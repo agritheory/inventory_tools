@@ -3,7 +3,7 @@
 		<div class="toolbar">
 			<button v-if="gridRef" @click="toggleGrid" class="btn btn-toggle-grid">Toggle Grid</button>
 			<button v-if="walkableRef" @click="toggleWalkable" class="btn btn-toggle-walkable">Toggle Walkable</button>
-			<button @click="addWarehouse" class="btn btn-primary btn-add-warehouse">Add Warehouse</button>
+			<button v-if="canEditPlan" @click="addWarehouse" class="btn btn-primary btn-add-warehouse">Add Warehouse</button>
 		</div>
 
 		<div class="overlay">
@@ -136,13 +136,9 @@ onMounted(async () => {
 	}
 })
 
-const frm = computed(() => {
-	return window.cur_frm
-})
-
-const doc = computed(() => {
-	return frm.value.doc as WarehousePlan
-})
+const frm = computed(() => window.cur_frm)
+const doc = computed(() => frm.value.doc as WarehousePlan)
+const canEditPlan = computed(() => frappe.boot.user.can_write.includes(frm.value.doctype))
 
 const plan = computed(() => {
 	const warehousePlan = doc.value
@@ -193,11 +189,12 @@ const hoverConfig = computed(
 		height: cellSize.value.height,
 		stroke: settingAccessibleCellFor.value ? 'lime' : 'tomato',
 		strokeWidth: 2,
-		opacity: isHoverValid.value
-			? settingAccessibleCellFor.value && isCellWalkable(hoverCell.value.x, hoverCell.value.y)
-				? 0.7
-				: 0.5
-			: 0,
+		opacity:
+			canEditPlan.value && isHoverValid.value
+				? settingAccessibleCellFor.value && isCellWalkable(hoverCell.value.x, hoverCell.value.y)
+					? 0.7
+					: 0.5
+				: 0,
 		listening: false,
 	})
 )
@@ -385,10 +382,14 @@ const showContextMenu = (event: KonvaEventObject<MouseEvent, Rect>, shape: Rect)
 					<p style="margin-bottom: 0">Accessible From: ${accessCell}</p>
 				`,
 			},
-			{ text: `Edit`, action: 'edit' },
-			{ text: 'Rotate', action: 'rotate' },
-			{ text: 'Set Access Cell', action: 'set-access' },
-			{ text: 'Delete', action: 'delete' },
+			...(canEditPlan.value
+				? [
+						{ text: `Edit`, action: 'edit' },
+						{ text: 'Rotate', action: 'rotate' },
+						{ text: 'Set Access Cell', action: 'set-access' },
+						{ text: 'Delete', action: 'delete' },
+					]
+				: []),
 		],
 		target: shape,
 	}
@@ -534,8 +535,8 @@ const addWarehouseRect = (
 		height: width * cellSize.value.height,
 		fill: 'rgba(0, 0, 255, 0.3)',
 		rotation: rotation || 0,
-		draggable: true,
-		listening: true,
+		draggable: canEditPlan.value,
+		listening: true, // allow mouse events for context menu
 		dragBoundFunc: position => {
 			// set the bounds of dragging to be inside the drawn canvas, minus the shape's dimensions
 			const minPos = { x: offsetPixels.value.left, y: offsetPixels.value.top }
@@ -656,7 +657,7 @@ const getCellFromEvent = () => {
 }
 
 const startPainting = (event: KonvaEventObject<MouseEvent>) => {
-	if (isDraggingWarehouse.value || settingAccessibleCellFor.value) return
+	if (!canEditPlan.value || isDraggingWarehouse.value || settingAccessibleCellFor.value) return
 	isPainting.value = true
 	const cell = getCellFromEvent()
 	if (cell) {
@@ -772,6 +773,7 @@ defineExpose({
 	flex-direction: row-reverse;
 	align-items: center;
 	gap: 8px;
+	margin-bottom: 8px;
 }
 
 .overlay-dimension {
