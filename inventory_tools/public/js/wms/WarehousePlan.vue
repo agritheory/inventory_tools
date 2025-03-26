@@ -34,10 +34,6 @@
 			<button v-if="gridRef" @click="toggleGrid" class="btn btn-toggle-grid">Toggle Grid</button>
 		</div>
 
-		<div class="overlay">
-			<div class="overlay-dimension">{{ plan.horizontal }}x{{ plan.vertical }} {{ plan.uom }}</div>
-		</div>
-
 		<div ref="container" class="container">
 			<konva-stage
 				ref="stage"
@@ -126,6 +122,14 @@
 						<span class="field-value">{{ warehousePopup.accessPoint }}</span>
 					</div>
 				</div>
+			</div>
+		</div>
+
+		<div class="footer">
+			<div class="footer-dimension">{{ plan.horizontal }}x{{ plan.vertical }} {{ plan.uom }}</div>
+			<div v-show="isHoverValid" class="footer-cell-tracker">
+				Cell ({{ hoverCell.x }}, {{ hoverCell.y }}) -
+				{{ isCellWalkable(hoverCell.x, hoverCell.y) ? 'Walkable' : 'Not Walkable' }}
 			</div>
 		</div>
 	</div>
@@ -1055,17 +1059,6 @@ defineExpose({
 	margin-right: auto;
 }
 
-.overlay-dimension {
-	position: absolute;
-	top: 38px;
-	right: 8px;
-	background-color: rgba(255, 255, 255, 0.8);
-	padding: 4px 8px;
-	border-radius: 4px;
-	font-size: 14px;
-	z-index: 1;
-}
-
 .warehouse-context-menu {
 	position: absolute;
 	background-color: white;
@@ -1133,5 +1126,31 @@ defineExpose({
 .field-value {
 	color: #1f272e;
 	font-weight: 500;
+}
+
+.footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 0;
+	margin-top: 8px;
+}
+
+.footer-dimension {
+	background-color: rgba(255, 255, 255, 0.8);
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 14px;
+	color: #1f272e;
+	border: 1px solid #e3e8f1;
+}
+
+.footer-cell-tracker {
+	background-color: rgba(255, 255, 255, 0.8);
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 14px;
+	color: #1f272e;
+	border: 1px solid #e3e8f1;
 }
 </style>
