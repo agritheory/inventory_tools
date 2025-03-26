@@ -170,16 +170,10 @@ const hoverCell = ref({ x: 0, y: 0 })
 const isDraggingWarehouse = ref(false)
 const isPainting = ref(false)
 const paintMode = ref<boolean | null>(null) // true for adding cells, false for removing
+const popupDebounceTimer = ref<number | null>(null)
 const settingAccessibleCellFor = ref<Rect | null>(null)
 const walkableCells = ref<Set<string>>(new Set())
 const warehousePopup = ref<WarehousePopup>({ visible: false })
-
-const setEditMode = (mode: 'warehouse' | 'walkable') => {
-	editMode.value = mode
-	// Reset any active operations when switching modes
-	stopPainting()
-	settingAccessibleCellFor.value = null
-}
 
 onMounted(async () => {
 	// Load floor plan image into Konva's image layer
@@ -397,6 +391,14 @@ const updateHoverPosition = (event: KonvaEventObject<MouseEvent>) => {
 // #################################################################
 // ######################## TOGGLE ACTIONS #########################
 // #################################################################
+const setEditMode = (mode: 'warehouse' | 'walkable') => {
+	editMode.value = mode
+
+	// Reset any active operations when switching modes
+	stopPainting()
+	settingAccessibleCellFor.value = null
+}
+
 const toggleWalkable = () => {
 	const walkableLayer = getLayer(walkableRef)
 	if (!walkableLayer) return
@@ -415,6 +417,17 @@ const toggleGrid = () => {
 	} else {
 		gridLayer.show()
 	}
+}
+
+const debounce = (fn: Function, delay: number) => {
+	if (popupDebounceTimer.value) {
+		clearTimeout(popupDebounceTimer.value)
+	}
+
+	popupDebounceTimer.value = setTimeout(() => {
+		fn()
+		popupDebounceTimer.value = null
+	}, delay)
 }
 
 // #################################################################
@@ -694,33 +707,39 @@ const addWarehouseRect = (
 		accessible_path: accessiblePath || '',
 	})
 
-	// Add mouseenter and mouseleave event handlers for the popup
 	warehouseRect.on('mouseenter', (event: KonvaEventObject<MouseEvent>) => {
 		if (contextMenu.value.visible) return
-		const pointerPosition = getPosition(event)
-		if (!pointerPosition) return
 
-		const { warehouse_name, warehouse_length, warehouse_width, accessible_path } =
-			warehouseRect.getAttr('warehouseData')
+		debounce(() => {
+			const pointerPosition = getPosition(event)
+			if (!pointerPosition) return
 
-		let accessPoint = 'Not Set'
-		if (accessible_path) {
-			const [pathX, pathY] = accessible_path.split(',').map(Number)
-			accessPoint = `(${pathX}, ${pathY})`
-		}
+			const { warehouse_name, warehouse_length, warehouse_width, accessible_path } =
+				warehouseRect.getAttr('warehouseData')
 
-		warehousePopup.value = {
-			visible: true,
-			x: pointerPosition.x + 30,
-			y: pointerPosition.y + 10,
-			title: warehouse_name,
-			length: warehouse_length,
-			width: warehouse_width,
-			accessPoint,
-		}
+			let accessPoint = 'Not Set'
+			if (accessible_path) {
+				const [pathX, pathY] = accessible_path.split(',').map(Number)
+				accessPoint = `(${pathX}, ${pathY})`
+			}
+
+			warehousePopup.value = {
+				visible: true,
+				x: pointerPosition.x + 30,
+				y: pointerPosition.y + 10,
+				title: warehouse_name,
+				length: warehouse_length,
+				width: warehouse_width,
+				accessPoint,
+			}
+		}, 400)
 	})
 
 	warehouseRect.on('mouseleave', () => {
+		if (popupDebounceTimer.value) {
+			clearTimeout(popupDebounceTimer.value)
+			popupDebounceTimer.value = null
+		}
 		warehousePopup.value.visible = false
 	})
 
