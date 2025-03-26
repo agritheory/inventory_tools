@@ -73,6 +73,11 @@
 				<!-- Warehouse Layer -->
 				<konva-layer ref="warehouse" />
 
+				<!-- Access Point Highlight Layer -->
+				<konva-layer ref="access">
+					<konva-rect :config="accessConfig" />
+				</konva-layer>
+
 				<!-- Hover Indicator Layer -->
 				<konva-layer ref="hover">
 					<konva-rect :config="hoverConfig" />
@@ -151,20 +156,23 @@ const emit = defineEmits(['update:walkableCells'])
 
 const containerRef = useTemplateRef('container')
 const stageRef = useTemplateRef<Stage>('stage')
+const accessRef = useTemplateRef<Layer>('access')
 const gridRef = useTemplateRef<Layer>('grid')
+const hoverRef = useTemplateRef<Layer>('hover')
 const walkableRef = useTemplateRef<Layer>('walkable')
 const warehouseRef = useTemplateRef<Layer>('warehouse')
-const hoverRef = useTemplateRef<Layer>('hover')
 
 const GRID_CELL_COLOR = 'rgba(0,0,0,0.1)'
 const WALKABLE_CELL_COLOR = 'rgba(0, 255, 0, 0.3)'
 const WAREHOUSE_COLOR = 'rgba(0, 0, 255, 0.3)'
-const HIGHLIGHTED_WAREHOUSE_COLOR = 'rgba(255, 215, 0, 0.5)'
+const HIGHLIGHTED_WAREHOUSE_COLOR = 'rgba(255, 215, 0, 0.3)'
+const ACCESS_POINT_COLOR = 'rgba(255, 0, 0, 0.3)'
 const { width, height } = useElementSize(containerRef)
 
 const backgroundImage = ref<HTMLImageElement | null>(null)
 const contextMenu = ref<WarehouseContextMenu>({ visible: false, x: 0, y: 0, options: [] })
 const editMode = ref<'warehouse' | 'walkable'>('walkable')
+const highlightedAccessPoint = ref<{ x: number; y: number } | null>(null)
 const highlightedWarehouse = ref<Rect | null>(null)
 const hoverCell = ref({ x: 0, y: 0 })
 const isDraggingWarehouse = ref(false)
@@ -260,6 +268,24 @@ const hoverConfig = computed(
 					? 0.7
 					: 0.5
 				: 0,
+		listening: false,
+	})
+)
+
+const accessConfig = computed(
+	(): RectConfig => ({
+		x: highlightedAccessPoint.value
+			? offsetPixels.value.left + highlightedAccessPoint.value.x * cellSize.value.width
+			: 0,
+		y: highlightedAccessPoint.value
+			? offsetPixels.value.top + highlightedAccessPoint.value.y * cellSize.value.height
+			: 0,
+		width: cellSize.value.width,
+		height: cellSize.value.height,
+		fill: ACCESS_POINT_COLOR,
+		stroke: 'red',
+		strokeWidth: 2,
+		opacity: highlightedAccessPoint.value ? 0.5 : 0,
 		listening: false,
 	})
 )
@@ -430,6 +456,16 @@ const debounce = (fn: Function, delay: number) => {
 	}, delay)
 }
 
+const highlightAccessPoint = (accessCell: string | null) => {
+	if (accessCell) {
+		const [x, y] = accessCell.split(',').map(Number)
+		highlightedAccessPoint.value = { x, y }
+	} else {
+		highlightedAccessPoint.value = null
+	}
+	redrawLayer(accessRef)
+}
+
 // #################################################################
 // ####################### WAREHOUSE SEARCH ########################
 // #################################################################
@@ -476,7 +512,7 @@ const searchWarehouse = () => {
 }
 
 const highlightWarehouse = (warehouseName: string) => {
-	resetWarehouseHighlight()
+	resetHighlights()
 
 	const warehouseLayer = getLayer(warehouseRef) as unknown as Layer | undefined
 	if (!warehouseLayer) return
@@ -504,6 +540,14 @@ const highlightWarehouse = (warehouseName: string) => {
 	foundRect.strokeWidth(3)
 	highlightedWarehouse.value = foundRect
 	redrawLayer(warehouseRef)
+
+	const { accessible_path } = foundRect.getAttr('warehouseData')
+	highlightAccessPoint(accessible_path)
+}
+
+const resetHighlights = () => {
+	resetWarehouseHighlight()
+	highlightAccessPoint(null)
 }
 
 const resetWarehouseHighlight = () => {
@@ -585,10 +629,12 @@ const setAccessCell = (event: KonvaEventObject<MouseEvent>) => {
 
 const setWarehouseAccessPath = (shape: Rect, x: number, y: number) => {
 	const warehouseData = shape.getAttr('warehouseData')
+	const accessPath = `${x},${y}`
 	shape.setAttr('warehouseData', {
 		...warehouseData,
-		accessible_path: `${x},${y}`,
+		accessible_path: accessPath,
 	})
+	highlightAccessPoint(accessPath)
 	frappe.show_alert(`Path set for ${warehouseData.warehouse_name} to (${x}, ${y})`, 3)
 }
 
@@ -758,8 +804,8 @@ const addWarehouseRect = (
 			event.evt.stopPropagation()
 			event.cancelBubble = true
 			warehousePopup.value.visible = false
-			resetWarehouseHighlight()
 			showContextMenu(event, warehouseRect)
+			resetHighlights()
 		}
 	})
 
@@ -773,13 +819,13 @@ const addWarehouseRect = (
 
 	warehouseRect.on('dragstart', () => {
 		warehousePopup.value.visible = false
-		resetWarehouseHighlight()
 		isDraggingWarehouse.value = true
+		resetHighlights()
 	})
 
 	warehouseRect.on('dragend', () => {
-		frm.value.dirty()
 		isDraggingWarehouse.value = false
+		frm.value.dirty()
 	})
 
 	// Add the warehouse shape to the warehouse layer
