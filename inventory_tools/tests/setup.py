@@ -570,6 +570,7 @@ def create_sales_order(settings):
 	so.save()
 	so.submit()
 
+
 def create_sales_order_2():
 	so = frappe.new_doc("Sales Order")
 	so.transaction_date = getdate().replace(month=1, day=1)
@@ -600,6 +601,7 @@ def create_sales_order_2():
 		},
 	)
 	so.save()
+
 
 def create_material_request(settings):
 	mr = frappe.new_doc("Material Request")

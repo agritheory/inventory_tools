@@ -201,7 +201,6 @@ operations = [
 	),
 ]
 attributes = {
-
 	"Ambrosia Pie": {
 		"Fruits": ["Hairless Rambutan", "Cloudberry", "Tayberry"],
 		"Price": 11.00,
