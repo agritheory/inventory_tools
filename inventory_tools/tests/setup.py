@@ -121,6 +121,8 @@ def create_test_data():
 	else:
 		create_material_request(settings)
 	create_production_plan(settings, prod_plan_from_doc)
+	# Required to be after production plan creation
+	create_sales_order_2()
 	create_fruit_material_request(settings)
 	create_quotations(settings)
 	create_specifications(settings)
@@ -568,6 +570,36 @@ def create_sales_order(settings):
 	so.save()
 	so.submit()
 
+def create_sales_order_2():
+	so = frappe.new_doc("Sales Order")
+	so.transaction_date = getdate().replace(month=1, day=1)
+	so.delivery_date = getdate().replace(month=1, day=3)
+	so.customer = "Whole Harvest Grocery Group"
+	so.append(
+		"items",
+		{
+			"item_code": "Bayberry",
+			"qty": 20,
+			"delivery_date": getdate().replace(month=1, day=3),
+		},
+	)
+	so.append(
+		"items",
+		{
+			"item_code": "Kepel",
+			"qty": 12,
+			"delivery_date": getdate().replace(month=1, day=3),
+		},
+	)
+	so.append(
+		"items",
+		{
+			"item_code": "Lychee",
+			"qty": 3,
+			"delivery_date": getdate().replace(month=1, day=3),
+		},
+	)
+	so.save()
 
 def create_material_request(settings):
 	mr = frappe.new_doc("Material Request")
