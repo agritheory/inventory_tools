@@ -1,517 +1,517 @@
 [
-	{
-		"item_code": "Butter",
-		"qty": 44,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Bayberry",
-		"qty": 82,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Cornstarch",
-		"qty": 2,
-		"warehouse": "Storeroom - APC"
-	},
-	{
-		"item_code": "Flour",
-		"qty": 71,
-		"warehouse": "Storeroom - APC"
-	},
-	{
-		"item_code": "Parchment Paper",
-		"qty": 60,
-		"warehouse": "Storeroom - APC"
-	},
-	{
-		"item_code": "Pie Tin",
-		"qty": 60,
-		"warehouse": "Storeroom - APC"
-	},
-	{
-		"item_code": "Pie Box",
-		"qty": 70,
-		"warehouse": "Storeroom - APC"
-	},
-	{
-		"item_code": "Sugar",
-		"qty": 8,
-		"warehouse": "Storeroom - APC"
-	},
-	{
-		"item_code": "Salt",
-		"qty": 1,
-		"warehouse": "Storeroom - APC"
-	},
-	{
-		"item_code": "Water",
-		"qty": 15,
-		"warehouse": "Kitchen - APC"
-	},
-	{
-		"item_code": "Gooseberry",
-		"qty": 30,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Cocoplum",
-		"qty": 45,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Damson Plum",
-		"qty": 45,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Bilberry",
-		"qty": 53,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Kepel",
-		"qty": 37,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Lime",
-		"qty": 74,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Boquila",
-		"qty": 74,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Bael",
-		"qty": 83,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Highbush Cranberry",
-		"qty": 17,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Sambucus",
-		"qty": 85,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Redcurrant",
-		"qty": 78,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Gac",
-		"qty": 73,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "European Blueberry",
-		"qty": 1,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Giant Granadilla",
-		"qty": 51,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Bearberry",
-		"qty": 45,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Seedless Watermelon",
-		"qty": 77,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Mini Watermelon",
-		"qty": 4,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Kandis",
-		"qty": 62,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Berberis Vulgaris",
-		"qty": 65,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Blue Tongue",
-		"qty": 32,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Kahikatea",
-		"qty": 34,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Kabosu",
-		"qty": 92,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Kaffir Lime",
-		"qty": 95,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Black Apple",
-		"qty": 72,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Black Cherry",
-		"qty": 39,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Lychee",
-		"qty": 26,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Jostaberry",
-		"qty": 34,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Camu Camu",
-		"qty": 54,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Batuan",
-		"qty": 3,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Calamondin",
-		"qty": 50,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Citron",
-		"qty": 12,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Coco Plum",
-		"qty": 65,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Horned Melon",
-		"qty": 54,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Fragaria",
-		"qty": 5,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Boysenberry",
-		"qty": 94,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Chokeberry",
-		"qty": 94,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Raisin",
-		"qty": 57,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Lawton Blackberry",
-		"qty": 17,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Cranberry",
-		"qty": 47,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Bilimbi",
-		"qty": 23,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Barbados Cherry",
-		"qty": 79,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Photinia",
-		"qty": 85,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Doubah",
-		"qty": 14,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Coffee",
-		"qty": 66,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Youngberry",
-		"qty": 75,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Bacuri",
-		"qty": 51,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Louvi",
-		"qty": 38,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Jaltomata Procumbens",
-		"qty": 64,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Empetrum",
-		"qty": 98,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "European Raspberry",
-		"qty": 38,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Black Raspberry",
-		"qty": 50,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Cryptocarya Alba",
-		"qty": 98,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Canary Melon",
-		"qty": 82,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Biriba",
-		"qty": 30,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Cocky Apple",
-		"qty": 79,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Edible Honeysuckle",
-		"qty": 91,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Whinberry",
-		"qty": 51,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Desert Lime",
-		"qty": 63,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Myrciaria Floribunda",
-		"qty": 98,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Physalis",
-		"qty": 52,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Bitter Melon",
-		"qty": 38,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Dabai",
-		"qty": 97,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Beach Plum",
-		"qty": 88,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Melon Pear",
-		"qty": 79,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Blood Orange",
-		"qty": 30,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Banana",
-		"qty": 51,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Loquat",
-		"qty": 81,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Eugenia Uniflora",
-		"qty": 5,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Kakadu Lime",
-		"qty": 29,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Karonda",
-		"qty": 4,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Hippophae",
-		"qty": 10,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Guava",
-		"qty": 56,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Candlenut",
-		"qty": 17,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Tomatillo",
-		"qty": 74,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Olallieberry",
-		"qty": 17,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Date",
-		"qty": 84,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Midyim",
-		"qty": 88,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Cowberry",
-		"qty": 69,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Kapok",
-		"qty": 34,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Durian",
-		"qty": 6,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Desert Banana",
-		"qty": 53,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Coconut",
-		"qty": 66,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Triphasia Brassii",
-		"qty": 77,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Kiwifruit",
-		"qty": 43,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Hackberry",
-		"qty": 75,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Genip",
-		"qty": 23,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Goji",
-		"qty": 55,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Clementine",
-		"qty": 80,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Huckleberry",
-		"qty": 95,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Sultana",
-		"qty": 75,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Bacupari",
-		"qty": 16,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "White Currant",
-		"qty": 8,
-		"warehouse": "Refrigerator - APC"
-	},
-	{
-		"item_code": "Raspberry",
-		"qty": 4,
-		"warehouse": "Refrigerator - APC"
-	}
+    {
+        "item_code": "Butter",
+        "qty": 44,
+        "warehouse": "Fruit Storage 1 - CFC"
+    },
+    {
+        "item_code": "Bayberry",
+        "qty": 82,
+        "warehouse": "Fruit Storage 2 - CFC"
+    },
+    {
+        "item_code": "Cornstarch",
+        "qty": 2,
+        "warehouse": "Fruit Storage 3 - CFC"
+    },
+    {
+        "item_code": "Flour",
+        "qty": 71,
+        "warehouse": "Fruit Storage 4 - CFC"
+    },
+    {
+        "item_code": "Parchment Paper",
+        "qty": 60,
+        "warehouse": "Fruit Storage 5 - CFC"
+    },
+    {
+        "item_code": "Pie Tin",
+        "qty": 60,
+        "warehouse": "Fruit Storage 6 - CFC"
+    },
+    {
+        "item_code": "Pie Box",
+        "qty": 70,
+        "warehouse": "Fruit Storage 7 - CFC"
+    },
+    {
+        "item_code": "Sugar",
+        "qty": 8,
+        "warehouse": "Fruit Storage 8 - CFC"
+    },
+    {
+        "item_code": "Salt",
+        "qty": 1,
+        "warehouse": "Fruit Storage 9 - CFC"
+    },
+    {
+        "item_code": "Water",
+        "qty": 15,
+        "warehouse": "Fruit Storage 10 - CFC"
+    },
+    {
+        "item_code": "Gooseberry",
+        "qty": 30,
+        "warehouse": "Fruit Storage 11 - CFC"
+    },
+    {
+        "item_code": "Cocoplum",
+        "qty": 45,
+        "warehouse": "Fruit Storage 12 - CFC"
+    },
+    {
+        "item_code": "Damson Plum",
+        "qty": 45,
+        "warehouse": "Fruit Storage 13 - CFC"
+    },
+    {
+        "item_code": "Bilberry",
+        "qty": 53,
+        "warehouse": "Fruit Storage 14 - CFC"
+    },
+    {
+        "item_code": "Kepel",
+        "qty": 37,
+        "warehouse": "Fruit Storage 15 - CFC"
+    },
+    {
+        "item_code": "Lime",
+        "qty": 74,
+        "warehouse": "Fruit Storage 16 - CFC"
+    },
+    {
+        "item_code": "Boquila",
+        "qty": 74,
+        "warehouse": "Fruit Storage 17 - CFC"
+    },
+    {
+        "item_code": "Bael",
+        "qty": 83,
+        "warehouse": "Fruit Storage 18 - CFC"
+    },
+    {
+        "item_code": "Highbush Cranberry",
+        "qty": 17,
+        "warehouse": "Fruit Storage 19 - CFC"
+    },
+    {
+        "item_code": "Sambucus",
+        "qty": 85,
+        "warehouse": "Fruit Storage 20 - CFC"
+    },
+    {
+        "item_code": "Redcurrant",
+        "qty": 78,
+        "warehouse": "Fruit Storage 21 - CFC"
+    },
+    {
+        "item_code": "Gac",
+        "qty": 73,
+        "warehouse": "Fruit Storage 22 - CFC"
+    },
+    {
+        "item_code": "European Blueberry",
+        "qty": 1,
+        "warehouse": "Fruit Storage 23 - CFC"
+    },
+    {
+        "item_code": "Giant Granadilla",
+        "qty": 51,
+        "warehouse": "Fruit Storage 24 - CFC"
+    },
+    {
+        "item_code": "Bearberry",
+        "qty": 45,
+        "warehouse": "Fruit Storage 25 - CFC"
+    },
+    {
+        "item_code": "Seedless Watermelon",
+        "qty": 77,
+        "warehouse": "Fruit Storage 26 - CFC"
+    },
+    {
+        "item_code": "Mini Watermelon",
+        "qty": 4,
+        "warehouse": "Fruit Storage 27 - CFC"
+    },
+    {
+        "item_code": "Kandis",
+        "qty": 62,
+        "warehouse": "Fruit Storage 28 - CFC"
+    },
+    {
+        "item_code": "Berberis Vulgaris",
+        "qty": 65,
+        "warehouse": "Fruit Storage 29 - CFC"
+    },
+    {
+        "item_code": "Blue Tongue",
+        "qty": 32,
+        "warehouse": "Fruit Storage 30 - CFC"
+    },
+    {
+        "item_code": "Kahikatea",
+        "qty": 34,
+        "warehouse": "Fruit Storage 31 - CFC"
+    },
+    {
+        "item_code": "Kabosu",
+        "qty": 92,
+        "warehouse": "Fruit Storage 32 - CFC"
+    },
+    {
+        "item_code": "Kaffir Lime",
+        "qty": 95,
+        "warehouse": "Fruit Storage 33 - CFC"
+    },
+    {
+        "item_code": "Black Apple",
+        "qty": 72,
+        "warehouse": "Fruit Storage 34 - CFC"
+    },
+    {
+        "item_code": "Black Cherry",
+        "qty": 39,
+        "warehouse": "Fruit Storage 35 - CFC"
+    },
+    {
+        "item_code": "Lychee",
+        "qty": 26,
+        "warehouse": "Fruit Storage 36 - CFC"
+    },
+    {
+        "item_code": "Jostaberry",
+        "qty": 34,
+        "warehouse": "Fruit Storage 37 - CFC"
+    },
+    {
+        "item_code": "Camu Camu",
+        "qty": 54,
+        "warehouse": "Fruit Storage 38 - CFC"
+    },
+    {
+        "item_code": "Batuan",
+        "qty": 3,
+        "warehouse": "Fruit Storage 39 - CFC"
+    },
+    {
+        "item_code": "Calamondin",
+        "qty": 50,
+        "warehouse": "Fruit Storage 40 - CFC"
+    },
+    {
+        "item_code": "Citron",
+        "qty": 12,
+        "warehouse": "Fruit Storage 41 - CFC"
+    },
+    {
+        "item_code": "Coco Plum",
+        "qty": 65,
+        "warehouse": "Fruit Storage 42 - CFC"
+    },
+    {
+        "item_code": "Horned Melon",
+        "qty": 54,
+        "warehouse": "Fruit Storage 43 - CFC"
+    },
+    {
+        "item_code": "Fragaria",
+        "qty": 5,
+        "warehouse": "Fruit Storage 44 - CFC"
+    },
+    {
+        "item_code": "Boysenberry",
+        "qty": 94,
+        "warehouse": "Fruit Storage 45 - CFC"
+    },
+    {
+        "item_code": "Chokeberry",
+        "qty": 94,
+        "warehouse": "Fruit Storage 46 - CFC"
+    },
+    {
+        "item_code": "Raisin",
+        "qty": 57,
+        "warehouse": "Fruit Storage 47 - CFC"
+    },
+    {
+        "item_code": "Lawton Blackberry",
+        "qty": 17,
+        "warehouse": "Fruit Storage 48 - CFC"
+    },
+    {
+        "item_code": "Cranberry",
+        "qty": 47,
+        "warehouse": "Fruit Storage 49 - CFC"
+    },
+    {
+        "item_code": "Bilimbi",
+        "qty": 23,
+        "warehouse": "Fruit Storage 50 - CFC"
+    },
+    {
+        "item_code": "Barbados Cherry",
+        "qty": 79,
+        "warehouse": "Fruit Storage 51 - CFC"
+    },
+    {
+        "item_code": "Photinia",
+        "qty": 85,
+        "warehouse": "Fruit Storage 52 - CFC"
+    },
+    {
+        "item_code": "Doubah",
+        "qty": 14,
+        "warehouse": "Fruit Storage 53 - CFC"
+    },
+    {
+        "item_code": "Coffee",
+        "qty": 66,
+        "warehouse": "Fruit Storage 54 - CFC"
+    },
+    {
+        "item_code": "Youngberry",
+        "qty": 75,
+        "warehouse": "Fruit Storage 55 - CFC"
+    },
+    {
+        "item_code": "Bacuri",
+        "qty": 51,
+        "warehouse": "Fruit Storage 56 - CFC"
+    },
+    {
+        "item_code": "Louvi",
+        "qty": 38,
+        "warehouse": "Fruit Storage 57 - CFC"
+    },
+    {
+        "item_code": "Jaltomata Procumbens",
+        "qty": 64,
+        "warehouse": "Fruit Storage 58 - CFC"
+    },
+    {
+        "item_code": "Empetrum",
+        "qty": 98,
+        "warehouse": "Fruit Storage 59 - CFC"
+    },
+    {
+        "item_code": "European Raspberry",
+        "qty": 38,
+        "warehouse": "Fruit Storage 60 - CFC"
+    },
+    {
+        "item_code": "Black Raspberry",
+        "qty": 50,
+        "warehouse": "Fruit Storage 1 - CFC"
+    },
+    {
+        "item_code": "Cryptocarya Alba",
+        "qty": 98,
+        "warehouse": "Fruit Storage 2 - CFC"
+    },
+    {
+        "item_code": "Canary Melon",
+        "qty": 82,
+        "warehouse": "Fruit Storage 3 - CFC"
+    },
+    {
+        "item_code": "Biriba",
+        "qty": 30,
+        "warehouse": "Fruit Storage 4 - CFC"
+    },
+    {
+        "item_code": "Cocky Apple",
+        "qty": 79,
+        "warehouse": "Fruit Storage 5 - CFC"
+    },
+    {
+        "item_code": "Edible Honeysuckle",
+        "qty": 91,
+        "warehouse": "Fruit Storage 6 - CFC"
+    },
+    {
+        "item_code": "Whinberry",
+        "qty": 51,
+        "warehouse": "Fruit Storage 7 - CFC"
+    },
+    {
+        "item_code": "Desert Lime",
+        "qty": 63,
+        "warehouse": "Fruit Storage 8 - CFC"
+    },
+    {
+        "item_code": "Myrciaria Floribunda",
+        "qty": 98,
+        "warehouse": "Fruit Storage 9 - CFC"
+    },
+    {
+        "item_code": "Physalis",
+        "qty": 52,
+        "warehouse": "Fruit Storage 10 - CFC"
+    },
+    {
+        "item_code": "Bitter Melon",
+        "qty": 38,
+        "warehouse": "Fruit Storage 11 - CFC"
+    },
+    {
+        "item_code": "Dabai",
+        "qty": 97,
+        "warehouse": "Fruit Storage 12 - CFC"
+    },
+    {
+        "item_code": "Beach Plum",
+        "qty": 88,
+        "warehouse": "Fruit Storage 13 - CFC"
+    },
+    {
+        "item_code": "Melon Pear",
+        "qty": 79,
+        "warehouse": "Fruit Storage 14 - CFC"
+    },
+    {
+        "item_code": "Blood Orange",
+        "qty": 30,
+        "warehouse": "Fruit Storage 15 - CFC"
+    },
+    {
+        "item_code": "Banana",
+        "qty": 51,
+        "warehouse": "Fruit Storage 16 - CFC"
+    },
+    {
+        "item_code": "Loquat",
+        "qty": 81,
+        "warehouse": "Fruit Storage 17 - CFC"
+    },
+    {
+        "item_code": "Eugenia Uniflora",
+        "qty": 5,
+        "warehouse": "Fruit Storage 18 - CFC"
+    },
+    {
+        "item_code": "Kakadu Lime",
+        "qty": 29,
+        "warehouse": "Fruit Storage 19 - CFC"
+    },
+    {
+        "item_code": "Karonda",
+        "qty": 4,
+        "warehouse": "Fruit Storage 20 - CFC"
+    },
+    {
+        "item_code": "Hippophae",
+        "qty": 10,
+        "warehouse": "Fruit Storage 21 - CFC"
+    },
+    {
+        "item_code": "Guava",
+        "qty": 56,
+        "warehouse": "Fruit Storage 22 - CFC"
+    },
+    {
+        "item_code": "Candlenut",
+        "qty": 17,
+        "warehouse": "Fruit Storage 23 - CFC"
+    },
+    {
+        "item_code": "Tomatillo",
+        "qty": 74,
+        "warehouse": "Fruit Storage 24 - CFC"
+    },
+    {
+        "item_code": "Olallieberry",
+        "qty": 17,
+        "warehouse": "Fruit Storage 25 - CFC"
+    },
+    {
+        "item_code": "Date",
+        "qty": 84,
+        "warehouse": "Fruit Storage 26 - CFC"
+    },
+    {
+        "item_code": "Midyim",
+        "qty": 88,
+        "warehouse": "Fruit Storage 27 - CFC"
+    },
+    {
+        "item_code": "Cowberry",
+        "qty": 69,
+        "warehouse": "Fruit Storage 28 - CFC"
+    },
+    {
+        "item_code": "Kapok",
+        "qty": 34,
+        "warehouse": "Fruit Storage 29 - CFC"
+    },
+    {
+        "item_code": "Durian",
+        "qty": 6,
+        "warehouse": "Fruit Storage 30 - CFC"
+    },
+    {
+        "item_code": "Desert Banana",
+        "qty": 53,
+        "warehouse": "Fruit Storage 31 - CFC"
+    },
+    {
+        "item_code": "Coconut",
+        "qty": 66,
+        "warehouse": "Fruit Storage 32 - CFC"
+    },
+    {
+        "item_code": "Triphasia Brassii",
+        "qty": 77,
+        "warehouse": "Fruit Storage 33 - CFC"
+    },
+    {
+        "item_code": "Kiwifruit",
+        "qty": 43,
+        "warehouse": "Fruit Storage 34 - CFC"
+    },
+    {
+        "item_code": "Hackberry",
+        "qty": 75,
+        "warehouse": "Fruit Storage 35 - CFC"
+    },
+    {
+        "item_code": "Genip",
+        "qty": 23,
+        "warehouse": "Fruit Storage 36 - CFC"
+    },
+    {
+        "item_code": "Goji",
+        "qty": 55,
+        "warehouse": "Fruit Storage 37 - CFC"
+    },
+    {
+        "item_code": "Clementine",
+        "qty": 80,
+        "warehouse": "Fruit Storage 38 - CFC"
+    },
+    {
+        "item_code": "Huckleberry",
+        "qty": 95,
+        "warehouse": "Fruit Storage 39 - CFC"
+    },
+    {
+        "item_code": "Sultana",
+        "qty": 75,
+        "warehouse": "Fruit Storage 40 - CFC"
+    },
+    {
+        "item_code": "Bacupari",
+        "qty": 16,
+        "warehouse": "Fruit Storage 41 - CFC"
+    },
+    {
+        "item_code": "White Currant",
+        "qty": 8,
+        "warehouse": "Fruit Storage 42 - CFC"
+    },
+    {
+        "item_code": "Raspberry",
+        "qty": 4,
+        "warehouse": "Fruit Storage 43 - CFC"
+    }
 ]

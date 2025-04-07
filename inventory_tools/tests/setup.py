@@ -126,7 +126,7 @@ def create_test_data():
 	create_specifications(settings)
 	create_item_dimensions()
 	create_warehouse_dimensions()
-	# create_stock_entries()
+	create_stock_entries()
 
 
 def copy_image_fixtures():
@@ -923,6 +923,7 @@ def create_stock_entries():
 	j = len(ITEMS_STOCKENTRY) // 2
 	# Add items to warehouse
 	se = frappe.new_doc("Stock Entry")
+	se.company = "Chelsea Fruit Co"
 	se.posting_date = getdate().replace(month=1, day=1)
 	se.set_posting_time = 1
 	se.stock_entry_type = "Material Receipt"
@@ -943,6 +944,7 @@ def create_stock_entries():
 
 	# Second entry offset time for FIFO/LIFO
 	se = frappe.new_doc("Stock Entry")
+	se.company = "Chelsea Fruit Co"
 	se.posting_date = getdate().replace(month=1, day=2)
 	se.set_posting_time = 1
 	se.stock_entry_type = "Material Receipt"
