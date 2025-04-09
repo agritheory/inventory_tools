@@ -121,14 +121,14 @@ def create_test_data():
 	else:
 		create_material_request(settings)
 	create_production_plan(settings, prod_plan_from_doc)
-	# Required to be after production plan creation
-	create_sales_order_2()
+
 	create_fruit_material_request(settings)
 	create_quotations(settings)
 	create_specifications(settings)
 	create_item_dimensions()
 	create_warehouse_dimensions()
 	create_stock_entries()
+	create_sales_order_2()
 
 
 def copy_image_fixtures():
@@ -576,12 +576,14 @@ def create_sales_order_2():
 	so.transaction_date = getdate().replace(month=1, day=1)
 	so.delivery_date = getdate().replace(month=1, day=3)
 	so.customer = "Whole Harvest Grocery Group"
+	so.company = "Chelsea Fruit Co"
 	so.append(
 		"items",
 		{
 			"item_code": "Bayberry",
 			"qty": 20,
 			"delivery_date": getdate().replace(month=1, day=3),
+			"warehouse": "All Warehouses - CFC",
 		},
 	)
 	so.append(
@@ -590,6 +592,7 @@ def create_sales_order_2():
 			"item_code": "Kepel",
 			"qty": 12,
 			"delivery_date": getdate().replace(month=1, day=3),
+			"warehouse": "All Warehouses - CFC",
 		},
 	)
 	so.append(
@@ -598,6 +601,7 @@ def create_sales_order_2():
 			"item_code": "Lychee",
 			"qty": 3,
 			"delivery_date": getdate().replace(month=1, day=3),
+			"warehouse": "All Warehouses - CFC",
 		},
 	)
 	so.save()
