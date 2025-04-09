@@ -605,6 +605,7 @@ def create_sales_order_2():
 		},
 	)
 	so.save()
+	so.submit()
 
 
 def create_material_request(settings):
