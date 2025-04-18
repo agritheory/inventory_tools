@@ -137,10 +137,8 @@ def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
 	# Create the TSP solver instance.
 	g = Grid_TSP(grid, scale=scale)
 
-	# TODO: Get dropoff node from doctype
-	# root_wh = frappe.get_doc("Warehouse Plan", "All Warehouses - CFC").as_dict()
-	# dropoff = g.pos2node((root_wh["pickup_point_x"], root_wh["pickup_point_y"]))
-	dropoff = [0]
+	root_wh = frappe.get_doc("Warehouse Plan", "All Warehouses - CFC").as_dict()
+	dropoff = g.pos2node((root_wh["pickup_point_x"], root_wh["pickup_point_y"]))
 
 	# Waypoints
 	unique_whs = list({item_wh["warehouse"] for item_wh in item_whs})

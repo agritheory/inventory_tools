@@ -22,6 +22,8 @@ class WarehousePlan(Document):
 		horizontal: DF.Float
 		matrix: DF.LongText | None
 		offset: DF.Data | None
+		pickup_point_x: DF.Int
+		pickup_point_y: DF.Int
 		uom: DF.Link | None
 		vertical: DF.Float
 	# end: auto-generated types
