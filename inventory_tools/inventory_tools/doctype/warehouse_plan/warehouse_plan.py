@@ -5,6 +5,7 @@ import frappe
 from frappe.model.document import Document
 import networkx as nx
 import numpy as np
+from typing import Any
 
 
 class WarehousePlan(Document):
@@ -177,7 +178,7 @@ class Grid_TSP:
 		else:
 			return (pickup_order, None, None)
 
-	def _plot(self, tsp_route: list[int] | None = None) -> None:
+	def _plot(self, tsp_route: list[Any] | None = None) -> None:
 		# This function is meant for debugging purposes only
 		import matplotlib.pyplot as plt
 
