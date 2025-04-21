@@ -18,7 +18,6 @@ from inventory_tools.tests.fixtures import (
 	operations,
 	suppliers,
 	workstations,
-	warehouse_plan_matrix,
 )
 
 
@@ -35,6 +34,7 @@ ITEMS_STOCKENTRY = read_json("items_stockentry")
 SPECIFICATIONS = read_json("specifications")
 WAREHOUSE_DIMENSIONS = read_json("warehouse_dimensions")
 WAREHOUSE_LOCATIONS = read_json("warehouse_locations")
+WAREHOUSE_PLAN_MATRIX = str(read_json("warehouse_plan_matrix"))
 
 
 def before_test():
@@ -436,7 +436,9 @@ def create_warehouse_plan(cfc):
 			"offset": "1,1,2.2,1",
 			"floor_plan": "/files/warehouse_plan.png",
 			"group_warehouse": root_wh,
-			"matrix": warehouse_plan_matrix,
+			"matrix": WAREHOUSE_PLAN_MATRIX,
+			"pickup_point_x": 0,
+			"pickup_point_y": 9,
 		}
 	)
 	warehouse_plan.save()
