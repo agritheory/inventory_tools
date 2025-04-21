@@ -138,7 +138,7 @@ def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
 	g = Grid_TSP(grid, scale=scale)
 
 	root_wh = frappe.get_doc("Warehouse Plan", "All Warehouses - CFC").as_dict()
-	dropoff = g.pos2node((root_wh["pickup_point_x"], root_wh["pickup_point_y"]))
+	dropoff = [g.pos2node((root_wh["pickup_point_x"], root_wh["pickup_point_y"]))]
 
 	# Waypoints
 	unique_whs = list({item_wh["warehouse"] for item_wh in item_whs})
@@ -146,8 +146,8 @@ def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
 	# Build a mapping from warehouse to its coordinate and node.
 	warehouse_to_node = {}
 	for wh in unique_whs:
-		loc = frappe.get_doc("Warehouse", wh).as_dict()
-		coordinate = (loc["accessible_path_x"], loc["accessible_path_y"])
+		accessible_path = frappe.get_doc("Warehouse", wh).as_dict()["accessible_path"].split(",")
+		coordinate = (int(accessible_path[0]), int(accessible_path[1]))
 		warehouse_to_node[wh] = g.pos2node(coordinate)
 	node_to_warehouse = {node: wh for wh, node in warehouse_to_node.items()}
 

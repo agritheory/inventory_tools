@@ -162,7 +162,14 @@ class Grid_TSP:
 	def tsp(self, pickup_node: list, nodes: list, debug: bool = False):
 		tsp = nx.approximation.traveling_salesman_problem
 		pickup_list = pickup_node + nodes
-		tsp_route = tsp(self.G, nodes=pickup_list)
+		try:
+			tsp_route = tsp(self.G, nodes=pickup_list)
+		except KeyError as e:
+			frappe.throw(
+				f"Route optimization failed: One or more pickup locations are not found in the current grid overlay. "
+				f"This may be due to a mismatch between the pickup list and the warehouse layout. Missing node: {str(e)}",
+				frappe.ValidationError,
+			)
 		pickup_order = list(dict.fromkeys(node for node in tsp_route if node in pickup_list))[1:]
 		if debug:
 			tsp_distance = sum(self.G[u][v]["weight"] for u, v in zip(tsp_route, tsp_route[1:]))
