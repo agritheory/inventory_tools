@@ -5,7 +5,6 @@ import frappe
 from frappe.model.document import Document
 import networkx as nx
 import numpy as np
-from typing import Any
 
 
 class WarehousePlan(Document):
@@ -178,15 +177,17 @@ class Grid_TSP:
 		else:
 			return (pickup_order, None, None)
 
-	def _plot(self, tsp_route: list[Any] | None = None) -> None:
-		# This function is meant for debugging purposes only
+	def _plot(self, tsp_route: list[int] | None = None) -> None:
+		"""Debug plot of the grid and (optional) TSP route."""
 		import matplotlib.pyplot as plt
 
 		plt.imshow(self.grid, cmap="gray")
 		plt.grid(True)
+
 		if tsp_route:
-			# Plot the path
-			path_coords = [self.node2pos(wp) for wp in tsp_route]
-			path_coords = np.array(path_coords)
-			plt.plot(path_coords[:, 1], path_coords[:, 0], "r-")
+			# node2pos(wp) returns a (row:int, col:int) tuple
+			coords: list[tuple[int, int]] = [self.node2pos(wp) for wp in tsp_route]
+			rows, cols = zip(*coords)  # unzip into two sequences of ints
+			plt.plot(cols, rows, "r-")  # x = cols, y = rows
+
 		plt.show()
