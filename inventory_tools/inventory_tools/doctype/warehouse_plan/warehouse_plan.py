@@ -189,32 +189,3 @@ class Grid_TSP:
 			path_coords = np.array(path_coords)
 			plt.plot(path_coords[:, 1], path_coords[:, 0], "r-")
 		plt.show()
-
-	@frappe.whitelist()
-	def get_warehouse_dimensions(self, warehouse: str):
-		warehouse_doc = frappe.get_doc("Warehouse", warehouse)
-		dimensions = frappe.get_all(
-			"Physical Dimension",
-			filters={"reference_doctype": "Warehouse", "reference_document": warehouse_doc.name},
-			fields=["item_length", "item_width", "uom"],
-		)
-
-		if not dimensions:
-			return {}
-
-		dimension = dimensions[0]
-
-		# convert warehouse dimension UOM using UOM Conversion records
-		if dimension.uom != self.uom:
-			uom_conversion = frappe.get_all(
-				"UOM Conversion Factor",
-				filters={"category": "Length", "from_uom": dimension.uom, "to_uom": self.uom},
-				pluck="value",
-				limit=1,
-			)
-
-			if uom_conversion:
-				dimension.item_length *= uom_conversion[0]
-				dimension.item_width *= uom_conversion[0]
-
-		return dimension
