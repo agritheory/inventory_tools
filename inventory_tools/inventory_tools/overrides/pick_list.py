@@ -204,19 +204,20 @@ def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
 	if isinstance(doc, str):
 		doc = frappe.get_doc("Pick List", doc).as_dict()
 	# Extract item codes and root warehouses from document locations
-	itemdict = {}
+	itemdict: dict[str, dict[str, float]] = {}
 	for loc in doc["locations"]:
-		if itemdict.get(loc["item_code"]):
-			itemdict[loc["item_code"]]["qty"] += loc["qty"]
+		code = loc["item_code"]
+		qty = loc["qty"]
+		if code in itemdict:
+			itemdict[code]["qty"] += qty
 		else:
-			itemdict[loc["item_code"]] = {"qty": loc["qty"]}
+			itemdict[code] = {"qty": qty}
 	company = doc["company"]
 	root_warehouses = [get_root_warehouse(loc["warehouse"]) for loc in doc["locations"]]
 
 	# Ensure all locations share the same root warehouse
 	if not all(wh == root_warehouses[0] for wh in root_warehouses):
-		frappe.ValidationError("All items in pick list do not share a common warehouse plan")
-		return
+		raise frappe.ValidationError("All items in pick list do not share a common warehouse plan")
 
 	root_warehouse = root_warehouses[0]
 
