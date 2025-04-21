@@ -177,7 +177,7 @@ class Grid_TSP:
 		else:
 			return (pickup_order, None, None)
 
-	def _plot(self, tsp_route: list = None):
+	def _plot(self, tsp_route: list | None = None):
 		# This function is meant for debugging purposes only
 		import matplotlib.pyplot as plt
 
