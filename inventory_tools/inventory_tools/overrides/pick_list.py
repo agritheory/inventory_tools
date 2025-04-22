@@ -43,7 +43,7 @@ class PathFinder:
 
 			remaining_qty = qty - qty_obtained
 
-			if entry["actual_qty"] > remaining_qty:
+			if entry["actual_qty"] >= remaining_qty:
 				newsle.append({"item_code": item_code, "warehouse": entry["warehouse"], "qty": remaining_qty})
 				qty_obtained += remaining_qty
 				break
