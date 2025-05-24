@@ -102,8 +102,7 @@ def get_root_warehouse(warehouse):
 			return warehouse
 	parent_warehouse = frappe.get_doc("Warehouse", warehouse).as_dict()["parent_warehouse"]
 	if parent_warehouse == "":
-		frappe.ValidationError("Warehouse does not have a parent warehouse")
-		return None
+		raise frappe.ValidationError("Warehouse does not have a parent warehouse")
 	return get_root_warehouse(parent_warehouse)
 
 
@@ -117,8 +116,8 @@ def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
 	Expected format of `item_whs`:
 	        [
 	                {
-	                        'item_code': <str>,   # The code identifying the item.
-	                        'warehouse': <str>    # The warehouse where the item is located.
+	                        'item_code': <str>,  # The code identifying the item.
+	                        'warehouse': <str>  # The warehouse where the item is located.
 	                },
 	                ...
 	        ]
@@ -127,26 +126,21 @@ def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
 	        list: A reordered list of dictionaries, optimized for the pick-up route.
 	"""
 
-	# Grid
 	grid = np.array(
 		safe_json_loads(frappe.get_doc("Warehouse Plan", root_warehouse).as_dict()["matrix"])
 	)
 
-	# Scale
 	imaginary_x = grid.shape[1]
 	real_x = frappe.get_doc("Warehouse Plan", root_warehouse).as_dict()["horizontal"]
 	scale = real_x / imaginary_x
 
-	# Create the TSP solver instance.
 	g = Grid_TSP(grid, scale=scale)
 
-	root_wh = frappe.get_doc("Warehouse Plan", "All Warehouses - CFC").as_dict()
+	root_wh = frappe.get_doc("Warehouse Plan", root_warehouse).as_dict()
 	dropoff = [g.pos2node((root_wh["pickup_point_x"], root_wh["pickup_point_y"]))]
 
-	# Waypoints
 	unique_whs = list({item_wh["warehouse"] for item_wh in item_whs})
 
-	# Build a mapping from warehouse to its coordinate and node.
 	warehouse_to_node = {}
 	for wh in unique_whs:
 		accessible_path = frappe.get_doc("Warehouse", wh).as_dict()["accessible_path"].split(",")
@@ -154,19 +148,13 @@ def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
 		warehouse_to_node[wh] = g.pos2node(coordinate)
 	node_to_warehouse = {node: wh for wh, node in warehouse_to_node.items()}
 
-	# For the TSP solver, create a list of nodes corresponding to each unique warehouse.
 	pickup_list = list(warehouse_to_node.values())
-
-	# Solve
 	pickup_order, *rest = g.tsp(dropoff, pickup_list)
-
-	# Map warehouse name to its order
 	warehouse_order_map = {}
 	for order_index, node in enumerate(pickup_order):
 		wh = node_to_warehouse[node]
 		warehouse_order_map[wh] = order_index
 
-	# Sort original item_whs
 	sorted_item_whs = sorted(
 		item_whs,
 		key=lambda item: (warehouse_order_map[item["warehouse"]], item["item_code"], item["qty"]),
@@ -183,27 +171,26 @@ def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
 	                The picklist document to optimize. The document must include:
 	                        - "company".
 	                        - "locations": A list of location dictionaries, each containing:
-	                                - "item_code".
-	                                - "qty".
-	                                - "warehouse".
+	                                                        - "item_code".
+	                                                        - "qty".
+	                                                        - "warehouse".
 	        strategy (str):
 	                The strategy to apply when determining the pick order. Supported strategies include:
-	                        - "FIFO".
-	                        - "LIFO".
-	                        - "Deplete maximum number of Bins".
-	                        - "Deplete minimum number of Bins".
+	                                - "FIFO".
+	                                - "LIFO".
+	                                - "Deplete maximum number of Bins".
+	                                - "Deplete minimum number of Bins".
 	        Returns:
 	                list[PickListItem]:
-	                                A list of optimized picklist items generated based on the input strategy and common warehouse.
+	                        A list of optimized picklist items generated based on the input strategy and common warehouse.
 
 	        Raises:
 	                frappe.ValidationError:
-	                        If the locations in the picklist document do not all share the same root warehouse,
-	                        indicating an inconsistency in the warehouse plan.
+	                                If the locations in the picklist document do not all share the same root warehouse,
+	                                indicating an inconsistency in the warehouse plan.
 	"""
 	if isinstance(doc, str):
 		doc = frappe.get_doc("Pick List", doc).as_dict()
-	# Extract item codes and root warehouses from document locations
 	itemdict: dict[str, dict[str, float]] = {}
 	for loc in doc["locations"]:
 		code = loc["item_code"]
@@ -215,7 +202,6 @@ def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
 	company = doc["company"]
 	root_warehouses = [get_root_warehouse(loc["warehouse"]) for loc in doc["locations"]]
 
-	# Ensure all locations share the same root warehouse
 	if not all(wh == root_warehouses[0] for wh in root_warehouses):
 		raise frappe.ValidationError("All items in pick list do not share a common warehouse plan")
 
@@ -235,5 +221,7 @@ def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
 			item_whs += PathFinder.deplete_min_bins(
 				item, itemdict[item]["qty"], company, root_warehouse=root_warehouse
 			)
-
-	return optimize_route_picklist(item_whs, root_warehouse)
+	try:
+		return optimize_route_picklist(item_whs, root_warehouse)
+	except Exception as e:
+		raise e

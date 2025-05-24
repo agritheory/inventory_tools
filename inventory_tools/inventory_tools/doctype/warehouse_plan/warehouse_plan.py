@@ -166,8 +166,8 @@ class Grid_TSP:
 			tsp_route = tsp(self.G, nodes=pickup_list)
 		except KeyError as e:
 			frappe.throw(
-				f"Route optimization failed: One or more pickup locations are not found in the current grid overlay. "
-				f"This may be due to a mismatch between the pickup list and the warehouse layout. Missing node: {str(e)}",
+				"Route optimization failed: One or more pickup locations are not found in the current grid overlay. <br>"
+				+ "This may be due to a mismatch between the pickup list and the warehouse layout. Missing node: {str(e)}",
 				frappe.ValidationError,
 			)
 		pickup_order = list(dict.fromkeys(node for node in tsp_route if node in pickup_list))[1:]

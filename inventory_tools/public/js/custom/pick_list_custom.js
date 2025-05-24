@@ -35,34 +35,12 @@ function path_dialog(frm) {
 					strategy: data.strategy,
 				})
 				.then(r => {
-					if (!Array.isArray(r)) {
-						console.error('Invalid response format:', r)
-						frappe.msgprint(__('Invalid response received from server.'))
-						return
-					}
-
-					// Clear and repopulate the child table
-					frm.clear_table('child_table_fieldname')
+					frm.clear_table('locations')
 					r.forEach(item => {
-						let child = frm.add_child('child_table_fieldname')
-						child.item_code = item.item_code
-						child.qty = item.qty
+						frm.add_child('locations', item)
 					})
-					frm.refresh_field('child_table_fieldname')
-				})
-				.catch(error => {
-					console.error('Error optimizing path:', error)
-					frappe.msgprint({
-						title: __('Error'),
-						indicator: 'red',
-						message: __('Failed to optimize path. Please try again.'),
-					})
-				})
-				.finally(() => {
-					setTimeout(() => {
-						d.hide()
-						frm.refresh()
-					}, 200)
+					frm.refresh_field('locations')
+					d.hide()
 				})
 		},
 		primary_action_label: __('Optimize Path'),
