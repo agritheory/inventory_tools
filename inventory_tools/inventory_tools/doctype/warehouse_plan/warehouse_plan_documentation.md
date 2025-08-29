@@ -23,3 +23,25 @@ This doctype is used to define and store the physical representation layer of th
 - `pickup_point_x`: Defines the horizontal start and end location of the pathing algorithm
 - `pickup_point_y`: Defines the vertical start and end location of the pathing algorithm
 - `company`: The company that owns the warehouse
+
+## Examples
+### Method: FIFO
+```
+[{'item_code': 'Bayberry', 'qty': 17.0, 'warehouse': 'Fruit Storage 11 - CFC'},
+ {'item_code': 'Lychee', 'qty': 3.0, 'warehouse': 'Fruit Storage 49 - CFC'},
+ {'item_code': 'Kepel', 'qty': 12.0, 'warehouse': 'Fruit Storage 21 - CFC'},
+ {'item_code': 'Bayberry', 'qty': 3.0, 'warehouse': 'Fruit Storage 14 - CFC'}]
+Distance: 156.0
+```
+![alt text](documentation_images/FIFO.png)
+
+In this example, using the FIFO rule, Bayberry in Fruit Storage 11 was insufficient, so the remaining quantity was taken from Fruit Storage 14. Then the pickup list order was optimized to achieve the shortest path.
+
+### Method: LIFO
+```
+[{'item_code': 'Bayberry', 'qty': 20.0, 'warehouse': 'Fruit Storage 57 - CFC'},
+ {'item_code': 'Kepel', 'qty': 12.0, 'warehouse': 'Fruit Storage 45 - CFC'},
+ {'item_code': 'Lychee', 'qty': 3.0, 'warehouse': 'Fruit Storage 25 - CFC'}]
+Distance: 132.0
+```
+![alt text](documentation_images/LIFO.png)
