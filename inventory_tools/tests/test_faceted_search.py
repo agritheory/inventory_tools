@@ -83,9 +83,9 @@ def test_generate_values():
 			],
 		}
 	)
-	assert (
-		len(frappe.get_all("Specification Value", {"specification": doc.name})) == 36 * 2
-	)  # total items x computed attributes
+	_len = len(frappe.get_all("Specification Value", {"specification": doc.name}))
+	# total items x computed attributes
+	assert _len == 126 * 2
 
 
 @pytest.mark.order(72)

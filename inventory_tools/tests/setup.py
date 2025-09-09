@@ -423,9 +423,8 @@ def create_items(settings):
 
 
 def create_warehouse_plan(cfc):
-	root_wh = frappe.get_value(
-		"Warehouse", {"company": cfc.name, "is_group": True, "parent_warehouse": ""}
-	)
+	if frappe.db.exists("Warehouse Plan", "All Warehouses - CFC"):
+		return
 	warehouse_plan = frappe.new_doc("Warehouse Plan")
 	warehouse_plan.update(
 		{
@@ -435,7 +434,7 @@ def create_warehouse_plan(cfc):
 			"uom": "Meter",
 			"offset": "1,1,2.2,1",
 			"floor_plan": "/files/warehouse_plan.png",
-			"group_warehouse": root_wh,
+			"group_warehouse": "All Warehouses - CFC",
 			"matrix": WAREHOUSE_PLAN_MATRIX,
 			"pickup_point_x": 0,
 			"pickup_point_y": 9,
