@@ -1,0 +1,19 @@
+{
+	"content": null,
+	"creation": "2025-09-29 02:18:42.206821",
+	"docstatus": 0,
+	"doctype": "Page",
+	"idx": 0,
+	"modified": "2025-09-29 02:18:58.331706",
+	"modified_by": "Administrator",
+	"module": "Inventory Tools",
+	"name": "workstation-selectio",
+	"owner": "Administrator",
+	"page_name": "workstation-selectio",
+	"roles": [{}],
+	"script": null,
+	"standard": "Yes",
+	"style": null,
+	"system_page": 0,
+	"title": "Workstation Selection Chart"
+}
