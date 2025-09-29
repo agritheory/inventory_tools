@@ -1,7 +1,6 @@
 // Copyright (c) 2025, AgriTheory and contributors
 // For license information, please see license.txt
 
-// Client Script - Type: Page, DocType: [blank]
 frappe.pages['workstation-selection'].on_page_load = function (wrapper) {
 	let page = frappe.ui.make_app_page({
 		parent: wrapper,

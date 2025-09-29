@@ -1,7 +1,6 @@
 # Copyright (c) 2025, AgriTheory and contributors
 # For license information, please see license.txt
 
-# Updated utils.py for existing ERPNext alternative workstation structure
 import frappe
 from frappe import _
 
