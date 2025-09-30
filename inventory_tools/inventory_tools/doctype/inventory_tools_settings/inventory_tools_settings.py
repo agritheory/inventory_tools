@@ -6,6 +6,30 @@ from frappe.model.document import Document
 
 
 class InventoryToolsSettings(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		aggregated_purchasing_warehouse: DF.Link | None
+		aggregated_sales_warehouse: DF.Link | None
+		allow_alternative_workstations: DF.Check
+		company: DF.Link | None
+		create_job_cards_automatically: DF.Literal["Yes", "No"]
+		create_purchase_orders: DF.Check
+		enable_work_order_subcontracting: DF.Check
+		enforce_uoms: DF.Check
+		overproduction_percentage_for_work_order: DF.Percent
+		prettify_warehouse_tree: DF.Check
+		purchase_order_aggregation_company: DF.Link | None
+		sales_order_aggregation_company: DF.Link | None
+		show_in_listview: DF.Check
+		show_on_website: DF.Check
+		update_warehouse_path: DF.Check
+	# end: auto-generated types
 	def validate(self):
 		self.create_warehouse_path_custom_field()
 		self.validate_single_aggregation_company()
