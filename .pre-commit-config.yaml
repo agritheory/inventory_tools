@@ -49,7 +49,7 @@ repos:
           - tomli
 
   - repo: https://github.com/agritheory/test_utils
-    rev: v0.17.0
+    rev: v1.1.0
     hooks:
       - id: update_pre_commit_config
       - id: mypy
