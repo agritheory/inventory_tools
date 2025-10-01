@@ -102,43 +102,94 @@ function render_page_workstation_chart(container, operations_data, work_order) {
 		return
 	}
 
-	let chart_html = `
-        <div class="workstation-operations">
-            <div class="chart-header">
-                <h5>Workstation Alternatives for Work Order: ${work_order}</h5>
-                <p class="text-muted">Select alternative workstations for your operations</p>
-            </div>
-    `
+	// Build the chart HTML
+	let chart_html = ``
 
 	operations_data.forEach(function (op, index) {
 		chart_html += render_operation_tree_for_page(op, index)
 	})
 
 	chart_html += '</div>'
+
+	// Render to conta  iner
 	container.html(chart_html)
 
 	setup_page_workstation_handlers(container, work_order)
 }
 
 function render_operation_tree_for_page(operation, index) {
-	let alternatives_html = ''
+	// Sort alternatives by next_available
+	let sorted_alternatives = (operation.alternatives || []).slice().sort((a, b) => {
+		let a_time = a.next_available ? new Date(a.next_available) : new Date(0)
+		let b_time = b.next_available ? new Date(b.next_available) : new Date(0)
+		return a_time - b_time
+	})
 
-	if (operation.alternatives && operation.alternatives.length > 0) {
+	// Determine primary card class and button
+	let primary_card_class = 'primary'
+	let primary_btn_class = 'btn-primary'
+
+	const earliest_alt_time = sorted_alternatives[0]?.next_available
+		? new Date(sorted_alternatives[0].next_available)
+		: null
+	const primary_time = operation.next_available ? new Date(operation.next_available) : new Date(0)
+
+	// Check if primary is truly the earliest option
+	const primary_is_earliest = !earliest_alt_time || primary_time <= earliest_alt_time
+
+	if (operation.availability === 'available' && primary_is_earliest) {
+		// Green - primary is available and earliest
+		primary_card_class += ' earliest'
+		primary_btn_class = 'btn-success'
+	} else if (operation.availability === 'busy' || !primary_is_earliest) {
+		// Yellow - primary is busy OR not the earliest option
+		primary_card_class += ' busy'
+		primary_btn_class = 'btn-warning'
+	}
+
+	// Primary card HTML
+	let primary_html = `
+        <div class="workstation-node ${primary_card_class}" data-workstation="${operation.workstation}">
+            <div class="node-content">
+                <div class="workstation-info">
+                    <strong>Primary: ${operation.workstation}</strong>
+                </div>
+                <div class="workstation-details">
+                    <div>Next Available: ${operation.next_available ? frappe.datetime.str_to_user(operation.next_available) : 'Now'}</div>
+                    <div>Capacity: ${operation.capacity || 1}/hour</div>
+                    <div>Planned Start: ${operation.planned_start_time ? frappe.datetime.str_to_user(operation.planned_start_time) : 'Not set'}</div>
+                </div>
+            </div>
+        </div>
+    `
+
+	// Alternatives HTML
+	let alternatives_html = ''
+	if (sorted_alternatives.length > 0) {
 		alternatives_html = '<div class="alternative-stations">'
-		operation.alternatives.forEach(function (alt) {
+		sorted_alternatives.forEach((alt, i) => {
+			let alt_card_class = 'alternative'
+			let alt_btn_class = 'btn-outline-primary'
+
+			if (i === 0) {
+				alt_card_class += ' earliest' // green
+				alt_btn_class = 'btn-success'
+			} else {
+				alt_card_class += ' busy' // yellow
+				alt_btn_class = 'btn-warning'
+			}
+
 			alternatives_html += `
-                <div class="workstation-node alternative" data-workstation="${alt.workstation}">
+                <div class="workstation-node ${alt_card_class}" data-workstation="${alt.workstation}">
                     <div class="node-content">
                         <div class="workstation-info">
                             <strong>${alt.workstation}</strong>
-                            <span class="availability-badge ${get_badge_class_for_page(alt.availability)}">${alt.availability}</span>
                         </div>
                         <div class="workstation-details">
-                            <small>Next Available: ${alt.next_available ? frappe.datetime.str_to_user(alt.next_available) : 'Now'}</small>
-                            <br>
-                            <small>Capacity: ${alt.capacity || 1}/hour</small>
+                            <div>Next Available: ${alt.next_available ? frappe.datetime.str_to_user(alt.next_available) : 'Now'}</div>
+                            <div>Capacity: ${alt.capacity || 1}/hour</div>
                         </div>
-                        <button class="btn btn-sm btn-outline-primary use-workstation-btn mt-2"
+                        <button class="btn btn-sm ${alt_btn_class} use-workstation-btn mt-2"
                                 data-workstation="${alt.workstation}"
                                 data-operation="${operation.operation_name || operation.operation}"
                                 data-operation-display="${operation.operation}">
@@ -157,6 +208,7 @@ function render_operation_tree_for_page(operation, index) {
         `
 	}
 
+	// Wrap everything in operation tree
 	return `
         <div class="operation-tree" data-operation="${operation.operation}">
             <div class="operation-header">
@@ -165,49 +217,14 @@ function render_operation_tree_for_page(operation, index) {
                     ${operation.operation}
                 </h6>
             </div>
-
             <div class="workstation-tree">
                 <div class="primary-branch">
-                    <div class="workstation-node primary" data-workstation="${operation.workstation}">
-                        <div class="node-content">
-                            <div class="workstation-info">
-                                <strong>Primary: ${operation.workstation}</strong>
-                                <span class="availability-badge ${get_badge_class_for_page(operation.availability)}">${operation.availability}</span>
-                            </div>
-                            <div class="workstation-details">
-                                <small>Next Available: ${operation.next_available ? frappe.datetime.str_to_user(operation.next_available) : 'Now'}</small>
-                                <br>
-                                <small>Capacity: ${operation.capacity || 1}/hour</small>
-                                <br>
-                                <small>Planned Start: ${operation.planned_start_time ? frappe.datetime.str_to_user(operation.planned_start_time) : 'Not set'}</small>
-                            </div>
-                            <button class="btn btn-sm btn-success use-workstation-btn mt-2"
-                                    data-workstation="${operation.workstation}"
-                                    data-operation="${operation.operation_name || operation.operation}"
-                                    data-operation-display="${operation.operation}">
-                                Keep Primary
-                            </button>
-                        </div>
-                    </div>
-
+                    ${primary_html}
                     ${alternatives_html}
                 </div>
             </div>
         </div>
     `
-}
-
-function get_badge_class_for_page(availability) {
-	switch (availability) {
-		case 'available':
-			return 'badge-success'
-		case 'busy':
-			return 'badge-warning'
-		case 'unavailable':
-			return 'badge-danger'
-		default:
-			return 'badge-secondary'
-	}
 }
 
 function setup_page_workstation_handlers(container, work_order) {

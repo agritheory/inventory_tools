@@ -1,9 +1,9 @@
 <!-- Copyright (c) 2025, AgriTheory and contributors
 For license information, please see license.txt-->
 
-# 📘 Alternative Workstation Functionality
+# Alternative Workstation Functionality
 
-## 🔎 Overview
+## Overview
 Manufacturing operations often face bottlenecks when a workstation is unavailable (maintenance, overload, breakdown).  
 To ensure flexibility, Inventory Tools now supports **Alternative Workstations**.  
 
@@ -13,7 +13,7 @@ To ensure flexibility, Inventory Tools now supports **Alternative Workstations**
 
 ---
 
-## 🏗 How It Works
+## How It Works
 
 ### 1. Define Alternatives in Operation
 In the **Operation Doctype**, a field **Alternative Workstations** is available.  

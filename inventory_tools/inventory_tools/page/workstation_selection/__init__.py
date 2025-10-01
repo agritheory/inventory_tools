@@ -122,33 +122,29 @@ def get_workstation_availability_status(workstation, planned_start_time):
 			planned_start_time = frappe.utils.get_datetime(planned_start_time)
 
 		# Check for overlapping work orders
-		overlapping_orders = frappe.db.sql(
-			"""
-            SELECT COUNT(*) as count
-            FROM `tabWork Order Operation` woo
-            JOIN `tabWork Order` wo ON woo.parent = wo.name
-            WHERE woo.workstation = %s
-            AND wo.status NOT IN ('Completed', 'Cancelled', 'Stopped')
-            AND wo.docstatus = 1
-            AND (
-                (woo.planned_start_time <= %s AND woo.planned_end_time > %s)
-                OR (woo.planned_start_time < %s AND woo.planned_end_time >= %s)
-            )
-        """,
-			(workstation, planned_start_time, planned_start_time, planned_start_time, planned_start_time),
-			as_dict=True,
-		)
+		woo = frappe.qb.DocType("Work Order Operation")
+		wo = frappe.qb.DocType("Work Order")
+
+		overlapping_orders = (
+			frappe.qb.from_(woo)
+			.join(wo)
+			.on(woo.parent == wo.name)
+			.select(frappe.qb.functions.Count("*").as_("count"))
+			.where(
+				(woo.workstation == workstation)
+				& (wo.status.not_in(["Completed", "Cancelled", "Stopped"]))
+				& (wo.docstatus == 1)
+				& (
+					((woo.planned_start_time <= planned_start_time) & (woo.planned_end_time > planned_start_time))
+					| (
+						(woo.planned_start_time < planned_start_time) & (woo.planned_end_time >= planned_start_time)
+					)
+				)
+			)
+		).run(as_dict=True)
 
 		if overlapping_orders and overlapping_orders[0].count > 0:
 			return "busy"
-
-		# Check workstation working hours and holidays
-		workstation_doc = frappe.get_doc("Workstation", workstation)
-		if workstation_doc.holiday_list:
-			from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
-
-			if is_holiday(workstation_doc.holiday_list, planned_start_time.date()):
-				return "unavailable"
 
 		return "available"
 
@@ -168,20 +164,21 @@ def get_next_available_time(workstation, planned_start_time):
 		if isinstance(planned_start_time, str):
 			planned_start_time = frappe.utils.get_datetime(planned_start_time)
 
-		# Find the earliest time when workstation is free
-		next_free_time = frappe.db.sql(
-			"""
-            SELECT MAX(woo.planned_end_time) as next_free
-            FROM `tabWork Order Operation` woo
-            JOIN `tabWork Order` wo ON woo.parent = wo.name
-            WHERE woo.workstation = %s
-            AND wo.status NOT IN ('Completed', 'Cancelled', 'Stopped')
-            AND wo.docstatus = 1
-            AND woo.planned_end_time > %s
-        """,
-			(workstation, planned_start_time),
-			as_dict=True,
-		)
+		woo = frappe.qb.DocType("Work Order Operation")
+		wo = frappe.qb.DocType("Work Order")
+
+		next_free_time = (
+			frappe.qb.from_(woo)
+			.join(wo)
+			.on(woo.parent == wo.name)
+			.select(frappe.qb.functions.Max(woo.planned_end_time).as_("next_free"))
+			.where(
+				(woo.workstation == workstation)
+				& (wo.status.not_in(["Completed", "Cancelled", "Stopped"]))
+				& (wo.docstatus == 1)
+				& (woo.planned_end_time > planned_start_time)
+			)
+		).run(as_dict=True)
 
 		if next_free_time and next_free_time[0].next_free:
 			return next_free_time[0].next_free
@@ -295,29 +292,32 @@ def get_workstation_schedule(workstation, from_date=None, to_date=None):
 		to_date = frappe.utils.add_days(from_date, 30)
 
 	try:
-		schedule = frappe.db.sql(
-			"""
-            SELECT
-                wo.name as work_order,
-                woo.operation,
-                woo.planned_start_time,
-                woo.planned_end_time,
-                wo.production_item,
-                wo.qty,
-                wo.status,
-                woo.completed_qty,
-                woo.process_loss_qty
-            FROM `tabWork Order Operation` woo
-            JOIN `tabWork Order` wo ON woo.parent = wo.name
-            WHERE woo.workstation = %s
-            AND DATE(woo.planned_start_time) BETWEEN %s AND %s
-            AND wo.docstatus = 1
-            AND wo.status NOT IN ('Cancelled')
-            ORDER BY woo.planned_start_time
-        """,
-			(workstation, from_date, to_date),
-			as_dict=True,
-		)
+		woo = frappe.qb.DocType("Work Order Operation")
+		wo = frappe.qb.DocType("Work Order")
+
+		schedule = (
+			frappe.qb.from_(woo)
+			.join(wo)
+			.on(woo.parent == wo.name)
+			.select(
+				wo.name.as_("work_order"),
+				woo.operation,
+				woo.planned_start_time,
+				woo.planned_end_time,
+				wo.production_item,
+				wo.qty,
+				wo.status,
+				woo.completed_qty,
+				woo.process_loss_qty,
+			)
+			.where(
+				(woo.workstation == workstation)
+				& (wo.docstatus == 1)
+				& (wo.status.not_in(["Cancelled"]))
+				& (frappe.qb.functions.Date(woo.planned_start_time).between(from_date, to_date))
+			)
+			.orderby(woo.planned_start_time)
+		).run(as_dict=True)
 
 		return schedule
 
