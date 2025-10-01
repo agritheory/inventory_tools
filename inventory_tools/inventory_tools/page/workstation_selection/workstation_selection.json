@@ -4,16 +4,16 @@
 	"docstatus": 0,
 	"doctype": "Page",
 	"idx": 0,
-	"modified": "2025-09-29 02:18:58.331706",
+	"modified": "2025-10-01 03:33:55.857851",
 	"modified_by": "Administrator",
 	"module": "Inventory Tools",
-	"name": "workstation-selectio",
+	"name": "workstation-selection",
 	"owner": "Administrator",
-	"page_name": "workstation-selectio",
-	"roles": [{}],
+	"page_name": "workstation-selection",
+	"roles": [],
 	"script": null,
 	"standard": "Yes",
 	"style": null,
 	"system_page": 0,
-	"title": "Workstation Selection Chart"
+	"title": "Alternative Workstations"
 }

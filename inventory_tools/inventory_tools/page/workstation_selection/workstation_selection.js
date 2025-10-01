@@ -45,6 +45,11 @@ frappe.pages['workstation-selection'].on_page_load = function (wrapper) {
 		render_input: true,
 	})
 
+	let work_order_id = frappe.get_route()[1] // first arg after page name
+	if (work_order_id) {
+		work_order_field.set_value(work_order_id)
+	}
+
 	// Load chart button handler
 	container.find('.load-chart-btn').click(function () {
 		let selected_work_order = work_order_field.get_value()
@@ -59,7 +64,7 @@ frappe.pages['workstation-selection'].on_page_load = function (wrapper) {
 		btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Loading...')
 
 		frappe.call({
-			method: 'inventory_tools.inventory_tools.overrides.workstation_chart.get_workstation_availability',
+			method: 'inventory_tools.inventory_tools.page.workstation_selection.__init__.get_workstation_availability',
 			args: {
 				work_order: selected_work_order,
 			},
@@ -227,7 +232,7 @@ function setup_page_workstation_handlers(container, work_order) {
 				btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Assigning...')
 
 				frappe.call({
-					method: 'inventory_tools.inventory_tools.overrides.workstation_chart.assign_workstation',
+					method: 'inventory_tools.inventory_tools.page.workstation_selection.__init__.assign_workstation',
 					args: {
 						work_order: work_order,
 						operation: operation,
@@ -241,7 +246,8 @@ function setup_page_workstation_handlers(container, work_order) {
 							})
 
 							frappe.call({
-								method: 'inventory_tools.inventory_tools.overrides.workstation_chart.get_workstation_availability',
+								method:
+									'inventory_tools.inventory_tools.page.workstation_selection.__init__.get_workstation_availability',
 								args: { work_order: work_order },
 								callback: function (res) {
 									if (res.message) {
