@@ -10,89 +10,85 @@ frappe.pages['workstation-selection'].on_page_load = function (wrapper) {
 
 	let container = $('<div class="workstation-page-container"></div>').appendTo(page.body)
 
-	// Add work order selector using frappe controls
-	let filter_section = $(`
-        <div class="page-filter-section" style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="work-order-field"></div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group" style="margin-top: 23px;">
-                        <button class="btn btn-primary btn-block load-chart-btn">
-                            <i class="fa fa-search"></i> Load Workstation Chart
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="chart-display-area"></div>
-    `).appendTo(container)
+	let filter_wrapper = $(`
+        <div class="sticky-work-order-filter"></div>
+    `).prependTo(page.body)
 
-	// Create work order link field using frappe controls
-	let work_order_field = frappe.ui.form.make_control({
-		parent: filter_section.find('.work-order-field'),
-		df: {
-			fieldtype: 'Link',
-			options: 'Work Order',
-			label: 'Work Order',
-			reqd: 1,
-			filters: {
-				docstatus: 1,
-				status: ['not in', ['Completed', 'Cancelled']],
-			},
+	add_sticky_filter_styles()
+
+	// Add Work Order selector using page.add_field
+	let work_order_field = page.add_field({
+		fieldtype: 'Link',
+		fieldname: 'work_order',
+		options: 'Work Order',
+		label: 'Work Order',
+		reqd: 1,
+		change: function () {
+			let selected_work_order = work_order_field.get_value()
+			if (!selected_work_order) {
+				container.find('.chart-display-area').empty()
+				return
+			}
+
+			container
+				.find('.chart-display-area')
+				.html(`<div class="text-muted p-4"><i class="fa fa-spinner fa-spin"></i> Loading chart...</div>`)
+
+			frappe.call({
+				method: 'inventory_tools.inventory_tools.page.workstation_selection.__init__.get_workstation_availability',
+				args: { work_order: selected_work_order },
+				callback: function (r) {
+					if (r.message) {
+						render_page_workstation_chart(container.find('.chart-display-area'), r.message, selected_work_order)
+					} else {
+						container.find('.chart-display-area').html(`
+                            <div class="alert alert-info">
+                                <i class="fa fa-info-circle"></i>
+                                No operations found for this Work Order or backend method not available.
+                            </div>
+                        `)
+					}
+				},
+				error: function () {
+					container.find('.chart-display-area').html(`
+                        <div class="alert alert-warning">
+                            <i class="fa fa-exclamation-triangle"></i>
+                            Error loading data. Please ensure the backend methods are properly installed.
+                        </div>
+                    `)
+				},
+			})
 		},
-		render_input: true,
 	})
+	$(work_order_field.$wrapper).appendTo(filter_wrapper)
 
-	let work_order_id = frappe.get_route()[1] // first arg after page name
+	// Place chart display area below the field
+	$('<div class="chart-display-area"></div>').appendTo(container)
+
+	// Preload if route contains work order
+	let work_order_id = frappe.get_route()[1]
 	if (work_order_id) {
 		work_order_field.set_value(work_order_id)
 	}
+}
 
-	// Load chart button handler
-	container.find('.load-chart-btn').click(function () {
-		let selected_work_order = work_order_field.get_value()
+function add_sticky_filter_styles() {
+	if (document.getElementById('sticky-work-order-style')) return
 
-		if (!selected_work_order) {
-			frappe.msgprint(__('Please select a Work Order'))
-			work_order_field.set_focus()
-			return
-		}
-
-		let btn = $(this)
-		btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Loading...')
-
-		frappe.call({
-			method: 'inventory_tools.inventory_tools.page.workstation_selection.__init__.get_workstation_availability',
-			args: {
-				work_order: selected_work_order,
-			},
-			callback: function (r) {
-				btn.prop('disabled', false).html('<i class="fa fa-search"></i> Load Workstation Chart')
-
-				if (r.message) {
-					render_page_workstation_chart(container.find('.chart-display-area'), r.message, selected_work_order)
-				} else {
-					container.find('.chart-display-area').html(`
-                        <div class="alert alert-info">
-                            <i class="fa fa-info-circle"></i>
-                            No operations found for this Work Order or backend method not available.
-                        </div>
-                    `)
-				}
-			},
-			error: function () {
-				btn.prop('disabled', false).html('<i class="fa fa-search"></i> Load Workstation Chart')
-				container.find('.chart-display-area').html(`
-                    <div class="alert alert-warning">
-                        <i class="fa fa-exclamation-triangle"></i>
-                        Error loading data. Please ensure the backend methods are properly installed.
-                    </div>
-                `)
-			},
-		})
-	})
+	let style = document.createElement('style')
+	style.id = 'sticky-work-order-style'
+	style.textContent = `
+        .sticky-work-order-filter {
+            position: sticky;
+            top: 60px; /* height of Frappe navbar */
+            background: #fff;
+            z-index: 100;
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+    `
+	document.head.appendChild(style)
 }
 
 function render_page_workstation_chart(container, operations_data, work_order) {
@@ -121,10 +117,6 @@ function render_page_workstation_chart(container, operations_data, work_order) {
 	chart_html += '</div>'
 	container.html(chart_html)
 
-	// Add styles if not already added
-	add_page_chart_styles()
-
-	// Setup click handlers
 	setup_page_workstation_handlers(container, work_order)
 }
 
@@ -274,139 +266,4 @@ function setup_page_workstation_handlers(container, work_order) {
 			}
 		)
 	})
-}
-
-function add_page_chart_styles() {
-	if (document.getElementById('page-workstation-chart-styles')) return
-
-	let style = document.createElement('style')
-	style.id = 'page-workstation-chart-styles'
-	style.textContent = `
-        .workstation-page-container {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
-
-        .chart-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 8px 8px 0 0;
-            margin-bottom: 20px;
-        }
-
-        .operation-tree {
-            margin-bottom: 30px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
-        }
-
-        .operation-header {
-            background: #f8f9fa;
-            padding: 15px 20px;
-            border-bottom: 2px solid #e9ecef;
-        }
-
-        .operation-number {
-            display: inline-block;
-            background: #007bff;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 24px;
-            font-size: 12px;
-            margin-right: 10px;
-        }
-
-        .workstation-tree {
-            padding: 20px;
-        }
-
-        .primary-branch {
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-        }
-
-        .workstation-node {
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            background: white;
-            transition: all 0.3s ease;
-            min-width: 280px;
-        }
-
-        .workstation-node.primary {
-            border-color: #28a745;
-            background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%);
-        }
-
-        .workstation-node.alternative {
-            border-color: #17a2b8;
-            background: linear-gradient(135deg, #f0fcff 0%, #e0f7ff 100%);
-        }
-
-        .node-content {
-            padding: 20px;
-        }
-
-        .workstation-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .availability-badge {
-            padding: 4px 8px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: white;
-        }
-
-        .badge-success { background: #28a745; }
-        .badge-warning { background: #ffc107; color: #212529; }
-        .badge-danger { background: #dc3545; }
-
-        .workstation-details {
-            margin-bottom: 15px;
-            color: #6c757d;
-            font-size: 13px;
-        }
-
-        .alternative-stations {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            flex: 1;
-        }
-
-        .no-alternatives {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-            background: #f8f9fa;
-            border: 2px dashed #dee2e6;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .use-workstation-btn {
-            width: 100%;
-            font-weight: 600;
-        }
-
-        @media (max-width: 768px) {
-            .primary-branch { flex-direction: column; }
-            .workstation-node { min-width: auto; width: 100%; }
-        }
-    `
-	document.head.appendChild(style)
 }

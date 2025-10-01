@@ -1,0 +1,141 @@
+/* Workstation Page Styles - Scoped to page */
+.workstation-page-container {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.workstation-page-container .chart-header {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	padding: 20px;
+	border-radius: 8px 8px 0 0;
+	margin-bottom: 20px;
+}
+
+.workstation-page-container .operation-tree {
+	margin-bottom: 30px;
+	background: white;
+	border-radius: 12px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+	overflow: hidden;
+}
+
+.workstation-page-container .operation-header {
+	background: #f8f9fa;
+	padding: 15px 20px;
+	border-bottom: 2px solid #e9ecef;
+}
+
+.workstation-page-container .operation-number {
+	display: inline-block;
+	background: #007bff;
+	color: white;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	text-align: center;
+	line-height: 24px;
+	font-size: 12px;
+	margin-right: 10px;
+}
+
+.workstation-page-container .workstation-tree {
+	padding: 20px;
+}
+
+.workstation-page-container .primary-branch {
+	display: flex;
+	gap: 20px;
+	align-items: flex-start;
+}
+
+.workstation-page-container .workstation-node {
+	border: 2px solid #e9ecef;
+	border-radius: 12px;
+	background: white;
+	transition: all 0.3s ease;
+	min-width: 280px;
+}
+
+.workstation-page-container .workstation-node.primary {
+	border-color: #28a745;
+	background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%);
+}
+
+.workstation-page-container .workstation-node.alternative {
+	border-color: #17a2b8;
+	background: linear-gradient(135deg, #f0fcff 0%, #e0f7ff 100%);
+}
+
+.workstation-page-container .node-content {
+	padding: 20px;
+}
+
+.workstation-page-container .workstation-info {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 15px;
+}
+
+.workstation-page-container .availability-badge {
+	padding: 4px 8px;
+	border-radius: 20px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	color: white;
+}
+
+.workstation-page-container .availability-badge.badge-success {
+	background: #28a745;
+}
+
+.workstation-page-container .availability-badge.badge-warning {
+	background: #ffc107;
+	color: #212529;
+}
+
+.workstation-page-container .availability-badge.badge-danger {
+	background: #dc3545;
+}
+
+.workstation-page-container .workstation-details {
+	margin-bottom: 15px;
+	color: #6c757d;
+	font-size: 13px;
+}
+
+.workstation-page-container .alternative-stations {
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+	flex: 1;
+}
+
+.workstation-page-container .no-alternatives {
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 40px 20px;
+	background: #f8f9fa;
+	border: 2px dashed #dee2e6;
+	border-radius: 12px;
+	text-align: center;
+}
+
+.workstation-page-container .use-workstation-btn {
+	width: 100%;
+	font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.workstation-page-container .primary-branch {
+		flex-direction: column;
+	}
+	.workstation-page-container .workstation-node {
+		min-width: auto;
+		width: 100%;
+	}
+}
