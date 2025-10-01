@@ -4,7 +4,7 @@
 frappe.pages['workstation-selection'].on_page_load = function (wrapper) {
 	let page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: 'Workstation Selection Chart',
+		title: 'Alternative Workstations',
 		single_column: true,
 	})
 
