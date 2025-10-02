@@ -137,7 +137,11 @@ function render_operation_tree_for_page(operation, index) {
 	// Check if primary is truly the earliest option
 	const primary_is_earliest = !earliest_alt_time || primary_time <= earliest_alt_time
 
-	if (operation.availability === 'available' && primary_is_earliest) {
+	if (!operation.is_bom_default) {
+		// Purple - non-default workstation chosen
+		primary_card_class += ' non-default'
+		primary_btn_class = 'btn-purple'
+	} else if (operation.availability === 'available' && primary_is_earliest) {
 		// Green - primary is available and earliest
 		primary_card_class += ' earliest'
 		primary_btn_class = 'btn-success'
@@ -147,12 +151,12 @@ function render_operation_tree_for_page(operation, index) {
 		primary_btn_class = 'btn-warning'
 	}
 
-	// Primary card HTML
+	// Primary card HTML (removed "Primary:")
 	let primary_html = `
         <div class="workstation-node ${primary_card_class}" data-workstation="${operation.workstation}">
             <div class="node-content">
                 <div class="workstation-info">
-                    <strong>Primary: ${operation.workstation}</strong>
+                    <strong>${operation.workstation}</strong>
                 </div>
                 <div class="workstation-details">
                     <div>Next Available: ${operation.next_available ? frappe.datetime.str_to_user(operation.next_available) : 'Now'}</div>
@@ -162,7 +166,6 @@ function render_operation_tree_for_page(operation, index) {
             </div>
         </div>
     `
-
 	// Alternatives HTML
 	let alternatives_html = ''
 	if (sorted_alternatives.length > 0) {

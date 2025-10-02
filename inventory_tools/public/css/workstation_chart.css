@@ -133,6 +133,18 @@
 	max-width: 320px;
 }
 
+.workstation-node.non-default {
+	border: 2px solid #6f42c1; /* Bootstrap purple */
+	background-color: #f5f0fa;
+}
+.btn-purple {
+	background-color: #6f42c1;
+	color: #fff;
+}
+.btn-purple:hover {
+	background-color: #59359c;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
 	.workstation-page-container .primary-branch {

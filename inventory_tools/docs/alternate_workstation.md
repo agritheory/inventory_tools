@@ -9,7 +9,7 @@ To ensure flexibility, Inventory Tools now supports **Alternative Workstations**
 
 - Each **Operation** can be linked with multiple alternative workstations.  
 - A **Work Order** inherits these alternatives.  
-- Users can quickly switch from the **primary workstation** to an **alternative** through the **Workstation Selection Page**.  
+- Users can quickly switch from the **primary workstation** to an **alternative** through the **Alternative Workstations Page**.  
 
 ---
 
@@ -33,9 +33,9 @@ When a **Work Order** is created:
 
 ---
 
-### 3. Workstation Selection Page
+### 3. Alternative Workstations Page
 Steps:  
-1. Navigate to **Workstation Selection Page**.  
+1. Navigate to **Alternative Workstations Page**.  
 2. Select a **Work Order** from the filter.  
 3. The system displays all operations under that Work Order, with:  
    - **Primary Workstation** (currently assigned)  
@@ -45,6 +45,16 @@ Steps:
 
 ### 4. Assigning an Alternative
 For each operation row, available alternatives are shown with a **“Use Alternative”** button.  
+
+- ### Rendering
+- **Primary Workstation Card**
+  - Shows workstation name, next available time, capacity, and planned start.
+  - Card color logic:
+    - **Purple:** Non-default workstation chosen.
+    - **Green:** Default workstation available and earliest option.
+    - **Yellow:** Default workstation is busy or not the earliest option.
+- **Alternative Workstations**
+  - Sorted by earliest availability.
 
 Clicking this button:  
 - Updates the assigned workstation in the **Work Order Operation** child table.  

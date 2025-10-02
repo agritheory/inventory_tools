@@ -26,11 +26,16 @@ def get_workstation_availability(work_order, operation=None):
 		# Get the Operation master to fetch alternative workstations
 		operation_master = frappe.get_doc("Operation", op.operation)
 
+		default_ws = operation_master.workstation
+		is_bom_default = op.workstation == default_ws
+
 		operation_data = {
 			"operation": op.operation,
 			"operation_name": op.operation,  # Keep for reference
 			"idx": op.idx,
 			"workstation": op.workstation,
+			"default_workstation": default_ws,
+			"is_bom_default": is_bom_default,
 			"planned_start_time": op.planned_start_time,
 			"planned_end_time": op.planned_end_time,
 			"availability": get_workstation_availability_status(op.workstation, op.planned_start_time),
