@@ -23,7 +23,7 @@ function workstation_selection_button(frm) {
 		frm.add_custom_button(
 			__('Alternative Workstations'),
 			function () {
-				frappe.set_route('workstation-selection', frm.doc.name)
+				frappe.set_route('alternative-workstation', frm.doc.name)
 			},
 			__('View')
 		)

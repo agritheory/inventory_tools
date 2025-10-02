@@ -1,6 +1,7 @@
 # Copyright (c) 2025, AgriTheory and contributors
 # For license information, please see license.txt
 
+import json
 import frappe
 from frappe import _
 
@@ -53,30 +54,16 @@ def get_workstation_availability(work_order, operation=None):
 def get_alternative_workstations_from_operation(
 	operation_doc, planned_start_time, current_workstation=None
 ):
-	"""
-	Get alternative workstations from Operation master document
-	"""
 	alternatives = []
-
-	# Check if Operation has alternative workstations configured
-	# In ERPNext, this could be in various formats - let's handle them
-
-	# Method 1: Check for alternative_workstations field (if it exists as multiselect or similar)
 	if hasattr(operation_doc, "alternative_workstations") and operation_doc.alternative_workstations:
 		workstation_names = []
 
-		# Handle different field types
 		if isinstance(operation_doc.alternative_workstations, str):
-			# Could be JSON string, comma-separated, or newline-separated
-			import json
-
 			try:
-				# Try JSON first
 				workstation_names = json.loads(operation_doc.alternative_workstations)
 				if isinstance(workstation_names, str):
 					workstation_names = [workstation_names]
 			except (json.JSONDecodeError, TypeError):
-				# Try comma or newline separation
 				workstation_names = [
 					name.strip()
 					for name in operation_doc.alternative_workstations.replace("\n", ",").split(",")
@@ -89,7 +76,7 @@ def get_alternative_workstations_from_operation(
 			if not workstation_name:
 				continue
 			if current_workstation and workstation_name == current_workstation:
-				continue  # 🚀 skip the primary
+				continue
 			if workstation_name and workstation_name != operation_doc.workstation:
 				alternative_data = {
 					"workstation": workstation_name.workstation,
@@ -99,7 +86,6 @@ def get_alternative_workstations_from_operation(
 				}
 				alternatives.append(alternative_data)
 
-	# Method 2: Check if there's a child table for alternative workstations
 	if hasattr(operation_doc, "alternative_workstation") and operation_doc.alternative_workstation:
 		for alt_row in operation_doc.alternative_workstation:
 			if hasattr(alt_row, "workstation") and alt_row.workstation:
@@ -219,17 +205,14 @@ def assign_workstation(work_order, operation, workstation):
 		frappe.throw(_("Work Order, Operation, and Workstation are required"))
 
 	try:
-		# Get and update the work order
 		work_order_doc = frappe.get_doc("Work Order", work_order)
 
-		# Find and update the specific operation
 		operation_found = False
 		for op in work_order_doc.operations:
 			if op.operation == operation:
 				old_workstation = op.workstation
 				op.workstation = workstation
 
-				# Recalculate times based on new workstation if needed
 				recalculate_operation_times(op, workstation)
 				operation_found = True
 				break
@@ -237,15 +220,9 @@ def assign_workstation(work_order, operation, workstation):
 		if not operation_found:
 			frappe.throw(_("Operation {0} not found in Work Order {1}").format(operation, work_order))
 
-		# Save the work order
 		work_order_doc.save(ignore_permissions=True)
 		frappe.db.commit()
 		work_order_doc.reload()
-
-		# Log the change
-		frappe.logger().info(
-			f"Workstation changed from {old_workstation} to {workstation} for operation {operation} in work order {work_order}"
-		)
 
 		return {
 			"message": _("Workstation {0} assigned to operation {1}").format(workstation, operation),
@@ -264,16 +241,13 @@ def recalculate_operation_times(operation_row, workstation):
 	try:
 		workstation_doc = frappe.get_doc("Workstation", workstation)
 
-		# Update hour rate if workstation has different rates
 		if workstation_doc.hour_rate:
 			operation_row.hour_rate = workstation_doc.hour_rate
 
-		# Get next available time for the new workstation
 		if operation_row.planned_start_time:
 			next_available = get_next_available_time(workstation, operation_row.planned_start_time)
 
 			if next_available and next_available > operation_row.planned_start_time:
-				# Calculate duration to maintain operation time
 				if operation_row.planned_end_time and operation_row.planned_start_time:
 					duration = operation_row.planned_end_time - operation_row.planned_start_time
 					operation_row.planned_start_time = next_available
@@ -283,49 +257,3 @@ def recalculate_operation_times(operation_row, workstation):
 
 	except Exception as e:
 		frappe.log_error(f"Error recalculating operation times: {str(e)}")
-		# Continue without failing the entire operation
-
-
-@frappe.whitelist()
-def get_workstation_schedule(workstation, from_date=None, to_date=None):
-	"""
-	Get detailed schedule for a workstation for calendar/timeline view
-	"""
-	if not from_date:
-		from_date = frappe.utils.today()
-	if not to_date:
-		to_date = frappe.utils.add_days(from_date, 30)
-
-	try:
-		woo = frappe.qb.DocType("Work Order Operation")
-		wo = frappe.qb.DocType("Work Order")
-
-		schedule = (
-			frappe.qb.from_(woo)
-			.join(wo)
-			.on(woo.parent == wo.name)
-			.select(
-				wo.name.as_("work_order"),
-				woo.operation,
-				woo.planned_start_time,
-				woo.planned_end_time,
-				wo.production_item,
-				wo.qty,
-				wo.status,
-				woo.completed_qty,
-				woo.process_loss_qty,
-			)
-			.where(
-				(woo.workstation == workstation)
-				& (wo.docstatus == 1)
-				& (wo.status.not_in(["Cancelled"]))
-				& (frappe.qb.functions.Date(woo.planned_start_time).between(from_date, to_date))
-			)
-			.orderby(woo.planned_start_time)
-		).run(as_dict=True)
-
-		return schedule
-
-	except Exception as e:
-		frappe.log_error(f"Error getting workstation schedule: {str(e)}")
-		return []
