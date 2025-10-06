@@ -56,7 +56,9 @@ def get_alternative_workstations_from_operation(
 ):
 	alternatives = []
 	seen_workstations = set()
+	default_workstation = operation_doc.workstation
 
+	# Add the operation's default workstation first if it's not the current one
 	if operation_doc.workstation and operation_doc.workstation != current_workstation:
 		alternative_data = {
 			"workstation": operation_doc.workstation,
@@ -65,11 +67,12 @@ def get_alternative_workstations_from_operation(
 			),
 			"next_available": get_next_available_time(operation_doc.workstation, planned_start_time),
 			"capacity": get_workstation_capacity(operation_doc.workstation),
-			"is_bom_default": True,
+			"is_bom_default": True,  # This is the default from Operation master
 		}
 		alternatives.append(alternative_data)
 		seen_workstations.add(operation_doc.workstation)
 
+	# Process alternative_workstations field (if it's a string or list)
 	if hasattr(operation_doc, "alternative_workstations") and operation_doc.alternative_workstations:
 		workstation_names = []
 
@@ -95,29 +98,21 @@ def get_alternative_workstations_from_operation(
 			if workstation_name in seen_workstations:
 				continue
 
+			ws_name = (
+				workstation_name.workstation if hasattr(workstation_name, "workstation") else workstation_name
+			)
+
 			alternative_data = {
-				"workstation": workstation_name.workstation
-				if hasattr(workstation_name, "workstation")
-				else workstation_name,
-				"availability": get_workstation_availability_status(
-					workstation_name.workstation
-					if hasattr(workstation_name, "workstation")
-					else workstation_name,
-					planned_start_time,
-				),
-				"next_available": get_next_available_time(
-					workstation_name.workstation
-					if hasattr(workstation_name, "workstation")
-					else workstation_name,
-					planned_start_time,
-				),
-				"capacity": get_workstation_capacity(
-					workstation_name.workstation if hasattr(workstation_name, "workstation") else workstation_name
-				),
+				"workstation": ws_name,
+				"availability": get_workstation_availability_status(ws_name, planned_start_time),
+				"next_available": get_next_available_time(ws_name, planned_start_time),
+				"capacity": get_workstation_capacity(ws_name),
+				"is_bom_default": ws_name == default_workstation,  # Check if this matches the default
 			}
 			alternatives.append(alternative_data)
-			seen_workstations.add(alternative_data["workstation"])
+			seen_workstations.add(ws_name)
 
+	# Process alternative_workstation child table
 	if hasattr(operation_doc, "alternative_workstation") and operation_doc.alternative_workstation:
 		for alt_row in operation_doc.alternative_workstation:
 			if hasattr(alt_row, "workstation") and alt_row.workstation:
@@ -131,6 +126,8 @@ def get_alternative_workstations_from_operation(
 					"availability": get_workstation_availability_status(alt_row.workstation, planned_start_time),
 					"next_available": get_next_available_time(alt_row.workstation, planned_start_time),
 					"capacity": get_workstation_capacity(alt_row.workstation),
+					"is_bom_default": alt_row.workstation
+					== default_workstation,  # Check if this matches the default
 				}
 				alternatives.append(alternative_data)
 				seen_workstations.add(alt_row.workstation)

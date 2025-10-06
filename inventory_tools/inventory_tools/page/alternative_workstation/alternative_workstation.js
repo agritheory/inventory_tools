@@ -126,7 +126,7 @@ function render_operation_tree_for_page(operation, index) {
 			<div class="node-content">
 				<div class="workstation-info">
 					<strong>${operation.workstation}</strong>
-				</div>
+						${operation.is_bom_default == true || operation.is_bom_default === 1 || operation.is_bom_default === '1' ? '<span class="default-badge">Default</span>' : ''}				</div>
 				<div class="workstation-details">
 					<div>Next Available: ${operation.next_available ? frappe.datetime.str_to_user(operation.next_available) : 'Now'}</div>
 					<div>Capacity: ${operation.capacity || 1}/hour</div>
@@ -134,7 +134,8 @@ function render_operation_tree_for_page(operation, index) {
 				</div>
 			</div>
 		</div>
-		`
+	`
+
 	// Alternatives HTML
 	let alternatives_html = ''
 	if (sorted_alternatives.length > 0) {
@@ -156,6 +157,7 @@ function render_operation_tree_for_page(operation, index) {
 					<div class="node-content">
 						<div class="workstation-info">
 							<strong>${alt.workstation}</strong>
+							${alt.is_bom_default === true || alt.is_bom_default === 1 || alt.is_bom_default === '1' ? '<span class="default-badge">Default</span>' : ''}
 						</div>
 						<div class="workstation-details">
 							<div>Next Available: ${alt.next_available ? frappe.datetime.str_to_user(alt.next_available) : 'Now'}</div>
