@@ -83,8 +83,9 @@ class InventoryToolsWorkstation(Workstation):
 @frappe.validate_and_sanitize_search_inputs
 def get_alternative_workstations(doctype, txt, searchfield, start, page_len, filters):
 	company = filters.get("company") or frappe.defaults.get_defaults().get("company")
-	if not frappe.get_cached_value(
-		"Inventory Tools Settings", company, "allow_alternative_workstations"
+	if (
+		frappe.get_cached_value("Inventory Tools Settings", company, "allow_alternative_workstations")
+		== "Do Not Allow Alternative Workstations"
 	):
 		filters.pop("operation") if "operation" in filters else True
 		filters.pop("company") if "company" in filters else True

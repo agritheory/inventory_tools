@@ -16,7 +16,11 @@ class InventoryToolsSettings(Document):
 
 		aggregated_purchasing_warehouse: DF.Link | None
 		aggregated_sales_warehouse: DF.Link | None
-		allow_alternative_workstations: DF.Check
+		allow_alternative_workstations: DF.Literal[
+			"Do Not Allow Alternative Workstations",
+			"Allow Manually Defined Alternative Workstations",
+			"Allow Alternative Workstations Based on Workstation Type",
+		]
 		company: DF.Link | None
 		create_job_cards_automatically: DF.Literal["Yes", "No"]
 		create_purchase_orders: DF.Check

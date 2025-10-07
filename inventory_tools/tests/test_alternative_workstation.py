@@ -21,7 +21,9 @@ def test_alternative_workstation_query():
 	inventory_tools_settings = frappe.get_doc(
 		"Inventory Tools Settings", frappe.defaults.get_defaults().get("company")
 	)
-	inventory_tools_settings.allow_alternative_workstations = True
+	inventory_tools_settings.allow_alternative_workstations = (
+		"Allow Manually Defined Alternative Workstations"
+	)
 	inventory_tools_settings.save()
 	response = frappe.call(
 		"frappe.desk.search.search_link",

@@ -192,7 +192,10 @@ def setup_manufacturing_settings(settings):
 	)
 	frappe.set_value("Inventory Tools Settings", settings.company, "create_purchase_orders", 0)
 	frappe.set_value(
-		"Inventory Tools Settings", settings.company, "allow_alternative_workstations", 1
+		"Inventory Tools Settings",
+		settings.company,
+		"allow_alternative_workstations",
+		"Allow Manually Defined Alternative Workstations",
 	)
 	frappe.set_value("Inventory Tools Settings", settings.company, "create_purchase_orders", 0)
 	frappe.set_value(
