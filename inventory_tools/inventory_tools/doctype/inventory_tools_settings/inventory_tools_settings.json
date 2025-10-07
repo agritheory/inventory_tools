@@ -100,9 +100,11 @@
 		},
 		{
 			"default": "0",
+			"description": "Deprecated: Use ERPNext's standard UOM enforcement. See <a href=\"https://docs.frappe.io/erpnext/user/manual/en/stock-settings#15-allow-uom-with-conversion-rate-defined-in-item\" target=\"_blank\">docs</a>.",
 			"fieldname": "enforce_uoms",
 			"fieldtype": "Check",
-			"label": "Enforce UOMs"
+			"label": "Enforce UOMs",
+			"read_only": 1
 		},
 		{
 			"fieldname": "bom_column",
