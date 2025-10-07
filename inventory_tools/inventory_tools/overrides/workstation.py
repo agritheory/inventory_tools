@@ -83,12 +83,13 @@ class InventoryToolsWorkstation(Workstation):
 @frappe.validate_and_sanitize_search_inputs
 def get_alternative_workstations(doctype, txt, searchfield, start, page_len, filters):
 	company = filters.get("company") or frappe.defaults.get_defaults().get("company")
-	if (
-		frappe.get_cached_value("Inventory Tools Settings", company, "allow_alternative_workstations")
-		== "Do Not Allow Alternative Workstations"
-	):
-		filters.pop("operation") if "operation" in filters else True
-		filters.pop("company") if "company" in filters else True
+	setting_value = frappe.get_cached_value(
+		"Inventory Tools Settings", company, "allow_alternative_workstations"
+	)
+
+	if setting_value == "Do Not Allow Alternative Workstations":
+		filters.pop("operation", None)
+		filters.pop("company", None)
 		return execute(
 			"Workstation",
 			filters=filters,
@@ -100,35 +101,65 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 
 	operation = filters.get("operation")
 	if not operation:
-		frappe.throw(frappe._("Please select a Operation first."))
+		frappe.throw(frappe._("Please select an Operation first."))
 
 	searchfields = list(reversed(frappe.get_meta(doctype).get_search_fields()))
 	select = ",\n".join([f"`tabWorkstation`.{field}" for field in searchfields])
-	search_text = "AND `tabAlternative Workstation`.workstation LIKE %(txt)s" if txt else ""
-
-	workstation = frappe.db.sql(
-		f"""
-		SELECT DISTINCT {select}
-		FROM `tabOperation`, `tabWorkstation`, `tabAlternative Workstation`
-		WHERE `tabWorkstation`.name = `tabAlternative Workstation`.workstation
-		AND `tabAlternative Workstation`.parent = %(operation)s
-		{search_text}
-	""",
-		{"operation": operation, "txt": f"%{txt}%"},
-		as_list=True,
-	)
+	search_text = "AND `tabWorkstation`.name LIKE %(txt)s" if txt else ""
 
 	default_workstation_name = frappe.db.get_value("Operation", operation, "workstation")
-	default_workstation_fields = frappe.db.get_values(
-		"Workstation", default_workstation_name, searchfields, as_dict=True
-	)
-	if default_workstation_name not in [row[0] for row in workstation]:
-		field_values = ",".join([v for k, v in default_workstation_fields[0].items() if k != "name"])
-		_default = tuple(
-			[
-				default_workstation_fields[0].name,
-				f"{frappe._('(Default Workstation)')} {' - ' if field_values else '' }{field_values}",
-			]
+
+	if setting_value == "Allow Alternative Workstations Based on Workstation Type":
+		if not default_workstation_name:
+			frappe.throw(frappe._("Default workstation not found for the selected operation."))
+
+		workstation_type = frappe.db.get_value(
+			"Workstation", default_workstation_name, "workstation_type"
 		)
-		workstation.insert(0, _default)
+		if not workstation_type:
+			frappe.throw(frappe._("Workstation type not found for the default workstation."))
+
+		workstation = frappe.db.sql(
+			f"""
+            SELECT DISTINCT {select}
+            FROM `tabWorkstation`
+            WHERE `tabWorkstation`.workstation_type = %(workstation_type)s
+            {search_text}
+            ORDER BY `tabWorkstation`.name
+            LIMIT %(start)s, %(page_len)s
+            """,
+			{
+				"workstation_type": workstation_type,
+				"txt": f"%{txt}%",
+				"start": start,
+				"page_len": page_len,
+			},
+			as_list=True,
+		)
+
+	else:
+		workstation = frappe.db.sql(
+			f"""
+            SELECT DISTINCT {select}
+            FROM `tabOperation`, `tabWorkstation`, `tabAlternative Workstation`
+            WHERE `tabWorkstation`.name = `tabAlternative Workstation`.workstation
+            AND `tabAlternative Workstation`.parent = %(operation)s
+            {search_text}
+            """,
+			{"operation": operation, "txt": f"%{txt}%"},
+			as_list=True,
+		)
+
+	if default_workstation_name and default_workstation_name not in [row[0] for row in workstation]:
+		default_fields = frappe.db.get_values(
+			"Workstation", default_workstation_name, searchfields, as_dict=True
+		)
+		if default_fields:
+			field_values = ", ".join([v for k, v in default_fields[0].items() if k != "name"])
+			_default = (
+				default_fields[0].name,
+				f"{frappe._('(Default Workstation)')} {' - ' if field_values else ''}{field_values}",
+			)
+			workstation.insert(0, _default)
+
 	return workstation
