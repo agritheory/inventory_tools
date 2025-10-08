@@ -34,7 +34,7 @@ class InventoryToolsProductionPlan(ProductionPlan):
 
 	def make_work_order_for_subassembly_items(self, wo_list, subcontracted_po, default_warehouses):
 		"""
-		HASH: 539c5b7974ffdaf4caf8acb6d4acc00fba626668
+		HASH: a5ed9fdc67986988388346dc97e832ecf3739ae6
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/production_plan/production_plan.py
 		METHOD: make_work_order_for_subassembly_items

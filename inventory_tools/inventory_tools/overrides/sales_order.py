@@ -9,12 +9,24 @@ from frappe.utils import cint
 
 class InventoryToolsSalesOrder(SalesOrder):
 	def validate_with_previous_doc(self):
+		"""
+		HASH: bc7f884ae12dccd443ff9a409708f7c95dae4b98
+		REPO: https://github.com/frappe/erpnext
+		PATH: erpnext/selling/doctype/sales_order/sales_order.py
+		METHOD: validate_with_previous_doc
+		"""
 		config = {"Quotation": {"ref_dn_field": "prevdoc_docname", "compare_fields": [["company", "="]]}}
 		if self.multi_company_sales_order:
 			config.pop("Quotation")
 		super(SalesOrder, self).validate_with_previous_doc(config)
 
 	def validate_warehouse(self):
+		"""
+		HASH: bc7f884ae12dccd443ff9a409708f7c95dae4b98
+		REPO: https://github.com/frappe/erpnext
+		PATH: erpnext/selling/doctype/sales_order/sales_order.py
+		METHOD: validate_warehouse
+		"""
 		warehouses = list({d.warehouse for d in self.get("items") if getattr(d, "warehouse", None)})
 
 		target_warehouses = list(
