@@ -54,7 +54,7 @@ class InventoryToolsStockEntry(StockEntry):
 
 	def validate_finished_goods(self):
 		"""
-		HASH: 32bfc2f5553661c2ba46109e6b22bdbea963a108
+		HASH: 7ce97ce0c2fdc2f6308e5b9266b1db198984061b
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
 		METHOD: validate_finished_goods

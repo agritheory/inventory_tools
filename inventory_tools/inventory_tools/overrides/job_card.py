@@ -12,7 +12,7 @@ from inventory_tools.inventory_tools.overrides.work_order import get_allowance_p
 class InventoryToolsJobCard(JobCard):
 	def validate_job_card(self):
 		"""
-		HASH: 6c4655dd72dc304d07b2b23a26e7f61eb1ff00b9
+		HASH: 80c76618ae1d9587257e36ef38d93152abd964f7
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/job_card/job_card.py
 		METHOD: validate_job_card

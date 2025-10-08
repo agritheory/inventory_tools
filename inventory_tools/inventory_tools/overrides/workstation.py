@@ -11,6 +11,12 @@ from frappe.utils.data import comma_and, flt, get_time, time_diff_in_hours
 
 class InventoryToolsWorkstation(Workstation):
 	def validate_working_hours(self, row):
+		"""
+		HASH: 3b4d39766f78492bd2ba92dc6c6c5b91263d3e6d
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/manufacturing/doctype/workstation/workstation.py
+		METHOD: update_operation_status
+		"""
 		if not (row.start_time and row.end_time):
 			frappe.throw(frappe._("Row #{0}: Start Time and End Time are required").format(row.idx))
 
@@ -22,6 +28,12 @@ class InventoryToolsWorkstation(Workstation):
 			)
 
 	def set_total_working_hours(self):
+		"""
+		HASH: 3b4d39766f78492bd2ba92dc6c6c5b91263d3e6d
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/manufacturing/doctype/workstation/workstation.py
+		METHOD: update_operation_status
+		"""
 		self.total_working_hours = 0.0
 		for row in self.working_hours:
 			self.validate_working_hours(row)
@@ -38,6 +50,12 @@ class InventoryToolsWorkstation(Workstation):
 				self.total_working_hours += row.hours
 
 	def validate_overlap_for_operation_timings(self):
+		"""
+		HASH: 3b4d39766f78492bd2ba92dc6c6c5b91263d3e6d
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/manufacturing/doctype/workstation/workstation.py
+		METHOD: update_operation_status
+		"""
 		for d in self.get("working_hours"):
 			existing = frappe.db.sql_list(
 				"""select idx from `tabWorkstation Working Hour`
