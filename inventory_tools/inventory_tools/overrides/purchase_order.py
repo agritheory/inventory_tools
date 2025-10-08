@@ -113,7 +113,7 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 
 	def set_missing_item_details(self, for_validate=False):
 		"""
-		HASH: aef6b62f7d68520e7878497718c9ffc7502118e4
+		HASH: baa6d2bcdca633d60bfb596fc76df5cc5ab8b8fd
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/controllers/accounts_controller.py
 		METHOD: set_missing_item_details
