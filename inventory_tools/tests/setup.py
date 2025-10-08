@@ -208,7 +208,7 @@ def setup_manufacturing_settings(settings):
 def create_workstations():
 	for ws in workstations:
 		if not frappe.db.exists("Workstation Type", ws[2]):
-			wst = frappe.new_doc('Workstation Type')
+			wst = frappe.new_doc("Workstation Type")
 			wst.workstation_type = ws[2]
 			wst.save()
 		if frappe.db.exists("Workstation", ws[0]):
