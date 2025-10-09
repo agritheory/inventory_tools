@@ -75,22 +75,22 @@ suppliers = [
 ]
 
 workstations = [
-	("Mix Pie Crust Station", "20"),
-	("Roll Pie Crust Station", "20"),
-	("Make Pie Filling Station", "20"),
-	("Cooling Station", "100"),
-	("Box Pie Station", "100"),
-	("Baking Station", "20"),
-	("Assemble Pie Station", "20"),
-	("Mix Pie Filling Station", "20"),
-	("Packaging Station", "2"),
-	("Food Prep Table 2", "10"),
-	("Food Prep Table 1", "5"),
-	("Range Station", "20"),
-	("Cooling Racks Station", "80"),
-	("Refrigerator Station", "200"),
-	("Oven Station", "20"),
-	("Mixer Station", "10"),
+	("Mix Pie Crust Station", "20", "Table"),
+	("Roll Pie Crust Station", "20", "Table"),
+	("Make Pie Filling Station", "20", "Table"),
+	("Cooling Station", "100", "Table"),
+	("Box Pie Station", "100", "Table"),
+	("Baking Station", "20", "Table"),
+	("Assemble Pie Station", "20", "Table"),
+	("Mix Pie Filling Station", "20", "Table"),
+	("Packaging Station", "2", "Table"),
+	("Food Prep Table 2", "10", "Table"),
+	("Food Prep Table 1", "5", "Table"),
+	("Range Station", "20", "Range"),
+	("Cooling Racks Station", "80", "Cooling"),
+	("Refrigerator Station", "200", "Refrigerator"),
+	("Oven Station", "20", "Oven"),
+	("Mixer Station", "10", "Mixer"),
 ]
 
 operations = [
