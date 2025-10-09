@@ -122,10 +122,10 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 		frappe.throw(frappe._("Please select an Operation first."))
 
 	searchfields = list(reversed(frappe.get_meta(doctype).get_search_fields()))
-	select = ",\n".join([f"`tabWorkstation`.{field}" for field in searchfields])
-	search_text = "AND `tabWorkstation`.name LIKE %(txt)s" if txt else ""
 
 	default_workstation_name = frappe.db.get_value("Operation", operation, "workstation")
+
+	Workstation = frappe.qb.DocType("Workstation")
 
 	if setting_value == "Allow Alternative Workstations Based on Workstation Type":
 		if not default_workstation_name:
@@ -137,36 +137,38 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 		if not workstation_type:
 			frappe.throw(frappe._("Workstation type not found for the default workstation."))
 
-		workstation = frappe.db.sql(
-			f"""
-            SELECT DISTINCT {select}
-            FROM `tabWorkstation`
-            WHERE `tabWorkstation`.workstation_type = %(workstation_type)s
-            {search_text}
-            ORDER BY `tabWorkstation`.name
-            LIMIT %(start)s, %(page_len)s
-            """,
-			{
-				"workstation_type": workstation_type,
-				"txt": f"%{txt}%",
-				"start": start,
-				"page_len": page_len,
-			},
-			as_list=True,
+		query = (
+			frappe.qb.from_(Workstation)
+			.select(*[Workstation[field] for field in searchfields])
+			.where(Workstation.workstation_type == workstation_type)
+			.distinct()
 		)
 
+		if txt:
+			query = query.where(Workstation.name.like(f"%{txt}%"))
+
+		query = query.orderby(Workstation.name).limit(page_len).offset(start)
+		workstation = query.run(as_dict=False)
+
 	else:
-		workstation = frappe.db.sql(
-			f"""
-            SELECT DISTINCT {select}
-            FROM `tabOperation`, `tabWorkstation`, `tabAlternative Workstation`
-            WHERE `tabWorkstation`.name = `tabAlternative Workstation`.workstation
-            AND `tabAlternative Workstation`.parent = %(operation)s
-            {search_text}
-            """,
-			{"operation": operation, "txt": f"%{txt}%"},
-			as_list=True,
+		Operation = frappe.qb.DocType("Operation")
+		AlternativeWorkstation = frappe.qb.DocType("Alternative Workstation")
+
+		query = (
+			frappe.qb.from_(Workstation)
+			.join(AlternativeWorkstation)
+			.on(Workstation.name == AlternativeWorkstation.workstation)
+			.join(Operation)
+			.on(AlternativeWorkstation.parent == Operation.name)
+			.select(*[Workstation[field] for field in searchfields])
+			.where(AlternativeWorkstation.parent == operation)
+			.distinct()
 		)
+
+		if txt:
+			query = query.where(Workstation.name.like(f"%{txt}%"))
+
+		workstation = query.run(as_dict=False)
 
 	if default_workstation_name and default_workstation_name not in [row[0] for row in workstation]:
 		default_fields = frappe.db.get_values(
