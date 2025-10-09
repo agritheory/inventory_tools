@@ -105,7 +105,6 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 		"Inventory Tools Settings", company, "allow_alternative_workstations"
 	)
 
-	# If alternative workstations are not allowed
 	if setting_value == "Do Not Allow Alternative Workstations":
 		filters.pop("operation", None)
 		filters.pop("company", None)
@@ -126,7 +125,6 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 	default_workstation_name = frappe.db.get_value("Operation", operation, "workstation")
 	Workstation = frappe.qb.DocType("Workstation")
 
-	# Allow alternative workstations by workstation type
 	if setting_value == "Allow Alternative Workstations Based on Workstation Type":
 		if not default_workstation_name:
 			frappe.throw(frappe._("Default workstation not found for the selected operation."))
@@ -150,7 +148,6 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 		query = query.orderby(Workstation.name).limit(page_len).offset(start)
 		workstation = list(query.run(as_dict=False))  # <-- convert to list
 
-	# Use manually defined alternative workstations
 	else:
 		Operation = frappe.qb.DocType("Operation")
 		AlternativeWorkstation = frappe.qb.DocType("Alternative Workstation")
@@ -169,9 +166,8 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 		if txt:
 			query = query.where(Workstation.name.like(f"%{txt}%"))
 
-		workstation = list(query.run(as_dict=False))  # <-- convert to list
+		workstation = list(query.run(as_dict=False))
 
-	# Insert default workstation at the top if missing
 	if default_workstation_name and default_workstation_name not in [row[0] for row in workstation]:
 		default_fields = frappe.db.get_values(
 			"Workstation", default_workstation_name, searchfields, as_dict=True
