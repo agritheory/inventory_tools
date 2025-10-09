@@ -105,6 +105,7 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 		"Inventory Tools Settings", company, "allow_alternative_workstations"
 	)
 
+	# If alternative workstations are not allowed
 	if setting_value == "Do Not Allow Alternative Workstations":
 		filters.pop("operation", None)
 		filters.pop("company", None)
@@ -122,11 +123,10 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 		frappe.throw(frappe._("Please select an Operation first."))
 
 	searchfields = list(reversed(frappe.get_meta(doctype).get_search_fields()))
-
 	default_workstation_name = frappe.db.get_value("Operation", operation, "workstation")
-
 	Workstation = frappe.qb.DocType("Workstation")
 
+	# Allow alternative workstations by workstation type
 	if setting_value == "Allow Alternative Workstations Based on Workstation Type":
 		if not default_workstation_name:
 			frappe.throw(frappe._("Default workstation not found for the selected operation."))
@@ -148,8 +148,9 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 			query = query.where(Workstation.name.like(f"%{txt}%"))
 
 		query = query.orderby(Workstation.name).limit(page_len).offset(start)
-		workstation = query.run(as_dict=False)
+		workstation = list(query.run(as_dict=False))  # <-- convert to list
 
+	# Use manually defined alternative workstations
 	else:
 		Operation = frappe.qb.DocType("Operation")
 		AlternativeWorkstation = frappe.qb.DocType("Alternative Workstation")
@@ -168,8 +169,9 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 		if txt:
 			query = query.where(Workstation.name.like(f"%{txt}%"))
 
-		workstation = query.run(as_dict=False)
+		workstation = list(query.run(as_dict=False))  # <-- convert to list
 
+	# Insert default workstation at the top if missing
 	if default_workstation_name and default_workstation_name not in [row[0] for row in workstation]:
 		default_fields = frappe.db.get_values(
 			"Workstation", default_workstation_name, searchfields, as_dict=True
