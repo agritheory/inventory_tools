@@ -172,10 +172,10 @@
 			"fieldtype": "Column Break"
 		},
 		{
-			"default": "0",
 			"fieldname": "allow_alternative_workstations",
-			"fieldtype": "Check",
-			"label": "Allow Alternative Workstations"
+			"fieldtype": "Select",
+			"label": "Allow Alternative Workstations",
+			"options": "Do Not Allow Alternative Workstations\nAllow Manually Defined Alternative Workstations\nAllow Alternative Workstations Based on Workstation Type"
 		},
 		{
 			"description": "These settings will apply to all companies",
@@ -191,7 +191,7 @@
 	],
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2025-09-30 12:33:39.534155",
+	"modified": "2025-10-07 01:48:39.818263",
 	"modified_by": "Administrator",
 	"module": "Inventory Tools",
 	"name": "Inventory Tools Settings",
