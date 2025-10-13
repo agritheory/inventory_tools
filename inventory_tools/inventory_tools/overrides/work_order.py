@@ -113,7 +113,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 
 	def update_work_order_qty(self):
 		"""
-		HASH: 46a2b7a07e5326ad5fde89d030460a5e9f2b67b0
+		HASH: a139cd4b5e0733c5bc08d100dd0722b5abc92ce0
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: update_work_order_qty

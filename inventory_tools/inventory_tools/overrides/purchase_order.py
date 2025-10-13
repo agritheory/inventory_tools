@@ -113,7 +113,7 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 
 	def set_missing_item_details(self, for_validate=False):
 		"""
-		HASH: aef6b62f7d68520e7878497718c9ffc7502118e4
+		HASH: baa6d2bcdca633d60bfb596fc76df5cc5ab8b8fd
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/controllers/accounts_controller.py
 		METHOD: set_missing_item_details
@@ -353,7 +353,7 @@ def make_sales_invoices(docname: str, rows: list | str) -> None:
 @frappe.whitelist()
 def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=True):
 	"""
-	HASH: af21bca2318089bfee543fdf2180e9d55c7f2833
+	HASH: d47f3cc1014db0f395aab21c6632458e85cb27ff
 	REPO: https://github.com/frappe/erpnext/
 	PATH: erpnext/stock/get_item_details.py
 	METHOD: get_item_details

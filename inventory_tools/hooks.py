@@ -15,7 +15,8 @@ required_apps = ["erpnext", "hrms", "webshop"]
 
 # include js, css files in header of desk.html
 app_include_css = [
-	"/assets/inventory_tools/dist/js/assets/style.css",
+	"/assets/inventory_tools/dist/js/style.css",
+	"/assets/inventory_tools/css/alternative_workstation.css",
 ]
 app_include_js = [
 	"inventory_tools.bundle.js",
@@ -53,7 +54,7 @@ doctype_js = {
 	"Work Order": "public/js/custom/work_order_custom.js",
 	"Workstation": "public/js/custom/workstation_custom.js",
 }
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_list_js = {"Work Order": "public/js/custom/work_order_list.js"}
 doctype_tree_js = {"Warehouse": "public/js/custom/warehouse_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
@@ -142,9 +143,6 @@ override_doctype_class = {
 # Hook on document methods and events
 
 doc_events = {
-	"*": {
-		"validate": ["inventory_tools.inventory_tools.overrides.uom.validate_uom_has_conversion"],
-	},
 	"Company": {
 		"validate": [
 			"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.create_inventory_tools_settings",
@@ -265,41 +263,5 @@ standard_queries = {
 # auth_hooks = [
 # 	"inventory_tools.auth.validate"
 # ]
-
-# Inventory Tools UOM Enforcement
-# --------------------------------
-
-inventory_tools_uom_enforcement = {
-	"BOM": {
-		"BOM Item": {"items": ["uom"]},
-	},
-	"Delivery Note": {
-		"Delivery Note Item": {"items": ["uom", "weight_uom"]},
-	},
-	"Item Price": {"Item Price": ["uom"]},
-	"Item": {"Item": ["sales_uom", "purchase_uom", "weight_uom"]},
-	"Job Card": {"Job Card Item": {"items": ["uom"]}},
-	"Material Request": {"Material Request Item": {"items": ["uom"]}},
-	"Opportunity": {"Opportunity Item": {"items": ["uom"]}},
-	"Pick List": {"Pick List Item": {"locations": ["uom"]}},
-	"POS Invoice": {"POS Invoice Item": {"items": ["uom"]}},
-	"Production Plan": {"Production Plan Item": {"po_items": ["planned_uom"]}},
-	"Purchase Invoice": {
-		"Purchase Invoice Item": {"items": ["uom", "weight_uom"]},
-	},
-	"Purchase Order": {"Purchase Order Item": {"items": ["uom"]}},
-	"Purchase Receipt": {
-		"Purchase Receipt Item": {"items": ["uom", "weight_uom"]},
-	},
-	"Putaway Rule": {"Putaway Rule Item": ["uom"]},
-	"Quotation": {"Quotation Item": {"items": ["uom"]}},
-	"Request for Quotation": {"Request for Quotation Item": {"items": ["uom"]}},
-	"Sales Invoice": {"Sales Invoice Item": {"items": ["uom"]}},
-	"Sales Order": {
-		"Sales Order Item": {"items": ["uom", "weight_uom"]},
-	},
-	"Stock Entry": {"Stock Entry Detail": {"items": ["uom"]}},
-	"Supplier Quotation": {"Supplier Quotation Item": {"items": ["uom"]}},
-}
 
 export_python_type_annotations = True

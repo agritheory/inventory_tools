@@ -76,22 +76,22 @@ suppliers = [
 ]
 
 workstations = [
-	("Mix Pie Crust Station", "20", "mixer.png", "mixer.png"),
-	("Roll Pie Crust Station", "20", "rolling.png", "rolling.png"),
-	("Make Pie Filling Station", "20", "table.png", "table.png"),
-	("Cooling Station", "100", "rack.png", "rack.png"),
-	("Box Pie Station", "100", "box.png", "box.png"),
-	("Baking Station", "20", "oven.png", "oven.png"),
-	("Assemble Pie Station", "20", "table.png", "table.png"),
-	("Mix Pie Filling Station", "20", "mixer.png", "mixer.png"),
-	("Packaging Station", "2", "box.png", "box.png"),
-	("Food Prep Table 2", "10", "table.png", "table.png"),
+	("Mix Pie Crust Station", "20", "Table", "mixer.png", "mixer.png"),
+	("Roll Pie Crust Station", "20", "Table", "rolling.png", "rolling.png"),
+	("Make Pie Filling Station", "20", "Table", "table.png", "table.png"),
+	("Cooling Station", "100", "Table", "rack.png", "rack.png"),
+	("Box Pie Station", "100", "Table", "box.png", "box.png"),
+	("Baking Station", "20", "Table", "oven.png", "oven.png"),
+	("Assemble Pie Station", "20", "Table", "table.png", "table.png"),
+	("Mix Pie Filling Station", "20", "Table", "mixer.png", "mixer.png"),
+	("Packaging Station", "2", "Table", "box.png", "box.png"),
+	("Food Prep Table 2", "10", "Table", "table.png", "table.png"),
 	("Food Prep Table 1", "5", "table.png", "table.png"),
-	("Range Station", "20", "range.png", "range.png"),
-	("Cooling Racks Station", "80", "rack.png", "rack.png"),
-	("Refrigerator Station", "200", "fridge.png", "fridge.png"),
-	("Oven Station", "20", "oven.png", "oven.png"),
-	("Mixer Station", "10", "mixer.png", "mixer.png"),
+	("Range Station", "20", "Range", "range.png", "range.png"),
+	("Cooling Racks Station", "80", "Cooling", "rack.png", "rack.png"),
+	("Refrigerator Station", "200", "Refrigerator", "fridge.png", "fridge.png"),
+	("Oven Station", "20", "Oven", "oven.png", "oven.png"),
+	("Mixer Station", "10", "Mixer", "mixer.png", "mixer.png"),
 ]
 
 operations = [

@@ -222,9 +222,11 @@ def setup_manufacturing_settings(settings):
 		"Inventory Tools Settings", settings.company, "enable_work_order_subcontracting", 1
 	)
 	frappe.set_value("Inventory Tools Settings", settings.company, "create_purchase_orders", 0)
-	frappe.set_value("Inventory Tools Settings", settings.company, "enforce_uoms", 1)
 	frappe.set_value(
-		"Inventory Tools Settings", settings.company, "allow_alternative_workstations", 1
+		"Inventory Tools Settings",
+		settings.company,
+		"allow_alternative_workstations",
+		"Allow Manually Defined Alternative Workstations",
 	)
 	frappe.set_value("Inventory Tools Settings", settings.company, "create_purchase_orders", 0)
 	frappe.set_value(
@@ -243,14 +245,20 @@ def create_workstations(settings):
 		pf.plant_floor_layout = "/files/floor_plan.png"
 		pf.save()
 	for ws in workstations:
+		if not frappe.db.exists("Workstation Type", ws[2]):
+			wst = frappe.new_doc("Workstation Type")
+			wst.workstation_type = ws[2]
+			wst.save()
 		if frappe.db.exists("Workstation", ws[0]):
-			continue
-		work = frappe.new_doc("Workstation")
+			work = frappe.get_doc("Workstation", ws[0])
+		else:
+			work = frappe.new_doc("Workstation")
 		work.workstation_name = ws[0]
 		work.production_capacity = ws[1]
+		work.workstation_type = ws[2]
 		work.plant_floor = "Kitchen"
-		work.off_status_image = f"/files/{ws[2]}"
-		work.on_status_image = f"/files/{ws[3]}"
+		work.off_status_image = f"/files/{ws[3]}"
+		work.on_status_image = f"/files/{ws[4]}"
 		work.save()
 
 
