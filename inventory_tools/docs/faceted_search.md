@@ -4,6 +4,11 @@ For license information, please see license.txt-->
 
 # Faceted Search
 
+<div class="byline">
+  Rohan Bansal, Devarsh Bhatt, Heather Kusmierz, and Tyler Matteson 2024-08-12
+</div>
+
+
 Faceted search works on top of ERPNext's Shopping Cart to add additional Ecommerce controls for marketplace users. This feature allows you to list your products under `/all-products` and filter them based on their specifications.
 
 # Manual Setup

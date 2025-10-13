@@ -3,6 +3,11 @@ For license information, please see license.txt-->
 
 # Warehouse Plan
 
+<div class="byline">
+  coleandreoli 2025-08-29
+</div>
+
+
 ## Overview
 
 The Warehouse Plan feature's goal is to optimize the walking time and calculate the shortest path of a pickup list within a warehouse. Additionally, `FIFO`, `LIFO`, `Deplete_Max_Bins`, and `Deplete_Min_Bins` rules can be applied to the available stock for optimal stock management. This is accomplished by using a physical representation layer and implementing a pathing algorithm to solve for the shortest path, combined with pickup rules.
@@ -36,7 +41,7 @@ This doctype is used to define and store the physical representation layer of th
  {'item_code': 'Bayberry', 'qty': 3.0, 'warehouse': 'Fruit Storage 14 - CFC'}]
 Distance: 156.0
 ```
-![alt text](documentation_images/FIFO.png)
+![alt text](assets/FIFO.png)
 
 In this example, using the FIFO rule, Bayberry in Fruit Storage 11 was insufficient, so the remaining quantity was taken from Fruit Storage 14. Then the pickup list order was optimized to achieve the shortest path.
 
@@ -47,4 +52,4 @@ In this example, using the FIFO rule, Bayberry in Fruit Storage 11 was insuffici
  {'item_code': 'Lychee', 'qty': 3.0, 'warehouse': 'Fruit Storage 25 - CFC'}]
 Distance: 132.0
 ```
-![alt text](documentation_images/LIFO.png)
+![alt text](assets/LIFO.png)

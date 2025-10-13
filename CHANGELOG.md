@@ -3,6 +3,11 @@ For license information, please see license.txt-->
 
 # CHANGELOG
 
+<div class="byline">
+  Rohan Bansal, Devarsh Bhatt, github-actions, IshwaryaM1030, Myuddin Khatri, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2025-10-09
+</div>
+
+
 
 ## v15.4.0 (2025-02-26)
 

@@ -2,6 +2,11 @@
 For license information, please see license.txt-->
 
 # Warehouse Path
+
+<div class="byline">
+  Rohan Bansal, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2024-07-23
+</div>
+
 ERPNext allows its user to construct hierarchial abstractions for their physical facilities. This can make it difficult to know when you are selecting a Warehouse if it is "Bin A" in the "Storage Closet" or if is "Bin A" from the "Repair Supplies" Warehouse.
 
 This feature encodes the Warehouse hierarchy into a string, which becomes searchable, and allows the user to more easily understand which Warehouse they are selecting.

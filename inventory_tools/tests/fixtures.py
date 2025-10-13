@@ -86,7 +86,7 @@ workstations = [
 	("Mix Pie Filling Station", "20", "Table", "mixer.png", "mixer.png"),
 	("Packaging Station", "2", "Table", "box.png", "box.png"),
 	("Food Prep Table 2", "10", "Table", "table.png", "table.png"),
-	("Food Prep Table 1", "5", "table.png", "table.png"),
+	("Food Prep Table 1", "5", "Table", "table.png", "table.png"),
 	("Range Station", "20", "Range", "range.png", "range.png"),
 	("Cooling Racks Station", "80", "Cooling", "rack.png", "rack.png"),
 	("Refrigerator Station", "200", "Refrigerator", "fridge.png", "fridge.png"),

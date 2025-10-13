@@ -3,6 +3,11 @@ For license information, please see license.txt-->
 
 # Material Demand
 
+<div class="byline">
+  Rohan Bansal, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2024-07-23
+</div>
+
+
 Material Demand is a report-based interface that allows you to aggregate required Items across multiple Material Requests, Suppliers, and requesting Companies. From there, you can create draft Purchase Orders (PO), draft Request for Quotations (RFQ), or a combination of the two based on the Item's configuration.
 
 ![Screen shot of the Material Demand report showing rows of Items grouped by supplier with columns for the Supplier, Material Request document ID, Required By date, Item, MR Qty, Draft POs, Total Selected, UOM, Price, and Selected Amount](./assets/md_report_view.png)

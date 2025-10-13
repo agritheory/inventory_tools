@@ -50,20 +50,17 @@ repos:
           - tomli
 
   - repo: https://github.com/agritheory/test_utils
-    rev: v1.1.0
+    rev: v1.3.0
     hooks:
       - id: update_pre_commit_config
       - id: mypy
-        stages: [pre-push]
       - id: validate_copyright
-        stages: [pre-push]
         files: '\.(js|ts|py|md)$'
         args: ['--app', 'inventory_tools']
       - id: clean_customized_doctypes
-        stages: [pre-push]
         args: ['--app', 'inventory_tools']
       - id: validate_customizations
-        stages: [pre-push]
+      - id: bylines
 
   - repo: local
     hooks:

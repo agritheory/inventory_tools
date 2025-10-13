@@ -3,6 +3,11 @@ For license information, please see license.txt-->
 
 ## Inventory Tools
 
+<div class="byline">
+  Rohan Bansal, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2025-02-26
+</div>
+
+
 Inventory Tools for ERPNext
 
 #### License
