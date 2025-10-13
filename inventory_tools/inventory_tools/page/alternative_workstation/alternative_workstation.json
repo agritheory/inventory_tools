@@ -1,0 +1,26 @@
+{
+	"name": "alternative-workstation",
+	"owner": "Administrator",
+	"creation": "2025-09-29 02:18:42.206821",
+	"modified": "2025-10-01 03:33:55.857851",
+	"modified_by": "Administrator",
+	"docstatus": 0,
+	"idx": 0,
+	"system_page": 0,
+	"page_name": "alternative-workstation",
+	"title": "Alternative Workstations",
+	"module": "Inventory Tools",
+	"standard": "Yes",
+	"doctype": "Page",
+	"roles": [
+		{
+			"role": "Manufacturing User"
+		},
+		{
+			"role": "Manufacturing Manager"
+		},
+		{
+			"role": "Operator"
+		}
+	]
+}

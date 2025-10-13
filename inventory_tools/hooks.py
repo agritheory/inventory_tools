@@ -16,6 +16,7 @@ required_apps = ["erpnext", "hrms", "webshop"]
 # include js, css files in header of desk.html
 app_include_css = [
 	"/assets/inventory_tools/dist/js/style.css",
+	"/assets/inventory_tools/css/alternative_workstation.css",
 ]
 app_include_js = [
 	"inventory_tools.bundle.js",
@@ -51,7 +52,7 @@ doctype_js = {
 	"Work Order": "public/js/custom/work_order_custom.js",
 	"Workstation": "public/js/custom/workstation_custom.js",
 }
-# doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
+doctype_list_js = {"Work Order": "public/js/custom/work_order_list.js"}
 doctype_tree_js = {"Warehouse": "public/js/custom/warehouse_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
