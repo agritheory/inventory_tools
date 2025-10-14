@@ -22,12 +22,14 @@
 			"description": "per hour",
 			"fieldname": "electricity_cost",
 			"fieldtype": "Currency",
+			"in_list_view": 1,
 			"label": "Electricity Cost"
 		},
 		{
 			"description": "per hour",
 			"fieldname": "consumable_cost",
 			"fieldtype": "Currency",
+			"in_list_view": 1,
 			"label": "Consumable Cost"
 		},
 		{
@@ -38,12 +40,14 @@
 			"description": "per hour",
 			"fieldname": "rent_cost",
 			"fieldtype": "Currency",
+			"in_list_view": 1,
 			"label": "Rent Cost"
 		},
 		{
 			"description": "Wages per hour",
 			"fieldname": "wages",
 			"fieldtype": "Currency",
+			"in_list_view": 1,
 			"label": "Wages"
 		},
 		{
@@ -54,26 +58,29 @@
 			"description": "per hour",
 			"fieldname": "net_hour_rate",
 			"fieldtype": "Currency",
+			"in_list_view": 1,
 			"label": "Net Hour Rate"
 		},
 		{
 			"fieldname": "from_date",
 			"fieldtype": "Date",
 			"in_list_view": 1,
-			"label": "From Date"
+			"label": "From Date",
+			"placeholder": "1"
 		},
 		{
 			"fieldname": "to_date",
 			"fieldtype": "Date",
 			"in_list_view": 1,
-			"label": "To Date"
+			"label": "To Date",
+			"placeholder": "2"
 		}
 	],
 	"grid_page_length": 50,
 	"index_web_pages_for_search": 1,
 	"istable": 1,
 	"links": [],
-	"modified": "2025-10-07 07:03:24.208828",
+	"modified": "2025-10-14 03:02:44.793569",
 	"modified_by": "Administrator",
 	"module": "Inventory Tools",
 	"name": "Workstation Operating Cost",

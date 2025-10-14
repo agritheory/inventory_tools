@@ -3,6 +3,11 @@
 
 frappe.ui.form.on('Workstation', {
 	setup: frm => {},
+	onload(frm) {
+		;['electricity_cost', 'consumable_cost', 'rent_cost', 'wages', 'net_hour_rate'].forEach(field => {
+			frm.set_df_property(field, 'read_only', 1)
+		})
+	},
 })
 
 frappe.ui.form.on('Workstation Working Hour', {

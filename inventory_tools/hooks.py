@@ -165,28 +165,16 @@ doc_events = {
 			"inventory_tools.inventory_tools.overrides.operation.validate_alternative_workstation"
 		]
 	},
+	"Workstation": {
+		"validate": "inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost.validate_workstation_costs"
+	},
 }
 
 # Scheduled Tasks
 # ---------------
-
-# scheduler_events = {
-# 	"all": [
-# 		"inventory_tools.tasks.all"
-# 	],
-# 	"daily": [
-# 		"inventory_tools.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"inventory_tools.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"inventory_tools.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"inventory_tools.tasks.monthly"
-# 	],
-# }
+scheduler_events = {
+	"daily": ["inventory_tools.inventory_tools.scheduler.refresh_workstation_rates"]
+}
 
 # Testing
 # -------
