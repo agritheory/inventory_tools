@@ -3,10 +3,15 @@
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
+
+
+class WorkstationOperatingCost(Document):
+	pass
 
 
 def validate_workstation_costs(doc, method):
-	costs = sorted(doc.workstation_operating_costs, key=lambda x: x.from_date)
+	costs = sorted(doc.workstation_operating_cost, key=lambda x: x.from_date)
 
 	for i, row in enumerate(costs):
 		# Automatically set to_date if not present
@@ -17,7 +22,7 @@ def validate_workstation_costs(doc, method):
 				row.to_date = None  # open-ended if last row
 
 	# Reorder by descending from_date
-	doc.workstation_operating_costs.sort(key=lambda x: x.from_date or "1970-01-01", reverse=True)
+	doc.workstation_operating_cost.sort(key=lambda x: x.from_date or "1970-01-01", reverse=True)
 
 	# Check overlap
 	for i in range(len(costs) - 1):

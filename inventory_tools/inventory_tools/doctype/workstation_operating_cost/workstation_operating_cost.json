@@ -1,7 +1,7 @@
 {
 	"actions": [],
 	"allow_rename": 1,
-	"creation": "2025-10-07 06:26:23.783808",
+	"creation": "2025-10-14 03:16:36.094319",
 	"doctype": "DocType",
 	"editable_grid": 1,
 	"engine": "InnoDB",
@@ -80,7 +80,7 @@
 	"index_web_pages_for_search": 1,
 	"istable": 1,
 	"links": [],
-	"modified": "2025-10-14 03:02:44.793569",
+	"modified": "2025-10-14 03:16:36.094319",
 	"modified_by": "Administrator",
 	"module": "Inventory Tools",
 	"name": "Workstation Operating Cost",
