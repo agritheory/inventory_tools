@@ -19,15 +19,13 @@
 			"fieldname": "from_date",
 			"fieldtype": "Date",
 			"in_list_view": 1,
-			"label": "From Date",
-			"placeholder": "1"
+			"label": "From Date"
 		},
 		{
 			"fieldname": "to_date",
 			"fieldtype": "Date",
 			"in_list_view": 1,
-			"label": "To Date",
-			"placeholder": "2"
+			"label": "To Date"
 		},
 		{
 			"bold": 1,
