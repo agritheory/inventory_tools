@@ -6,9 +6,7 @@
 			"bold": 0,
 			"collapsible": 0,
 			"columns": 0,
-			"creation": "2023-07-28 06:45:43.330833",
 			"default": null,
-			"docstatus": 0,
 			"dt": "Item Supplier",
 			"fetch_if_empty": 0,
 			"fieldname": "requires_rfq",
@@ -17,7 +15,6 @@
 			"hide_border": 0,
 			"hide_days": 0,
 			"hide_seconds": 0,
-			"idx": 3,
 			"ignore_user_permissions": 0,
 			"ignore_xss_filter": 0,
 			"in_global_search": 0,
@@ -29,15 +26,10 @@
 			"is_virtual": 0,
 			"label": "Requires RFQ?",
 			"length": 0,
-			"modified": "2024-07-13 08:52:49.182757",
-			"modified_by": "Administrator",
 			"module": "Inventory Tools",
-			"name": "Item Supplier-requires_rfq",
 			"no_copy": 0,
 			"non_negative": 0,
-			"owner": "Administrator",
 			"permlevel": 0,
-			"precision": "",
 			"print_hide": 0,
 			"print_hide_if_no_value": 0,
 			"read_only": 0,
@@ -48,9 +40,7 @@
 			"unique": 0
 		}
 	],
-	"custom_perms": [],
 	"doctype": "Item Supplier",
-	"links": [],
 	"property_setters": [],
 	"sync_on_migrate": 1
 }

@@ -1,0 +1,151 @@
+{
+	"actions": [],
+	"autoname": "field:group_warehouse",
+	"creation": "2025-02-11 17:29:08.253737",
+	"doctype": "DocType",
+	"engine": "InnoDB",
+	"field_order": [
+		"plan_tab",
+		"warehouse_plan",
+		"details_tab",
+		"horizontal",
+		"vertical",
+		"column_break_ocmz",
+		"uom",
+		"offset",
+		"column_break_rjyh",
+		"company",
+		"group_warehouse",
+		"floor_plan",
+		"column_break_gnwx",
+		"pickup_point_x",
+		"pickup_point_y",
+		"section_break_aokq",
+		"matrix"
+	],
+	"fields": [
+		{
+			"fieldname": "plan_tab",
+			"fieldtype": "Tab Break",
+			"label": "Plan"
+		},
+		{
+			"fieldname": "warehouse_plan",
+			"fieldtype": "HTML"
+		},
+		{
+			"fieldname": "details_tab",
+			"fieldtype": "Tab Break",
+			"label": "Details"
+		},
+		{
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"label": "Company",
+			"options": "Company"
+		},
+		{
+			"fieldname": "group_warehouse",
+			"fieldtype": "Link",
+			"label": "Group Warehouse",
+			"options": "Warehouse",
+			"unique": 1
+		},
+		{
+			"fieldname": "matrix",
+			"fieldtype": "Long Text",
+			"hidden": 1
+		},
+		{
+			"fieldname": "column_break_rjyh",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "floor_plan",
+			"fieldtype": "Attach Image",
+			"label": "Floor Plan"
+		},
+		{
+			"fieldname": "section_break_aokq",
+			"fieldtype": "Section Break"
+		},
+		{
+			"fieldname": "horizontal",
+			"fieldtype": "Float",
+			"label": "Horizontal"
+		},
+		{
+			"fieldname": "vertical",
+			"fieldtype": "Float",
+			"label": "Vertical"
+		},
+		{
+			"fieldname": "uom",
+			"fieldtype": "Link",
+			"label": "UOM",
+			"options": "UOM"
+		},
+		{
+			"default": "0,0,0,0",
+			"fieldname": "offset",
+			"fieldtype": "Data",
+			"label": "Offset"
+		},
+		{
+			"fieldname": "column_break_ocmz",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "column_break_gnwx",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "pickup_point_x",
+			"fieldtype": "Int",
+			"label": "pickup_point_x"
+		},
+		{
+			"fieldname": "pickup_point_y",
+			"fieldtype": "Int",
+			"label": "pickup_point_y"
+		}
+	],
+	"index_web_pages_for_search": 1,
+	"links": [],
+	"modified": "2025-04-18 13:27:44.526278",
+	"modified_by": "Administrator",
+	"module": "Inventory Tools",
+	"name": "Warehouse Plan",
+	"naming_rule": "By fieldname",
+	"owner": "Administrator",
+	"permissions": [
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "System Manager",
+			"share": 1,
+			"write": 1
+		},
+		{
+			"create": 1,
+			"delete": 1,
+			"email": 1,
+			"export": 1,
+			"print": 1,
+			"read": 1,
+			"report": 1,
+			"role": "Stock Manager",
+			"share": 1,
+			"write": 1
+		}
+	],
+	"row_format": "Dynamic",
+	"sort_field": "modified",
+	"sort_order": "DESC",
+	"states": []
+}

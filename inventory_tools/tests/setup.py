@@ -2,6 +2,8 @@
 # For license information, please see license.txt
 
 import datetime
+import shutil
+from pathlib import Path
 
 import frappe
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
@@ -13,14 +15,26 @@ from frappe.utils.data import add_months, flt, getdate, nowdate, get_datetime
 from webshop.webshop.doctype.website_item.website_item import make_website_item
 
 from inventory_tools.tests.fixtures import (
-	boms,
-	customers,
-	items,
 	operations,
-	specifications,
 	suppliers,
 	workstations,
 )
+
+
+def read_json(name):
+	fixtures_dir = Path(frappe.get_app_path("inventory_tools", "tests", "fixtures"))
+	return frappe.get_file_json(fixtures_dir / f"{name}.json")
+
+
+BOMS = read_json("boms")
+CUSTOMERS = read_json("customers")
+ITEM_DIMENSIONS = read_json("item_dimensions")
+ITEMS = read_json("items")
+ITEMS_STOCKENTRY = read_json("items_stockentry")
+SPECIFICATIONS = read_json("specifications")
+WAREHOUSE_DIMENSIONS = read_json("warehouse_dimensions")
+WAREHOUSE_LOCATIONS = read_json("warehouse_locations")
+WAREHOUSE_PLAN_MATRIX = str(read_json("warehouse_plan_matrix"))
 
 
 def before_test():
@@ -77,6 +91,7 @@ def create_test_data():
 	company_address.is_your_company_address = 1
 	company_address.append("links", {"link_doctype": "Company", "link_name": settings.company})
 	company_address.save()
+
 	cfc = frappe.new_doc("Company")
 	cfc.company_name = "Chelsea Fruit Co"
 	cfc.default_currency = "USD"
@@ -85,11 +100,14 @@ def create_test_data():
 	cfc.abbr = "CFC"
 	cfc.save()
 
+	copy_image_fixtures()
 	frappe.db.set_single_value("Stock Settings", "valuation_method", "Moving Average")
 	frappe.db.set_single_value("Stock Settings", "default_warehouse", "")
+	create_warehouse_plan(cfc)
 	create_warehouses(settings)
+	create_warehouse_locations()
 	setup_manufacturing_settings(settings)
-	create_workstations()
+	create_workstations(settings)
 	create_operations()
 	create_item_groups(settings)
 	create_price_lists(settings)
@@ -103,9 +121,22 @@ def create_test_data():
 	else:
 		create_material_request(settings)
 	create_production_plan(settings, prod_plan_from_doc)
+
 	create_fruit_material_request(settings)
 	create_quotations(settings)
 	create_specifications(settings)
+	create_item_dimensions()
+	create_warehouse_dimensions()
+	create_stock_entries()
+	create_sales_order_2()
+
+
+def copy_image_fixtures():
+	fixtures_dir = Path(frappe.get_app_path("inventory_tools", "tests", "fixtures"))
+	for path in fixtures_dir.iterdir():
+		if path.is_file() and path.suffix in (".png", ".jpg", ".jpeg"):
+			public_file_path = Path(frappe.get_site_path("public", "files", path.name))
+			shutil.copy(path.resolve(), public_file_path.resolve())
 
 
 def create_suppliers(settings):
@@ -155,7 +186,7 @@ def create_suppliers(settings):
 
 
 def create_customers(settings):
-	for customer_name in customers:
+	for customer_name in CUSTOMERS:
 		customer = frappe.new_doc("Customer")
 		customer.customer_name = customer_name
 		customer.customer_group = "Commercial"
@@ -205,7 +236,14 @@ def setup_manufacturing_settings(settings):
 	frappe.set_value("Inventory Tools Settings", settings.company, "show_in_listview", 1)
 
 
-def create_workstations():
+def create_workstations(settings):
+	if not frappe.db.exists("Plant Floor", "Kitchen"):
+		pf = frappe.new_doc("Plant Floor")
+		pf.floor_name = "Kitchen"
+		pf.company = settings.company
+		pf.warehouse = "Kitchen - APC"
+		pf.plant_floor_layout = "/files/floor_plan.png"
+		pf.save()
 	for ws in workstations:
 		if not frappe.db.exists("Workstation Type", ws[2]):
 			wst = frappe.new_doc("Workstation Type")
@@ -218,6 +256,9 @@ def create_workstations():
 		work.workstation_name = ws[0]
 		work.production_capacity = ws[1]
 		work.workstation_type = ws[2]
+		work.plant_floor = "Kitchen"
+		work.off_status_image = f"/files/{ws[3]}"
+		work.on_status_image = f"/files/{ws[4]}"
 		work.save()
 
 
@@ -295,7 +336,7 @@ def create_price_lists(settings):
 
 
 def create_items(settings):
-	for item in items:
+	for item in ITEMS:
 		if frappe.db.exists("Item", item.get("item_code")):
 			continue
 		i = frappe.new_doc("Item")
@@ -326,8 +367,16 @@ def create_items(settings):
 			or item.get("is_sub_contracted_item")
 			else 0
 		)
-		i.is_sales_item = 1 if item.get("item_group") == "Baked Goods" else 0
-		i.sales_uom = "Nos" if i.is_sales_item else None
+		if item.get("item_group") == "Baked Goods":
+			i.is_sales_item = 1
+			i.sales_uom = "Nos"
+		elif item.get("item_group") == "Ingredients":
+			i.is_sales_item = 1
+			i.sales_uom = "Pound"
+		else:
+			i.is_sales_item = 0
+			i.sales_uom = None
+
 		i.shelf_life_in_days = 7 if i.is_sales_item else None
 		i.brand = "Ambrosia Pie Co" if i.is_sales_item else None
 		i.append(
@@ -381,6 +430,27 @@ def create_items(settings):
 			website_item.save()
 
 
+def create_warehouse_plan(cfc):
+	if frappe.db.exists("Warehouse Plan", "All Warehouses - CFC"):
+		return
+	warehouse_plan = frappe.new_doc("Warehouse Plan")
+	warehouse_plan.update(
+		{
+			"company": cfc.name,
+			"horizontal": 50,
+			"vertical": 32,
+			"uom": "Meter",
+			"offset": "1,1,2.2,1",
+			"floor_plan": "/files/warehouse_plan.png",
+			"group_warehouse": "All Warehouses - CFC",
+			"matrix": WAREHOUSE_PLAN_MATRIX,
+			"pickup_point_x": 0,
+			"pickup_point_y": 9,
+		}
+	)
+	warehouse_plan.save()
+
+
 def create_warehouses(settings):
 	inventory_tools_settings = frappe.get_doc("Inventory Tools Settings", settings.company)
 	inventory_tools_settings.enable_work_order_subcontracting = 1
@@ -388,7 +458,7 @@ def create_warehouses(settings):
 	inventory_tools_settings.update_warehouse_path = 1
 	inventory_tools_settings.save()
 
-	warehouses = [item.get("default_warehouse") for item in items]
+	warehouses = [item.get("default_warehouse") for item in ITEMS]
 	root_wh = frappe.get_value("Warehouse", {"company": settings.company, "is_group": 1})
 	if frappe.db.exists("Warehouse", "Stores - APC"):
 		frappe.rename_doc("Warehouse", "Stores - APC", "Storeroom - APC", force=True)
@@ -398,7 +468,7 @@ def create_warehouses(settings):
 	for wh in frappe.get_all("Warehouse", {"company": settings.company}, ["name", "is_group"]):
 		if wh.name not in warehouses and not wh.is_group:
 			frappe.delete_doc("Warehouse", wh.name)
-	for item in items:
+	for item in ITEMS:
 		if frappe.db.exists("Warehouse", item.get("default_warehouse")):
 			continue
 		wh = frappe.new_doc("Warehouse")
@@ -419,7 +489,7 @@ def create_warehouses(settings):
 
 
 def create_boms(settings):
-	for bom in boms[::-1]:  # reversed
+	for bom in BOMS[::-1]:  # reversed
 		if frappe.db.exists("BOM", {"item": bom.get("item")}) and bom.get("item") != "Pie Crust":
 			continue
 		b = frappe.new_doc("BOM")
@@ -448,7 +518,7 @@ def create_boms(settings):
 def create_sales_order(settings):
 	so = frappe.new_doc("Sales Order")
 	so.transaction_date = settings.day
-	so.customer = customers[0]
+	so.customer = CUSTOMERS[0]
 	so.order_type = "Sales"
 	so.currency = "USD"
 	so.selling_price_list = "Bakery Wholesale"
@@ -504,6 +574,43 @@ def create_sales_order(settings):
 			"delivery_date": so.transaction_date,
 			"qty": 20,
 			"warehouse": "Refrigerated Display - APC",
+		},
+	)
+	so.save()
+	so.submit()
+
+
+def create_sales_order_2():
+	so = frappe.new_doc("Sales Order")
+	so.transaction_date = getdate().replace(month=1, day=1)
+	so.delivery_date = getdate().replace(month=1, day=3)
+	so.customer = "Whole Harvest Grocery Group"
+	so.company = "Chelsea Fruit Co"
+	so.append(
+		"items",
+		{
+			"item_code": "Bayberry",
+			"qty": 20,
+			"delivery_date": getdate().replace(month=1, day=3),
+			"warehouse": "All Warehouses - CFC",
+		},
+	)
+	so.append(
+		"items",
+		{
+			"item_code": "Kepel",
+			"qty": 12,
+			"delivery_date": getdate().replace(month=1, day=3),
+			"warehouse": "All Warehouses - CFC",
+		},
+	)
+	so.append(
+		"items",
+		{
+			"item_code": "Lychee",
+			"qty": 3,
+			"delivery_date": getdate().replace(month=1, day=3),
+			"warehouse": "All Warehouses - CFC",
 		},
 	)
 	so.save()
@@ -814,7 +921,7 @@ def create_specifications(settings=None):
 			color.color = c[1]
 			color.save()
 
-	for spec in specifications:
+	for spec in SPECIFICATIONS:
 		if frappe.db.exists("Specification", spec.get("name")):
 			s = frappe.get_doc("Specification", spec.get("name"))
 		else:
@@ -844,3 +951,69 @@ def create_demo_specification_values():
 	test_generate_values()
 	test_generate_values_on_overlapping_items()
 	test_manual_attribute_addition()
+
+
+def create_item_dimensions():
+	for item in ITEM_DIMENSIONS:
+		pyd = frappe.new_doc("Physical Dimension")
+		pyd.update(item)
+		pyd.save()
+
+
+def create_warehouse_dimensions():
+	for item in WAREHOUSE_DIMENSIONS:
+		wyd = frappe.new_doc("Physical Dimension")
+		wyd.update(item)
+		wyd.save()
+
+
+def create_stock_entries():
+	j = len(ITEMS_STOCKENTRY) // 2
+	# Add items to warehouse
+	se = frappe.new_doc("Stock Entry")
+	se.company = "Chelsea Fruit Co"
+	se.posting_date = getdate().replace(month=1, day=1)
+	se.set_posting_time = 1
+	se.stock_entry_type = "Material Receipt"
+
+	for item in ITEMS_STOCKENTRY[0:j]:
+		se.append(
+			"items",
+			{
+				"t_warehouse": item["warehouse"],
+				"item_code": item["item_code"],
+				"qty": item["qty"],
+				"allow_zero_valuation_rate": 1,
+			},
+		)
+
+	se.save()
+	se.submit()
+
+	# Second entry offset time for FIFO/LIFO
+	se = frappe.new_doc("Stock Entry")
+	se.company = "Chelsea Fruit Co"
+	se.posting_date = getdate().replace(month=1, day=2)
+	se.set_posting_time = 1
+	se.stock_entry_type = "Material Receipt"
+
+	for item in ITEMS_STOCKENTRY[j:]:
+		se.append(
+			"items",
+			{
+				"t_warehouse": item["warehouse"],
+				"item_code": item["item_code"],
+				"qty": item["qty"],
+				"allow_zero_valuation_rate": 1,
+			},
+		)
+
+	se.save()
+	se.submit()
+
+
+def create_warehouse_locations():
+	for details in WAREHOUSE_LOCATIONS:
+		warehouse = frappe.new_doc("Warehouse")
+		warehouse.update(details)
+		warehouse.save()

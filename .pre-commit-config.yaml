@@ -1,10 +1,11 @@
 exclude: 'node_modules|.git'
 default_stages: [pre-commit]
+default_install_hook_types: [pre-commit, pre-push]
 fail_fast: false
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
         files: 'inventory_tools.*'
@@ -19,7 +20,7 @@ repos:
       - id: debug-statements
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.17.0
+    rev: v3.19.1
     hooks:
       - id: pyupgrade
         args: ['--py310-plus']
@@ -36,20 +37,20 @@ repos:
         args: [--remove-all-unused-imports, --in-place]
 
   - repo: https://github.com/PyCQA/flake8
-    rev: 7.1.1
+    rev: 7.1.2
     hooks:
       - id: flake8
         additional_dependencies: ['flake8-bugbear']
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.3.0
+    rev: v2.4.1
     hooks:
       - id: codespell
         additional_dependencies:
           - tomli
 
   - repo: https://github.com/agritheory/test_utils
-    rev: v1.1.0
+    rev: v1.3.1
     hooks:
       - id: update_pre_commit_config
       - id: mypy
@@ -59,6 +60,7 @@ repos:
       - id: clean_customized_doctypes
         args: ['--app', 'inventory_tools']
       - id: validate_customizations
+      - id: bylines
 
   - repo: local
     hooks:

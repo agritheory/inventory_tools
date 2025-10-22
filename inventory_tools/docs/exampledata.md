@@ -3,6 +3,11 @@ For license information, please see license.txt-->
 
 # Using the Example Data to Experiment with Inventory Tools
 
+<div class="byline">
+  Rohan Bansal, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2024-07-23
+</div>
+
+
 The Inventory Tools application comes with a `setup.py` script that is completely optional to use. If you execute the script, it populates an ERPNext site with demo business data for a fictitious company called Ambrosia Pie Company. The data enable you to experiment and test the Inventory Tools application's functionality before installing the app into your ERPNext site.
 
 It's recommended to install the demo data into its own site to avoid potential interference with the configuration or data in your organization's ERPNext site.

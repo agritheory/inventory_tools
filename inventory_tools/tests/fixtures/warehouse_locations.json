@@ -1,0 +1,577 @@
+[
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Refrigerator 1",
+		"parent_warehouse": "All Warehouses - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"is_group": true
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Refrigerator 2",
+		"parent_warehouse": "All Warehouses - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"is_group": true
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Refrigerator 3",
+		"parent_warehouse": "All Warehouses - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"is_group": true
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Refrigerator 4",
+		"parent_warehouse": "All Warehouses - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"is_group": true
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Refrigerator 5",
+		"parent_warehouse": "All Warehouses - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"is_group": true
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 1",
+		"parent_warehouse": "Refrigerator 1 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "11.03,0.09,1.5,2.5",
+		"accessible_path": "12,2",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 2",
+		"parent_warehouse": "Refrigerator 1 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "11.03,2.58,1.5,2.5",
+		"accessible_path": "12,4",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 3",
+		"parent_warehouse": "Refrigerator 1 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "11.03,5.07,1.5,2.5",
+		"accessible_path": "12,6",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 4",
+		"parent_warehouse": "Refrigerator 1 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "11.03,7.56,1.5,2.5",
+		"accessible_path": "12,9",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 5",
+		"parent_warehouse": "Refrigerator 1 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "11.03,10.04,1.5,2.5",
+		"accessible_path": "12,11",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 6",
+		"parent_warehouse": "Refrigerator 1 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "11.03,12.53,1.5,2.5",
+		"accessible_path": "12,13",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 7",
+		"parent_warehouse": "Refrigerator 1 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "14.97,0.09,1.5,2.5",
+		"accessible_path": "13,1",
+		"rotation": 90
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 8",
+		"parent_warehouse": "Refrigerator 1 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "17.43,0.09,1.5,2.5",
+		"accessible_path": "15,1",
+		"rotation": 90
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 9",
+		"parent_warehouse": "Refrigerator 1 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "15.85,2.53,1.5,2.5",
+		"accessible_path": "15,4",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 10",
+		"parent_warehouse": "Refrigerator 1 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "15.85,5.02,1.5,2.5",
+		"accessible_path": "15,6",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 11",
+		"parent_warehouse": "Refrigerator 1 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "15.85,7.51,1.5,2.5",
+		"accessible_path": "15,9",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 12",
+		"parent_warehouse": "Refrigerator 1 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "15.85,10.00,1.5,2.5",
+		"accessible_path": "15,11",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 13",
+		"parent_warehouse": "Refrigerator 1 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "15.85,12.49,1.5,2.5",
+		"accessible_path": "15,14",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 14",
+		"parent_warehouse": "Refrigerator 2 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "17.65,0.09,1.5,2.5",
+		"accessible_path": "19,2",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 15",
+		"parent_warehouse": "Refrigerator 2 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "17.65,2.58,1.5,2.5",
+		"accessible_path": "19,4",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 16",
+		"parent_warehouse": "Refrigerator 2 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "17.65,5.07,1.5,2.5",
+		"accessible_path": "19,6",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 17",
+		"parent_warehouse": "Refrigerator 2 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "17.65,7.56,1.5,2.5",
+		"accessible_path": "19,9",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 18",
+		"parent_warehouse": "Refrigerator 2 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "17.65,10.04,1.5,2.5",
+		"accessible_path": "19,11",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 19",
+		"parent_warehouse": "Refrigerator 2 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "17.65,12.53,1.5,2.5",
+		"accessible_path": "19,13",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 20",
+		"parent_warehouse": "Refrigerator 2 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "21.59,0.09,1.5,2.5",
+		"accessible_path": "20,1",
+		"rotation": 90
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 21",
+		"parent_warehouse": "Refrigerator 2 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "24.05,0.09,1.5,2.5",
+		"accessible_path": "22,1",
+		"rotation": 90
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 22",
+		"parent_warehouse": "Refrigerator 2 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "22.47,2.53,1.5,2.5",
+		"accessible_path": "22,4",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 23",
+		"parent_warehouse": "Refrigerator 2 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "22.47,5.02,1.5,2.5",
+		"accessible_path": "22,6",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 24",
+		"parent_warehouse": "Refrigerator 2 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "22.47,7.51,1.5,2.5",
+		"accessible_path": "22,9",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 25",
+		"parent_warehouse": "Refrigerator 2 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "22.47,10.00,1.5,2.5",
+		"accessible_path": "22,11",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 26",
+		"parent_warehouse": "Refrigerator 2 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "22.47,12.49,1.5,2.5",
+		"accessible_path": "22,14",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 27",
+		"parent_warehouse": "Refrigerator 3 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "24.35,0.09,1.5,2.5",
+		"accessible_path": "26,2",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 28",
+		"parent_warehouse": "Refrigerator 3 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "24.35,2.58,1.5,2.5",
+		"accessible_path": "26,4",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 29",
+		"parent_warehouse": "Refrigerator 3 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "24.35,5.07,1.5,2.5",
+		"accessible_path": "26,6",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 30",
+		"parent_warehouse": "Refrigerator 3 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "24.35,7.56,1.5,2.5",
+		"accessible_path": "26,9",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 31",
+		"parent_warehouse": "Refrigerator 3 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "24.35,10.04,1.5,2.5",
+		"accessible_path": "26,11",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 32",
+		"parent_warehouse": "Refrigerator 3 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "24.35,12.53,1.5,2.5",
+		"accessible_path": "26,13",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 33",
+		"parent_warehouse": "Refrigerator 3 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "28.29,0.09,1.5,2.5",
+		"accessible_path": "27,1",
+		"rotation": 90
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 34",
+		"parent_warehouse": "Refrigerator 3 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "30.75,0.09,1.5,2.5",
+		"accessible_path": "29,1",
+		"rotation": 90
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 35",
+		"parent_warehouse": "Refrigerator 3 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "29.17,2.53,1.5,2.5",
+		"accessible_path": "29,4",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 36",
+		"parent_warehouse": "Refrigerator 3 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "29.17,5.02,1.5,2.5",
+		"accessible_path": "29,6",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 37",
+		"parent_warehouse": "Refrigerator 3 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "29.17,7.51,1.5,2.5",
+		"accessible_path": "29,9",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 38",
+		"parent_warehouse": "Refrigerator 3 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "29.17,10.00,1.5,2.5",
+		"accessible_path": "29,11",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 39",
+		"parent_warehouse": "Refrigerator 3 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "29.17,12.49,1.5,2.5",
+		"accessible_path": "29,14",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 40",
+		"parent_warehouse": "Refrigerator 4 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "31.06,0.09,1.5,2.5",
+		"accessible_path": "32,2",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 41",
+		"parent_warehouse": "Refrigerator 4 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "31.06,2.58,1.5,2.5",
+		"accessible_path": "32,4",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 42",
+		"parent_warehouse": "Refrigerator 4 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "31.06,5.07,1.5,2.5",
+		"accessible_path": "32,6",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 43",
+		"parent_warehouse": "Refrigerator 4 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "31.06,7.56,1.5,2.5",
+		"accessible_path": "32,9",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 44",
+		"parent_warehouse": "Refrigerator 4 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "31.06,10.04,1.5,2.5",
+		"accessible_path": "32,11",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 45",
+		"parent_warehouse": "Refrigerator 4 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "31.06,12.53,1.5,2.5",
+		"accessible_path": "32,13",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 46",
+		"parent_warehouse": "Refrigerator 4 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "35,0.09,1.5,2.5",
+		"accessible_path": "33,1",
+		"rotation": 90
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 47",
+		"parent_warehouse": "Refrigerator 4 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "37.46,0.09,1.5,2.5",
+		"accessible_path": "35,1",
+		"rotation": 90
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 48",
+		"parent_warehouse": "Refrigerator 4 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "35.88,2.53,1.5,2.5",
+		"accessible_path": "35,4",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 49",
+		"parent_warehouse": "Refrigerator 4 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "35.88,5.02,1.5,2.5",
+		"accessible_path": "35,6",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 50",
+		"parent_warehouse": "Refrigerator 4 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "35.88,7.51,1.5,2.5",
+		"accessible_path": "35,9",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 51",
+		"parent_warehouse": "Refrigerator 4 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "35.88,10.00,1.5,2.5",
+		"accessible_path": "35,11",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 52",
+		"parent_warehouse": "Refrigerator 4 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "35.88,12.49,1.5,2.5",
+		"accessible_path": "35,14",
+		"rotation": 0
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 53",
+		"parent_warehouse": "Refrigerator 5 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "40.27,0.09,1.5,2.5",
+		"accessible_path": "38,1",
+		"rotation": 90
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 54",
+		"parent_warehouse": "Refrigerator 5 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "39.08,2.13,1.5,2.5",
+		"accessible_path": "39,3",
+		"rotation": -16
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 55",
+		"parent_warehouse": "Refrigerator 5 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "39.79,4.53,1.5,2.5",
+		"accessible_path": "40,6",
+		"rotation": -16
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 56",
+		"parent_warehouse": "Refrigerator 5 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "40.49,6.93,1.5,2.5",
+		"accessible_path": "40,8",
+		"rotation": -16
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 57",
+		"parent_warehouse": "Refrigerator 5 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "41.19,9.33,1.5,2.5",
+		"accessible_path": "41,10",
+		"rotation": -16
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 58",
+		"parent_warehouse": "Refrigerator 5 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "41.89,11.73,1.5,2.5",
+		"accessible_path": "42,13",
+		"rotation": -16
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 59",
+		"parent_warehouse": "Refrigerator 5 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "42.50,13.96,1.5,2.5",
+		"accessible_path": "40,13",
+		"rotation": 90
+	},
+	{
+		"company": "Chelsea Fruit Co",
+		"warehouse_name": "Fruit Storage 60",
+		"parent_warehouse": "Refrigerator 5 - CFC",
+		"warehouse_plan": "All Warehouses - CFC",
+		"warehouse_plan_coordinates": "",
+		"accessible_path": "15,1",
+		"rotation": 0
+	}
+]

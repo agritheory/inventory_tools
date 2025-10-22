@@ -3,6 +3,11 @@ For license information, please see license.txt-->
 
 # Alternative Workstation Functionality
 
+<div class="byline">
+  IshwaryaM1030 and Tyler Matteson 2025-10-13
+</div>
+
+
 ## Overview
 Manufacturing operations often face bottlenecks when a workstation is unavailable (maintenance, overload, breakdown).  
 To ensure flexibility, Inventory Tools now supports **Alternative Workstations**.  

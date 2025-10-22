@@ -3,6 +3,11 @@ For license information, please see license.txt-->
 
 # Inventory Tools Documentation
 
+<div class="byline">
+  Rohan Bansal, Devarsh Bhatt, IshwaryaM1030, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2025-10-13
+</div>
+
+
 The Inventory Tools application enhances and extends inventory-related functionality and workflows in ERPNext. It includes the following features:
 
 - **[Material Demand](./material_demand.md)**: a report-based interface to aggregate required Items across multiple sources, then optionally create Purchase Orders or Request for Quotations

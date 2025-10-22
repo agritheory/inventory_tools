@@ -3,6 +3,11 @@ For license information, please see license.txt-->
 
 # Manufacturing Capacity Report
 
+<div class="byline">
+  Rohan Bansal, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2024-07-23
+</div>
+
+
 Manufacturing Capacity is a report-based interface that, given a BOM and Warehouse, displays the demand and in-stock quantities for the entire hierarchy of any BOM tree containing that BOM.
 
 Once the filters are set, the report traverses the BOM tree to find the top-level parents of the given BOM. From there, it finds total demand based on outstanding Sales Orders, Material Requests (of type "Manufacture"), and Work Orders, adjusting for any overlap. In stock quantities for each level are determined based on the selected Warehouse. The Parts Can Build quantity is based on what is in stock (for non-BOM/raw material rows) or the minimum Parts can Build of sub-levels for BOM rows.

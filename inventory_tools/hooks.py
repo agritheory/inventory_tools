@@ -25,7 +25,7 @@ app_include_js = [
 
 # include js, css files in header of web template
 web_include_css = [
-	"/assets/inventory_tools/dist/js/style.css",
+	"/assets/inventory_tools/dist/js/assets/style.css",
 ]
 web_include_js = [
 	"/assets/inventory_tools/dist/js/inventory_tools.js",
@@ -46,6 +46,8 @@ doctype_js = {
 	"Item": "public/js/custom/item_custom.js",
 	"Job Card": "public/js/custom/job_card_custom.js",
 	"Operation": "public/js/custom/operation_custom.js",
+	"Pick List": "public/js/custom/pick_list_custom.js",
+	"Plant Floor": "public/js/custom/plant_floor_custom.js",
 	"Purchase Invoice": "public/js/custom/purchase_invoice_custom.js",
 	"Purchase Order": "public/js/custom/purchase_order_custom.js",
 	"Stock Entry": "public/js/custom/stock_entry_custom.js",

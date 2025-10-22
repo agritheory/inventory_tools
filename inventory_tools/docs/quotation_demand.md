@@ -3,6 +3,11 @@ For license information, please see license.txt-->
 
 # Quotation Demand
 
+<div class="byline">
+  Rohan Bansal, Tyler Matteson, and Francisco Roldán 2024-07-23
+</div>
+
+
 Quotation Demand is a report-based interface that allows you to aggregate required Items across multiple Quotations, Customers, and requesting Companies. From there, you can create draft Sales Orders (SO).
 
 ![Screen shot of the Quotation Demand report showing rows of Items grouped by customer with columns for the Customer,Quotation document ID, Company, Date, Warehouse, and Item](./assets/qd_report_view.png)

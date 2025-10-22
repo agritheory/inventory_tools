@@ -3,3 +3,4 @@
 
 import './custom/utils.js'
 import './faceted_search/specification_dialog.js'
+import './inventory_tools.js'
