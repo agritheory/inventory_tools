@@ -12,7 +12,7 @@ from inventory_tools.inventory_tools.report.material_demand.material_demand impo
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 
 
-def remove_wms_demand():
+def create_po_for_wms_demand():
 	po = make_purchase_order("MAT-MR-2025-00002")
 	po.supplier = "Southern Fruit Supply"
 	po.save()
@@ -21,7 +21,7 @@ def remove_wms_demand():
 
 @pytest.mark.order(20)
 def test_report_po_without_aggregation():
-	remove_wms_demand()
+	create_po_for_wms_demand()
 	filters = frappe._dict(
 		{"end_date": getdate(), "price_list": "Bakery Wholesale", "company": "Ambrosia Pie Company"}
 	)
@@ -63,7 +63,6 @@ def test_report_po_without_aggregation():
 
 
 def test_report_rfq_without_aggregation():
-	# remove_wms_demand()
 	filters = frappe._dict(
 		{"end_date": getdate(), "price_list": "Bakery Wholesale", "company": "Ambrosia Pie Company"}
 	)
@@ -110,7 +109,6 @@ def test_report_rfq_without_aggregation():
 
 @pytest.mark.order(21)
 def test_report_item_based_without_aggregation():
-	# remove_wms_demand()
 	filters = frappe._dict(
 		{"end_date": getdate(), "price_list": "Bakery Wholesale", "company": "Ambrosia Pie Company"}
 	)
@@ -158,7 +156,6 @@ def test_report_item_based_without_aggregation():
 
 @pytest.mark.order(22)
 def test_report_po_with_aggregation_and_no_aggregation_warehouse():
-	# remove_wms_demand()
 	settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
 	settings.purchase_order_aggregation_company = settings.name
 	settings.aggregated_purchasing_warehouse = None
@@ -207,7 +204,6 @@ def test_report_po_with_aggregation_and_no_aggregation_warehouse():
 
 @pytest.mark.order(23)
 def test_report_po_with_aggregation_and_aggregation_warehouse():
-	# remove_wms_demand()
 	settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
 	settings.purchase_order_aggregation_company = settings.name
 	settings.aggregated_purchasing_warehouse = "Stores - CFC"
