@@ -46,7 +46,11 @@ def test_report_po_without_aggregation():
 		},
 	)
 
-	pos = frappe.get_all("Purchase Order", {"supplier": ["!=", "Southern Fruit Supply"]}, ["name", "supplier", "grand_total"])
+	pos = frappe.get_all(
+		"Purchase Order",
+		{"supplier": ["!=", "Southern Fruit Supply"]},
+		["name", "supplier", "grand_total"],
+	)
 	assert "Unity Bakery Supply" not in [p.get("supplier") for p in pos]
 	for po in pos:
 		if po.supplier == "Chelsea Fruit Co":
@@ -59,7 +63,7 @@ def test_report_po_without_aggregation():
 
 
 def test_report_rfq_without_aggregation():
-	#remove_wms_demand()
+	# remove_wms_demand()
 	filters = frappe._dict(
 		{"end_date": getdate(), "price_list": "Bakery Wholesale", "company": "Ambrosia Pie Company"}
 	)
@@ -154,7 +158,7 @@ def test_report_item_based_without_aggregation():
 
 @pytest.mark.order(22)
 def test_report_po_with_aggregation_and_no_aggregation_warehouse():
-	#remove_wms_demand()
+	# remove_wms_demand()
 	settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
 	settings.purchase_order_aggregation_company = settings.name
 	settings.aggregated_purchasing_warehouse = None
@@ -186,12 +190,11 @@ def test_report_po_with_aggregation_and_no_aggregation_warehouse():
 	for po in pos:
 		if po.name == "PUR-ORD-2025-00001":
 			continue
-		if po.supplier == "Southern Fruit Supply":
+		elif po.supplier == "Southern Fruit Supply":
 			assert po.grand_total == flt(202.9, 2)
 			for item in po.items:
 				mr_wh = frappe.get_value("Material Request Item", item.material_request_item, "warehouse")
 				assert item.warehouse == mr_wh
-
 		elif po.supplier == "Freedom Provisions":
 			assert po.grand_total == flt(375.89, 2)
 			for item in po.items:
@@ -204,7 +207,7 @@ def test_report_po_with_aggregation_and_no_aggregation_warehouse():
 
 @pytest.mark.order(23)
 def test_report_po_with_aggregation_and_aggregation_warehouse():
-	#remove_wms_demand()
+	# remove_wms_demand()
 	settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
 	settings.purchase_order_aggregation_company = settings.name
 	settings.aggregated_purchasing_warehouse = "Stores - CFC"
@@ -236,7 +239,7 @@ def test_report_po_with_aggregation_and_aggregation_warehouse():
 	for po in pos:
 		if po.name == "PUR-ORD-2025-00001":
 			continue
-		if po.supplier == "Southern Fruit Supply":
+		elif po.supplier == "Southern Fruit Supply":
 			assert po.grand_total == flt(202.9, 2)
 			for item in po.items:
 				wh_company = frappe.get_value("Warehouse", item.warehouse, "company")
