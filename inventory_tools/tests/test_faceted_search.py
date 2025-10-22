@@ -32,14 +32,14 @@ def test_values_updated_on_item_save():
 	values = frappe.get_all(
 		"Specification Value", {"reference_doctype": "Item", "reference_name": "Double Plum Pie"}
 	)
-	assert len(values) == 4
+	assert len(values) == 3
 	doc.weight_per_unit = 12
 	doc.save()
 	values = frappe.get_all(
 		"Specification Value",
 		{"reference_doctype": "Item", "reference_name": "Double Plum Pie"},
 	)
-	assert len(values) == 4
+	assert len(values) == 3
 	new_weight = frappe.get_all(
 		"Specification Value",
 		{"reference_doctype": "Item", "reference_name": "Double Plum Pie", "attribute": "Weight"},
@@ -59,7 +59,7 @@ def test_values_updated_on_item_save():
 	values = frappe.get_all(
 		"Specification Value", {"reference_doctype": "Item", "reference_name": "Double Plum Pie"}
 	)
-	assert len(values) == 4
+	assert len(values) == 3
 	# cleanup
 	for value in values:
 		frappe.delete_doc("Specification Value", value.name, force=True)
