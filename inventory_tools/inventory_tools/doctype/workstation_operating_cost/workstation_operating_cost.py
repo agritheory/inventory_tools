@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, nowdate, getdate
+from frappe.utils import flt, nowdate, getdate, add_days
 
 
 class WorkstationOperatingCost(Document):
@@ -29,44 +29,53 @@ class WorkstationOperatingCost(Document):
 
 
 def validate_workstation_costs(doc, method):
-	costs = sorted(doc.workstation_operating_cost, key=lambda x: x.from_date)
+	for idx, r in enumerate(doc.workstation_operating_cost, start=1):
+		if not r.from_date:
+			frappe.throw(_("Row {0}: 'From Date' is required.").format(idx))
+
+	costs = sorted(doc.workstation_operating_cost, key=lambda x: getdate(x.from_date))
 
 	for i, row in enumerate(costs):
-		# Automatically set to_date if not present
 		if not row.to_date:
 			if i + 1 < len(costs):
-				row.to_date = costs[i + 1].from_date
+				next_from = getdate(costs[i + 1].from_date)
+				row.to_date = add_days(next_from, -1)
 			else:
-				row.to_date = None  # open-ended if last row
+				row.to_date = None
 
-	# Reorder by descending from_date
-	doc.workstation_operating_cost.sort(key=lambda x: x.from_date or "1970-01-01", reverse=True)
-
-	# Check overlap
 	for i in range(len(costs) - 1):
-		if costs[i].to_date and costs[i].to_date > costs[i + 1].from_date:
-			frappe.throw(
-				_("Cost periods cannot overlap. Row {0} overlaps with Row {1}").format(i + 1, i + 2)
-			)
+		cur_to = costs[i].to_date
+		next_from = costs[i + 1].from_date
 
-	# Populate latest rates into legacy fields
-	if costs:
-		latest = costs[0]
+		if cur_to and next_from:
+			if getdate(cur_to) >= getdate(next_from):
+				frappe.throw(
+					_("Cost periods cannot overlap. Row {0} overlaps with Row {1}").format(i + 1, i + 2)
+				)
+
+	doc.workstation_operating_cost.sort(key=lambda x: getdate(x.from_date), reverse=True)
+
+	for i, row in enumerate(doc.workstation_operating_cost, start=1):
+		row.idx = i
+
+	if doc.workstation_operating_cost:
+		latest = doc.workstation_operating_cost[0]
 		doc.hour_rate_electricity = latest.electricity_cost
 		doc.hour_rate_consumable = latest.consumable_cost
 		doc.hour_rate_rent = latest.rent_cost
 		doc.hour_rate_labour = latest.wages
-		# doc.net_hour_rate = latest.net_hour_rate
 
 
 def validate_dates(doc, method):
-	for row in doc.workstation_operating_cost:
+	for idx, row in enumerate(doc.workstation_operating_cost, start=1):
 		if row.from_date and row.to_date:
-			if row.from_date > row.to_date:
-				frappe.throw(_("From Date cannot be after To Date in Workstation Operating Cost."))
+			from_date = getdate(row.from_date)
+			to_date = getdate(row.to_date)
 
-			if row.to_date < row.from_date:
-				frappe.throw(_("To Date cannot be before From Date in Workstation Operating Cost."))
+			if from_date > to_date:
+				frappe.throw(
+					_("Row {0}: From Date cannot be after To Date in Workstation Operating Cost.").format(idx)
+				)
 
 
 def get_operating_cost_per_unit_with_date_range(work_order=None, bom_no=None, posting_date=None):
