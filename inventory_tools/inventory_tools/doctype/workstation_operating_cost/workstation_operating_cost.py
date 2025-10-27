@@ -89,8 +89,8 @@ def get_operating_cost_per_unit_with_date_range(work_order=None, bom_no=None, po
 				continue
 
 			ws = frappe.get_doc("Workstation", op.workstation)
-
 			matched_row = None
+
 			for row in ws.workstation_operating_cost:
 				from_date = getdate(row.from_date) if row.from_date else None
 				to_date = getdate(row.to_date) if row.to_date else None
@@ -105,14 +105,21 @@ def get_operating_cost_per_unit_with_date_range(work_order=None, bom_no=None, po
 						break
 
 			if matched_row:
-				row_cost = (
+				# Hourly cost rate
+				hourly_cost = (
 					flt(matched_row.electricity_cost)
 					+ flt(matched_row.consumable_cost)
 					+ flt(matched_row.rent_cost)
 				)
+
+				# ✅ FIX: Calculate total operation cost (hourly_cost × hours)
+				hours = flt(op.time_in_mins) / 60.0
+				total_operation_cost = hourly_cost * hours
+
+				# ✅ FIX: Divide by work order quantity to get per-unit cost
 				if flt(op.completed_qty):
-					operating_cost_per_unit += row_cost / flt(op.completed_qty)
+					operating_cost_per_unit += total_operation_cost / flt(op.completed_qty)
 				elif work_order.qty:
-					operating_cost_per_unit += row_cost / flt(work_order.qty)
+					operating_cost_per_unit += total_operation_cost / flt(work_order.qty)
 
 	return operating_cost_per_unit
