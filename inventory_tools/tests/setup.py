@@ -265,10 +265,10 @@ def create_workstations(settings):
 		work.on_status_image = ws.get("on_status_image")
 
 		if ws.get("operating_costs"):
-			work.operating_cost = []
+			work.workstation_operating_cost = []
 			for oc in ws.get("operating_costs"):
 				work.append(
-					"operating_cost",
+					"workstation_operating_cost",
 					{
 						"from_date": oc.get("from_date"),
 						"to_date": oc.get("to_date"),

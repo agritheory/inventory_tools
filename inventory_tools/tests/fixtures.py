@@ -456,6 +456,7 @@ sales_orders = [
 workstations = [
 	{
 		"name": "Mix Pie Crust Station",
+		"workstation_type": "Table",
 		"hour_rate": "20",
 		"off_status_image": "mixer.png",
 		"on_status_image": "mixer.png",
@@ -488,6 +489,7 @@ workstations = [
 	},
 	{
 		"name": "Roll Pie Crust Station",
+		"workstation_type": "Table",
 		"hour_rate": "20",
 		"off_status_image": "rolling.png",
 		"on_status_image": "rolling.png",
@@ -520,6 +522,7 @@ workstations = [
 	},
 	{
 		"name": "Make Pie Filling Station",
+		"workstation_type": "Table",
 		"hour_rate": "20",
 		"off_status_image": "table.png",
 		"on_status_image": "table.png",
@@ -552,6 +555,7 @@ workstations = [
 	},
 	{
 		"name": "Cooling Station",
+		"workstation_type": "Table",
 		"hour_rate": "100",
 		"off_status_image": "rack.png",
 		"on_status_image": "rack.png",
@@ -584,6 +588,7 @@ workstations = [
 	},
 	{
 		"name": "Box Pie Station",
+		"workstation_type": "Table",
 		"hour_rate": "100",
 		"off_status_image": "box.png",
 		"on_status_image": "box.png",
@@ -616,6 +621,7 @@ workstations = [
 	},
 	{
 		"name": "Baking Station",
+		"workstation_type": "Table",
 		"hour_rate": "20",
 		"off_status_image": "oven.png",
 		"on_status_image": "oven.png",
@@ -648,6 +654,7 @@ workstations = [
 	},
 	{
 		"name": "Assemble Pie Station",
+		"workstation_type": "Table",
 		"hour_rate": "20",
 		"off_status_image": "table.png",
 		"on_status_image": "table.png",
@@ -680,6 +687,7 @@ workstations = [
 	},
 	{
 		"name": "Mix Pie Filling Station",
+		"workstation_type": "Table",
 		"hour_rate": "20",
 		"off_status_image": "mixer.png",
 		"on_status_image": "mixer.png",
@@ -712,6 +720,7 @@ workstations = [
 	},
 	{
 		"name": "Packaging Station",
+		"workstation_type": "Table",
 		"hour_rate": "2",
 		"off_status_image": "box.png",
 		"on_status_image": "box.png",
@@ -744,6 +753,7 @@ workstations = [
 	},
 	{
 		"name": "Food Prep Table 2",
+		"workstation_type": "Table",
 		"hour_rate": "10",
 		"off_status_image": "table.png",
 		"on_status_image": "table.png",
@@ -776,6 +786,7 @@ workstations = [
 	},
 	{
 		"name": "Food Prep Table 1",
+		"workstation_type": "Table",
 		"hour_rate": "5",
 		"off_status_image": "table.png",
 		"on_status_image": "table.png",
@@ -808,6 +819,7 @@ workstations = [
 	},
 	{
 		"name": "Range Station",
+		"workstation_type": "Range",
 		"hour_rate": "20",
 		"off_status_image": "range.png",
 		"on_status_image": "range.png",
@@ -840,6 +852,7 @@ workstations = [
 	},
 	{
 		"name": "Cooling Racks Station",
+		"workstation_type": "Cooling",
 		"hour_rate": "80",
 		"off_status_image": "rack.png",
 		"on_status_image": "rack.png",
@@ -872,6 +885,7 @@ workstations = [
 	},
 	{
 		"name": "Refrigerator Station",
+		"workstation_type": "Refrigerator",
 		"hour_rate": "200",
 		"off_status_image": "fridge.png",
 		"on_status_image": "fridge.png",
@@ -904,6 +918,7 @@ workstations = [
 	},
 	{
 		"name": "Oven Station",
+		"workstation_type": "Oven",
 		"hour_rate": "20",
 		"off_status_image": "oven.png",
 		"on_status_image": "oven.png",
@@ -936,6 +951,7 @@ workstations = [
 	},
 	{
 		"name": "Mixer Station",
+		"workstation_type": "Mixer",
 		"off_status_image": "mixer.png",
 		"on_status_image": "mixer.png",
 		"hour_rate": "10",
