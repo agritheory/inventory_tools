@@ -244,21 +244,41 @@ def create_workstations(settings):
 		pf.warehouse = "Kitchen - APC"
 		pf.plant_floor_layout = "/files/floor_plan.png"
 		pf.save()
+
 	for ws in workstations:
-		if not frappe.db.exists("Workstation Type", ws[2]):
+		if not frappe.db.exists("Workstation Type", ws.get("workstation_type")):
 			wst = frappe.new_doc("Workstation Type")
-			wst.workstation_type = ws[2]
+			wst.workstation_type = ws.get("workstation_type")
 			wst.save()
-		if frappe.db.exists("Workstation", ws[0]):
-			work = frappe.get_doc("Workstation", ws[0])
+
+		if frappe.db.exists("Workstation", ws.get("name")):
+			work = frappe.get_doc("Workstation", ws.get("name"))
 		else:
 			work = frappe.new_doc("Workstation")
-		work.workstation_name = ws[0]
-		work.production_capacity = ws[1]
-		work.workstation_type = ws[2]
+
+		work.workstation_name = ws.get("name")
+		work.production_capacity = ws.get("hour_rate")
+		work.hour_rate = ws.get("hour_rate")
+		work.workstation_type = ws.get("workstation_type")
 		work.plant_floor = "Kitchen"
-		work.off_status_image = f"/files/{ws[3]}"
-		work.on_status_image = f"/files/{ws[4]}"
+		work.off_status_image = ws.get("off_status_image")
+		work.on_status_image = ws.get("on_status_image")
+
+		if ws.get("operating_costs"):
+			work.operating_cost = []
+			for oc in ws.get("operating_costs"):
+				work.append(
+					"operating_cost",
+					{
+						"from_date": oc.get("from_date"),
+						"to_date": oc.get("to_date"),
+						"electricity_cost": oc.get("electricity_cost"),
+						"rent_cost": oc.get("rent_cost"),
+						"consumable_cost": oc.get("consumable_cost"),
+						"wages": oc.get("wages"),
+					},
+				)
+
 		work.save()
 
 
