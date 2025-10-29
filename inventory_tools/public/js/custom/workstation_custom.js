@@ -1,17 +1,6 @@
 // Copyright (c) 2024, AgriTheory and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Workstation', {
-	setup: frm => {},
-	onload(frm) {
-		;['hour_rate_electricity', 'hour_rate_consumable', 'hour_rate_rent', 'hour_rate_labour', 'hour_rate'].forEach(
-			field => {
-				frm.set_df_property(field, 'read_only', 1)
-			}
-		)
-	},
-})
-
 frappe.ui.form.on('Workstation Working Hour', {
 	shift_type: (frm, cdt, cdn) => {
 		row = locals[cdt][cdn]
