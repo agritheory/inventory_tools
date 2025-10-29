@@ -176,9 +176,6 @@ doc_events = {
 
 # Scheduled Tasks
 # ---------------
-scheduler_events = {
-	"daily": ["inventory_tools.inventory_tools.scheduler.refresh_workstation_rates"]
-}
 
 # Testing
 # -------
