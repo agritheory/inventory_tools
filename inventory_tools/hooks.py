@@ -1,8 +1,6 @@
 # Copyright (c) 2024, AgriTheory and contributors
 # For license information, please see license.txt
 
-from inventory_tools.patches.operating_cost_patch import apply_operating_cost_patches
-
 app_name = "inventory_tools"
 app_title = "Inventory Tools"
 app_publisher = "AgriTheory"
@@ -13,7 +11,7 @@ required_apps = ["erpnext", "hrms", "webshop"]
 
 # Includes in <head>
 # ------------------
-apply_operating_cost_patches()
+
 # include js, css files in header of desk.html
 app_include_css = [
 	"/assets/inventory_tools/dist/js/assets/style.css",

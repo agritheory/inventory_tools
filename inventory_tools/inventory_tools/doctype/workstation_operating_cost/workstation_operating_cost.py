@@ -112,14 +112,12 @@ def get_operating_cost_per_unit_with_date_range(work_order=None, bom_no=None, po
 					+ flt(matched_row.rent_cost)
 				)
 
-				# ✅ FIX: Calculate total operation cost (hourly_cost × hours)
 				hours = flt(op.time_in_mins) / 60.0
 				total_operation_cost = hourly_cost * hours
 
-				# ✅ FIX: Divide by work order quantity to get per-unit cost
 				if flt(op.completed_qty):
 					operating_cost_per_unit += total_operation_cost / flt(op.completed_qty)
 				elif work_order.qty:
 					operating_cost_per_unit += total_operation_cost / flt(work_order.qty)
 
-	return operating_cost_per_unit
+	return round(operating_cost_per_unit, 2)
