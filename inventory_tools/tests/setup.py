@@ -109,7 +109,7 @@ def create_test_data():
 	create_warehouse_locations()
 	setup_manufacturing_settings(settings)
 	create_shift_types()
-	create_workstations()
+	create_workstations(settings)
 	create_operations()
 	create_item_groups(settings)
 	create_price_lists(settings)

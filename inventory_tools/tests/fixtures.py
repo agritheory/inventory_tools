@@ -75,24 +75,6 @@ suppliers = [
 	),
 ]
 
-# workstations = [
-# 	("Mix Pie Crust Station", "20"),
-# 	("Roll Pie Crust Station", "20"),
-# 	("Make Pie Filling Station", "20"),
-# 	("Cooling Station", "100"),
-# 	("Box Pie Station", "100"),
-# 	("Baking Station", "20"),
-# 	("Assemble Pie Station", "20"),
-# 	("Mix Pie Filling Station", "20"),
-# 	("Packaging Station", "2"),
-# 	("Food Prep Table 2", "10"),
-# 	("Food Prep Table 1", "5"),
-# 	("Range Station", "20"),
-# 	("Cooling Racks Station", "80"),
-# 	("Refrigerator Station", "200"),
-# 	("Oven Station", "20"),
-# 	("Mixer Station", "10"),
-# ]
 
 workstations = [
 	{
@@ -101,6 +83,7 @@ workstations = [
 		"type": "Table",
 		"off_status_image": "mixer.png",
 		"on_status_image": "mixer.png",
+		"shift_types": ["Day Shift", "Evening Shift"],
 	},
 	{
 		"workstation_name": "Roll Pie Crust Station",
@@ -108,6 +91,7 @@ workstations = [
 		"type": "Table",
 		"off_status_image": "rolling.png",
 		"on_status_image": "rolling.png",
+		"shift_types": ["Day Shift"],
 	},
 	{
 		"workstation_name": "Make Pie Filling Station",
@@ -115,6 +99,7 @@ workstations = [
 		"type": "Table",
 		"off_status_image": "table.png",
 		"on_status_image": "table.png",
+		"shift_types": ["Day Shift"],
 	},
 	{
 		"workstation_name": "Cooling Station",
@@ -122,6 +107,7 @@ workstations = [
 		"type": "Table",
 		"off_status_image": "rack.png",
 		"on_status_image": "rack.png",
+		"shift_types": ["Day Shift", "Evening Shift"],
 	},
 	{
 		"workstation_name": "Box Pie Station",
@@ -129,6 +115,7 @@ workstations = [
 		"type": "Table",
 		"off_status_image": "box.png",
 		"on_status_image": "box.png",
+		"shift_types": ["Day Shift"],
 	},
 	{
 		"workstation_name": "Baking Station",
@@ -136,6 +123,7 @@ workstations = [
 		"type": "Table",
 		"off_status_image": "oven.png",
 		"on_status_image": "oven.png",
+		"shift_types": ["Day Shift", "Evening Shift"],
 	},
 	{
 		"workstation_name": "Assemble Pie Station",
@@ -143,6 +131,7 @@ workstations = [
 		"type": "Table",
 		"off_status_image": "table.png",
 		"on_status_image": "table.png",
+		"shift_types": ["Day Shift"],
 	},
 	{
 		"workstation_name": "Mix Pie Filling Station",
@@ -150,6 +139,7 @@ workstations = [
 		"type": "Table",
 		"off_status_image": "mixer.png",
 		"on_status_image": "mixer.png",
+		"shift_types": ["Day Shift"],
 	},
 	{
 		"workstation_name": "Packaging Station",
@@ -157,6 +147,7 @@ workstations = [
 		"type": "Table",
 		"off_status_image": "box.png",
 		"on_status_image": "box.png",
+		"shift_types": ["Day Shift"],
 	},
 	{
 		"workstation_name": "Food Prep Table 2",
@@ -164,6 +155,7 @@ workstations = [
 		"type": "Table",
 		"off_status_image": "table.png",
 		"on_status_image": "table.png",
+		"shift_types": ["Day Shift"],
 	},
 	{
 		"workstation_name": "Food Prep Table 1",
@@ -171,6 +163,7 @@ workstations = [
 		"type": "Table",
 		"off_status_image": "table.png",
 		"on_status_image": "table.png",
+		"shift_types": ["Day Shift", "Evening Shift"],
 	},
 	{
 		"workstation_name": "Range Station",
@@ -178,6 +171,7 @@ workstations = [
 		"type": "Range",
 		"off_status_image": "range.png",
 		"on_status_image": "range.png",
+		"shift_types": ["Day Shift"],
 	},
 	{
 		"workstation_name": "Cooling Racks Station",
@@ -185,6 +179,7 @@ workstations = [
 		"type": "Cooling",
 		"off_status_image": "rack.png",
 		"on_status_image": "rack.png",
+		"shift_types": ["Day Shift"],
 	},
 	{
 		"workstation_name": "Refrigerator Station",
@@ -192,6 +187,7 @@ workstations = [
 		"type": "Refrigerator",
 		"off_status_image": "fridge.png",
 		"on_status_image": "fridge.png",
+		"shift_types": ["Day Shift"],
 	},
 	{
 		"workstation_name": "Oven Station",
@@ -199,6 +195,7 @@ workstations = [
 		"type": "Oven",
 		"off_status_image": "oven.png",
 		"on_status_image": "oven.png",
+		"shift_types": ["Day Shift", "Evening Shift"],
 	},
 	{
 		"workstation_name": "Mixer Station",
@@ -206,6 +203,7 @@ workstations = [
 		"type": "Mixer",
 		"off_status_image": "mixer.png",
 		"on_status_image": "mixer.png",
+		"shift_types": ["Day Shift"],
 	},
 ]
 
