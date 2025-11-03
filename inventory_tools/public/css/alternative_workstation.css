@@ -1,0 +1,190 @@
+/* Workstation Page Styles - Scoped to page */
+.workstation-page-container {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Header */
+.workstation-page-container .chart-header {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	color: white;
+	padding: 20px;
+	border-radius: 8px 8px 0 0;
+	margin-bottom: 20px;
+}
+
+/* Operation tree */
+.workstation-page-container .operation-tree {
+	margin-bottom: 30px;
+	background: white;
+	border-radius: 12px;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+	overflow: hidden;
+}
+
+/* Operation header */
+.workstation-page-container .operation-header {
+	background: #f8f9fa;
+	/* padding: 15px 20px; */
+	padding-top: 8px;
+	border-bottom: 2px solid #e9ecef;
+}
+
+.workstation-page-container .operation-header h3 {
+	margin-bottom: 8px;
+}
+
+.workstation-page-container .operation-number {
+	display: inline-block;
+	background: #007bff;
+	color: white;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	text-align: center;
+	line-height: 24px;
+	font-size: 12px;
+	margin-right: 10px;
+}
+
+/* Tree container */
+.workstation-page-container .workstation-tree {
+	padding: 20px;
+}
+
+.workstation-page-container .primary-branch {
+	display: flex;
+	gap: 20px;
+	align-items: flex-start;
+}
+
+/* Card default */
+.workstation-page-container .workstation-node {
+	border: 2px solid #e9ecef;
+	border-radius: 12px;
+	background: white;
+	transition: all 0.3s ease;
+	min-width: 280px;
+}
+
+/* Remove previous gradient overrides for primary/alternative */
+.workstation-page-container .workstation-node.primary,
+.workstation-page-container .workstation-node.alternative {
+	background: white;
+}
+
+/* Green - earliest available */
+.workstation-page-container .workstation-node.primary.earliest,
+.workstation-page-container .workstation-node.alternative.earliest {
+	border: 2px solid #28a745;
+	background: linear-gradient(135deg, #e6f9ed 0%, #f8fff9 100%);
+}
+
+/* Yellow - busy / not earliest */
+.workstation-page-container .workstation-node.primary.busy,
+.workstation-page-container .workstation-node.alternative.busy {
+	border: 2px solid #ffc107;
+	background: linear-gradient(135deg, #fff8e1 0%, #fffbe6 100%);
+}
+
+/* Card content */
+.workstation-page-container .node-content {
+	padding: 20px;
+	min-height: 160px;
+}
+
+.workstation-page-container .workstation-info {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+/* Details text */
+.workstation-page-container .workstation-details {
+	margin-bottom: 15px;
+	color: #6c757d;
+	font-size: 13px;
+}
+
+/* No alternatives card */
+.workstation-page-container .no-alternatives {
+	display: flex;
+	flex: 1;
+	align-items: center;
+	justify-content: center;
+	padding: 40px 20px;
+	background: #f8f9fa;
+	border: 2px dashed #dee2e6;
+	border-radius: 12px;
+	text-align: center;
+	min-height: 160px;
+}
+
+.no-alternatives {
+	max-width: 276px;
+}
+
+/* Buttons */
+.workstation-page-container .use-workstation-btn {
+	width: 100%;
+	font-weight: 600;
+}
+
+/* Alternative cards container */
+.workstation-page-container .alternative-stations {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 20px;
+	align-items: flex-start;
+}
+
+.workstation-page-container .workstation-node.alternative {
+	flex: 1 1 280px;
+	min-width: 280px;
+	max-width: 320px;
+}
+
+.workstation-node.non-default {
+	border: 2px solid #6f42c1; /* Bootstrap purple */
+	background-color: #f5f0fa;
+}
+.btn-purple {
+	background-color: #6f42c1;
+	color: #fff;
+}
+.btn-purple:hover {
+	background-color: #59359c;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.workstation-page-container .primary-branch {
+		flex-direction: column;
+	}
+	.workstation-page-container .workstation-node {
+		min-width: auto;
+		width: 100%;
+	}
+}
+
+.sticky-work-order-filter {
+	position: sticky;
+	top: 60px; /* height of Frappe navbar */
+	background: #fff;
+	z-index: 100;
+	padding: 15px;
+	border-bottom: 1px solid #e0e0e0;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.workstation-page-container .default-badge {
+	display: inline-block;
+	background: #007bff;
+	color: #fff;
+	font-size: 11px;
+	font-weight: 600;
+	padding: 2px 6px;
+	border-radius: 8px;
+	margin-left: 8px;
+	vertical-align: middle;
+}

@@ -11,11 +11,24 @@ frappe.ui.form.on('Work Order', {
 	refresh: frm => {
 		manage_subcontracting_buttons(frm)
 		get_workstations(frm)
+		workstation_selection_button(frm)
 	},
 	operation: frm => {
 		get_workstations(frm)
 	},
 })
+
+function workstation_selection_button(frm) {
+	if (frm.doc.docstatus == 1 && frm.doc.status !== 'Completed') {
+		frm.add_custom_button(
+			__('Alternative Workstations'),
+			function () {
+				frappe.set_route('alternative-workstation', frm.doc.name)
+			},
+			__('View')
+		)
+	}
+}
 
 function get_workstations(frm) {
 	frm.set_query('workstation', 'operations', (doc, cdt, cdn) => {

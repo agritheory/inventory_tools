@@ -1,25 +1,30 @@
 // Copyright (c) 2024, AgriTheory and contributors
 // For license information, please see license.txt
 
-import { defineConfig } from 'vite'
+import { resolve } from 'node:path'
 import vue from '@vitejs/plugin-vue'
-import path from 'path'
+import { defineConfig } from 'vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [vue()],
 	build: {
-		lib: {
-			entry: path.resolve(__dirname, './faceted_search/faceted_search.js'),
-			name: 'inventory_tools',
-			fileName: format => `inventory_tools.js`, // creates module only output
-		},
 		outDir: './inventory_tools/public/dist/js',
 		target: 'esnext',
 		emptyOutDir: false,
-		minify: false,
+		sourcemap: true,
+		lib: {
+			entry: resolve(__dirname, './inventory_tools.js'),
+			name: 'inventory_tools',
+			fileName: format => `inventory_tools.js`,
+		},
+		rollupOptions: {
+			output: {
+				chunkFileNames: 'chunks/[name].[hash].js',
+				assetFileNames: 'assets/[name].[ext]',
+			},
+		},
 	},
-	optimizeDeps: {},
 	define: {
 		'process.env': process.env,
 	},

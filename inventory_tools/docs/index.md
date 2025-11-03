@@ -3,6 +3,11 @@ For license information, please see license.txt-->
 
 # Inventory Tools Documentation
 
+<div class="byline">
+  Rohan Bansal, Devarsh Bhatt, IshwaryaM1030, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2025-10-13
+</div>
+
+
 The Inventory Tools application enhances and extends inventory-related functionality and workflows in ERPNext. It includes the following features:
 
 - **[Material Demand](./material_demand.md)**: a report-based interface to aggregate required Items across multiple sources, then optionally create Purchase Orders or Request for Quotations
@@ -12,6 +17,7 @@ The Inventory Tools application enhances and extends inventory-related functiona
 - **[Inline Landed Costing](./landed_costing.md)**: Coming soon! This features enables a user to include any additional costs to be capitalized into an Item's valuation directly in a Purchase Receipt or Purchase Invoice without needing to create a separate Landed Cost Voucher
 - **[Manufacturing Capacity](./manufacturing_capacity.md)**: a report-based interface to show, for a given BOM, the entire hierarchy of any BOM tree containing that BOM with demand and in-stock quantities for all levels
 - **[Faceted Search](./faceted_search.md)**: loosely-coupled attributes for Items, visible in both Ecommerce and Item Listview search contexts
+- **[Alternate Workstation](./alternate_workstation.md)**: allows selecting alternative workstations that can perform the same operation
 
 ## Configuration
 Any feature in Inventory Tools may be toggled on or off via the Inventory Tools Settings document. The only exception to this is the Material Demand report, which is generally available upon installation of the app. There may be one settings document for each company in ERPNext to enable features on a per-company basis. Follow the links above for further details around feature-specific configuration.

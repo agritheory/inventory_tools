@@ -1,0 +1,294 @@
+# Copyright (c) 2025, AgriTheory and contributors
+# For license information, please see license.txt
+
+import json
+import frappe
+from frappe import _
+
+
+@frappe.whitelist()
+def get_workstation_availability(work_order, operation=None):
+	"""
+	Get workstation availability data for the workstation chart
+	Works with existing ERPNext alternative workstation setup
+	"""
+	if not work_order:
+		frappe.throw(_("Work Order is required"))
+
+	work_order_doc = frappe.get_doc("Work Order", work_order)
+	operations_data = []
+
+	# Get operations from work order
+	operations = work_order_doc.operations
+	if operation:
+		operations = [op for op in operations if op.name == operation]
+
+	for op in operations:
+		# Get the Operation master to fetch alternative workstations
+		operation_master = frappe.get_doc("Operation", op.operation)
+
+		default_ws = operation_master.workstation
+		is_bom_default = op.workstation == default_ws
+
+		operation_data = {
+			"operation": op.operation,
+			"operation_name": op.operation,  # Keep for reference
+			"idx": op.idx,
+			"workstation": op.workstation,
+			"default_workstation": default_ws,
+			"is_bom_default": is_bom_default,
+			"planned_start_time": op.planned_start_time,
+			"planned_end_time": op.planned_end_time,
+			"availability": get_workstation_availability_status(op.workstation, op.planned_start_time),
+			"next_available": get_next_available_time(op.workstation, op.planned_start_time),
+			"capacity": get_workstation_capacity(op.workstation),
+			"alternatives": get_alternative_workstations_from_operation(
+				operation_master, op.planned_start_time, op.workstation
+			),
+		}
+		operations_data.append(operation_data)
+
+	return operations_data
+
+
+def get_alternative_workstations_from_operation(
+	operation_doc, planned_start_time, current_workstation=None
+):
+	alternatives = []
+	seen_workstations = set()
+	default_workstation = operation_doc.workstation
+
+	# Add the operation's default workstation first if it's not the current one
+	if operation_doc.workstation and operation_doc.workstation != current_workstation:
+		alternative_data = {
+			"workstation": operation_doc.workstation,
+			"availability": get_workstation_availability_status(
+				operation_doc.workstation, planned_start_time
+			),
+			"next_available": get_next_available_time(operation_doc.workstation, planned_start_time),
+			"capacity": get_workstation_capacity(operation_doc.workstation),
+			"is_bom_default": True,  # This is the default from Operation master
+		}
+		alternatives.append(alternative_data)
+		seen_workstations.add(operation_doc.workstation)
+
+	# Process alternative_workstations field (if it's a string or list)
+	if hasattr(operation_doc, "alternative_workstations") and operation_doc.alternative_workstations:
+		workstation_names = []
+
+		if isinstance(operation_doc.alternative_workstations, str):
+			try:
+				workstation_names = json.loads(operation_doc.alternative_workstations)
+				if isinstance(workstation_names, str):
+					workstation_names = [workstation_names]
+			except (json.JSONDecodeError, TypeError):
+				workstation_names = [
+					name.strip()
+					for name in operation_doc.alternative_workstations.replace("\n", ",").split(",")
+					if name.strip()
+				]
+		elif isinstance(operation_doc.alternative_workstations, list):
+			workstation_names = operation_doc.alternative_workstations
+
+		for workstation_name in workstation_names:
+			if not workstation_name:
+				continue
+			if current_workstation and workstation_name == current_workstation:
+				continue
+			if workstation_name in seen_workstations:
+				continue
+
+			ws_name = (
+				workstation_name.workstation if hasattr(workstation_name, "workstation") else workstation_name
+			)
+
+			alternative_data = {
+				"workstation": ws_name,
+				"availability": get_workstation_availability_status(ws_name, planned_start_time),
+				"next_available": get_next_available_time(ws_name, planned_start_time),
+				"capacity": get_workstation_capacity(ws_name),
+				"is_bom_default": ws_name == default_workstation,  # Check if this matches the default
+			}
+			alternatives.append(alternative_data)
+			seen_workstations.add(ws_name)
+
+	# Process alternative_workstation child table
+	if hasattr(operation_doc, "alternative_workstation") and operation_doc.alternative_workstation:
+		for alt_row in operation_doc.alternative_workstation:
+			if hasattr(alt_row, "workstation") and alt_row.workstation:
+				if current_workstation and alt_row.workstation == current_workstation:
+					continue
+				if alt_row.workstation in seen_workstations:
+					continue
+
+				alternative_data = {
+					"workstation": alt_row.workstation,
+					"availability": get_workstation_availability_status(alt_row.workstation, planned_start_time),
+					"next_available": get_next_available_time(alt_row.workstation, planned_start_time),
+					"capacity": get_workstation_capacity(alt_row.workstation),
+					"is_bom_default": alt_row.workstation
+					== default_workstation,  # Check if this matches the default
+				}
+				alternatives.append(alternative_data)
+				seen_workstations.add(alt_row.workstation)
+
+	return alternatives
+
+
+def get_workstation_availability_status(workstation, planned_start_time):
+	"""
+	Check if workstation is available at the planned start time
+	"""
+	if not workstation or not planned_start_time:
+		return "unavailable"
+
+	try:
+		# Convert string to datetime if needed
+		if isinstance(planned_start_time, str):
+			planned_start_time = frappe.utils.get_datetime(planned_start_time)
+
+		# Check for overlapping work orders
+		woo = frappe.qb.DocType("Work Order Operation")
+		wo = frappe.qb.DocType("Work Order")
+
+		overlapping_orders = (
+			frappe.qb.from_(woo)
+			.join(wo)
+			.on(woo.parent == wo.name)
+			.select(frappe.qb.functions.Count("*").as_("count"))
+			.where(
+				(woo.workstation == workstation)
+				& (wo.status.not_in(["Completed", "Cancelled", "Stopped"]))
+				& (wo.docstatus == 1)
+				& (
+					((woo.planned_start_time <= planned_start_time) & (woo.planned_end_time > planned_start_time))
+					| (
+						(woo.planned_start_time < planned_start_time) & (woo.planned_end_time >= planned_start_time)
+					)
+				)
+			)
+		).run(as_dict=True)
+
+		if overlapping_orders and overlapping_orders[0].count > 0:
+			return "busy"
+
+		return "available"
+
+	except Exception as e:
+		frappe.log_error(f"Error checking workstation availability: {str(e)}")
+		return "unavailable"
+
+
+def get_next_available_time(workstation, planned_start_time):
+	"""
+	Get the next available time slot for the workstation
+	"""
+	if not workstation:
+		return None
+
+	try:
+		if isinstance(planned_start_time, str):
+			planned_start_time = frappe.utils.get_datetime(planned_start_time)
+
+		woo = frappe.qb.DocType("Work Order Operation")
+		wo = frappe.qb.DocType("Work Order")
+
+		next_free_time = (
+			frappe.qb.from_(woo)
+			.join(wo)
+			.on(woo.parent == wo.name)
+			.select(frappe.qb.functions.Max(woo.planned_end_time).as_("next_free"))
+			.where(
+				(woo.workstation == workstation)
+				& (wo.status.not_in(["Completed", "Cancelled", "Stopped"]))
+				& (wo.docstatus == 1)
+				& (woo.planned_end_time > planned_start_time)
+			)
+		).run(as_dict=True)
+
+		if next_free_time and next_free_time[0].next_free:
+			return next_free_time[0].next_free
+
+		return planned_start_time
+
+	except Exception as e:
+		frappe.log_error(f"Error getting next available time: {str(e)}")
+		return planned_start_time
+
+
+def get_workstation_capacity(workstation):
+	"""
+	Get workstation capacity per hour
+	"""
+	if not workstation:
+		return 1
+
+	try:
+		workstation_doc = frappe.get_doc("Workstation", workstation)
+		return workstation_doc.hour_rate_consumable or workstation_doc.hour_rate_labour or 1
+	except Exception as e:
+		frappe.log_error(f"Error getting workstation capacity: {str(e)}")
+		return 1
+
+
+@frappe.whitelist()
+def assign_workstation(work_order, operation, workstation):
+	"""
+	Assign a workstation to an operation in the work order
+	"""
+	if not all([work_order, operation, workstation]):
+		frappe.throw(_("Work Order, Operation, and Workstation are required"))
+
+	try:
+		work_order_doc = frappe.get_doc("Work Order", work_order)
+
+		operation_found = False
+		for op in work_order_doc.operations:
+			if op.operation == operation:
+				old_workstation = op.workstation
+				op.workstation = workstation
+
+				recalculate_operation_times(op, workstation)
+				operation_found = True
+				break
+
+		if not operation_found:
+			frappe.throw(_("Operation {0} not found in Work Order {1}").format(operation, work_order))
+
+		work_order_doc.save(ignore_permissions=True)
+		frappe.db.commit()
+		work_order_doc.reload()
+
+		return {
+			"message": _("Workstation {0} assigned to operation {1}").format(workstation, operation),
+			"status": "success",
+		}
+
+	except Exception as e:
+		frappe.log_error(f"Error assigning workstation: {str(e)}")
+		frappe.throw(_("Failed to assign workstation: {0}").format(str(e)))
+
+
+def recalculate_operation_times(operation_row, workstation):
+	"""
+	Recalculate operation times based on the new workstation
+	"""
+	try:
+		workstation_doc = frappe.get_doc("Workstation", workstation)
+
+		if workstation_doc.hour_rate:
+			operation_row.hour_rate = workstation_doc.hour_rate
+
+		if operation_row.planned_start_time:
+			next_available = get_next_available_time(workstation, operation_row.planned_start_time)
+
+			if next_available and next_available > operation_row.planned_start_time:
+				if operation_row.planned_end_time and operation_row.planned_start_time:
+					duration = operation_row.planned_end_time - operation_row.planned_start_time
+					operation_row.planned_start_time = next_available
+					operation_row.planned_end_time = next_available + duration
+				else:
+					operation_row.planned_start_time = next_available
+
+	except Exception as e:
+		frappe.log_error(f"Error recalculating operation times: {str(e)}")

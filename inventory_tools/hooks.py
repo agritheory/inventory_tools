@@ -16,6 +16,7 @@ required_apps = ["erpnext", "hrms", "webshop"]
 # include js, css files in header of desk.html
 app_include_css = [
 	"/assets/inventory_tools/dist/js/style.css",
+	"/assets/inventory_tools/css/alternative_workstation.css",
 ]
 app_include_js = [
 	"inventory_tools.bundle.js",
@@ -24,7 +25,7 @@ app_include_js = [
 
 # include js, css files in header of web template
 web_include_css = [
-	"/assets/inventory_tools/dist/js/style.css",
+	"/assets/inventory_tools/dist/js/assets/style.css",
 ]
 web_include_js = [
 	"/assets/inventory_tools/dist/js/inventory_tools.js",
@@ -45,16 +46,16 @@ doctype_js = {
 	"Item": "public/js/custom/item_custom.js",
 	"Job Card": "public/js/custom/job_card_custom.js",
 	"Operation": "public/js/custom/operation_custom.js",
+	"Pick List": "public/js/custom/pick_list_custom.js",
+	"Plant Floor": "public/js/custom/plant_floor_custom.js",
 	"Purchase Invoice": "public/js/custom/purchase_invoice_custom.js",
 	"Purchase Order": "public/js/custom/purchase_order_custom.js",
 	"Stock Entry": "public/js/custom/stock_entry_custom.js",
 	"Work Order": "public/js/custom/work_order_custom.js",
 	"Workstation": "public/js/custom/workstation_custom.js",
 }
-
 doctype_list_js = {"Work Order": "public/js/custom/work_order_list.js"}
-
-# doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
+doctype_tree_js = {"Warehouse": "public/js/custom/warehouse_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 
 # Home Pages
@@ -142,9 +143,6 @@ override_doctype_class = {
 # Hook on document methods and events
 
 doc_events = {
-	"*": {
-		"validate": ["inventory_tools.inventory_tools.overrides.uom.validate_uom_has_conversion"],
-	},
 	"Company": {
 		"validate": [
 			"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.create_inventory_tools_settings",
@@ -266,38 +264,4 @@ standard_queries = {
 # 	"inventory_tools.auth.validate"
 # ]
 
-# Inventory Tools UOM Enforcement
-# --------------------------------
-
-inventory_tools_uom_enforcement = {
-	"BOM": {
-		"BOM Item": {"items": ["uom"]},
-	},
-	"Delivery Note": {
-		"Delivery Note Item": {"items": ["uom", "weight_uom"]},
-	},
-	"Item Price": {"Item Price": ["uom"]},
-	"Item": {"Item": ["sales_uom", "purchase_uom", "weight_uom"]},
-	"Job Card": {"Job Card Item": {"items": ["uom"]}},
-	"Material Request": {"Material Request Item": {"items": ["uom"]}},
-	"Opportunity": {"Opportunity Item": {"items": ["uom"]}},
-	"Pick List": {"Pick List Item": {"locations": ["uom"]}},
-	"POS Invoice": {"POS Invoice Item": {"items": ["uom"]}},
-	"Production Plan": {"Production Plan Item": {"po_items": ["planned_uom"]}},
-	"Purchase Invoice": {
-		"Purchase Invoice Item": {"items": ["uom", "weight_uom"]},
-	},
-	"Purchase Order": {"Purchase Order Item": {"items": ["uom"]}},
-	"Purchase Receipt": {
-		"Purchase Receipt Item": {"items": ["uom", "weight_uom"]},
-	},
-	"Putaway Rule": {"Putaway Rule Item": ["uom"]},
-	"Quotation": {"Quotation Item": {"items": ["uom"]}},
-	"Request for Quotation": {"Request for Quotation Item": {"items": ["uom"]}},
-	"Sales Invoice": {"Sales Invoice Item": {"items": ["uom"]}},
-	"Sales Order": {
-		"Sales Order Item": {"items": ["uom", "weight_uom"]},
-	},
-	"Stock Entry": {"Stock Entry Detail": {"items": ["uom"]}},
-	"Supplier Quotation": {"Supplier Quotation Item": {"items": ["uom"]}},
-}
+export_python_type_annotations = True

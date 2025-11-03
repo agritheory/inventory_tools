@@ -1,0 +1,16 @@
+{
+	"custom_fields": [],
+	"doctype": "Work Order Operation",
+	"property_setters": [
+		{
+			"doc_type": "Work Order Operation",
+			"doctype_or_field": "DocField",
+			"field_name": "workstation",
+			"is_system_generated": 0,
+			"module": "Inventory Tools",
+			"property": "allow_on_submit",
+			"value": "1"
+		}
+	],
+	"sync_on_migrate": 1
+}

@@ -1,0 +1,702 @@
+[
+	{
+		"item_length": 6.0,
+		"item_height": 3.0,
+		"item_width": 5.0,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Kitchen - APC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 4.5,
+		"item_height": 2.5,
+		"item_width": 3.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Refrigerated Display - APC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 4.0,
+		"item_height": 2.0,
+		"item_width": 4.0,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Bakery Display - APC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 7.0,
+		"item_height": 3.5,
+		"item_width": 6.0,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Credible Contract Baking - APC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 3.0,
+		"item_height": 2.0,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Refrigerator - APC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 4.5,
+		"item_height": 2.5,
+		"item_width": 4.0,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Baked Goods - APC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 6.0,
+		"item_height": 3.0,
+		"item_width": 5.0,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Goods In Transit - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 6.5,
+		"item_height": 3.5,
+		"item_width": 5.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Finished Goods - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 6.2,
+		"item_height": 3.2,
+		"item_width": 5.0,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Work In Progress - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 5.0,
+		"item_height": 2.5,
+		"item_width": 4.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Storeroom - APC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 1 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 2 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 3 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 4 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 5 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 6 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 7 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 8 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 9 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 10 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 11 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 12 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 13 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 14 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 15 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 16 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 17 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 18 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 19 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 20 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 21 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 22 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 23 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 24 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 25 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 26 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 27 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 28 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 29 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 30 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 31 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 32 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 33 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 34 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 35 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 36 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 37 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 38 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 39 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 40 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 41 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 42 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 43 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 44 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 45 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 46 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 47 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 48 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 49 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 50 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 51 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 52 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 53 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 54 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 55 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 56 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 57 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 58 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 59 - CFC",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 1.5,
+		"item_height": 1,
+		"item_width": 2.5,
+		"dimension_type": "Interior",
+		"orientation": 1,
+		"reference_doctype": "Warehouse",
+		"reference_document": "Fruit Storage 60 - CFC",
+		"uom": "Meter"
+	}
+]

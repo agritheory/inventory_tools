@@ -5,6 +5,7 @@ import json
 import types
 
 import frappe
+from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	make_inter_company_purchase_invoice,
 )
@@ -13,7 +14,11 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 	make_purchase_invoice,
 	make_purchase_receipt,
 )
-from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
+from erpnext.controllers.accounts_controller import (
+	get_default_taxes_and_charges,
+	force_item_fields,
+)
+from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 from frappe import _, throw
 
@@ -25,7 +30,7 @@ def _bypass(*args, **kwargs):
 class InventoryToolsPurchaseOrder(PurchaseOrder):
 	def validate_with_previous_doc(self):
 		"""
-		HASH: 7cc5579ecaae99336b8164e7aeedc15b990d2257
+		HASH: 8f811728d97293744bb35f6a3bdba889708127c5
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/buying/doctype/purchase_order/purchase_order.py
 		METHOD: validate_with_previous_doc
@@ -105,6 +110,129 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 					title=_("Warning"),
 					indicator="red",
 				)
+
+	def set_missing_item_details(self, for_validate=False):
+		"""
+		HASH: baa6d2bcdca633d60bfb596fc76df5cc5ab8b8fd
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/controllers/accounts_controller.py
+		METHOD: set_missing_item_details
+		"""
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		if hasattr(self, "items"):
+			parent_dict = {}
+			for fieldname in self.meta.get_valid_columns():
+				parent_dict[fieldname] = self.get(fieldname)
+
+			if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+				document_type = f"{self.doctype} Item"
+				parent_dict.update({"document_type": document_type})
+
+			# party_name field used for customer in quotation
+			if (
+				self.doctype == "Quotation"
+				and self.quotation_to == "Customer"
+				and parent_dict.get("party_name")
+			):
+				parent_dict.update({"customer": parent_dict.get("party_name")})
+
+			self.pricing_rules = []
+
+			for item in self.get("items"):
+				if item.get("item_code"):
+					args = parent_dict.copy()
+					args.update(item.as_dict())
+
+					args["doctype"] = self.doctype
+					args["name"] = self.name
+					args["child_doctype"] = item.doctype
+					args["child_docname"] = item.name
+					args["ignore_pricing_rule"] = (
+						self.ignore_pricing_rule if hasattr(self, "ignore_pricing_rule") else 0
+					)
+
+					if not args.get("transaction_date"):
+						args["transaction_date"] = args.get("posting_date")
+
+					if self.get("is_subcontracted"):
+						args["is_subcontracted"] = self.is_subcontracted
+
+					# CUSTOM CODE START (uses overridden function defined below)
+					ret = get_item_details(args, self, for_validate=for_validate, overwrite_warehouse=False)
+					# CUSTOM CODE END
+					for fieldname, value in ret.items():
+						if item.meta.get_field(fieldname) and value is not None:
+							if (
+								item.get(fieldname) is None
+								or fieldname in force_item_fields
+								or (fieldname in ["serial_no", "batch_no"] and item.get("use_serial_batch_fields"))
+							):
+								item.set(fieldname, value)
+
+							elif fieldname in ["cost_center", "conversion_factor"] and not item.get(fieldname):
+								item.set(fieldname, value)
+							elif fieldname == "item_tax_rate" and not (
+								self.get("is_return") and self.get("return_against")
+							):
+								item.set(fieldname, value)
+							elif fieldname == "serial_no":
+								# Ensure that serial numbers are matched against Stock UOM
+								item_conversion_factor = item.get("conversion_factor") or 1.0
+								item_qty = abs(item.get("qty")) * item_conversion_factor
+
+								if item_qty != len(get_serial_nos(item.get("serial_no"))):
+									item.set(fieldname, value)
+
+							elif (
+								ret.get("pricing_rule_removed")
+								and value is not None
+								and fieldname
+								in [
+									"discount_percentage",
+									"discount_amount",
+									"rate",
+									"margin_rate_or_amount",
+									"margin_type",
+									"remove_free_item",
+								]
+							):
+								# reset pricing rule fields if pricing_rule_removed
+								item.set(fieldname, value)
+
+					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field(
+						"is_fixed_asset"
+					):
+						item.set("is_fixed_asset", ret.get("is_fixed_asset", 0))
+
+					# Double check for cost center
+					# Items add via promotional scheme may not have cost center set
+					if hasattr(item, "cost_center") and not item.get("cost_center"):
+						item.set(
+							"cost_center",
+							self.get("cost_center") or get_default_cost_center(self.company),
+						)
+
+					if ret.get("pricing_rules"):
+						self.apply_pricing_rule_on_items(item, ret)
+						self.set_pricing_rule_details(item, ret)
+				else:
+					# Transactions line item without item code
+
+					uom = item.get("uom")
+					stock_uom = item.get("stock_uom")
+					if bool(uom) != bool(stock_uom):  # xor
+						item.stock_uom = item.uom = uom or stock_uom
+
+					# UOM cannot be zero so substitute as 1
+					item.conversion_factor = (
+						get_uom_conv_factor(item.get("uom"), item.get("stock_uom"))
+						or item.get("conversion_factor")
+						or 1
+					)
+
+			if self.doctype == "Purchase Invoice":
+				self.set_expense_account(for_validate)
 
 
 @frappe.whitelist()
@@ -225,7 +353,7 @@ def make_sales_invoices(docname: str, rows: list | str) -> None:
 @frappe.whitelist()
 def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=True):
 	"""
-	HASH: 59b9b7dc9185fee1814d5ef7d89d0875fead4bf7
+	HASH: d47f3cc1014db0f395aab21c6632458e85cb27ff
 	REPO: https://github.com/frappe/erpnext/
 	PATH: erpnext/stock/get_item_details.py
 	METHOD: get_item_details
@@ -243,7 +371,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 @frappe.whitelist()
 def validate_item_details(args, item):
 	"""
-	HASH: 59b9b7dc9185fee1814d5ef7d89d0875fead4bf7
+	HASH: af21bca2318089bfee543fdf2180e9d55c7f2833
 	REPO: https://github.com/frappe/erpnext/
 	PATH: erpnext/stock/get_item_details.py
 	METHOD: validate_item_details

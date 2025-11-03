@@ -1,0 +1,61 @@
+[
+	{
+		"dt": "Item",
+		"name": "Items",
+		"apply_on": "",
+		"enabled": 1,
+		"attributes": [
+			{
+				"attribute_name": "Color",
+				"applied_on": "Item",
+				"component": "FacetedSearchColorPicker"
+			},
+			{
+				"attribute_name": "Weight",
+				"applied_on": "Item",
+				"field": "weight_per_unit",
+				"numeric_values": 1,
+				"component": "FacetedSearchNumericRange"
+			},
+			{
+				"attribute_name": "Brand",
+				"applied_on": "Item",
+				"field": "brand",
+				"component": "AttributeFilter"
+			}
+		]
+	},
+	{
+		"dt": "Item Group",
+		"name": "Baked Goods",
+		"apply_on": "Baked Goods",
+		"enabled": 1,
+		"attributes": [
+			{
+				"attribute_name": "Price",
+				"applied_on": "Item",
+				"numeric_values": 1,
+				"component": "FacetedSearchNumericRange"
+			},
+			{
+				"attribute_name": "Fruits",
+				"applied_on": "Item",
+				"component": "AttributeFilter"
+			},
+			{
+				"attribute_name": "Shelf Life",
+				"applied_on": "Item",
+				"field": "shelf_life_in_days",
+				"numeric_values": 1,
+				"component": "FacetedSearchNumericRange"
+			},
+			{
+				"attribute_name": "EOL",
+				"applied_on": "Item",
+				"field": "end_of_life",
+				"date_values": 1,
+				"component": "FacetedSearchDateRange"
+			}
+		]
+	}
+]

@@ -1,12 +1,15 @@
 [tool.poetry]
 name = "inventory_tools"
-version =  "0.1.0"
+version =  "15.6.0"
 authors = ["AgriTheory <support@agritheory.dev>"]
 description = "Inventory Tools for ERPNext"
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
+matplotlib = "^3.10.1"
+numpy = "^2.0.2"
+networkx = "^3.4.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
@@ -38,6 +41,10 @@ indent = "\t"
 
 [tool.semantic_release]
 version_toml = ["pyproject.toml:tool.poetry.version"]
+version_variables = [
+    "inventory_tools/__init__.py:__version__"
+]
+build_command = "echo 1"
 
 [tool.semantic_release.branches.version]
 match = "version-(14|15)"
