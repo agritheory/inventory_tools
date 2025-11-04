@@ -12,7 +12,7 @@ class InventoryToolsProductionPlan(ProductionPlan):
 	@frappe.whitelist()
 	def make_work_order(self):
 		"""
-		HASH: 539c5b7974ffdaf4caf8acb6d4acc00fba626668
+		HASH: 5798409f695d8adadd5a5bbba971708015658250
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/production_plan/production_plan.py
 		METHOD: make_work_order
@@ -21,16 +21,22 @@ class InventoryToolsProductionPlan(ProductionPlan):
 		wo_list, po_list = [], []
 		subcontracted_po = {}
 		default_warehouses = get_default_warehouse()
+		create_purchase_orders = frappe.get_value(
+			"Inventory Tools Settings", self.company, "create_purchase_orders"
+		)
 
 		self.make_work_order_for_finished_goods(wo_list, default_warehouses)
 		self.make_work_order_for_subassembly_items(wo_list, subcontracted_po, default_warehouses)
-		if frappe.get_value("Inventory Tools Settings", self.company, "create_purchase_orders"):
+		if create_purchase_orders:
 			self.make_subcontracted_purchase_order(subcontracted_po, po_list)
 		self.show_list_created_message("Work Order", wo_list)
 		self.show_list_created_message("Purchase Order", po_list)
 
 		if not wo_list:
 			frappe.msgprint(_("No Work Orders were created"))
+
+		if create_purchase_orders and not po_list:
+			frappe.msgprint(_("No Purchase Orders were created"))
 
 	def make_work_order_for_subassembly_items(self, wo_list, subcontracted_po, default_warehouses):
 		"""
