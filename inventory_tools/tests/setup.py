@@ -11,13 +11,14 @@ from erpnext.manufacturing.doctype.production_plan.production_plan import (
 )
 from erpnext.setup.utils import set_defaults_for_tests
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
-from frappe.utils.data import add_months, flt, getdate, nowdate, get_datetime
+from frappe.utils.data import add_months, flt, getdate, nowdate
 from webshop.webshop.doctype.website_item.website_item import make_website_item
 
 from inventory_tools.tests.fixtures import (
 	operations,
 	suppliers,
 	workstations,
+	shifts,
 )
 
 
@@ -30,7 +31,7 @@ BOMS = read_json("boms")
 CUSTOMERS = read_json("customers")
 ITEM_DIMENSIONS = read_json("item_dimensions")
 ITEMS = read_json("items")
-ITEMS_STOCKENTRY = read_json("items_stockentry")
+ITEMS_STOCK_ENTRY = read_json("items_stock_entry")
 SPECIFICATIONS = read_json("specifications")
 WAREHOUSE_DIMENSIONS = read_json("warehouse_dimensions")
 WAREHOUSE_LOCATIONS = read_json("warehouse_locations")
@@ -107,6 +108,7 @@ def create_test_data():
 	create_warehouses(settings)
 	create_warehouse_locations()
 	setup_manufacturing_settings(settings)
+	create_shift_types()
 	create_workstations(settings)
 	create_operations()
 	create_item_groups(settings)
@@ -230,10 +232,25 @@ def setup_manufacturing_settings(settings):
 	)
 	frappe.set_value("Inventory Tools Settings", settings.company, "create_purchase_orders", 0)
 	frappe.set_value(
-		"Inventory Tools Settings", settings.company, "overproduction_percentage_for_work_order", 50
+		"Inventory Tools Settings",
+		settings.company,
+		"overproduction_percentage_for_work_order",
+		50,
 	)
 	frappe.set_value("Inventory Tools Settings", settings.company, "show_on_website", 1)
 	frappe.set_value("Inventory Tools Settings", settings.company, "show_in_listview", 1)
+
+
+def create_shift_types():
+	for shift in shifts:
+		if frappe.db.exists("Shift Type", shift["name"]):
+			continue
+		sh = frappe.new_doc("Shift Type")
+		sh.name = shift["name"]
+		sh.start_time = shift["start_time"]
+		sh.end_time = shift["end_time"]
+		sh.color = shift["color"]
+		sh.save()
 
 
 def create_workstations(settings):
@@ -244,21 +261,42 @@ def create_workstations(settings):
 		pf.warehouse = "Kitchen - APC"
 		pf.plant_floor_layout = "/files/floor_plan.png"
 		pf.save()
+
 	for ws in workstations:
-		if not frappe.db.exists("Workstation Type", ws[2]):
+		# Create workstation type if it doesn't exist
+		if not frappe.db.exists("Workstation Type", ws["type"]):
 			wst = frappe.new_doc("Workstation Type")
-			wst.workstation_type = ws[2]
+			wst.workstation_type = ws["type"]
 			wst.save()
-		if frappe.db.exists("Workstation", ws[0]):
-			work = frappe.get_doc("Workstation", ws[0])
+
+		# Create or update workstation
+		if frappe.db.exists("Workstation", ws["workstation_name"]):
+			work = frappe.get_doc("Workstation", ws["workstation_name"])
 		else:
 			work = frappe.new_doc("Workstation")
-		work.workstation_name = ws[0]
-		work.production_capacity = ws[1]
-		work.workstation_type = ws[2]
+
+		work.workstation_name = ws["workstation_name"]
+		work.production_capacity = ws["production_capacity"]
+		work.workstation_type = ws["type"]
 		work.plant_floor = "Kitchen"
-		work.off_status_image = f"/files/{ws[3]}"
-		work.on_status_image = f"/files/{ws[4]}"
+		work.off_status_image = f"/files/{ws['off_status_image']}"
+		work.on_status_image = f"/files/{ws['on_status_image']}"
+
+		work.working_hours = []
+		for shift_type in ws["shift_types"]:
+			for sh in shifts:
+				if sh["name"] == shift_type:
+					result = sh
+					break
+			work.append(
+				"working_hours",
+				{
+					"shift_type": shift_type,
+					"start_time": result["start_time"],
+					"end_time": result["end_time"],
+				},
+			)
+
 		work.save()
 
 
@@ -709,22 +747,39 @@ def create_production_plan(settings, prod_plan_from_doc):
 			},
 		)
 		pp.get_mr_items()
-	for item in pp.po_items:
-		item.planned_start_date = settings.day
+
+	pp.po_items = sorted(pp.po_items, key=lambda x: x.get("item_code"))
+
+	for idx, item in enumerate(pp.po_items):
+		item.planned_start_date = settings.day + datetime.timedelta(days=idx)
+
 	pp.get_sub_assembly_items()
-	for item in pp.sub_assembly_items:
-		item.schedule_date = settings.day
+	start_time = datetime.datetime(settings.day.year, settings.day.month, settings.day.day, 6, 0)
+	pp.append(
+		"sub_assembly_items",
+		{
+			"schedule_date": start_time,
+			"production_item": "Pie Crust",
+			"name": None,
+			"type_of_manufacturing": "In House",
+			"idx": 1,
+			"qty": 50,
+			"bom_no": "BOM-Pie Crust-001",
+			"bom_level": 1,
+			"supplier": None,
+			"for_warehouse": "Storeroom - APC",
+		},
+	)
+	for idx, item in enumerate(
+		sorted(pp.sub_assembly_items, key=lambda x: (-abs(x.bom_level), x.idx)), start=1
+	):
+		item.idx = idx
+		item.schedule_date = start_time
 		if item.production_item == "Pie Crust":
-			idx = item.idx
-			item.type_of_manufacturing = "Subcontract"
-			item.supplier = "Credible Contract Baking"
 			item.qty = 50
-	pp.append("sub_assembly_items", pp.sub_assembly_items[idx - 1].as_dict())
-	pp.sub_assembly_items[-1].name = None
-	pp.sub_assembly_items[-1].type_of_manufacturing = "In House"
-	pp.sub_assembly_items[-1].bom_no = "BOM-Pie Crust-001"
-	pp.sub_assembly_items[-1].supplier = None
-	pp.for_warehouse = "Storeroom - APC"
+		time = frappe.get_value("BOM Operation", {"parent": item.bom_no}, "SUM(time_in_mins) AS time")
+		if time:
+			start_time += datetime.timedelta(minutes=time + 2)
 	raw_materials = get_items_for_material_requests(
 		pp.as_dict(), warehouses=None, get_parent_warehouse_data=None
 	)
@@ -753,10 +808,21 @@ def create_production_plan(settings, prod_plan_from_doc):
 	for wo in wos:
 		wo = frappe.get_doc("Work Order", wo)
 		wo.wip_warehouse = "Kitchen - APC"
+		current_year = str(settings.day.year)
 		wo.save()
 		wo.submit()
 		job_cards = frappe.get_all("Job Card", {"work_order": wo.name})
-		start_time = get_datetime()
+		wo.planned_start_date = start_time
+		time = frappe.get_value("BOM Operation", {"parent": item.bom_no}, "SUM(time_in_mins) AS time")
+		if time:
+			wo.planned_end_date = wo.planned_start_date + datetime.timedelta(minutes=time + 2)
+		wo.required_items = sorted(wo.required_items, key=lambda x: x.get("item_code"))
+		for idx, w in enumerate(wo.required_items, start=1):
+			w.idx = idx
+			w.required_qty = flt(w.required_qty, 3)
+		wo.save()
+		wo.submit()
+		frappe.db.set_value("Work Order", wo.name, "creation", start_time)
 		for job_card in job_cards:
 			job_card = frappe.get_doc("Job Card", job_card)
 			batch_size, total_operation_time = frappe.get_value(
@@ -846,7 +912,10 @@ def create_quotations(settings):
 		"conversion_rate": 1,
 		"transaction_date": nowdate(),
 		"valid_till": add_months(nowdate(), 1),
-		"items": [{"item_code": "Ambrosia Pie", "qty": 1}, {"item_code": "Gooseberry Pie", "qty": 5}],
+		"items": [
+			{"item_code": "Ambrosia Pie", "qty": 1},
+			{"item_code": "Gooseberry Pie", "qty": 5},
+		],
 		"company": settings.company,
 	}
 	quotation.update(values)
@@ -863,7 +932,10 @@ def create_quotations(settings):
 		"conversion_rate": 1,
 		"transaction_date": nowdate(),
 		"valid_till": add_months(nowdate(), 1),
-		"items": [{"item_code": "Ambrosia Pie", "qty": 1}, {"item_code": "Gooseberry Pie", "qty": 5}],
+		"items": [
+			{"item_code": "Ambrosia Pie", "qty": 1},
+			{"item_code": "Gooseberry Pie", "qty": 5},
+		],
 		"company": settings.company,
 	}
 	quotation.update(values)
@@ -880,7 +952,10 @@ def create_quotations(settings):
 		"conversion_rate": 1,
 		"transaction_date": nowdate(),
 		"valid_till": add_months(nowdate(), 1),
-		"items": [{"item_code": "Ambrosia Pie", "qty": 2}, {"item_code": "Double Plum Pie", "qty": 1}],
+		"items": [
+			{"item_code": "Ambrosia Pie", "qty": 2},
+			{"item_code": "Double Plum Pie", "qty": 1},
+		],
 		"company": settings.company,
 	}
 	quotation.update(values)
@@ -897,7 +972,10 @@ def create_quotations(settings):
 		"conversion_rate": 1,
 		"transaction_date": nowdate(),
 		"valid_till": add_months(nowdate(), 1),
-		"items": [{"item_code": "Ambrosia Pie", "qty": 5}, {"item_code": "Double Plum Pie", "qty": 10}],
+		"items": [
+			{"item_code": "Ambrosia Pie", "qty": 5},
+			{"item_code": "Double Plum Pie", "qty": 10},
+		],
 		"company": "Chelsea Fruit Co",
 	}
 	quotation.update(values)
@@ -968,7 +1046,7 @@ def create_warehouse_dimensions():
 
 
 def create_stock_entries():
-	j = len(ITEMS_STOCKENTRY) // 2
+	j = len(ITEMS_STOCK_ENTRY) // 2
 	# Add items to warehouse
 	se = frappe.new_doc("Stock Entry")
 	se.company = "Chelsea Fruit Co"
@@ -976,7 +1054,7 @@ def create_stock_entries():
 	se.set_posting_time = 1
 	se.stock_entry_type = "Material Receipt"
 
-	for item in ITEMS_STOCKENTRY[0:j]:
+	for item in ITEMS_STOCK_ENTRY[0:j]:
 		se.append(
 			"items",
 			{
@@ -997,7 +1075,7 @@ def create_stock_entries():
 	se.set_posting_time = 1
 	se.stock_entry_type = "Material Receipt"
 
-	for item in ITEMS_STOCKENTRY[j:]:
+	for item in ITEMS_STOCK_ENTRY[j:]:
 		se.append(
 			"items",
 			{

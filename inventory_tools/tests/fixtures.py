@@ -75,24 +75,144 @@ suppliers = [
 	),
 ]
 
+
 workstations = [
-	("Mix Pie Crust Station", "20", "Table", "mixer.png", "mixer.png"),
-	("Roll Pie Crust Station", "20", "Table", "rolling.png", "rolling.png"),
-	("Make Pie Filling Station", "20", "Table", "table.png", "table.png"),
-	("Cooling Station", "100", "Table", "rack.png", "rack.png"),
-	("Box Pie Station", "100", "Table", "box.png", "box.png"),
-	("Baking Station", "20", "Table", "oven.png", "oven.png"),
-	("Assemble Pie Station", "20", "Table", "table.png", "table.png"),
-	("Mix Pie Filling Station", "20", "Table", "mixer.png", "mixer.png"),
-	("Packaging Station", "2", "Table", "box.png", "box.png"),
-	("Food Prep Table 2", "10", "Table", "table.png", "table.png"),
-	("Food Prep Table 1", "5", "Table", "table.png", "table.png"),
-	("Range Station", "20", "Range", "range.png", "range.png"),
-	("Cooling Racks Station", "80", "Cooling", "rack.png", "rack.png"),
-	("Refrigerator Station", "200", "Refrigerator", "fridge.png", "fridge.png"),
-	("Oven Station", "20", "Oven", "oven.png", "oven.png"),
-	("Mixer Station", "10", "Mixer", "mixer.png", "mixer.png"),
+	{
+		"workstation_name": "Mix Pie Crust Station",
+		"production_capacity": "20",
+		"type": "Table",
+		"off_status_image": "mixer.png",
+		"on_status_image": "mixer.png",
+		"shift_types": ["Day Shift", "Evening Shift"],
+	},
+	{
+		"workstation_name": "Roll Pie Crust Station",
+		"production_capacity": "20",
+		"type": "Table",
+		"off_status_image": "rolling.png",
+		"on_status_image": "rolling.png",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Make Pie Filling Station",
+		"production_capacity": "20",
+		"type": "Table",
+		"off_status_image": "table.png",
+		"on_status_image": "table.png",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Cooling Station",
+		"production_capacity": "100",
+		"type": "Table",
+		"off_status_image": "rack.png",
+		"on_status_image": "rack.png",
+		"shift_types": ["Day Shift", "Evening Shift"],
+	},
+	{
+		"workstation_name": "Box Pie Station",
+		"production_capacity": "100",
+		"type": "Table",
+		"off_status_image": "box.png",
+		"on_status_image": "box.png",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Baking Station",
+		"production_capacity": "20",
+		"type": "Table",
+		"off_status_image": "oven.png",
+		"on_status_image": "oven.png",
+		"shift_types": ["Day Shift", "Evening Shift"],
+	},
+	{
+		"workstation_name": "Assemble Pie Station",
+		"production_capacity": "20",
+		"type": "Table",
+		"off_status_image": "table.png",
+		"on_status_image": "table.png",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Mix Pie Filling Station",
+		"production_capacity": "20",
+		"type": "Table",
+		"off_status_image": "mixer.png",
+		"on_status_image": "mixer.png",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Packaging Station",
+		"production_capacity": "2",
+		"type": "Table",
+		"off_status_image": "box.png",
+		"on_status_image": "box.png",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Food Prep Table 2",
+		"production_capacity": "10",
+		"type": "Table",
+		"off_status_image": "table.png",
+		"on_status_image": "table.png",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Food Prep Table 1",
+		"production_capacity": "5",
+		"type": "Table",
+		"off_status_image": "table.png",
+		"on_status_image": "table.png",
+		"shift_types": ["Day Shift", "Evening Shift"],
+	},
+	{
+		"workstation_name": "Range Station",
+		"production_capacity": "20",
+		"type": "Range",
+		"off_status_image": "range.png",
+		"on_status_image": "range.png",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Cooling Racks Station",
+		"production_capacity": "80",
+		"type": "Cooling",
+		"off_status_image": "rack.png",
+		"on_status_image": "rack.png",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Refrigerator Station",
+		"production_capacity": "200",
+		"type": "Refrigerator",
+		"off_status_image": "fridge.png",
+		"on_status_image": "fridge.png",
+		"shift_types": ["Day Shift"],
+	},
+	{
+		"workstation_name": "Oven Station",
+		"production_capacity": "20",
+		"type": "Oven",
+		"off_status_image": "oven.png",
+		"on_status_image": "oven.png",
+		"shift_types": ["Day Shift", "Evening Shift"],
+	},
+	{
+		"workstation_name": "Mixer Station",
+		"production_capacity": "10",
+		"type": "Mixer",
+		"off_status_image": "mixer.png",
+		"on_status_image": "mixer.png",
+		"shift_types": ["Day Shift"],
+	},
 ]
+
+shifts = [
+	{"name": "Day Shift", "start_time": "06:00:00", "end_time": "14:00:00", "color": "Yellow"},
+	{"name": "Evening Shift", "start_time": "14:00:00", "end_time": "22:00:00", "color": "Blue"},
+	{"name": "Night Shift", "start_time": "22:00:00", "end_time": "06:00:00", "color": "Violet"},
+]
+
 
 operations = [
 	(
@@ -196,9 +316,10 @@ operations = [
 		"Food Prep Table 1",
 		"5",
 		"""- Tower: package one pie and one pocket, and one popper
-    - Pocketful of Bay: package one pocket with two poppers""",
+		- Pocketful of Bay: package one pocket with two poppers""",
 	),
 ]
+
 attributes = {
 	"Ambrosia Pie": {
 		"Fruits": ["Hairless Rambutan", "Cloudberry", "Tayberry"],

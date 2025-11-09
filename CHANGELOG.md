@@ -1,10 +1,12 @@
 <!-- Copyright (c) 2025, AgriTheory and contributors
 For license information, please see license.txt-->
 
+For license information, please see license.txt-->
+
 # CHANGELOG
 
 <div class="byline">
-  Rohan Bansal, Devarsh Bhatt, github-actions, IshwaryaM1030, Myuddin Khatri, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2025-10-09
+  Rohan Bansal, Devarsh Bhatt, coleandreoli, fproldan, github-actions, Myuddin Khatri, Heather Kusmierz, and Tyler Matteson 2024-12-02
 </div>
 
 
