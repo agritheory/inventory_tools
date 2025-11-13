@@ -1,57 +1,21 @@
 # Copyright (c) 2025, AgriTheory and contributors
 # For license information, please see license.txt
 
-import pytest
 import frappe
 from frappe.utils import getdate
-from inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost import (
-	get_operating_cost_per_unit_with_date_range,
-)
 
 
-@pytest.fixture(scope="module")
-def setup_workstation():
-	"""Ensure a test workstation with date-range-based costs exists."""
-	ws_name = "Mixer Station"
-
-	# Create Operation first (required for BOM)
-	if not frappe.db.exists("Operation", "Mixing"):
-		op = frappe.get_doc(
-			{
-				"doctype": "Operation",
-				"name": "Mixing",
-				"operation": "Mixing",
-				"workstation": ws_name,
-			}
-		)
-		op.insert(ignore_permissions=True)
-
-	if not frappe.db.exists("Workstation", ws_name):
-		ws = frappe.get_doc(
-			{
-				"doctype": "Workstation",
-				"workstation_name": ws_name,
-				"workstation_operating_cost": [
-					{
-						"from_date": "2024-01-01",
-						"to_date": "2024-12-31",
-						"electricity_cost": 2.0,
-						"consumable_cost": 3.0,
-						"rent_cost": 4.0,
-					},
-					{
-						"from_date": "2025-01-01",
-						"to_date": "2025-12-31",
-						"electricity_cost": 3.0,
-						"consumable_cost": 4.0,
-						"rent_cost": 5.0,
-					},
-				],
-			}
-		)
-		ws.insert(ignore_permissions=True)
-
-	return frappe.get_doc("Workstation", ws_name)
+def complete_job_cards_for_work_order(wo):
+	job_cards = frappe.get_all("Job Card", {"work_order": wo}, order_by="sequence_id ASC")
+	for jc in job_cards:
+		doc = frappe.get_doc("Job Card", jc.name)
+		for row in doc.scheduled_time_logs:
+			doc.append(
+				"time_logs",
+				{"from_time": row.from_time, "to_time": row.to_time, "completed_qty": doc.for_quantity},
+			)
+		doc.save()
+		doc.submit()
 
 
 def test_operating_cost_changes_with_posting_date():

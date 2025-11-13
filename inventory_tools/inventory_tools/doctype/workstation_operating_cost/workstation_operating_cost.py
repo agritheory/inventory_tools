@@ -16,23 +16,24 @@ class WorkstationOperatingCost(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		consumable_cost: DF.Currency
-		electricity_cost: DF.Currency
-		from_date: DF.Date | None
+		account: DF.Link
+		from_date: DF.Date
+		item_code: DF.Link | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		rent_cost: DF.Currency
+		qty: DF.Float
 		to_date: DF.Date | None
-		wages: DF.Currency
 	# end: auto-generated types
 
 
 def validate_workstation_costs(doc, method):
+	# Validate required fields
 	for idx, r in enumerate(doc.workstation_operating_cost, start=1):
 		if not r.from_date:
 			frappe.throw(_("Row {0}: 'From Date' is required.").format(idx))
 
+	# Sort and auto-fill to_dates
 	costs = sorted(doc.workstation_operating_cost, key=lambda x: getdate(x.from_date))
 
 	for i, row in enumerate(costs):
@@ -43,27 +44,37 @@ def validate_workstation_costs(doc, method):
 			else:
 				row.to_date = None
 
-	for i in range(len(costs) - 1):
-		cur_to = costs[i].to_date
-		next_from = costs[i + 1].from_date
+	# Group by account and check for overlaps within each account
+	account_costs = {}
+	for idx, row in enumerate(costs, start=1):
+		if row.account:
+			if row.account not in account_costs:
+				account_costs[row.account] = []
+			account_costs[row.account].append((idx, row))
 
-		if cur_to and next_from:
-			if getdate(cur_to) >= getdate(next_from):
-				frappe.throw(
-					_("Cost periods cannot overlap. Row {0} overlaps with Row {1}").format(i + 1, i + 2)
-				)
+	# Check for overlapping periods within each account
+	for account, account_rows in account_costs.items():
+		for i in range(len(account_rows) - 1):
+			cur_idx, cur_row = account_rows[i]
+			next_idx, next_row = account_rows[i + 1]
 
-	doc.workstation_operating_cost.sort(key=lambda x: getdate(x.from_date), reverse=True)
+			cur_to = cur_row.to_date
+			next_from = next_row.from_date
+
+			if cur_to and next_from:
+				if getdate(cur_to) >= getdate(next_from):
+					frappe.throw(
+						_("Account '{0}': Cost periods cannot overlap. Row {1} overlaps with Row {2}").format(
+							account, cur_idx, next_idx
+						)
+					)
+
+	doc.workstation_operating_cost.sort(
+		key=lambda x: (x.account or "", getdate(x.from_date)), reverse=True
+	)
 
 	for i, row in enumerate(doc.workstation_operating_cost, start=1):
 		row.idx = i
-
-	if doc.workstation_operating_cost:
-		latest = doc.workstation_operating_cost[0]
-		doc.hour_rate_electricity = latest.electricity_cost
-		doc.hour_rate_consumable = latest.consumable_cost
-		doc.hour_rate_rent = latest.rent_cost
-		doc.hour_rate_labour = latest.wages
 
 
 def validate_dates(doc, method):
@@ -78,46 +89,71 @@ def validate_dates(doc, method):
 				)
 
 
-def get_operating_cost_per_unit_with_date_range(work_order=None, bom_no=None, posting_date=None):
-	"""Extended version that adds date-range-based cost lookup."""
-	operating_cost_per_unit = 0
+def get_operating_costs_by_operation(
+	work_order=None, bom_no=None, posting_date=None
+) -> list[frappe._dict]:
+	"""Returns operating costs per operation and account for the given date range."""
 	posting_date = getdate(posting_date or nowdate())
 
-	if work_order and hasattr(work_order, "operations"):
-		for op in work_order.get("operations"):
-			if not op.workstation:
-				continue
+	if not work_order or not hasattr(work_order, "operations"):
+		return []
 
-			ws = frappe.get_doc("Workstation", op.workstation)
-			matched_row = None
+	operating_costs = []
 
-			for row in ws.workstation_operating_cost:
-				from_date = getdate(row.from_date) if row.from_date else None
-				to_date = getdate(row.to_date) if row.to_date else None
+	for op in work_order.get("operations"):
+		if not op.workstation:
+			continue
 
-				if from_date and to_date:
-					if from_date <= posting_date <= to_date:
-						matched_row = row
-						break
-				elif from_date and not to_date:
-					if from_date <= posting_date:
-						matched_row = row
-						break
+		ws = frappe.get_doc("Workstation", op.workstation)
+		hours = flt(op.time_in_mins) / 60.0
 
-			if matched_row:
-				# Hourly cost rate
-				hourly_cost = (
-					flt(matched_row.electricity_cost)
-					+ flt(matched_row.consumable_cost)
-					+ flt(matched_row.rent_cost)
-				)
+		for row in ws.workstation_operating_cost:
+			from_date = getdate(row.from_date) if row.from_date else None
+			to_date = getdate(row.to_date) if row.to_date else None
 
-				hours = flt(op.time_in_mins) / 60.0
-				total_operation_cost = hourly_cost * hours
+			date_matches = False
+			if from_date and to_date:
+				if from_date <= posting_date <= to_date:
+					date_matches = True
+			elif from_date and not to_date:
+				if from_date <= posting_date:
+					date_matches = True
 
-				if flt(op.completed_qty):
-					operating_cost_per_unit += total_operation_cost / flt(op.completed_qty)
-				elif work_order.qty:
-					operating_cost_per_unit += total_operation_cost / flt(work_order.qty)
+			if date_matches and row.account:
+				total_cost = flt(row.qty) * hours
 
-	return round(operating_cost_per_unit, 2)
+				qty = flt(work_order.qty)
+				if qty:
+					cost_per_unit = flt(total_cost / qty, 2)
+
+					operation_name = op.operation or ws.workstation_name or ws.name
+					account_short = row.account.split(" - ")[0] if " - " in row.account else row.account
+
+					description_parts = [
+						operation_name,
+						ws.name,
+						f"{hours:.2f} hrs @ ${flt(row.qty):.2f}/hr",
+						f"${cost_per_unit:.2f}/unit",
+						account_short,
+					]
+
+					if row.item_code:
+						description_parts.append(f"Item: {row.item_code}")
+
+					description = " | ".join(description_parts)
+
+					operating_costs.append(
+						frappe._dict(
+							{"account": row.account, "cost_per_unit": cost_per_unit, "description": description}
+						)
+					)
+
+	return operating_costs
+
+
+@frappe.whitelist()
+def fetch_default_expense_account(company, item_code):
+	if item_code:
+		return frappe.db.get_value(
+			"Item Default", {"parent": item_code, "company": company}, ["expense_account"]
+		)

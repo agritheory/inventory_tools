@@ -896,7 +896,7 @@ workstations = [
 				"electricity_cost": 7.52,
 				"rent_cost": 5.64,
 				"consumable_cost": 9.40,
-				"wages": 188.00,
+				"wages": 18.80,
 			},
 			{
 				"from_date": "2025-01-01",
@@ -904,7 +904,7 @@ workstations = [
 				"electricity_cost": 8.00,
 				"rent_cost": 6.00,
 				"consumable_cost": 10.00,
-				"wages": 200.00,
+				"wages": 20.00,
 			},
 			{
 				"from_date": "2026-01-01",
@@ -912,7 +912,7 @@ workstations = [
 				"electricity_cost": 8.48,
 				"rent_cost": 6.36,
 				"consumable_cost": 10.60,
-				"wages": 212.00,
+				"wages": 21.20,
 			},
 		],
 	},

@@ -92,13 +92,16 @@ def create_test_data():
 	company_address.append("links", {"link_doctype": "Company", "link_name": settings.company})
 	company_address.save()
 
-	cfc = frappe.new_doc("Company")
-	cfc.company_name = "Chelsea Fruit Co"
-	cfc.default_currency = "USD"
-	cfc.create_chart_of_accounts_based_on = "Existing Company"
-	cfc.existing_company = settings.company
-	cfc.abbr = "CFC"
-	cfc.save()
+	if not frappe.db.exists("Company", "Chelsea Fruit Co"):
+		cfc = frappe.new_doc("Company")
+		cfc.company_name = "Chelsea Fruit Co"
+		cfc.default_currency = "USD"
+		cfc.create_chart_of_accounts_based_on = "Existing Company"
+		cfc.existing_company = settings.company
+		cfc.abbr = "CFC"
+		cfc.save()
+	else:
+		cfc = frappe.get_doc("Company", "Chelsea Fruit Co")
 
 	copy_image_fixtures()
 	frappe.db.set_single_value("Stock Settings", "valuation_method", "Moving Average")
@@ -107,13 +110,13 @@ def create_test_data():
 	create_warehouses(settings)
 	create_warehouse_locations()
 	setup_manufacturing_settings(settings)
-	create_workstations(settings)
-	create_operations()
 	create_item_groups(settings)
 	create_price_lists(settings)
 	create_suppliers(settings)
 	create_customers(settings)
 	create_items(settings)
+	create_workstations(settings)
+	create_operations()
 	create_boms(settings)
 	prod_plan_from_doc = "Sales Order"
 	if prod_plan_from_doc == "Sales Order":
@@ -217,6 +220,62 @@ def setup_manufacturing_settings(settings):
 		wip.root_type = "Asset"
 		wip.save()
 
+	if not frappe.db.exists(
+		"Account", {"account_name": "Accrued Manufacturing Wages", "company": settings.company}
+	):
+		wip = frappe.new_doc("Account")
+		wip.account_name = "Accrued Manufacturing Wages"
+		wip.parent_account = "2200 - Stock Liabilities - APC"
+		wip.account_number = "2212"
+		wip.company = settings.company
+		wip.currency = "USD"
+		wip.report_type = "Balance Sheet"
+		wip.root_type = "Liability"
+		wip.account_type = "Expenses Included In Valuation"
+		wip.save()
+
+	if not frappe.db.exists(
+		"Account", {"account_name": "Accrued Manufacturing Electricity", "company": settings.company}
+	):
+		wip = frappe.new_doc("Account")
+		wip.account_name = "Accrued Manufacturing Electricity"
+		wip.parent_account = "2200 - Stock Liabilities - APC"
+		wip.account_number = "2213"
+		wip.company = settings.company
+		wip.currency = "USD"
+		wip.report_type = "Balance Sheet"
+		wip.root_type = "Liability"
+		wip.account_type = "Expenses Included In Valuation"
+		wip.save()
+
+	if not frappe.db.exists(
+		"Account",
+		{"account_name": "Accrued Manufacturing Rent Contribution", "company": settings.company},
+	):
+		wip = frappe.new_doc("Account")
+		wip.account_name = "Accrued Manufacturing Rent Contribution"
+		wip.parent_account = "2200 - Stock Liabilities - APC"
+		wip.account_number = "2214"
+		wip.company = settings.company
+		wip.currency = "USD"
+		wip.report_type = "Balance Sheet"
+		wip.root_type = "Liability"
+		wip.account_type = "Expenses Included In Valuation"
+		wip.save()
+
+	if not frappe.db.exists(
+		"Account", {"account_name": "Manufacturing Wages Capitalized", "company": settings.company}
+	):
+		wip = frappe.new_doc("Account")
+		wip.account_name = "Manufacturing Wages Capitalized"
+		wip.parent_account = "5111 - Cost of Goods Sold - APC"
+		wip.account_number = "5120"
+		wip.company = settings.company
+		wip.currency = "USD"
+		wip.report_type = "Profit and Loss"
+		wip.root_type = "Expense"
+		wip.save()
+
 	frappe.set_value("Warehouse", "Kitchen - APC", "account", wip.name)
 	frappe.set_value(
 		"Inventory Tools Settings", settings.company, "enable_work_order_subcontracting", 1
@@ -263,19 +322,40 @@ def create_workstations(settings):
 		work.plant_floor = "Kitchen"
 		work.off_status_image = ws.get("off_status_image")
 		work.on_status_image = ws.get("on_status_image")
-
-		if ws.get("operating_costs"):
-			work.workstation_operating_cost = []
-			for oc in ws.get("operating_costs"):
+		for oc in ws.get("operating_costs"):
+			if oc.get("electricity_cost"):
 				work.append(
 					"workstation_operating_cost",
 					{
 						"from_date": oc.get("from_date"),
 						"to_date": oc.get("to_date"),
-						"electricity_cost": oc.get("electricity_cost"),
-						"rent_cost": oc.get("rent_cost"),
-						"consumable_cost": oc.get("consumable_cost"),
-						"wages": oc.get("wages"),
+						"account": "2213 - Accrued Manufacturing Electricity - APC",
+						"item_code": "Electricity",
+						"qty": oc.get("electricity_cost"),
+					},
+				)
+
+			if oc.get("rent_cost"):
+				work.append(
+					"workstation_operating_cost",
+					{
+						"from_date": oc.get("from_date"),
+						"to_date": oc.get("to_date"),
+						"account": "2214 - Accrued Manufacturing Rent Contribution - APC",
+						"item_code": "Rent",
+						"qty": oc.get("rent_cost"),
+					},
+				)
+
+			if oc.get("wages"):
+				work.append(
+					"workstation_operating_cost",
+					{
+						"from_date": oc.get("from_date"),
+						"to_date": oc.get("to_date"),
+						"account": "2212 - Accrued Manufacturing Wages - APC",
+						"item_code": None,
+						"qty": oc.get("wages"),
 					},
 				)
 
@@ -365,10 +445,11 @@ def create_items(settings):
 		i.stock_uom = item.get("uom")
 		i.description = item.get("description")
 		i.is_stock_item = 0 if item.get("is_stock_item") == 0 else 1
-		i.include_item_in_manufacturing = 1
+		i.include_item_in_manufacturing = 0 if item.get("is_stock_item") == 0 else 1
 		i.valuation_rate = item.get("valuation_rate") or 0
 		i.is_sub_contracted_item = item.get("is_sub_contracted_item") or 0
-		i.default_warehouse = settings.get("warehouse")
+		i.default_warehouse = item.get("default_warehouse") or settings.get("warehouse")
+		i.default_supplier = item.get("default_supplier")
 		i.weight_uom = item.get("weight_uom") if i.is_stock_item else None
 		i.weight_per_unit = item.get("weight_per_unit")
 		i.default_material_request_type = (
@@ -403,8 +484,8 @@ def create_items(settings):
 			"item_defaults",
 			{
 				"company": settings.company,
-				"default_warehouse": item.get("default_warehouse"),
-				"default_supplier": item.get("default_supplier"),
+				"default_warehouse": i.default_warehouse,
+				"default_supplier": i.default_supplier,
 				"requires_rfq": True if item.get("item_code") == "Cloudberry" else False,
 			},
 		)
@@ -500,6 +581,8 @@ def create_warehouses(settings):
 		if wh.name not in warehouses and not wh.is_group:
 			frappe.delete_doc("Warehouse", wh.name)
 	for item in ITEMS:
+		if item.get("is_stock_item") == 0:
+			continue
 		if frappe.db.exists("Warehouse", item.get("default_warehouse")):
 			continue
 		wh = frappe.new_doc("Warehouse")
@@ -508,15 +591,24 @@ def create_warehouses(settings):
 		wh.company = settings.company
 		wh.save()
 
-	wh = frappe.new_doc("Warehouse")
-	wh.warehouse_name = "Bakery Display"
-	wh.parent_warehouse = "Baked Goods - APC"
-	wh.company = settings.company
-	wh.save()
+	if not frappe.db.exists("Warehouse", {"warehouse_name": "Bakery Display"}):
+		wh = frappe.new_doc("Warehouse")
+		wh.warehouse_name = "Bakery Display"
+		wh.parent_warehouse = "Baked Goods - APC"
+		wh.company = settings.company
+		wh.save()
 
-	wh = frappe.get_doc("Warehouse", "Refrigerated Display - APC")
-	wh.parent_warehouse = "Baked Goods - APC"
-	wh.save()
+	if not frappe.db.exists("Warehouse", {"warehouse_name": "Refrigerated Display - APC"}):
+		wh = frappe.get_doc("Warehouse", "Refrigerated Display - APC")
+		wh.parent_warehouse = "Baked Goods - APC"
+		wh.save()
+
+	if not frappe.db.exists("Warehouse", {"warehouse_name": "Credible Contract Baking"}):
+		wh = frappe.new_doc("Warehouse")
+		wh.warehouse_name = "Credible Contract Baking - APC"
+		wh.parent_warehouse = "All Warehouses - APC"
+		wh.company = settings.company
+		wh.save()
 
 
 def create_boms(settings):

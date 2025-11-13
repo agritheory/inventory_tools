@@ -7,6 +7,9 @@ from frappe import _
 from frappe.utils import flt, cint
 
 from inventory_tools.inventory_tools.overrides.work_order import get_allowance_percentage
+from inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost import (
+	get_operating_costs_by_operation,
+)
 
 
 class InventoryToolsStockEntry(StockEntry):
@@ -185,7 +188,7 @@ class InventoryToolsStockEntry(StockEntry):
 		super().get_items(qty, production_item)
 		if self.work_order and self.purpose == "Manufacture":
 			work_order = frappe.get_doc("Work Order", self.work_order)
-		self.calculate_additional_costs(work_order)
+			self.calculate_additional_costs(work_order)
 
 	@frappe.whitelist()
 	def calculate_additional_costs(stock_entry=None, work_order=None):
@@ -208,23 +211,20 @@ class InventoryToolsStockEntry(StockEntry):
 
 
 def add_operations_cost(stock_entry, work_order=None, expense_account=None):
-	from inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost import (
-		get_operating_cost_per_unit_with_date_range,
-	)
-
-	operating_cost_per_unit = get_operating_cost_per_unit_with_date_range(
+	operating_costs = get_operating_costs_by_operation(
 		work_order, stock_entry.bom_no, posting_date=stock_entry.posting_date
 	)
 
-	if operating_cost_per_unit:
-		stock_entry.append(
-			"additional_costs",
-			{
-				"expense_account": expense_account,
-				"description": _("Operating Cost as per Work Order / BOM"),
-				"amount": operating_cost_per_unit * flt(stock_entry.fg_completed_qty),
-			},
-		)
+	if operating_costs:
+		for cost in operating_costs:
+			stock_entry.append(
+				"additional_costs",
+				{
+					"expense_account": cost.get("account"),
+					"description": cost.get("description"),
+					"amount": flt(cost.get("cost_per_unit")) * flt(stock_entry.fg_completed_qty),
+				},
+			)
 
 	if work_order and work_order.additional_operating_cost and work_order.qty:
 		additional_operating_cost_per_unit = flt(work_order.additional_operating_cost) / flt(
