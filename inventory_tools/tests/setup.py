@@ -403,6 +403,17 @@ def create_items(settings):
 			ip.valid_from = "2018-1-1"
 			ip.price_list_rate = item.get("item_price")
 			ip.save()
+
+			if i.is_sales_item:
+				ip = frappe.new_doc("Item Price")
+				ip.item_code = i.item_code
+				ip.uom = i.stock_uom
+				ip.price_list = "Bakery Buying"
+				ip.buying = 1
+				ip.valid_from = "2018-1-1"
+				ip.price_list_rate = item.get("item_price")
+				ip.save()
+
 		if item.get("available_in_house"):
 			se = frappe.new_doc("Stock Entry")
 			se.posting_date = settings.day
