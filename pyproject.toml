@@ -1,6 +1,16 @@
+[project]
+name = "inventory_tools"
+version = "15.6.0"
+description = "Inventory Tools for ERPNext"
+authors = [
+    { name = "AgriTheory", email = "support@agritheory.dev"}
+]
+readme = "README.md"
+dynamic = ["dependencies", "requires-python"]
+
 [tool.poetry]
 name = "inventory_tools"
-version =  "15.6.0"
+version =  "15.6.1"
 authors = ["AgriTheory <support@agritheory.dev>"]
 description = "Inventory Tools for ERPNext"
 readme = "README.md"
