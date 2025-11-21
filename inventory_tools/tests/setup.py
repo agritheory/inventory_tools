@@ -268,7 +268,7 @@ def setup_manufacturing_settings(settings):
 	):
 		wip = frappe.new_doc("Account")
 		wip.account_name = "Manufacturing Wages Capitalized"
-		wip.parent_account = "5111 - Cost of Goods Sold - APC"
+		wip.parent_account = "5110 - Stock Expenses - APC"
 		wip.account_number = "5120"
 		wip.company = settings.company
 		wip.currency = "USD"

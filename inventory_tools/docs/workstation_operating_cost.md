@@ -1,17 +1,29 @@
 <!-- Copyright (c) 2025, AgriTheory and contributors
 For license information, please see license.txt-->
 
-# Workstation Operating Cost Management
+# Workstation Operating Cost
+
+<div class="byline">
+  Tyler Matteson 2025-11-13
+</div>
+
 
 Workstation Operating Cost provides a flexible, time-based system for tracking and allocating manufacturing overhead to production operations. This system maintains historical cost data while automatically applying current rates or adding future rates to manufacturing transactions.
 
 When a new cost period begins, the previous period's end date is set to one day before the new period starts, ensuring complete coverage without gaps. The system validates that cost periods for the same account don't overlap, preventing duplicate or conflicting cost entries.
 
+## ERNext's Default Manufacturing Costing vs. Workstation Operating Cost
+ERPNext's standard manufacturing process applies labor and overhead through a simplified aggregation model. As manufacturing occurs, Job Cards record the time spent at each workstation operation. When the Manufacture Stock Entry is created, the system multiplies those recorded hours by the workstation's current rate, calculates a per-unit cost, and capitalizes the total into the finished goods valuation. This approach works well for straightforward operations but creates several limitations for businesses requiring detailed cost analysis or managing cost changes over time.
+
+The standard model aggregates all operating costs into a single "Expenses Included in Valuation" entry with minimal detail. When rates change midway through a production period, there is no mechanism to apply different rates to different manufacturing dates. Historical cost data is not explicitly maintained, making it difficult to understand how prior periods were costed or to analyze variances over time. Reconciling standard costs to actual expenses becomes challenging because the cost structure lacks sufficient granularity to isolate specific cost types or identify which transactions applied which rates.
+
+Workstation Operating Cost provides an alternative approach through explicit time-based cost periods. The system maintains a history of cost periods for each workstation, with defined start and end dates. When manufacturing occurs on a specific posting date, the system retrieves the cost period active on that date and applies those rates. This design ensures that cost periods never overlap, that historical rates remain intact for audit and analysis purposes, and that rate changes are deliberately managed through explicit period transitions.
+
 ## Account and Item Structure
 
 The system distinguishes between cost types through account and item associations. Resource-based costs like electricity and rent track both an expense account and an inventory item code. For example, electricity uses "2213 - Accrued Manufacturing Electricity" with item "Electricity", while rent uses "2214 - Accrued Manufacturing Rent Contribution" with item "Rent". This dual tracking enables both financial reporting and inventory costing at the item level. Only non-inventoriable items may be selected; stocked items should be added to BOM. 
 
-## Stock Entry Integration
+## How Operating Costs Are Applied
 
 When a Stock Entry is created from a Work Order, the system examines each operation and applies the appropriate operating costs based on the posting date. For each operation, the system:
 
@@ -37,6 +49,10 @@ Here's how operating costs flow through the accounting system for a Stock Entry 
 Operating costs totaling $183.50 are credited from accrued liability accounts ($42.50 electricity, $32.50 rent, $15.00 wages). The finished goods are received at a total valuation of $334.48, reflecting both material costs and manufacturing overhead. The per-unit cost of each pie crust increases from $3.02 in materials to $4.82 including overhead, ensuring accurate inventory valuation throughout the production cycle.
 
 ## Reconciling Accrued Manufacturing Costs
+
+<aside style="background-color: #9d6335; color: white; padding: 0.75em; border-radius: 0.5rem;">
+The configuration described here - where accrued costs are used - requires an additional step in the period close and/or payroll-period close processes. The liabilities accrued in the manufacturing process must be regularly reconciled and re-classed against the "actual" expense source documents (Purchase Invoice or Journal Entry).
+</aside>
 
 The accrued liability accounts credited during manufacturing represent standard costs applied through workstation rates. These amounts require reconciliation when actual expenses are incurred to prevent double counting and ensure proper expense classification.
 

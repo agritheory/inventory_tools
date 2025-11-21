@@ -2,7 +2,14 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import getdate
+from frappe.utils import flt
+from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry
+
+
+def submit_all_purchase_receipts():
+	for pr in frappe.get_all("Purchase Receipt", {"docstatus": 0}):
+		pr = frappe.get_doc("Purchase Receipt", pr)
+		pr.submit()
 
 
 def complete_job_cards_for_work_order(wo):
@@ -18,44 +25,76 @@ def complete_job_cards_for_work_order(wo):
 		doc.submit()
 
 
-def test_operating_cost_changes_with_posting_date():
-	"""Ensure Manufacture Stock Entry cost changes with posting date ranges."""
+def test_operating_cost_changes():
+	"""
+	Test that operating costs are properly capitalized into finished goods during manufacture.
+
+	| Account                                    | Debit    | Credit   |
+	|--------------------------------------------|----------|----------|
+	| 1110 - Work In Process - APC              | 240.98   |          |
+	| 2212 - Accrued Manufacturing Wages - APC  |          | 10.00    |
+	| 2213 - Accrued Manufacturing Electricity  |          | 41.50    |
+	| 2214 - Accrued Manufacturing Rent - APC   |          | 32.00    |
+	| 5119 - Stock Adjustment - APC             |          | 150.98   |
+
+	Verifies that 50 units of Pie Crust complete manufacturing with:
+	- Raw materials consumed: $150.98
+	- Operating costs capitalized: $83.50
+	- Total finished goods valuation: $234.48 ($4.69 per unit)
+	"""
+
 	wo = frappe.get_doc("Work Order", "MFG-WO-2025-00016")
+	submit_all_purchase_receipts()
 
-	ws = frappe.get_doc("Workstation", "Mixer Station")
+	se = make_stock_entry(wo.name, "Material Transfer for Manufacture", 50)
+	se = frappe.get_doc(**se)
+	se.save()
+	material_receipt = frappe.copy_doc(se)
+	material_receipt.stock_entry_type = "Material Receipt"
+	for row in material_receipt.items:
+		row.t_warehouse = row.s_warehouse
+		row.s_warehouse = None
+		row.expense_account = "5119 - Stock Adjustment - APC"
+	material_receipt.save()
+	material_receipt.submit()
+	se.submit()
 
-	old_date = getdate("2024-06-15")
-	new_date = getdate("2025-06-15")
+	complete_job_cards_for_work_order(wo.name)
 
-	cost_2024 = None
-	cost_2025 = None
+	sem = make_stock_entry(wo.name, "Manufacture", 50)
+	sem = frappe.get_doc(**sem)
+	sem.save()
+	sem.submit()
 
-	for oc in ws.workstation_operating_cost:
-		if getdate(oc.from_date) <= old_date <= getdate(oc.to_date):
-			cost_2024 = oc.electricity_cost + oc.consumable_cost + oc.rent_cost
-		if getdate(oc.from_date) <= new_date <= getdate(oc.to_date):
-			cost_2025 = oc.electricity_cost + oc.consumable_cost + oc.rent_cost
+	assert sem.fg_completed_qty == 50
+	assert flt(sem.total_incoming_value, 2) == 234.48
+	assert flt(sem.total_outgoing_value, 2) == 150.98
+	assert flt(sem.total_additional_costs, 2) == 83.5
+	fg_item = [item for item in sem.items if item.is_finished_item][0]
+	assert fg_item.qty == 50
+	assert flt(fg_item.basic_rate, 4) == 3.0196  # $150.98 / 50 units
+	assert flt(fg_item.additional_cost, 2) == 83.5  # Operating costs per finished item line
+	assert flt(fg_item.valuation_rate, 4) == 4.6896  # ($150.98 + $83.50) / 50 units
+	wages_cost = sum(cost.amount for cost in sem.additional_costs if "2212" in cost.expense_account)
+	electricity_cost = sum(
+		cost.amount for cost in sem.additional_costs if "2213" in cost.expense_account
+	)
+	rent_cost = sum(cost.amount for cost in sem.additional_costs if "2214" in cost.expense_account)
+	assert flt(wages_cost, 2) == 10.00
+	assert flt(electricity_cost, 2) == 41.50
+	assert flt(rent_cost, 2) == 32.00
 
-	time_in_mins = wo.operations[0].time_in_mins
-	hours = time_in_mins / 60.0
+	gl_entries = frappe.get_all(
+		"GL Entry",
+		filters={"voucher_type": "Stock Entry", "voucher_no": sem.name},
+		fields=["account", "debit", "credit"],
+	)
 
-	expected_2024 = (hours * cost_2024) / wo.qty
-	expected_2025 = (hours * cost_2025) / wo.qty
+	accounts_in_gl = {entry["account"]: entry for entry in gl_entries}
+	assert "2212 - Accrued Manufacturing Wages - APC" in accounts_in_gl
+	assert "2213 - Accrued Manufacturing Electricity - APC" in accounts_in_gl
+	assert "2214 - Accrued Manufacturing Rent Contribution - APC" in accounts_in_gl
 
-	actual_2024 = get_operating_cost_per_unit_with_date_range(work_order=wo, posting_date=old_date)
-	actual_2025 = get_operating_cost_per_unit_with_date_range(work_order=wo, posting_date=new_date)
-
-	assert (
-		actual_2025 != actual_2024
-	), "Operating cost should change with different posting date ranges"
-	assert actual_2024 > 0, "2024 cost should be greater than 0"
-	assert actual_2025 > 0, "2025 cost should be greater than 0"
-	assert actual_2025 > actual_2024, "2025 cost should be higher than 2024 cost"
-
-	tolerance = 3
-	assert (
-		abs(actual_2024 - expected_2024) < tolerance
-	), f"Expected {expected_2024} for 2024, got {actual_2024}"
-	assert (
-		abs(actual_2025 - expected_2025) < tolerance
-	), f"Expected {expected_2025} for 2025, got {actual_2025}"
+	total_debit = sum(entry["debit"] for entry in gl_entries)
+	total_credit = sum(entry["credit"] for entry in gl_entries)
+	assert flt(total_debit, 2) == flt(total_credit, 2)
