@@ -10,7 +10,7 @@ requires-python = ">=3.10"
 
 [tool.poetry]
 name = "inventory_tools"
-version =  "14.6.1"
+version =  "14.7.0"
 authors = ["AgriTheory <support@agritheory.dev>"]
 description = "Inventory Tools for ERPNext"
 readme = "README.md"
