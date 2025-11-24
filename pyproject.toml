@@ -1,3 +1,13 @@
+[project]
+name = "inventory_tools"
+version = "14.6.1"
+description = "Inventory Tools for ERPNext"
+authors = [
+    { name = "AgriTheory", email = "support@agritheory.dev" }
+]
+readme = "README.md"
+requires-python = ">=3.10"
+
 [tool.poetry]
 name = "inventory_tools"
 version =  "14.6.1"
