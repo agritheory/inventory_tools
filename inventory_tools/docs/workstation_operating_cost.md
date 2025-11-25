@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Workstation Operating Cost
 
 <div class="byline">
-  Tyler Matteson 2025-11-21
+  Tyler Matteson 2025-11-25
 </div>
 
 
@@ -39,20 +39,30 @@ Each additional cost entry includes a comprehensive description showing the oper
 
 Here's how operating costs flow through the accounting system for a Stock Entry manufacturing 50 pie crusts (Work Order MFG-WO-2025-00016):
 
-| Account | Stock Ledger | Debit | Credit |
-| :------- | :------------: | -----: | ------: |
-| 1310 - Stock In Hand - APC | -Various @ Various | $334.48 |  |
-| Expenses Included in Valuation | | | $41.50 |
-| 2214 - Accrued Manufacturing Rent Contribution - APC | | | $182.98 |
-| 2212 - Accrued Manufacturing Wages - APC | | | $110.00 |
+The "Transfer for Manufacture" step remains the same:
 
+| Account                                    | Stock Ledger | Debit    | Credit   |
+|--------------------------------------------|--------------|----------|----------|
+| 1410 - Stock In Hand - APC                 |  Various     |          |   150.98 |
+| 1110 - Work In Process - APC               |  Various     |   150.98 |          |
 
-| Account | Stock Ledger | Debit | Credit |
-| :------- | :------------: | -----: | ------: |
-| 1310 - Stock In Hand - APC | -Various @ Various | $334.48 |  |
-| 2213 - Accrued Manufacturing Electricity - APC | | | $41.50 |
-| 2214 - Accrued Manufacturing Rent Contribution - APC | | | $182.98 |
-| 2212 - Accrued Manufacturing Wages - APC | | | $110.00 |
+The default ERPNext workflow through version 15:
+
+| Account                                    | Stock Ledger | Debit    | Credit   |
+|--------------------------------------------|--------------|----------|----------|
+| 1410 - Stock In Hand - APC                 | Various      | 240.98   |          |
+| Expenses Included in Valuation             |              |          | 90.00    |
+| 1110 - Work In Process - APC               |              |          | 150.98   |
+
+An example using Workstation Operating Cost with a single operation:
+
+| Account                                    | Stock Ledger | Debit    | Credit   |
+|--------------------------------------------|--------------|----------|----------|
+| 1410 - Stock In Hand - APC                 | Various      | 240.98   |          |
+| 2212 - Accrued Manufacturing Wages - APC   |              |          | 10.00    |
+| 2213 - Accrued Manufacturing Electricity   |              |          | 41.50    |
+| 2214 - Accrued Manufacturing Rent - APC    |              |          | 32.00    |
+| 1110 - Work In Process - APC               |              |          | 150.98   |
 
 Operating costs totaling $183.50 are credited from accrued liability accounts ($42.50 electricity, $32.50 rent, $15.00 wages). The finished goods are received at a total valuation of $334.48, reflecting both material costs and manufacturing overhead. The per-unit cost of each pie crust increases from $3.02 in materials to $4.82 including overhead, ensuring accurate inventory valuation throughout the production cycle.
 
@@ -68,17 +78,17 @@ When payroll is processed or utility bills are paid, standard accounting entries
 
 For the example above where $110.00 was credited to Accrued Manufacturing Wages based on standard workstation rates, the reconciliation would occur after the payroll run. The journal entry uses a contra-expense account to maintain the tie between total wage expense and the payroll register while separately identifying the capitalized portion:
 
-**Initial Payroll Entry (Standard):**
-| Account | Debit | Credit |
-| :------- | -----: | ------: |
-| 5213 - Salary - APC | $2,000.00 | |
-| 1110 - Cash - APC | | $2,000.00 |
+Initial Payroll Entry (Standard)
+| Account                                      | Debit      |     Credit |
+| :--------------------------------------------| ---------: | ---------: |
+| 5213 - Salary - APC                          |  $2,000.00 |            |
+| 1110 - Cash - APC                            |            |  $2,000.00 |
 
-**Reconciliation Journal Entry:**
-| Account | Debit | Credit |
-| :------- | -----: | ------: |
-| 2212 - Accrued Manufacturing Wages - APC | $110.00 | |
-| 6213 - Manufacturing Wages Capitalized - APC | | $110.00 |
+Reconciliation Journal Entry
+| Account                                      | Debit      |     Credit |
+| :--------------------------------------------| ---------: | ---------: |
+| 2212 - Accrued Manufacturing Wages - APC     | $110.00    |            |
+| 6213 - Manufacturing Wages Capitalized - APC |            |    $110.00 |
 
 The Accrued Manufacturing Wages account should be configured as a liability account with the account type "Expenses Included in Valuation" to function as a contra-expense. This preserves the gross salary expense at $2,000.00 matching the payroll register while the contra-expense shows the $110.00 manufacturing portion. The Profit and Loss presents net operating wages of $1,890.00, with the capitalized amount flowing to Cost of Goods Sold when the finished goods are sold through ERPNext's standard inventory costing methods. It is not usually necessary to use a contra-expense account for rent or utilities.
 

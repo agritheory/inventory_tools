@@ -29,19 +29,19 @@ def test_operating_cost_changes():
 	"""
 	Test that operating costs are properly capitalized into finished goods during manufacture.
 	Transfer for Manufacture:
-	| Account                                    | Debit    | Credit   |
-	|--------------------------------------------|----------|----------|
-	| 1410 - Stock In Hand - APC                 |          |   150.98 |
-	| 1110 - Work In Process - APC               |   150.98 |          |
+	| Account                                    | Stock Ledger | Debit    | Credit   |
+	|--------------------------------------------|--------------|----------|----------|
+	| 1410 - Stock In Hand - APC                 |  Various     |          |   150.98 |
+	| 1110 - Work In Process - APC               |  Various     |   150.98 |          |
 
 	Manufacture:
-	| Account                                    | Debit    | Credit   |
-	|--------------------------------------------|----------|----------|
-	| 1410 - Stock In Hand - APC                 | 240.98   |          |
-	| 2212 - Accrued Manufacturing Wages - APC   |          | 10.00    |
-	| 2213 - Accrued Manufacturing Electricity   |          | 41.50    |
-	| 2214 - Accrued Manufacturing Rent - APC    |          | 32.00    |
-	| 1110 - Work In Process - APC               |          | 150.98   |
+	| Account                                    | Stock Ledger | Debit    | Credit   |
+	|--------------------------------------------|--------------|----------|----------|
+	| 1410 - Stock In Hand - APC                 | Various      | 240.98   |          |
+	| 2212 - Accrued Manufacturing Wages - APC   |              |          | 10.00    |
+	| 2213 - Accrued Manufacturing Electricity   |              |          | 41.50    |
+	| 2214 - Accrued Manufacturing Rent - APC    |              |          | 32.00    |
+	| 1110 - Work In Process - APC               |              |          | 150.98   |
 
 	Verifies that 50 units of Pie Crust complete manufacturing with:
 	- Raw materials consumed: $150.98
