@@ -32,7 +32,6 @@ def validate_workstation_costs(doc, method):
 	for idx, r in enumerate(doc.workstation_operating_cost, start=1):
 		if not r.from_date:
 			frappe.throw(_("Row {0}: 'From Date' is required.").format(idx))
-
 	# Sort and auto-fill to_dates
 	costs = sorted(doc.workstation_operating_cost, key=lambda x: getdate(x.from_date))
 
@@ -107,46 +106,59 @@ def get_operating_costs_by_operation(
 		ws = frappe.get_doc("Workstation", op.workstation)
 		hours = flt(op.time_in_mins) / 60.0
 
-		for row in ws.workstation_operating_cost:
-			from_date = getdate(row.from_date) if row.from_date else None
-			to_date = getdate(row.to_date) if row.to_date else None
+		if ws.workstation_operating_cost:
+			for row in ws.workstation_operating_cost:
+				from_date = getdate(row.from_date) if row.from_date else None
+				to_date = getdate(row.to_date) if row.to_date else None
 
-			date_matches = False
-			if from_date and to_date:
-				if from_date <= posting_date <= to_date:
-					date_matches = True
-			elif from_date and not to_date:
-				if from_date <= posting_date:
-					date_matches = True
+				date_matches = False
+				if from_date and to_date:
+					if from_date <= posting_date <= to_date:
+						date_matches = True
+				elif from_date and not to_date:
+					if from_date <= posting_date:
+						date_matches = True
 
-			if date_matches and row.account:
-				total_cost = flt(row.qty) * hours
+				if date_matches and row.account:
+					total_cost = flt(row.qty) * hours
 
-				qty = flt(work_order.qty)
-				if qty:
-					cost_per_unit = flt(total_cost / qty, 2)
+					qty = flt(work_order.qty)
+					if qty:
+						cost_per_unit = flt(total_cost / qty, 2)
 
-					operation_name = op.operation or ws.workstation_name or ws.name
-					account_short = row.account.split(" - ")[0] if " - " in row.account else row.account
+						operation_name = op.operation or ws.workstation_name or ws.name
+						account_short = row.account.split(" - ")[0] if " - " in row.account else row.account
 
-					description_parts = [
-						operation_name,
-						ws.name,
-						f"{hours:.2f} hrs @ ${flt(row.qty):.2f}/hr",
-						f"${cost_per_unit:.2f}/unit",
-						account_short,
-					]
+						description_parts = [
+							operation_name,
+							ws.name,
+							f"{hours:.2f} hrs @ ${flt(row.qty):.2f}/hr",
+							f"${cost_per_unit:.2f}/unit",
+							account_short,
+						]
 
-					if row.item_code:
-						description_parts.append(f"Item: {row.item_code}")
+						if row.item_code:
+							description_parts.append(f"Item: {row.item_code}")
 
-					description = " | ".join(description_parts)
+						description = " | ".join(description_parts)
 
-					operating_costs.append(
-						frappe._dict(
-							{"account": row.account, "cost_per_unit": cost_per_unit, "description": description}
+						operating_costs.append(
+							frappe._dict(
+								{"account": row.account, "cost_per_unit": cost_per_unit, "description": description}
+							)
 						)
-					)
+		else:
+			account = frappe.db.get_value("Company", ws.company, "expenses_included_in_valuation")
+			cost_per_unit = flt((ws.hour_rate * hours) / flt(work_order.qty), 2)
+			operating_costs.append(
+				frappe._dict(
+					{
+						"account": account,
+						"cost_per_unit": cost_per_unit,
+						"description": f"Net Cost from {ws.name}",
+					}
+				)
+			)
 
 	return operating_costs
 

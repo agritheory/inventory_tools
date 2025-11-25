@@ -219,6 +219,7 @@ def setup_manufacturing_settings(settings):
 		wip.report_type = "Balance Sheet"
 		wip.root_type = "Asset"
 		wip.save()
+		frappe.set_value("Warehouse", "Kitchen - APC", "account", wip.name)
 
 	if not frappe.db.exists(
 		"Account", {"account_name": "Accrued Manufacturing Wages", "company": settings.company}
@@ -276,7 +277,6 @@ def setup_manufacturing_settings(settings):
 		wip.root_type = "Expense"
 		wip.save()
 
-	frappe.set_value("Warehouse", "Kitchen - APC", "account", wip.name)
 	frappe.set_value(
 		"Inventory Tools Settings", settings.company, "enable_work_order_subcontracting", 1
 	)

@@ -3,7 +3,8 @@
 
 frappe.ui.form.on('Workstation', {
 	refresh: frm => {
-		// frm.set_query('')
+		set_item_query(frm)
+		set_read_only(frm)
 	},
 })
 
@@ -36,3 +37,29 @@ frappe.ui.form.on('Workstation Operating Cost', {
 			})
 	},
 })
+
+function set_item_query(frm) {
+	frm.set_query('item_code', 'workstation_operating_cost', () => {
+		return {
+			filters: {
+				is_stock_item: 0,
+				is_fixed_asset: 0,
+				disabled: 0,
+			},
+		}
+	})
+}
+
+function set_read_only(frm) {
+	if (frm.doc.workstation_operating_cost && frm.doc.workstation_operating_cost.length > 0) {
+		frm.set_df_property('hour_rate_labour', 'read_only', 1)
+		frm.set_df_property('hour_rate_electricity', 'read_only', 1)
+		frm.set_df_property('hour_rate_consumable', 'read_only', 1)
+		frm.set_df_property('hour_rate_rent', 'read_only', 1)
+	} else {
+		frm.set_df_property('hour_rate_labour', 'read_only', 0)
+		frm.set_df_property('hour_rate_electricity', 'read_only', 0)
+		frm.set_df_property('hour_rate_consumable', 'read_only', 0)
+		frm.set_df_property('hour_rate_rent', 'read_only', 0)
+	}
+}

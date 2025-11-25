@@ -225,6 +225,8 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 					"amount": flt(cost.get("cost_per_unit")) * flt(stock_entry.fg_completed_qty),
 				},
 			)
+	else:
+		super().calculate_additional_costs(stock_entry, work_order)
 
 	if work_order and work_order.additional_operating_cost and work_order.qty:
 		additional_operating_cost_per_unit = flt(work_order.additional_operating_cost) / flt(

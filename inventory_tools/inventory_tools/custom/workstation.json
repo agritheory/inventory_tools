@@ -106,7 +106,6 @@
 			"insert_after": "custom_section_break_jmwyl",
 			"is_system_generated": 0,
 			"is_virtual": 0,
-			"label": "Operating Cost",
 			"length": 0,
 			"module": "Inventory Tools",
 			"no_copy": 0,
@@ -126,47 +125,6 @@
 		}
 	],
 	"doctype": "Workstation",
-	"property_setters": [
-		{
-			"doc_type": "Workstation",
-			"doctype_or_field": "DocField",
-			"field_name": "hour_rate_consumable",
-			"is_system_generated": 0,
-			"module": "Inventory Tools",
-			"property": "read_only",
-			"property_type": "Check",
-			"value": "1"
-		},
-		{
-			"doc_type": "Workstation",
-			"doctype_or_field": "DocField",
-			"field_name": "hour_rate_electricity",
-			"is_system_generated": 0,
-			"module": "Inventory Tools",
-			"property": "read_only",
-			"property_type": "Check",
-			"value": "1"
-		},
-		{
-			"doc_type": "Workstation",
-			"doctype_or_field": "DocField",
-			"field_name": "hour_rate_labour",
-			"is_system_generated": 0,
-			"module": "Inventory Tools",
-			"property": "read_only",
-			"property_type": "Check",
-			"value": "1"
-		},
-		{
-			"doc_type": "Workstation",
-			"doctype_or_field": "DocField",
-			"field_name": "hour_rate_rent",
-			"is_system_generated": 0,
-			"module": "Inventory Tools",
-			"property": "read_only",
-			"property_type": "Check",
-			"value": "1"
-		}
-	],
+	"property_setters": [],
 	"sync_on_migrate": 1
 }

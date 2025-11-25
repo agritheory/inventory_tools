@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Workstation Operating Cost
 
 <div class="byline">
-  Tyler Matteson 2025-11-13
+  Tyler Matteson 2025-11-21
 </div>
 
 
@@ -38,6 +38,14 @@ Each additional cost entry includes a comprehensive description showing the oper
 ## Example
 
 Here's how operating costs flow through the accounting system for a Stock Entry manufacturing 50 pie crusts (Work Order MFG-WO-2025-00016):
+
+| Account | Stock Ledger | Debit | Credit |
+| :------- | :------------: | -----: | ------: |
+| 1310 - Stock In Hand - APC | -Various @ Various | $334.48 |  |
+| Expenses Included in Valuation | | | $41.50 |
+| 2214 - Accrued Manufacturing Rent Contribution - APC | | | $182.98 |
+| 2212 - Accrued Manufacturing Wages - APC | | | $110.00 |
+
 
 | Account | Stock Ledger | Debit | Credit |
 | :------- | :------------: | -----: | ------: |
