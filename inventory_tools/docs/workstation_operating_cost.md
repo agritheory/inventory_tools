@@ -76,7 +76,7 @@ The accrued liability accounts credited during manufacturing represent standard 
 
 When payroll is processed or utility bills are paid, standard accounting entries expense these costs immediately. Without reconciliation, the manufacturing portion would be counted twice: once as period expense and again in Cost of Goods Sold when inventory is sold. A reclassification journal entry prevents this double counting by moving the manufacturing portion from a liability to a contra-expense account, preserving the gross expense amount for reconciliation to source documents while properly classifying the manufacturing portion.
 
-For the example above where $110.00 was credited to Accrued Manufacturing Wages based on standard workstation rates, the reconciliation would occur after the payroll run. The journal entry uses a contra-expense account to maintain the tie between total wage expense and the payroll register while separately identifying the capitalized portion:
+For the example above where $10.00 was credited to Accrued Manufacturing Wages based on standard workstation rates, the reconciliation would occur after the payroll run. The journal entry uses a contra-expense account to maintain the tie between total wage expense and the payroll register while separately identifying the capitalized portion:
 
 Initial Payroll Entry (Standard)
 | Account                                      | Debit      |     Credit |
@@ -87,8 +87,8 @@ Initial Payroll Entry (Standard)
 Reconciliation Journal Entry
 | Account                                      | Debit      |     Credit |
 | :--------------------------------------------| ---------: | ---------: |
-| 2212 - Accrued Manufacturing Wages - APC     | $110.00    |            |
-| 6213 - Manufacturing Wages Capitalized - APC |            |    $110.00 |
+| 2212 - Accrued Manufacturing Wages - APC     |     $10.00 |            |
+| 6213 - Manufacturing Wages Capitalized - APC |            |     $10.00 |
 
 The Accrued Manufacturing Wages account should be configured as a liability account with the account type "Expenses Included in Valuation" to function as a contra-expense. This preserves the gross salary expense at $2,000.00 matching the payroll register while the contra-expense shows the $110.00 manufacturing portion. The Profit and Loss presents net operating wages of $1,890.00, with the capitalized amount flowing to Cost of Goods Sold when the finished goods are sold through ERPNext's standard inventory costing methods. It is not usually necessary to use a contra-expense account for rent or utilities.
 
