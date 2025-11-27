@@ -230,11 +230,11 @@ def calculate_total_variances(
 	Adds total_variance fields to each row showing the aggregate variance for that group.
 
 	Args:
-	        data: List of row dictionaries
-	        demand_doc_field: Field name for demand document (e.g., 'purchase_order')
-	        demand_qty_field: Field name for demand quantity (e.g., 'po_qty')
-	        receipt_qty_field: Field name for receipt quantity (e.g., 'pr_qty')
-	        invoice_qty_field: Optional field name for invoice quantity
+	                data: List of row dictionaries
+	                demand_doc_field: Field name for demand document (e.g., 'purchase_order')
+	                demand_qty_field: Field name for demand quantity (e.g., 'po_qty')
+	                receipt_qty_field: Field name for receipt quantity (e.g., 'pr_qty')
+	                invoice_qty_field: Optional field name for invoice quantity
 	"""
 	from collections import defaultdict
 
@@ -272,8 +272,20 @@ def calculate_total_variances(
 				invoice_variance = total_invoice_qty - demand_qty
 			else:
 				invoice_variance = None
+		else:
+			# Orphaned items (no demand document)
+			# Full quantities are the variance
+			if group["receipt_qtys"]:
+				receipt_variance = sum(group["receipt_qtys"])
+			else:
+				receipt_variance = None
 
-			total_variances[key] = {"receipt": receipt_variance, "invoice": invoice_variance}
+			if invoice_qty_field and group["invoice_qtys"]:
+				invoice_variance = sum(group["invoice_qtys"])
+			else:
+				invoice_variance = None
+
+		total_variances[key] = {"receipt": receipt_variance, "invoice": invoice_variance}
 
 	# Add total variances to each row
 	# Build field names by replacing '_qty' with '_total_qty_variance'
@@ -376,6 +388,114 @@ def get_purchasing_cycle_data(filters):
 
 	data = query.run(as_dict=True)
 
+	# Query 2: PR orphan items (items in PR without PO link)
+	if not filters.get("purchase_order"):
+		pr_orphan_query = (
+			frappe.qb.from_(PurchaseReceiptItem)
+			.inner_join(PurchaseReceipt)
+			.on(PurchaseReceipt.name == PurchaseReceiptItem.parent)
+			.left_join(PurchaseInvoiceItem)
+			.on(
+				(PurchaseInvoiceItem.purchase_receipt == PurchaseReceiptItem.parent)
+				& (PurchaseInvoiceItem.pr_detail == PurchaseReceiptItem.name)
+			)
+			.left_join(PurchaseInvoice)
+			.on(PurchaseInvoice.name == PurchaseInvoiceItem.parent)
+			.select(
+				PurchaseReceiptItem.item_code,
+				PurchaseReceiptItem.item_name,
+				frappe.qb.terms.NullValue().as_("purchase_order"),
+				frappe.qb.terms.NullValue().as_("po_qty"),
+				frappe.qb.terms.NullValue().as_("po_rate"),
+				frappe.qb.terms.NullValue().as_("po_status"),
+				PurchaseReceiptItem.parent.as_("purchase_receipt"),
+				PurchaseReceiptItem.qty.as_("pr_qty"),
+				PurchaseReceiptItem.rate.as_("pr_rate"),
+				PurchaseReceipt.status.as_("pr_status"),
+				PurchaseInvoiceItem.parent.as_("purchase_invoice"),
+				PurchaseInvoiceItem.qty.as_("pi_qty"),
+				PurchaseInvoiceItem.rate.as_("pi_rate"),
+				PurchaseInvoice.status.as_("pi_status"),
+				PurchaseReceipt.posting_date.as_("po_date"),
+			)
+			.where(
+				(PurchaseReceipt.docstatus == 1)
+				& ((PurchaseReceiptItem.purchase_order.isnull()) | (PurchaseReceiptItem.purchase_order == ""))
+			)
+		)
+
+		# Apply filters to PR orphan query
+		if filters.get("company"):
+			pr_orphan_query = pr_orphan_query.where(PurchaseReceipt.company == filters.get("company"))
+
+		if filters.get("start_date"):
+			pr_orphan_query = pr_orphan_query.where(
+				PurchaseReceipt.posting_date >= filters.get("start_date")
+			)
+
+		if filters.get("end_date"):
+			pr_orphan_query = pr_orphan_query.where(PurchaseReceipt.posting_date <= filters.get("end_date"))
+
+		if filters.get("purchase_receipt"):
+			pr_orphan_query = pr_orphan_query.where(PurchaseReceipt.name == filters.get("purchase_receipt"))
+		if filters.get("purchase_invoice"):
+			pr_orphan_query = pr_orphan_query.where(PurchaseInvoice.name == filters.get("purchase_invoice"))
+
+		pr_orphan_query = pr_orphan_query.orderby(PurchaseReceipt.posting_date, order=frappe.qb.desc)
+		pr_orphan_query = pr_orphan_query.orderby(PurchaseReceiptItem.item_code)
+		data.extend(pr_orphan_query.run(as_dict=True))
+
+	# Query 3: PI orphan items (items in PI without PO or PR link)
+	if not filters.get("purchase_order") and not filters.get("purchase_receipt"):
+		pi_orphan_query = (
+			frappe.qb.from_(PurchaseInvoiceItem)
+			.inner_join(PurchaseInvoice)
+			.on(PurchaseInvoice.name == PurchaseInvoiceItem.parent)
+			.select(
+				PurchaseInvoiceItem.item_code,
+				PurchaseInvoiceItem.item_name,
+				frappe.qb.terms.NullValue().as_("purchase_order"),
+				frappe.qb.terms.NullValue().as_("po_qty"),
+				frappe.qb.terms.NullValue().as_("po_rate"),
+				frappe.qb.terms.NullValue().as_("po_status"),
+				frappe.qb.terms.NullValue().as_("purchase_receipt"),
+				frappe.qb.terms.NullValue().as_("pr_qty"),
+				frappe.qb.terms.NullValue().as_("pr_rate"),
+				frappe.qb.terms.NullValue().as_("pr_status"),
+				PurchaseInvoiceItem.parent.as_("purchase_invoice"),
+				PurchaseInvoiceItem.qty.as_("pi_qty"),
+				PurchaseInvoiceItem.rate.as_("pi_rate"),
+				PurchaseInvoice.status.as_("pi_status"),
+				PurchaseInvoice.posting_date.as_("po_date"),
+			)
+			.where(
+				(PurchaseInvoice.docstatus == 1)
+				& ((PurchaseInvoiceItem.purchase_order.isnull()) | (PurchaseInvoiceItem.purchase_order == ""))
+				& (
+					(PurchaseInvoiceItem.purchase_receipt.isnull()) | (PurchaseInvoiceItem.purchase_receipt == "")
+				)
+			)
+		)
+
+		# Apply filters to PI orphan query
+		if filters.get("company"):
+			pi_orphan_query = pi_orphan_query.where(PurchaseInvoice.company == filters.get("company"))
+
+		if filters.get("start_date"):
+			pi_orphan_query = pi_orphan_query.where(
+				PurchaseInvoice.posting_date >= filters.get("start_date")
+			)
+
+		if filters.get("end_date"):
+			pi_orphan_query = pi_orphan_query.where(PurchaseInvoice.posting_date <= filters.get("end_date"))
+
+		if filters.get("purchase_invoice"):
+			pi_orphan_query = pi_orphan_query.where(PurchaseInvoice.name == filters.get("purchase_invoice"))
+
+		pi_orphan_query = pi_orphan_query.orderby(PurchaseInvoice.posting_date, order=frappe.qb.desc)
+		pi_orphan_query = pi_orphan_query.orderby(PurchaseInvoiceItem.item_code)
+		data.extend(pi_orphan_query.run(as_dict=True))
+
 	# Get field precisions
 	qty_precision = get_field_precision("Purchase Order Item", "qty")
 	rate_precision = get_field_precision("Purchase Order Item", "rate")
@@ -391,36 +511,49 @@ def get_purchasing_cycle_data(filters):
 	for row in data:
 		has_discrepancy = False
 
-		# Determine if we should ignore small discrepancies based on closed status
-		ignore_discrepancy = not per_doctype_mode and (row.get("po_status") == "Closed")
-
-		# Calculate quantity variances
-		if row.pr_qty is not None and row.po_qty is not None:
-			row["pr_qty_variance"] = row.pr_qty - row.po_qty
-			if not ignore_discrepancy and not compare_values(row.pr_qty, row.po_qty, qty_precision):
-				has_discrepancy = True
-
-		if row.pi_qty is not None and row.po_qty is not None:
-			row["pi_qty_variance"] = row.pi_qty - row.po_qty
-			if not ignore_discrepancy and not compare_values(row.pi_qty, row.po_qty, qty_precision):
-				has_discrepancy = True
-
-		# Calculate rate variances
-		if row.pr_rate is not None and row.po_rate is not None:
-			row["pr_rate_variance"] = row.pr_rate - row.po_rate
-			if not ignore_discrepancy and not compare_values(row.pr_rate, row.po_rate, rate_precision):
-				has_discrepancy = True
-
-		if row.pi_rate is not None and row.po_rate is not None:
-			row["pi_rate_variance"] = row.pi_rate - row.po_rate
-			if not ignore_discrepancy and not compare_values(row.pi_rate, row.po_rate, rate_precision):
-				has_discrepancy = True
-
-		# Check for missing documents
-		if not row.purchase_receipt:
+		# Flag orphaned items (items without PO reference)
+		if not row.get("purchase_order"):
 			has_discrepancy = True
-		if not row.purchase_invoice:
-			has_discrepancy = True
+			# For orphaned items, the entire quantity/rate is the variance
+			if row.pr_qty is not None:
+				row["pr_qty_variance"] = row.pr_qty
+			if row.pr_rate is not None:
+				row["pr_rate_variance"] = row.pr_rate
+			if row.pi_qty is not None:
+				row["pi_qty_variance"] = row.pi_qty
+			if row.pi_rate is not None:
+				row["pi_rate_variance"] = row.pi_rate
+		else:
+			# Determine if we should ignore small discrepancies based on closed status
+			ignore_discrepancy = not per_doctype_mode and (row.get("po_status") == "Closed")
+
+			# Calculate quantity variances
+			if row.pr_qty is not None and row.po_qty is not None:
+				row["pr_qty_variance"] = row.pr_qty - row.po_qty
+				if not ignore_discrepancy and not compare_values(row.pr_qty, row.po_qty, qty_precision):
+					has_discrepancy = True
+
+			if row.pi_qty is not None and row.po_qty is not None:
+				row["pi_qty_variance"] = row.pi_qty - row.po_qty
+				if not ignore_discrepancy and not compare_values(row.pi_qty, row.po_qty, qty_precision):
+					has_discrepancy = True
+
+			# Calculate rate variances
+			if row.pr_rate is not None and row.po_rate is not None:
+				row["pr_rate_variance"] = row.pr_rate - row.po_rate
+				if not ignore_discrepancy and not compare_values(row.pr_rate, row.po_rate, rate_precision):
+					has_discrepancy = True
+
+			if row.pi_rate is not None and row.po_rate is not None:
+				row["pi_rate_variance"] = row.pi_rate - row.po_rate
+				if not ignore_discrepancy and not compare_values(row.pi_rate, row.po_rate, rate_precision):
+					has_discrepancy = True
+
+			# Check for missing documents
+			if not row.purchase_receipt:
+				has_discrepancy = True
+			if not row.purchase_invoice:
+				has_discrepancy = True
 
 		# Only include rows with discrepancies
 		if has_discrepancy:
