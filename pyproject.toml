@@ -10,7 +10,7 @@ dynamic = ["dependencies", "requires-python"]
 
 [tool.poetry]
 name = "inventory_tools"
-version =  "15.8.1"
+version =  "15.9.0"
 authors = ["AgriTheory <support@agritheory.dev>"]
 description = "Inventory Tools for ERPNext"
 readme = "README.md"
