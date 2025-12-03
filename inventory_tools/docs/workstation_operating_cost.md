@@ -13,7 +13,7 @@ Workstation Operating Cost provides a flexible, time-based system for tracking a
 When a new cost period begins, the previous period's end date is set to one day before the new period starts, ensuring complete coverage without gaps. The system validates that cost periods for the same account don't overlap, preventing duplicate or conflicting cost entries.
 
 ## ERNext's Default Manufacturing Costing vs. Workstation Operating Cost
-ERPNext's standard manufacturing process applies labor and overhead through a simplified aggregation model. As manufacturing occurs, Job Cards record the time spent at each workstation operation. When the Manufacture Stock Entry is created, the system multiplies those recorded hours by the workstation's current rate, calculates a per-unit cost, and capitalizes the total into the finished goods valuation. This approach works well for straightforward operations but creates several limitations for businesses requiring detailed cost analysis or managing cost changes over time.
+ERPNext's standard manufacturing process applies labor and overhead through a simplified aggregation model. As manufacturing occurs, Job Cards record the time spent at each workstation operation. When the system creates a Manufacture Stock Entry, it multiplies those recorded hours by the workstation's current rate, calculates a per-unit cost, and capitalizes the total into the finished goods valuation. This approach works well for straightforward operations but creates several limitations for businesses requiring detailed cost analysis or managing cost changes over time.
 
 The standard model aggregates all operating costs into a single "Expenses Included in Valuation" entry with minimal detail. When rates change midway through a production period, there is no mechanism to apply different rates to different manufacturing dates. Historical cost data is not explicitly maintained, making it difficult to understand how prior periods were costed or to analyze variances over time. Reconciling standard costs to actual expenses becomes challenging because the cost structure lacks sufficient granularity to isolate specific cost types or identify which transactions applied which rates.
 
@@ -21,7 +21,7 @@ Workstation Operating Cost provides an alternative approach through explicit tim
 
 ## Account and Item Structure
 
-The system distinguishes between cost types through account and item associations. Resource-based costs like electricity and rent track both an expense account and an inventory item code. For example, electricity uses "2213 - Accrued Manufacturing Electricity" with item "Electricity", while rent uses "2214 - Accrued Manufacturing Rent Contribution" with item "Rent". This dual tracking enables both financial reporting and inventory costing at the item level. Only non-inventoriable items may be selected; stocked items should be added to BOM. 
+The system distinguishes between cost types through account and item associations. Resource-based costs like electricity and rent track both an expense account and an inventory item code. For example, electricity uses "2213 - Accrued Manufacturing Electricity" with item "Electricity", while rent uses "2214 - Accrued Manufacturing Rent Contribution" with item "Rent". This dual tracking enables both financial reporting and inventory costing at the item level. Only non-inventoriable items may be selected; stocked items should be added to BOM.
 
 ## How Operating Costs Are Applied
 
@@ -50,26 +50,26 @@ The default ERPNext workflow through version 15:
 
 | Account                                    | Stock Ledger | Debit    | Credit   |
 |--------------------------------------------|--------------|----------|----------|
-| 1410 - Stock In Hand - APC                 | Various      | 240.98   |          |
-| Expenses Included in Valuation             |              |          | 90.00    |
-| 1110 - Work In Process - APC               |              |          | 150.98   |
+| 1410 - Stock In Hand - APC                 | Various      |   234.48 |          |
+| Expenses Included in Valuation             |              |          |    83.50 |
+| 1110 - Work In Process - APC               |              |          |   150.98 |
 
 An example using Workstation Operating Cost with a single operation:
 
 | Account                                    | Stock Ledger | Debit    | Credit   |
 |--------------------------------------------|--------------|----------|----------|
-| 1410 - Stock In Hand - APC                 | Various      | 240.98   |          |
-| 2212 - Accrued Manufacturing Wages - APC   |              |          | 10.00    |
-| 2213 - Accrued Manufacturing Electricity   |              |          | 41.50    |
-| 2214 - Accrued Manufacturing Rent - APC    |              |          | 32.00    |
-| 1110 - Work In Process - APC               |              |          | 150.98   |
+| 1410 - Stock In Hand - APC                 | Various      |   234.48 |          |
+| 2212 - Accrued Manufacturing Wages - APC   |              |          |    10.00 |
+| 2213 - Accrued Manufacturing Electricity   |              |          |    41.50 |
+| 2214 - Accrued Manufacturing Rent - APC    |              |          |    32.00 |
+| 1110 - Work In Process - APC               |              |          |   150.98 |
 
-Operating costs totaling $183.50 are credited from accrued liability accounts ($42.50 electricity, $32.50 rent, $15.00 wages). The finished goods are received at a total valuation of $334.48, reflecting both material costs and manufacturing overhead. The per-unit cost of each pie crust increases from $3.02 in materials to $4.82 including overhead, ensuring accurate inventory valuation throughout the production cycle.
+Operating costs totaling $83.50 are credited from accrued liability accounts ($41.50 electricity, $32.00 rent, $10.00 wages). The finished goods are received at a total valuation of $234.48, reflecting both material costs and manufacturing overhead. The per-unit cost of each pie crust increases from $3.02 in materials ($150.98 / 50 units) to $4.69 ($234.48 / 50 units) including overhead, ensuring accurate inventory valuation throughout the production cycle.
 
 ## Reconciling Accrued Manufacturing Costs
 
 <aside style="background-color: #9d6335; color: white; padding: 0.75em; border-radius: 0.5rem;">
-The configuration described here - where accrued costs are used - requires an additional step in the period close and/or payroll-period close processes. The liabilities accrued in the manufacturing process must be regularly reconciled and re-classed against the "actual" expense source documents (Purchase Invoice or Journal Entry).
+The configuration described here - using accrued costs - requires an additional step in the period close and/or payroll-period close processes. The liabilities accrued in the manufacturing process must be regularly reconciled and re-classed against the "actual" expense source documents (Purchase Invoice or Journal Entry).
 </aside>
 
 The accrued liability accounts credited during manufacturing represent standard costs applied through workstation rates. These amounts require reconciliation when actual expenses are incurred to prevent double counting and ensure proper expense classification.
@@ -90,6 +90,6 @@ Reconciliation Journal Entry
 | 2212 - Accrued Manufacturing Wages - APC     |     $10.00 |            |
 | 6213 - Manufacturing Wages Capitalized - APC |            |     $10.00 |
 
-The Accrued Manufacturing Wages account should be configured as a liability account with the account type "Expenses Included in Valuation" to function as a contra-expense. This preserves the gross salary expense at $2,000.00 matching the payroll register while the contra-expense shows the $110.00 manufacturing portion. The Profit and Loss presents net operating wages of $1,890.00, with the capitalized amount flowing to Cost of Goods Sold when the finished goods are sold through ERPNext's standard inventory costing methods. It is not usually necessary to use a contra-expense account for rent or utilities.
+The Accrued Manufacturing Wages account should be configured as a liability account with the account type "Expenses Included in Valuation" to function as a contra-expense. This preserves the gross salary expense at $2,000.00 matching the payroll register while the contra-expense shows the $10.00 manufacturing portion. The Profit and Loss presents net operating wages of $1,990.00, with the capitalized amount flowing to Cost of Goods Sold when the finished goods are sold through ERPNext's standard inventory costing methods. It is not usually necessary to use a contra-expense account for rent or utilities.
 
 The difference between the standard amount capitalized and actual amount reconciled represents a manufacturing variance that affects period results. The same pattern applies to electricity, rent, and other operating costs as their corresponding bills are received and entered. Each cost type may be reconciled on its own schedule. For example, handling accrued manufacturing wages could be processed with payroll,  typically weekly or biweekly while utilities and rent would usually be reconciled monthly. This reconciliation workflow maintains accurate period expenses while ensuring inventory carries appropriate absorption costs and preserving audit trails to source documents.

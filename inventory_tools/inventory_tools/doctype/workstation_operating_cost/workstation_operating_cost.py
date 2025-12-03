@@ -32,24 +32,23 @@ def validate_workstation_costs(doc, method):
 	for idx, r in enumerate(doc.workstation_operating_cost, start=1):
 		if not r.from_date:
 			frappe.throw(_("Row {0}: 'From Date' is required.").format(idx))
-	# Sort and auto-fill to_dates
-	costs = sorted(doc.workstation_operating_cost, key=lambda x: getdate(x.from_date))
+	# Sort by account, then from_date and auto-fill to_dates
+	costs = sorted(doc.workstation_operating_cost, key=lambda x: (x.account, getdate(x.from_date)))
 
 	for i, row in enumerate(costs):
 		if not row.to_date:
-			if i + 1 < len(costs):
+			if i + 1 < len(costs) and row.account == costs[i + 1].account:
 				next_from = getdate(costs[i + 1].from_date)
 				row.to_date = add_days(next_from, -1)
 			else:
 				row.to_date = None
 
-	# Group by account and check for overlaps within each account
+	# Group sorted rows by account
 	account_costs = {}
-	for idx, row in enumerate(costs, start=1):
-		if row.account:
-			if row.account not in account_costs:
-				account_costs[row.account] = []
-			account_costs[row.account].append((idx, row))
+	for row in costs:
+		if row.account not in account_costs:
+			account_costs[row.account] = []
+		account_costs[row.account].append((row.idx, row))
 
 	# Check for overlapping periods within each account
 	for account, account_rows in account_costs.items():
