@@ -1347,5 +1347,23 @@
 		"default_warehouse": "Refrigerator - APC",
 		"description": "A juicy, red berry with a perfect balance of sweetness and tang.",
 		"supplier": ["Chelsea Fruit Co", "Southern Fruit Supply"]
+	},
+	{
+		"item_code": "Electricity",
+		"item_group": "Services",
+		"is_stock_item": 0,
+		"supplier": ["Exceptional Grid"]
+	},
+	{
+		"item_code": "Internet Services",
+		"item_group": "Services",
+		"is_stock_item": 0,
+		"supplier": ["HIJ Telecom, Inc"]
+	},
+	{
+		"item_code": "Rent",
+		"item_group": "Services",
+		"is_stock_item": 0,
+		"supplier": ["Chelsea Fruit Co"]
 	}
 ]

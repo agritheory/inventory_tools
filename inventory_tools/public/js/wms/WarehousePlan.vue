@@ -588,7 +588,7 @@ const showContextMenu = (event: KonvaEventObject<MouseEvent, Rect>, shape: Rect)
 						{ text: 'Rotate', action: 'rotate' },
 						{ text: 'Set Access Cell', action: 'set-access' },
 						{ text: 'Delete', action: 'delete' },
-				  ]
+					]
 				: [],
 		target: shape,
 	}

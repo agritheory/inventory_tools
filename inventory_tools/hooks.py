@@ -1,7 +1,6 @@
 # Copyright (c) 2024, AgriTheory and contributors
 # For license information, please see license.txt
 
-
 app_name = "inventory_tools"
 app_title = "Inventory Tools"
 app_publisher = "AgriTheory"
@@ -47,7 +46,6 @@ doctype_js = {
 	"Job Card": "public/js/custom/job_card_custom.js",
 	"Operation": "public/js/custom/operation_custom.js",
 	"Pick List": "public/js/custom/pick_list_custom.js",
-	"Plant Floor": "public/js/custom/plant_floor_custom.js",
 	"Purchase Invoice": "public/js/custom/purchase_invoice_custom.js",
 	"Purchase Order": "public/js/custom/purchase_order_custom.js",
 	"Stock Entry": "public/js/custom/stock_entry_custom.js",
@@ -165,28 +163,16 @@ doc_events = {
 			"inventory_tools.inventory_tools.overrides.operation.validate_alternative_workstation"
 		]
 	},
+	"Workstation": {
+		"validate": [
+			"inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost.validate_workstation_costs",
+			"inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost.validate_dates",
+		]
+	},
 }
 
 # Scheduled Tasks
 # ---------------
-
-# scheduler_events = {
-# 	"all": [
-# 		"inventory_tools.tasks.all"
-# 	],
-# 	"daily": [
-# 		"inventory_tools.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"inventory_tools.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"inventory_tools.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"inventory_tools.tasks.monthly"
-# 	],
-# }
 
 # Testing
 # -------

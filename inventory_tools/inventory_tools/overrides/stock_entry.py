@@ -4,9 +4,12 @@
 import frappe
 from erpnext.stock.doctype.stock_entry.stock_entry import FinishedGoodError, StockEntry
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, cint
 
 from inventory_tools.inventory_tools.overrides.work_order import get_allowance_percentage
+from inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost import (
+	get_operating_costs_by_operation,
+)
 
 
 class InventoryToolsStockEntry(StockEntry):
@@ -172,6 +175,131 @@ class InventoryToolsStockEntry(StockEntry):
 			frappe.msgprint(_("""All items have already been transferred for this Work Order."""))
 
 		return item_dict
+
+	@frappe.whitelist()
+	def get_items(self, qty=None, production_item=None):
+		"""
+		HASH: 7ce97ce0c2fdc2f6308e5b9266b1db198984061b
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
+		METHOD: get_items
+		"""
+
+		super().get_items(qty, production_item)
+		if self.work_order and self.purpose == "Manufacture":
+			work_order = frappe.get_doc("Work Order", self.work_order)
+			self.calculate_additional_costs(work_order)
+
+	@frappe.whitelist()
+	def calculate_additional_costs(stock_entry=None, work_order=None):
+		from erpnext.manufacturing.doctype.bom.bom import add_non_stock_items_cost
+
+		# Add non stock items cost in the additional cost
+		stock_entry.additional_costs = []
+		company_account = frappe.db.get_value(
+			"Company",
+			work_order.company,
+			["expenses_included_in_valuation", "default_operating_cost_account"],
+			as_dict=1,
+		)
+
+		expense_account = (
+			company_account.default_operating_cost_account or company_account.expenses_included_in_valuation
+		)
+		add_non_stock_items_cost(stock_entry, work_order, expense_account)
+		add_operations_cost(stock_entry, work_order, expense_account)
+
+
+def add_operations_cost(stock_entry, work_order=None, expense_account=None):
+	operating_costs = get_operating_costs_by_operation(
+		work_order, stock_entry.bom_no, posting_date=stock_entry.posting_date
+	)
+
+	if operating_costs:
+		for cost in operating_costs:
+			stock_entry.append(
+				"additional_costs",
+				{
+					"expense_account": cost.get("account"),
+					"description": cost.get("description"),
+					"amount": flt(cost.get("cost_per_unit")) * flt(stock_entry.fg_completed_qty),
+				},
+			)
+	else:
+		super().calculate_additional_costs(stock_entry, work_order)
+
+	if work_order and work_order.additional_operating_cost and work_order.qty:
+		additional_operating_cost_per_unit = flt(work_order.additional_operating_cost) / flt(
+			work_order.qty
+		)
+
+		if additional_operating_cost_per_unit:
+			stock_entry.append(
+				"additional_costs",
+				{
+					"expense_account": expense_account,
+					"description": "Additional Operating Cost",
+					"amount": additional_operating_cost_per_unit * flt(stock_entry.fg_completed_qty),
+				},
+			)
+
+	def get_max_operation_quantity():
+		from frappe.query_builder.functions import Sum
+
+		table = frappe.qb.DocType("Job Card")
+		query = (
+			frappe.qb.from_(table)
+			.select(Sum(table.total_completed_qty).as_("qty"))
+			.where(
+				(table.docstatus == 1)
+				& (table.work_order == work_order.name)
+				& (table.is_corrective_job_card == 0)
+			)
+			.groupby(table.operation)
+		)
+		return min([d.qty for d in query.run(as_dict=True)], default=0)
+
+	def get_utilised_corrective_cost():
+		from frappe.query_builder.functions import Sum
+
+		table = frappe.qb.DocType("Stock Entry")
+		subquery = (
+			frappe.qb.from_(table)
+			.select(table.name)
+			.where(
+				(table.docstatus == 1)
+				& (table.work_order == work_order.name)
+				& (table.purpose == "Manufacture")
+			)
+		)
+		table = frappe.qb.DocType("Landed Cost Taxes and Charges")
+		query = (
+			frappe.qb.from_(table)
+			.select(Sum(table.amount).as_("amount"))
+			.where(table.parent.isin(subquery) & (table.has_corrective_cost == 1))
+		)
+		return query.run(as_dict=True)[0].amount or 0
+
+	if (
+		work_order
+		and work_order.corrective_operation_cost
+		and cint(
+			frappe.db.get_single_value(
+				"Manufacturing Settings", "add_corrective_operation_cost_in_finished_good_valuation"
+			)
+		)
+	):
+		max_qty = get_max_operation_quantity() - work_order.produced_qty
+		remaining_corrective_cost = work_order.corrective_operation_cost - get_utilised_corrective_cost()
+		stock_entry.append(
+			"additional_costs",
+			{
+				"expense_account": expense_account,
+				"description": "Corrective Operation Cost",
+				"has_corrective_cost": 1,
+				"amount": remaining_corrective_cost / max_qty * flt(stock_entry.fg_completed_qty),
+			},
+		)
 
 
 @frappe.whitelist()

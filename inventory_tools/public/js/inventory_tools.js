@@ -5,7 +5,7 @@ import VueKonva from 'vue-konva'
 import { createApp } from 'vue'
 
 import WarehousePlan from './wms/WarehousePlan.vue'
-import './faceted_search/faceted_search.js' 
+import './faceted_search/faceted_search.js'
 
 frappe.provide('inventory_tools')
 
