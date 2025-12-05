@@ -169,6 +169,16 @@ doc_events = {
 			"inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost.validate_dates",
 		]
 	},
+	"Purchase Receipt": {
+		"before_submit": "inventory_tools.inventory_tools.overrides.purchase_receipt.handle_pr_quarantine",
+	},
+	"Stock Entry": {
+		"on_submit": "inventory_tools.inventory_tools.overrides.stock_entry.handle_se_quarantine",
+		"validate": "inventory_tools.inventory_tools.overrides.stock_entry.block_quarantine_issue",
+	},
+	"Quality Inspection": {
+		"on_submit": "inventory_tools.inventory_tools.overrides.stock_entry.release_from_quarantine"
+	},
 }
 
 # Scheduled Tasks

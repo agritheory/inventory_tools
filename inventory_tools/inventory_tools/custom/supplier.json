@@ -26,7 +26,6 @@
 			"is_virtual": 0,
 			"length": 0,
 			"module": "Inventory Tools",
-			"name": "Supplier-subcontracting_defaults",
 			"no_copy": 0,
 			"non_negative": 0,
 			"options": "Subcontracting Default",

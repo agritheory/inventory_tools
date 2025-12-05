@@ -27,7 +27,6 @@
 			"label": "Paid Qty",
 			"length": 0,
 			"module": "Inventory Tools",
-			"name": "Stock Entry Detail-paid_qty",
 			"no_copy": 0,
 			"non_negative": 0,
 			"permlevel": 0,

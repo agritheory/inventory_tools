@@ -8,7 +8,6 @@
 			"field_name": "workstation",
 			"is_system_generated": 0,
 			"module": "Inventory Tools",
-			"name": "Work Order Operation-workstation-allow_on_submit",
 			"property": "allow_on_submit",
 			"value": "1"
 		}

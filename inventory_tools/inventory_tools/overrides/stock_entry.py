@@ -326,3 +326,70 @@ def get_production_item_if_work_orders_for_required_item_exists(stock_entry_name
 		return production_item
 
 	return ""
+
+
+def block_quarantine_issue(doc, method):
+	settings = frappe.get_single("Inventory Tools Settings")
+	if not settings.block_issue_from_quarantine:
+		return
+
+	for row in doc.items:
+		wh = row.s_warehouse or row.warehouse
+		if frappe.db.get_value("Warehouse", wh, "is_quarantine"):
+			frappe.throw(
+				f"Item {row.item_code} cannot be issued from Quarantine Warehouse {wh} without inspection."
+			)
+
+
+def release_from_quarantine(doc, method):
+	if doc.status != "Accepted":
+		return
+
+	if not doc.reference_type or not doc.reference_name:
+		return
+
+	# Get PR Item row
+	ref_doc = frappe.get_doc(doc.reference_type, doc.reference_name)
+
+	target_wh = None
+
+	for row in ref_doc.items:
+		if row.item_code == doc.item_code:
+			target_wh = row.intended_warehouse
+			break
+
+	if not target_wh:
+		frappe.throw("Target warehouse not found for release")
+
+	# Get Quarantine Warehouse from PR Ledger
+	quarantine_wh = frappe.db.get_value(
+		"Stock Ledger Entry",
+		{
+			"voucher_type": doc.reference_type,
+			"voucher_no": doc.reference_name,
+			"item_code": doc.item_code,
+		},
+		"warehouse",
+	)
+
+	if not quarantine_wh:
+		frappe.throw("Quarantine warehouse not found in Stock Ledger")
+
+	# Create Stock Entry
+	se = frappe.new_doc("Stock Entry")
+	se.stock_entry_type = "Material Transfer"
+
+	se.append(
+		"items",
+		{
+			"item_code": doc.item_code,
+			"qty": doc.sample_size,
+			"s_warehouse": quarantine_wh,
+			"t_warehouse": target_wh,
+			"reference_doctype": "Quality Inspection",
+			"reference_name": doc.name,
+		},
+	)
+
+	se.insert(ignore_permissions=True)
+	se.submit()
