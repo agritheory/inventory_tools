@@ -21,9 +21,12 @@ class InventoryToolsSettings(Document):
 			"Allow Manually Defined Alternative Workstations",
 			"Allow Alternative Workstations Based on Workstation Type",
 		]
+		block_issue_from_quarantine: DF.Check
 		company: DF.Link | None
 		create_job_cards_automatically: DF.Literal["Yes", "No"]
 		create_purchase_orders: DF.Check
+		default_quarantine_warehouse: DF.Link | None
+		enable_quarantine_workflow: DF.Check
 		enable_work_order_subcontracting: DF.Check
 		enforce_uoms: DF.Check
 		overproduction_percentage_for_work_order: DF.Percent
