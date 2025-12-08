@@ -175,6 +175,9 @@ doc_events = {
 	"Quality Inspection": {
 		"on_submit": "inventory_tools.inventory_tools.overrides.stock_entry.release_from_quarantine"
 	},
+	# "Stock Entry":{
+	#     "before_submit":"inventory_tools.inventory_tools.overrides.stock_entry.handle_se_quarantine"
+	# }
 }
 
 # Scheduled Tasks

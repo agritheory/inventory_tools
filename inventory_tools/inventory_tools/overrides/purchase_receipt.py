@@ -43,6 +43,22 @@ class InventoryToolsPurchaseReceipt(PurchaseReceipt):
 				[["Purchase Order", "purchase_order", "purchase_order_item"]]
 			)
 
+	def validate_qi_presence(self, items=None):
+		settings = frappe.get_doc("Inventory Tools Settings", self.company)
+
+		if settings.enable_quarantine_workflow:
+			return
+
+		super().validate_qi_presence()
+
+	def validate_qi_submission(self, items=None):
+		settings = frappe.get_doc("Inventory Tools Settings", self.company)
+
+		if settings.enable_quarantine_workflow:
+			return
+
+		super().validate_qi_submission()
+
 
 def handle_pr_quarantine(doc, method):
 	settings = frappe.get_doc("Inventory Tools Settings", doc.company)
@@ -69,6 +85,4 @@ def handle_pr_quarantine(doc, method):
 			frappe.throw(f"No Quarantine Warehouse configured for Item {row.item_code}")
 
 		row.warehouse = quarantine_wh
-
-		row.inspection_required = 0
 		row.quality_inspection = None
