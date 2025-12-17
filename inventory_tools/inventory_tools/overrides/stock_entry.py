@@ -177,15 +177,15 @@ class InventoryToolsStockEntry(StockEntry):
 		return item_dict
 
 	@frappe.whitelist()
-	def get_items(self, qty=None, production_item=None):
+	def get_items(self):
 		"""
-		HASH: 7ce97ce0c2fdc2f6308e5b9266b1db198984061b
+		HASH: 279cf6fe007528f624f8f1e5ef7d169124584756
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
 		METHOD: get_items
 		"""
 
-		super().get_items(qty, production_item)
+		super().get_items()
 		if self.work_order and self.purpose == "Manufacture":
 			work_order = frappe.get_doc("Work Order", self.work_order)
 			self.calculate_additional_costs(work_order)

@@ -159,7 +159,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 
 	def update_operation_status(self):
 		"""
-		HASH: 46a2b7a07e5326ad5fde89d030460a5e9f2b67b0
+		HASH: 1693e3ef3fdd03d51454791915c0601d3a7a13e6
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: update_operation_status
@@ -169,13 +169,16 @@ class InventoryToolsWorkOrder(WorkOrder):
 		max_allowed_qty_for_wo = flt(self.qty) + (allowance_percentage / 100 * flt(self.qty))
 
 		for d in self.get("operations"):
-			if not d.completed_qty:
+			precision = d.precision("completed_qty")
+			qty = flt(flt(d.completed_qty, precision) + flt(d.process_loss_qty, precision), precision)
+
+			if not qty:
 				d.status = "Pending"
-			elif flt(d.completed_qty) < flt(self.qty):
+			elif qty < flt(self.qty, precision):
 				d.status = "Work in Progress"
-			elif flt(d.completed_qty) == flt(self.qty):
+			elif qty == flt(self.qty, precision):
 				d.status = "Completed"
-			elif flt(d.completed_qty) <= max_allowed_qty_for_wo:
+			elif qty <= flt(max_allowed_qty_for_wo, precision):
 				d.status = "Completed"
 			else:
 				frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))
