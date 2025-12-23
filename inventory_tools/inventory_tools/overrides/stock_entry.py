@@ -194,6 +194,7 @@ class InventoryToolsStockEntry(StockEntry):
 	def calculate_additional_costs(stock_entry=None, work_order=None):
 		from erpnext.manufacturing.doctype.bom.bom import add_non_stock_items_cost
 
+		print("IN INV TOOLS CALCULATE_ADDITIONAL_COSTS")
 		# Add non stock items cost in the additional cost
 		stock_entry.additional_costs = []
 		company_account = frappe.db.get_value(
@@ -225,8 +226,6 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 					"amount": flt(cost.get("cost_per_unit")) * flt(stock_entry.fg_completed_qty),
 				},
 			)
-	else:
-		super().calculate_additional_costs(stock_entry, work_order)
 
 	if work_order and work_order.additional_operating_cost and work_order.qty:
 		additional_operating_cost_per_unit = flt(work_order.additional_operating_cost) / flt(
