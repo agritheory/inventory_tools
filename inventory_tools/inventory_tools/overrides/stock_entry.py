@@ -194,7 +194,6 @@ class InventoryToolsStockEntry(StockEntry):
 	def calculate_additional_costs(stock_entry=None, work_order=None):
 		from erpnext.manufacturing.doctype.bom.bom import add_non_stock_items_cost
 
-		print("IN INV TOOLS CALCULATE_ADDITIONAL_COSTS")
 		# Add non stock items cost in the additional cost
 		stock_entry.additional_costs = []
 		company_account = frappe.db.get_value(
