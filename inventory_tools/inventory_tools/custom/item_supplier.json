@@ -27,6 +27,7 @@
 			"label": "Requires RFQ?",
 			"length": 0,
 			"module": "Inventory Tools",
+			"name": "Item Supplier-requires_rfq",
 			"no_copy": 0,
 			"non_negative": 0,
 			"permlevel": 0,
