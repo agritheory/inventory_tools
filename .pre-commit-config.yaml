@@ -69,17 +69,6 @@ repos:
         entry: npx prettier -w . --config .prettierrc.cjs --ignore-path .prettierignore
         language: system
 
-  - repo: local
-    hooks:
-      - id: jscpd
-        name: Check for code duplication
-        entry: bash -c 'npx jscpd@4 . --format "python,javascript,typescript" --ignore "**/node_modules/**,**/.venv/**,**/venv/**,**/__pycache__/**,**/dist/**,**/build/**,**/*.bundle.js,**/tests/**,**/test_*.py,**/*_test.py,**/*.test.js,**/*.spec.js,**/fixtures/**,**/*fixtures.py,**/*.min.js,**/*.min.css,**/migrations/**" --min-lines 20 --min-tokens 150 --threshold 6 --exitCode 1 --reporters "console" --silent'
-        language: system
-        pass_filenames: false
-        files: \.(py|js|ts)$
-        stages: [commit]
-        verbose: true
-
 ci:
   autoupdate_schedule: weekly
   skip: []

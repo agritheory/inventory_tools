@@ -103,7 +103,6 @@ function update_selected_qty() {
 	})
 }
 
-/* jscpd:ignore-start */
 async function select_all_customer_items(row, toggle) {
 	return new Promise(resolve => {
 		if (frappe.query_report.datatable.datamanager._filteredRows) {
@@ -131,7 +130,6 @@ async function select_all_customer_items(row, toggle) {
 		resolve()
 	})
 }
-/* jscpd:ignore-end */
 
 async function create() {
 	let filters = frappe.query_report.get_filter_values()
