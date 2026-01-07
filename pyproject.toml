@@ -20,6 +20,8 @@ python = "^3.10"
 matplotlib = "^3.10.1"
 numpy = "^2.0.2"
 networkx = "^3.4.2"
+packaging = "<25"
+typing-extensions = "<4.16"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
