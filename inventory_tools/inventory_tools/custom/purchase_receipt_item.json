@@ -27,6 +27,7 @@
 			"label": "Intended Warehouse",
 			"length": 0,
 			"module": "Inventory Tools",
+			"name": "Purchase Receipt Item-intended_warehouse",
 			"no_copy": 0,
 			"non_negative": 0,
 			"options": "Warehouse",
