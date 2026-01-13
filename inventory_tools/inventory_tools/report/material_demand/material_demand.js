@@ -155,6 +155,7 @@ function update_selected_qty() {
 	})
 }
 
+/* jscpd:ignore-start */
 async function select_all_supplier_items(row, toggle) {
 	return new Promise(resolve => {
 		if (frappe.query_report.datatable.datamanager._filteredRows) {
@@ -182,6 +183,7 @@ async function select_all_supplier_items(row, toggle) {
 		resolve()
 	})
 }
+/* jscpd:ignore-end */
 
 async function select_company() {
 	return new Promise(resolve => {
