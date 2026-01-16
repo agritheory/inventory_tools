@@ -21,7 +21,6 @@ class InventoryToolsSettings(Document):
 			"Allow Manually Defined Alternative Workstations",
 			"Allow Alternative Workstations Based on Workstation Type",
 		]
-		block_issue_from_quarantine: DF.Check
 		company: DF.Link | None
 		create_job_cards_automatically: DF.Literal["Yes", "No"]
 		create_purchase_orders: DF.Check

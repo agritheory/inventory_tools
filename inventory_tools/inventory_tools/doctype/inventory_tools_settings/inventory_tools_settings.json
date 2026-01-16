@@ -33,7 +33,6 @@
 		"quarantine_quality_control_section",
 		"enable_quarantine_workflow",
 		"default_quarantine_warehouse",
-		"block_issue_from_quarantine",
 		"faceted_search_tab",
 		"section_break_pxnx",
 		"show_on_website",
@@ -208,12 +207,6 @@
 			"fieldtype": "Link",
 			"label": "Default Quarantine Warehouse",
 			"options": "Warehouse"
-		},
-		{
-			"default": "0",
-			"fieldname": "block_issue_from_quarantine",
-			"fieldtype": "Check",
-			"label": " Block Issue from Quarantine"
 		}
 	],
 	"index_web_pages_for_search": 1,
