@@ -10,7 +10,7 @@ dynamic = ["dependencies", "requires-python"]
 
 [tool.poetry]
 name = "inventory_tools"
-version =  "15.9.0"
+version =  "15.9.2"
 authors = ["AgriTheory <support@agritheory.dev>"]
 description = "Inventory Tools for ERPNext"
 readme = "README.md"
@@ -20,6 +20,8 @@ python = "^3.10"
 matplotlib = "^3.10.1"
 numpy = "^2.0.2"
 networkx = "^3.4.2"
+packaging = "<25"
+typing-extensions = "<4.16"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
