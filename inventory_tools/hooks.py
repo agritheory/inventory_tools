@@ -169,6 +169,15 @@ doc_events = {
 			"inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost.validate_dates",
 		]
 	},
+	"Pick List": {
+		"on_submit": "inventory_tools.utils.cartonization.run_cartonization",
+	},
+	"Stock Entry": {
+		"on_submit": "inventory_tools.utils.cartonization.run_cartonization",
+	},
+	"Delivery Note": {
+		"on_submit": "inventory_tools.utils.cartonization.run_cartonization",
+	},
 }
 
 # Scheduled Tasks
