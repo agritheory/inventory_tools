@@ -1,5 +1,9 @@
 <template>
-	<div v-if="plan.horizontal && plan.vertical">
+	<div
+		v-if="plan.horizontal && plan.vertical"
+		ref="warehouse-plan-wrapper"
+		class="warehouse-plan-wrapper"
+		style="position: relative">
 		<div class="toolbar">
 			<!-- toolbar toggles -->
 			<div v-if="canEditPlan" class="toolbar-edit-mode">
@@ -79,48 +83,48 @@
 					<konva-rect :config="hoverConfig" />
 				</konva-layer>
 			</konva-stage>
+		</div>
 
-			<!-- Context Menu -->
+		<!-- Context Menu -->
+		<div
+			v-if="contextMenu.visible"
+			v-on-click-outside="hideContextMenu"
+			class="warehouse-context-menu"
+			:style="{
+				top: `${contextMenu.y}px`,
+				left: `${contextMenu.x}px`,
+			}">
 			<div
-				v-if="contextMenu.visible"
-				v-on-click-outside="hideContextMenu"
-				class="warehouse-context-menu"
-				:style="{
-					top: `${contextMenu.y}px`,
-					left: `${contextMenu.x}px`,
-				}">
-				<div
-					v-for="(option, index) in contextMenu.options"
-					v-html="option.text"
-					:key="index"
-					class="warehouse-context-menu-item"
-					@click="option.action && runContextAction(option.action)" />
+				v-for="(option, index) in contextMenu.options"
+				v-html="option.text"
+				:key="index"
+				class="warehouse-context-menu-item"
+				@click="option.action && runContextAction(option.action)" />
+		</div>
+
+		<!-- Warehouse Hover Popup -->
+		<div
+			v-if="warehousePopup.visible"
+			class="warehouse-popup"
+			:style="{
+				top: `${warehousePopup.y}px`,
+				left: `${warehousePopup.x}px`,
+			}">
+			<div class="warehouse-popup-header">
+				<span class="warehouse-popup-title">{{ warehousePopup.title }}</span>
 			</div>
-
-			<!-- Warehouse Hover Popup -->
-			<div
-				v-if="warehousePopup.visible"
-				class="warehouse-popup"
-				:style="{
-					top: `${warehousePopup.y}px`,
-					left: `${warehousePopup.x}px`,
-				}">
-				<div class="warehouse-popup-header">
-					<span class="warehouse-popup-title">{{ warehousePopup.title }}</span>
+			<div class="warehouse-popup-content">
+				<div class="warehouse-popup-field">
+					<span class="field-label">Length:</span>
+					<span class="field-value">{{ warehousePopup.length }} {{ plan.uom }}</span>
 				</div>
-				<div class="warehouse-popup-content">
-					<div class="warehouse-popup-field">
-						<span class="field-label">Length:</span>
-						<span class="field-value">{{ warehousePopup.length }} {{ plan.uom }}</span>
-					</div>
-					<div class="warehouse-popup-field">
-						<span class="field-label">Width:</span>
-						<span class="field-value">{{ warehousePopup.width }} {{ plan.uom }}</span>
-					</div>
-					<div class="warehouse-popup-field">
-						<span class="field-label">Access Point:</span>
-						<span class="field-value">{{ warehousePopup.accessPoint }}</span>
-					</div>
+				<div class="warehouse-popup-field">
+					<span class="field-label">Width:</span>
+					<span class="field-value">{{ warehousePopup.width }} {{ plan.uom }}</span>
+				</div>
+				<div class="warehouse-popup-field">
+					<span class="field-label">Access Point:</span>
+					<span class="field-value">{{ warehousePopup.accessPoint }}</span>
 				</div>
 			</div>
 		</div>
@@ -158,6 +162,7 @@ declare const frappe: any
 
 const emit = defineEmits(['update:walkableCells'])
 
+const wrapperRef = useTemplateRef('warehouse-plan-wrapper')
 const containerRef = useTemplateRef('container')
 const stageRef = useTemplateRef<Stage>('stage')
 const accessRef = useTemplateRef<Layer>('access')
@@ -1041,6 +1046,10 @@ defineExpose({
 </script>
 
 <style scoped>
+.warehouse-plan-wrapper {
+	position: relative;
+}
+
 .toolbar {
 	display: flex;
 	align-items: center;

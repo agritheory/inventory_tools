@@ -28,7 +28,8 @@ def load_customizations():
 				if existing_field
 				else frappe.new_doc("Custom Field")
 			)
-			field.pop("modified")
+			if field.get("modified"):
+				field.pop("modified")
 			{custom_field.set(key, value) for key, value in field.items()}
 			custom_field.flags.ignore_permissions = True
 			custom_field.flags.ignore_version = True

@@ -59,14 +59,16 @@ waitForElement('[data-route]').then(element => {
 			}
 		}
 	})
-	const config = { attributes: true, childList: false, characterData: true }
+	const config = { childList: true, subtree: true }
 	observer.observe(element, config)
 })
 
 waitForElement('.filter-x-button').then(element => {
-	cur_list.filter_area.filter_x_button.on('click', () => {
-		faceted_search.$instance.resetFacets()
-	})
+	if (cur_list && cur_list.filter_area) {
+		cur_list.filter_area.filter_x_button.on('click', () => {
+			faceted_search.$instance.resetFacets()
+		})
+	}
 })
 
 waitForElement('#product-filters').then(element => {

@@ -1,0 +1,232 @@
+name: Code Duplication Report
+
+on:
+  push:
+    branches: "*"
+  pull_request:
+    branches: "*"
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  duplication:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Detect app name
+        id: detect_app
+        run: |
+          # Try to detect app name from repository name or directory structure
+          APP_NAME="${GITHUB_REPOSITORY#*/}"
+          
+          # Check if there's a Frappe app structure
+          if [ -d "$APP_NAME" ]; then
+            echo "app_name=$APP_NAME" >> $GITHUB_OUTPUT
+            echo "Detected app name: $APP_NAME"
+          elif [ -f "setup.py" ]; then
+            # Try to extract app name from setup.py
+            APP_NAME=$(python3 -c "import ast; setup_content=open('setup.py').read(); tree=ast.parse(setup_content); name=[node.value.s for node in ast.walk(tree) if isinstance(node, ast.Assign) and any(t.id == 'name' for t in node.targets if isinstance(t, ast.Name))]; print(name[0] if name else '')" 2>/dev/null || echo "${GITHUB_REPOSITORY#*/}")
+            echo "app_name=$APP_NAME" >> $GITHUB_OUTPUT
+            echo "Detected app name from setup.py: $APP_NAME"
+          else
+            echo "app_name=$APP_NAME" >> $GITHUB_OUTPUT
+            echo "Using repository name as app name: $APP_NAME"
+          fi
+
+      - name: Run jscpd
+        id: jscpd
+        continue-on-error: true
+        run: |
+          APP_NAME="${{ steps.detect_app.outputs.app_name }}"
+          REPORT_DIR="./${APP_NAME}/tests/jscpd"
+          
+          # Create report directory
+          mkdir -p "$REPORT_DIR"
+          
+          # Run jscpd with comprehensive ignore patterns
+          npx jscpd@4 . \
+            --format "python,javascript,typescript" \
+            --ignore "**/node_modules/**,**/.venv/**,**/venv/**,**/__pycache__/**,**/dist/**,**/build/**,**/*.bundle.js,**/tests/**,**/test_*.py,**/*_test.py,**/*.test.js,**/*.spec.js,**/fixtures/**,**/*fixtures.py,**/*.min.js,**/*.min.css,**/migrations/**,**/.git/**,**/.github/**" \
+            --min-lines 20 \
+            --min-tokens 150 \
+            --reporters "html,json,console" \
+            --output "$REPORT_DIR" \
+            --threshold 6 \
+            --exitCode 0
+          
+          echo "report_dir=$REPORT_DIR" >> $GITHUB_OUTPUT
+
+      - name: Generate summary
+        if: always()
+        run: |
+          REPORT_DIR="${{ steps.jscpd.outputs.report_dir }}"
+          JSON_REPORT="$REPORT_DIR/jscpd-report.json"
+          
+          if [ -f "$JSON_REPORT" ]; then
+            echo "##  Code Duplication Report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            # Check if there are any duplicates
+            TOTAL_CLONES=$(jq -r '.statistics.total.clones // 0' "$JSON_REPORT")
+            
+            if [ "$TOTAL_CLONES" -eq 0 ]; then
+              echo " **No code duplication detected!**" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "| Format | Files | Lines | Clones | Duplicated Lines |" >> $GITHUB_STEP_SUMMARY
+              echo "|--------|-------|-------|--------|------------------|" >> $GITHUB_STEP_SUMMARY
+              
+              jq -r '
+                (.statistics.formats // {} | to_entries[] |
+                  "| \(.key) | \(.value.sources // 0) | \(.value.lines // 0) | \(.value.clones // 0) | \(.value.duplicatedLines // 0) (\(.value.percentage // 0 | . * 100 | floor / 100)%) |"
+                )
+              ' "$JSON_REPORT" >> $GITHUB_STEP_SUMMARY
+              
+              echo "" >> $GITHUB_STEP_SUMMARY
+              
+              TOTAL_DUPLICATED=$(jq -r '.statistics.total.duplicatedLines // 0' "$JSON_REPORT")
+              TOTAL_PERCENTAGE=$(jq -r '.statistics.total.percentage // 0 | . * 100 | floor / 100' "$JSON_REPORT")
+              
+              echo "**Total: $TOTAL_CLONES clones, $TOTAL_DUPLICATED duplicated lines ($TOTAL_PERCENTAGE%)**" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              
+              # Add details about largest duplications
+              echo "###  Top Duplications" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              
+              jq -r '
+                if (.duplicates // [] | length) > 0 then
+                  .duplicates[0:5] | .[] |
+                  "- **\(.format)** - \(.lines) lines duplicated in \(.fragment // "unknown") (\(.firstFile.name // "file"))"
+                else
+                  "No detailed duplication information available."
+                end
+              ' "$JSON_REPORT" >> $GITHUB_STEP_SUMMARY
+            fi
+            
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo " [View detailed HTML report in artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "##  Code Duplication Report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Report generation failed or no duplications found." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check clone threshold
+        if: always()
+        run: |
+          REPORT_DIR="${{ steps.jscpd.outputs.report_dir }}"
+          JSON_REPORT="$REPORT_DIR/jscpd-report.json"
+          MAX_CLONES=60
+          MAX_PERCENTAGE=5.0
+          
+          if [ -f "$JSON_REPORT" ]; then
+            CLONES=$(jq -r '.statistics.total.clones // 0' "$JSON_REPORT")
+            PERCENTAGE=$(jq -r '.statistics.total.percentage // 0 | . * 100' "$JSON_REPORT")
+            
+            echo "Found $CLONES clones ($PERCENTAGE% duplication)"
+            echo "Thresholds: $MAX_CLONES clones, $MAX_PERCENTAGE% duplication"
+            
+            FAILED=0
+            
+            if (( $(echo "$CLONES > $MAX_CLONES" | bc -l) )); then
+              echo "::error::Clone count $CLONES exceeds threshold of $MAX_CLONES"
+              FAILED=1
+            fi
+            
+            if (( $(echo "$PERCENTAGE > $MAX_PERCENTAGE" | bc -l) )); then
+              echo "::warning::Duplication percentage $PERCENTAGE% exceeds threshold of $MAX_PERCENTAGE%"
+            fi
+            
+            if [ $FAILED -eq 1 ]; then
+              exit 1
+            fi
+          else
+            echo "::warning::Could not read duplication report for threshold check"
+          fi
+
+      - name: Upload report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jscpd-report
+          path: ${{ steps.jscpd.outputs.report_dir }}
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportDir = '${{ steps.jscpd.outputs.report_dir }}';
+            const jsonPath = `${reportDir}/jscpd-report.json`;
+            
+            if (!fs.existsSync(jsonPath)) {
+              return;
+            }
+            
+            const report = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+            const clones = report.statistics?.total?.clones || 0;
+            const percentage = ((report.statistics?.total?.percentage || 0) * 100).toFixed(2);
+            const duplicatedLines = report.statistics?.total?.duplicatedLines || 0;
+            
+            let emoji = '✅';
+            let status = 'Good';
+            
+            if (clones > 60 || percentage > 5) {
+              emoji = '❌';
+              status = 'Needs attention';
+            } else if (clones > 30 || percentage > 3) {
+              emoji = '⚠️';
+              status = 'Warning';
+            }
+            
+            const comment = `## ${emoji} Code Duplication Report - ${status}
+            
+            | Metric | Value |
+            |--------|-------|
+            | Total Clones | ${clones} |
+            | Duplicated Lines | ${duplicatedLines} |
+            | Duplication % | ${percentage}% |
+            
+            [View detailed report in artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            
+            <details>
+            <summary>How to fix duplications</summary>
+            
+            1. Extract duplicated code into reusable functions or classes
+            2. Use inheritance or composition for similar structures
+            3. For configuration arrays (report columns, dialog fields), add ignore comments:
+            
+            \`\`\`javascript
+            /* jscpd:ignore-start */
+            const dialogFields = [...];
+            /* jscpd:ignore-end */
+            \`\`\`
+            
+            \`\`\`python
+            # jscpd:ignore-start
+            columns = [...]
+            # jscpd:ignore-end
+            \`\`\`
+            </details>
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

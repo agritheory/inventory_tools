@@ -6,7 +6,7 @@ import datetime
 import frappe
 from erpnext.manufacturing.doctype.workstation.workstation import Workstation
 from frappe.desk.reportview import execute
-from frappe.utils.data import comma_and, flt, get_time, time_diff_in_hours
+from frappe.utils.data import comma_and, flt, get_time, time_diff_in_hours, getdate
 
 
 class InventoryToolsWorkstation(Workstation):
@@ -15,7 +15,7 @@ class InventoryToolsWorkstation(Workstation):
 		HASH: 3b4d39766f78492bd2ba92dc6c6c5b91263d3e6d
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/workstation/workstation.py
-		METHOD: update_operation_status
+		METHOD: validate_working_hours
 		"""
 		if not (row.start_time and row.end_time):
 			frappe.throw(frappe._("Row #{0}: Start Time and End Time are required").format(row.idx))
@@ -32,7 +32,7 @@ class InventoryToolsWorkstation(Workstation):
 		HASH: 3b4d39766f78492bd2ba92dc6c6c5b91263d3e6d
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/workstation/workstation.py
-		METHOD: update_operation_status
+		METHOD: set_total_working_hours
 		"""
 		self.total_working_hours = 0.0
 		for row in self.working_hours:
@@ -54,7 +54,7 @@ class InventoryToolsWorkstation(Workstation):
 		HASH: 3b4d39766f78492bd2ba92dc6c6c5b91263d3e6d
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/workstation/workstation.py
-		METHOD: update_operation_status
+		METHOD: validate_overlap_for_operation_timings
 		"""
 		for d in self.get("working_hours"):
 			existing = frappe.db.sql_list(
@@ -72,6 +72,27 @@ class InventoryToolsWorkstation(Workstation):
 				frappe.msgprint(
 					frappe._("Row #{0}: May overlap with row {1}").format(d.idx, comma_and(existing)),
 				)
+
+	def set_hour_rate(self):
+		"""
+		HASH: 3b4d39766f78492bd2ba92dc6c6c5b91263d3e6d
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/manufacturing/doctype/workstation/workstation.py
+		METHOD: set_hour_rate
+		"""
+		if self.workstation_operating_cost:
+			net_hour_rate = 0.0
+			for row in self.workstation_operating_cost:
+				if row.from_date and getdate(row.from_date) <= getdate() <= getdate(row.to_date or "2100-1-1"):
+					net_hour_rate += row.qty
+			self.hour_rate = net_hour_rate
+		else:
+			self.hour_rate = (
+				flt(self.hour_rate_labour)
+				+ flt(self.hour_rate_electricity)
+				+ flt(self.hour_rate_consumable)
+				+ flt(self.hour_rate_rent)
+			)
 
 
 """

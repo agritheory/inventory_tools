@@ -27,6 +27,7 @@
 			"label": "Image",
 			"length": 0,
 			"module": "Inventory Tools",
+			"name": "Color-image",
 			"no_copy": 0,
 			"non_negative": 0,
 			"permlevel": 0,
