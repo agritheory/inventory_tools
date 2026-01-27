@@ -209,21 +209,21 @@ class InventoryToolsStockEntry(StockEntry):
 		add_non_stock_items_cost(stock_entry, work_order, expense_account)
 		add_operations_cost(stock_entry, work_order, expense_account)
 
-	def validate_qi_presence(self, items=None):
+	def validate_qi_presence(self, row):
 		settings = frappe.get_doc("Inventory Tools Settings", self.company)
 
 		if settings.enable_quarantine_workflow:
 			return
 
-		super().validate_qi_presence()
+		super().validate_qi_presence(row)
 
-	def validate_qi_submission(self, items=None):
+	def validate_qi_submission(self, row):
 		settings = frappe.get_doc("Inventory Tools Settings", self.company)
 
 		if settings.enable_quarantine_workflow:
 			return
 
-		super().validate_qi_submission()
+		super().validate_qi_submission(row)
 
 
 def add_operations_cost(stock_entry, work_order=None, expense_account=None):
@@ -394,29 +394,32 @@ def release_from_quarantine(doc, method):
 
 
 def handle_se_quarantine(doc, method):
+	if doc.stock_entry_type != "Material Transfer for Manufacture":
+		return
 	settings = frappe.get_doc("Inventory Tools Settings", doc.company)
 
 	if not settings.enable_quarantine_workflow:
 		return
 
 	for row in doc.items:
-		if not row.intended_warehouse:
-			row.intended_warehouse = row.t_warehouse
+		if frappe.db.get_value("Item", row.item_code, "inspection_required_before_delivery"):
+			if not row.intended_warehouse:
+				row.intended_warehouse = row.t_warehouse
 
-		qi_template = frappe.db.get_value("Item", row.item_code, "quality_inspection_template")
+			qi_template = frappe.db.get_value("Item", row.item_code, "quality_inspection_template")
 
-		quarantine_wh = None
+			quarantine_wh = None
 
-		if qi_template:
-			quarantine_wh = frappe.db.get_value(
-				"Quality Inspection Template", qi_template, "quarantine_warehouse"
-			)
+			if qi_template:
+				quarantine_wh = frappe.db.get_value(
+					"Quality Inspection Template", qi_template, "quarantine_warehouse"
+				)
 
-		quarantine_wh = quarantine_wh or settings.default_quarantine_warehouse
+			quarantine_wh = quarantine_wh or settings.default_quarantine_warehouse
 
-		if not quarantine_wh:
-			frappe.throw(f"No Quarantine Warehouse configured for Item {row.item_code}")
+			if not quarantine_wh:
+				frappe.throw(f"No Quarantine Warehouse configured for Item {row.item_code}")
 
-		row.t_warehouse = quarantine_wh
+			row.t_warehouse = quarantine_wh
 
-		row.quality_inspection = None
+			row.quality_inspection = None
