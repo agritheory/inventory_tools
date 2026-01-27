@@ -3,6 +3,11 @@ For license information, please see license.txt-->
 
 # Quarantine Quality Control
 
+<div class="byline">
+  Ishwarya 2026-01-12
+</div>
+
+
 ## Overview
 
 The Quarantine Quality Control feature allows inventory to be automatically moved to a quarantine warehouse for inspection, rather than requiring immediate quality checks during receipt or manufacturing. Items remain in quarantine until quality inspection is completed and approved.
@@ -38,8 +43,7 @@ On the **Item** master:
 
 1. Create and submit **Purchase Receipt**
 2. System automatically routes items to the quarantine warehouse
-3. Quality Inspection record is created with "Pending" status
-4. Items remain in quarantine until inspection is complete
+3. Items remain in quarantine until inspection is complete
 
 ### Inspecting Items
 
@@ -49,11 +53,10 @@ On the **Item** master:
 
 ### Releasing from Quarantine
 
-1. Create **Stock Entry** (Material Transfer)
+1. On submit of Quality Inspection, system automatically creates **Stock Entry** (Material Transfer)
 2. Source: Quarantine warehouse
 3. Target: Final destination warehouse
-4. System validates that quality inspection passed
-5. Submit to complete the transfer
+4. System validates that quality inspection passed and Transfers the stock from Quarantine warehouse to Final destination warehouse
 
 **Note**: Items cannot be removed from quarantine if inspection is pending or failed.
 

@@ -50,7 +50,7 @@ repos:
           - tomli
 
   - repo: https://github.com/agritheory/test_utils
-    rev: v1.10.1
+    rev: v1.11.2
     hooks:
       - id: update_pre_commit_config
       - id: mypy
@@ -77,7 +77,7 @@ repos:
         language: system
         pass_filenames: false
         files: \.(py|js|ts)$
-        stages: [commit]
+        stages: [pre-commit]
         verbose: true
 
 ci:
