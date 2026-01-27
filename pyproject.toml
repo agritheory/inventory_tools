@@ -22,6 +22,7 @@ numpy = "^2.0.2"
 networkx = "^3.4.2"
 packaging = "<25"
 typing-extensions = "<4.16"
+mip = "^1.14"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.2.2"
