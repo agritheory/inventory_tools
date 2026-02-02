@@ -518,6 +518,29 @@ items = [
 		"available_in_house": 1,
 		"opening_qty": 50,
 	},
+	{
+		"item_code": "Bottled Coffee",
+		"uom": "Nos",
+		"description": "Bottled Coffee",
+		"item_group": "Products",
+		"item_price": 3.50,
+		"default_warehouse": "Refrigerator - APC",
+		"supplier": [
+			"Freedom Provisions",
+		],
+	},
+	{
+		"item_code": "Bottled Juice",
+		"uom": "Nos",
+		"description": "Bottled Juice",
+		"item_group": "Products",
+		"item_price": 2.99,
+		"default_warehouse": "Refrigerator - APC",
+		"supplier": [
+			"Freedom Provisions",
+			"Chelsea Fruit Co",
+		],
+	},
 ]
 
 boms = [
