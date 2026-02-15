@@ -149,17 +149,18 @@ def get_applicable_specification(doc):
 	if doc.doctype != "Item":  # implement other doctypes later
 		return
 	applicable_specifications = []
-	specification_candidates = frappe.db.sql(
-		"""
-		SELECT DISTINCT `tabSpecification`.name,
-		`tabSpecification`.dt,
-		`tabSpecification`.apply_on
-		FROM `tabSpecification`, `tabSpecification Attribute`
-		WHERE `tabSpecification`.name = `tabSpecification Attribute`.parent
-		AND `tabSpecification Attribute`.applied_on = %(doctype)s
-		""",
-		{"doctype": doc.doctype},
-		as_dict=True,
+	specification = frappe.qb.DocType("Specification")
+	specification_attribute = frappe.qb.DocType("Specification Attribute")
+
+	specification_candidates = (
+		frappe.qb.from_(specification)
+		.from_(specification_attribute)
+		.select(specification.name, specification.dt, specification.apply_on)
+		.where(
+			(specification.name == specification_attribute.parent)
+			& (specification_attribute.applied_on == doc.doctype)
+		)
+		.run(as_dict=True)
 	)
 
 	i = frappe.get_meta(doc.doctype)
