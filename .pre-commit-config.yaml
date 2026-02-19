@@ -50,7 +50,7 @@ repos:
           - tomli
 
   - repo: https://github.com/agritheory/test_utils
-    rev: v1.11.2
+    rev: v1.14.0
     hooks:
       - id: update_pre_commit_config
       - id: mypy
