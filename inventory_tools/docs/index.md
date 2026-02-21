@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Inventory Tools Documentation
 
 <div class="byline">
-  Rohan Bansal, Devarsh Bhatt, IshwaryaM1030, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2025-10-13
+  Rohan Bansal, Devarsh Bhatt, coleandreoli, IshwaryaM1030, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2025-10-22
 </div>
 
 
