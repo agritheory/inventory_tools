@@ -123,13 +123,17 @@ extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
 # Override standard doctype classes
 
 override_doctype_class = {
+	"Delivery Note": "inventory_tools.inventory_tools.overrides.delivery_note.InventoryToolsDeliveryNote",
+	"Quality Inspection": "inventory_tools.inventory_tools.overrides.quality_inspection.InventoryToolsQualityInspection",
 	"Job Card": "inventory_tools.inventory_tools.overrides.job_card.InventoryToolsJobCard",
 	"Production Plan": "inventory_tools.inventory_tools.overrides.production_plan.InventoryToolsProductionPlan",
 	"Purchase Invoice": "inventory_tools.inventory_tools.overrides.purchase_invoice.InventoryToolsPurchaseInvoice",
 	"Purchase Order": "inventory_tools.inventory_tools.overrides.purchase_order.InventoryToolsPurchaseOrder",
 	"Purchase Receipt": "inventory_tools.inventory_tools.overrides.purchase_receipt.InventoryToolsPurchaseReceipt",
+	"Sales Invoice": "inventory_tools.inventory_tools.overrides.sales_invoice.InventoryToolsSalesInvoice",
 	"Sales Order": "inventory_tools.inventory_tools.overrides.sales_order.InventoryToolsSalesOrder",
 	"Stock Entry": "inventory_tools.inventory_tools.overrides.stock_entry.InventoryToolsStockEntry",
+	"Subcontracting Receipt": "inventory_tools.inventory_tools.overrides.subcontracting_receipt.InventoryToolsSubcontractingReceipt",
 	"Work Order": "inventory_tools.inventory_tools.overrides.work_order.InventoryToolsWorkOrder",
 	"Workstation": "inventory_tools.inventory_tools.overrides.workstation.InventoryToolsWorkstation",
 	"Website Item": "inventory_tools.inventory_tools.overrides.website_item.InventoryToolsWebsiteItem",

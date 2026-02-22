@@ -94,6 +94,7 @@ def test_total_demand():
 	# amend and stop to test "Stop" criteria
 	_mr = frappe.copy_doc(mr)
 	_mr.amended_from = mr.name
+	_mr.docstatus = 0  # Reset docstatus since copy_doc preserves docstatus=2 from cancelled doc
 	_mr.save()
 	_mr.submit()
 	_mr.set_status(update=True, status="Stopped")

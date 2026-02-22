@@ -194,13 +194,13 @@
 		{
 			"fieldname": "quarantine_quality_control_section",
 			"fieldtype": "Section Break",
-			"label": "Quarantine Quality Control "
+			"label": "Quarantine Quality Control"
 		},
 		{
 			"default": "0",
 			"fieldname": "enable_quarantine_workflow",
 			"fieldtype": "Check",
-			"label": " Enable Quarantine Workflow"
+			"label": "Enable Quarantine Workflow"
 		},
 		{
 			"fieldname": "default_quarantine_warehouse",

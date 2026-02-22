@@ -6,6 +6,11 @@ import frappe
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import PurchaseReceipt
 from frappe.utils.data import cint
 
+from inventory_tools.inventory_tools.overrides.inspection import (
+	get_inspection_required,
+	validate_inspection_with_company_scope,
+)
+
 
 class InventoryToolsPurchaseReceipt(PurchaseReceipt):
 	def validate_with_previous_doc(self):
@@ -59,6 +64,9 @@ class InventoryToolsPurchaseReceipt(PurchaseReceipt):
 
 		super().validate_qi_submission(row)
 
+	def validate_inspection(self):
+		validate_inspection_with_company_scope(self)
+
 
 def handle_pr_quarantine(doc, method):
 	settings = frappe.get_doc("Inventory Tools Settings", doc.company)
@@ -67,7 +75,7 @@ def handle_pr_quarantine(doc, method):
 		return
 
 	for row in doc.items:
-		if frappe.db.get_value("Item", row.item_code, "inspection_required_before_purchase"):
+		if get_inspection_required(row.item_code, doc.company, "inspection_required_before_purchase"):
 			if not row.intended_warehouse:
 				row.intended_warehouse = row.warehouse
 

@@ -6,6 +6,10 @@ from erpnext.stock.doctype.stock_entry.stock_entry import FinishedGoodError, Sto
 from frappe import _
 from frappe.utils import flt, cint
 
+from inventory_tools.inventory_tools.overrides.inspection import (
+	get_inspection_required,
+	validate_inspection_with_company_scope,
+)
 from inventory_tools.inventory_tools.overrides.work_order import get_allowance_percentage
 from inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost import (
 	get_operating_costs_by_operation,
@@ -225,6 +229,9 @@ class InventoryToolsStockEntry(StockEntry):
 
 		super().validate_qi_submission(row)
 
+	def validate_inspection(self):
+		validate_inspection_with_company_scope(self)
+
 
 def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 	operating_costs = get_operating_costs_by_operation(
@@ -350,6 +357,9 @@ def release_from_quarantine(doc, method):
 		return
 
 	ref_doc = frappe.get_doc(doc.reference_type, doc.reference_name)
+	settings = frappe.get_doc("Inventory Tools Settings", ref_doc.company)
+	if not settings.enable_quarantine_workflow:
+		return
 
 	target_wh = None
 
@@ -360,6 +370,9 @@ def release_from_quarantine(doc, method):
 
 	if not target_wh:
 		frappe.throw("Target warehouse not found for release")
+
+	# Use full quantity from reference doc, not sample_size (inspection sample)
+	release_qty = sum(flt(row.qty) for row in ref_doc.items if row.item_code == doc.item_code)
 
 	quarantine_wh = frappe.db.get_value(
 		"Stock Ledger Entry",
@@ -376,12 +389,13 @@ def release_from_quarantine(doc, method):
 
 	se = frappe.new_doc("Stock Entry")
 	se.stock_entry_type = "Material Transfer"
+	se.company = ref_doc.company
 
 	se.append(
 		"items",
 		{
 			"item_code": doc.item_code,
-			"qty": doc.sample_size,
+			"qty": release_qty,
 			"s_warehouse": quarantine_wh,
 			"t_warehouse": target_wh,
 			"reference_doctype": "Quality Inspection",
@@ -389,7 +403,7 @@ def release_from_quarantine(doc, method):
 		},
 	)
 
-	se.insert(ignore_permissions=True)
+	se.save()
 	se.submit()
 
 
@@ -402,7 +416,7 @@ def handle_se_quarantine(doc, method):
 		return
 
 	for row in doc.items:
-		if frappe.db.get_value("Item", row.item_code, "inspection_required_before_delivery"):
+		if get_inspection_required(row.item_code, doc.company, "inspection_required_before_manufacture"):
 			if not row.intended_warehouse:
 				row.intended_warehouse = row.t_warehouse
 

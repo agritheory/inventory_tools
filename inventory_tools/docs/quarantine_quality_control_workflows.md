@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Quarantine Quality Control
 
 <div class="byline">
-  Ishwarya 2026-01-12
+  Ishwarya 2026-01-27
 </div>
 
 
@@ -29,21 +29,28 @@ For each template requiring quarantine workflow:
 3. Configure inspection parameters as needed
 4. Save the template
 
-### 3. Configure Items
+### 3. Configure Items (Item Default)
 
-On the **Item** master:
+Inspection requirements are **company-scoped** via **Item Default**, not on the Item master. Item-level inspection fields are hidden.
 
-1. Assign the appropriate **Quality Inspection Template**
+On **Item Default** for each company and item:
+
+1. Assign the appropriate **Quality Inspection Template** (from the Item)
 2. Check **Inspection Required Before Purchase** (for incoming materials)
 3. Check **Inspection Required Before Delivery** (for finished goods)
+4. Check **Inspection Required Before Manufacture** (for raw materials before manufacturing)
 
 ## Workflow
 
-### Receiving Items
+### Receiving Items (Purchase)
 
 1. Create and submit **Purchase Receipt**
-2. System automatically routes items to the quarantine warehouse
+2. System automatically routes items with `inspection_required_before_purchase` (Item Default) to the quarantine warehouse
 3. Items remain in quarantine until inspection is complete
+
+### Material Transfer for Manufacture
+
+For Stock Entry type **Material Transfer for Manufacture**, items with `inspection_required_before_manufacture` (Item Default) are routed to quarantine before use in production.
 
 ### Inspecting Items
 
@@ -53,12 +60,13 @@ On the **Item** master:
 
 ### Releasing from Quarantine
 
-1. On submit of Quality Inspection, system automatically creates **Stock Entry** (Material Transfer)
+1. On submit of Quality Inspection with status **Accepted**, system automatically creates **Stock Entry** (Material Transfer)
 2. Source: Quarantine warehouse
-3. Target: Final destination warehouse
-4. System validates that quality inspection passed and Transfers the stock from Quarantine warehouse to Final destination warehouse
+3. Target: Final destination warehouse (from PR/SE `intended_warehouse`)
+4. **Full quantity** is transferred (the received quantity), not the `sample_size`
+5. Stock Entry company matches the reference document's company
 
-**Note**: Items cannot be removed from quarantine if inspection is pending or failed.
+**Note**: Items cannot be removed from quarantine if inspection is pending or rejected.
 
 ## Use Cases
 
