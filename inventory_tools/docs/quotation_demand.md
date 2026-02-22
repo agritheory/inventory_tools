@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Quotation Demand
 
 <div class="byline">
-  Rohan Bansal, Tyler Matteson, and Francisco Roldán 2024-07-23
+  Rohan Bansal, coleandreoli, Tyler Matteson, and Francisco Roldán 2025-10-22
 </div>
 
 
