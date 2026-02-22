@@ -8,6 +8,10 @@ from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import PurchaseI
 from frappe import _
 from frappe.utils.data import cint
 
+from inventory_tools.inventory_tools.overrides.inspection import (
+	validate_inspection_with_company_scope,
+)
+
 
 class InventoryToolsPurchaseInvoice(PurchaseInvoice):
 	def validate_with_previous_doc(self):
@@ -78,6 +82,9 @@ class InventoryToolsPurchaseInvoice(PurchaseInvoice):
 	def is_work_order_subcontracting_enabled(self):
 		settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
 		return bool(settings and settings.enable_work_order_subcontracting)
+
+	def validate_inspection(self):
+		validate_inspection_with_company_scope(self)
 
 	def validate_subcontracting_to_pay_qty(self):
 		# Checks the qty the invoice will cover is not more than the outstanding qty

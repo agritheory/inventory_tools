@@ -30,6 +30,9 @@
 		"allow_alternative_workstations",
 		"uoms_section",
 		"enforce_uoms",
+		"quarantine_quality_control_section",
+		"enable_quarantine_workflow",
+		"default_quarantine_warehouse",
 		"faceted_search_tab",
 		"section_break_pxnx",
 		"show_on_website",
@@ -187,11 +190,28 @@
 			"fieldname": "prettify_warehouse_tree",
 			"fieldtype": "Check",
 			"label": "Prettify Warehouse Tree"
+		},
+		{
+			"fieldname": "quarantine_quality_control_section",
+			"fieldtype": "Section Break",
+			"label": "Quarantine Quality Control"
+		},
+		{
+			"default": "0",
+			"fieldname": "enable_quarantine_workflow",
+			"fieldtype": "Check",
+			"label": "Enable Quarantine Workflow"
+		},
+		{
+			"fieldname": "default_quarantine_warehouse",
+			"fieldtype": "Link",
+			"label": "Default Quarantine Warehouse",
+			"options": "Warehouse"
 		}
 	],
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2025-10-07 01:48:39.818263",
+	"modified": "2025-12-08 01:32:29.199751",
 	"modified_by": "Administrator",
 	"module": "Inventory Tools",
 	"name": "Inventory Tools Settings",

@@ -24,6 +24,8 @@ class InventoryToolsSettings(Document):
 		company: DF.Link | None
 		create_job_cards_automatically: DF.Literal["Yes", "No"]
 		create_purchase_orders: DF.Check
+		default_quarantine_warehouse: DF.Link | None
+		enable_quarantine_workflow: DF.Check
 		enable_work_order_subcontracting: DF.Check
 		enforce_uoms: DF.Check
 		overproduction_percentage_for_work_order: DF.Percent
