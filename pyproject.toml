@@ -32,6 +32,11 @@ frappe = ">=15.0.0,<16.0.0"
 erpnext = ">=15.0.0,<16.0.0"
 hrms = ">=15.0.0,<16.0.0"
 
+[tool.bench.dev-dependencies]
+pytest = "~=8.2.2"
+pytest-cov = "~=5.0.0"
+pytest-order = "~=1.2.1"
+
 [tool.codespell]
 skip = "CHANGELOG.md"
 
