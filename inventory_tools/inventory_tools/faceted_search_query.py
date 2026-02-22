@@ -462,19 +462,26 @@ def get_web_item_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 
 	if warehouse:
 		lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
-		stock_qty = frappe.db.sql(
-			"""
-			SELECT SUM(GREATEST(`tabBin`.actual_qty - `tabBin`.reserved_qty - `tabBin`.reserved_qty_for_production - `tabBin`.reserved_qty_for_sub_contract, 0)) AS stock_qty
-			FROM `tabBin`, `tabItem`, `tabWarehouse`
-			WHERE
-			`tabWarehouse`.lft >= %(lft)s
-			AND `tabWarehouse`.rgt <= %(rgt)s
-			AND `tabItem`.name = `tabBin`.item_code
-			AND `tabItem`.name = %(item_code)s
-			AND `tabWarehouse`.name = `tabBin`.warehouse
-			AND `tabWarehouse`.up_purpose = 'Storage'
-			""",
-			{"item_code": item_code, "lft": lft, "rgt": rgt},
+		from frappe.query_builder import functions as fn
+
+		bin = frappe.qb.DocType("Bin")
+		item = frappe.qb.DocType("Item")
+		warehouse = frappe.qb.DocType("Warehouse")
+
+		stock_qty = (
+			frappe.qb.from_(bin)
+			.from_(item)
+			.from_(warehouse)
+			.select(fn.Sum(bin.reserved_qty_for_sub_contract).as_("stock_qty"))
+			.where(
+				(warehouse.lft >= "lft")
+				& (warehouse.rgt <= "rgt")
+				& (item.name == bin.item_code)
+				& (item.name == "item_code")
+				& (warehouse.name == bin.warehouse)
+				& (warehouse.up_purpose == "Storage")
+			)
+			.run(as_dict=True)
 		)
 
 		if stock_qty:

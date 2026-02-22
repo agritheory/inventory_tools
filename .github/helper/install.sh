@@ -56,6 +56,7 @@ bench get-app inventory_tools "${GITHUB_WORKSPACE}" --skip-assets
 
 printf '%s\n' 'frappe' 'erpnext' 'hrms' 'payments' 'webshop' 'inventory_tools' > ~/frappe-bench/sites/apps.txt
 bench setup requirements --python
+bench setup requirements --dev
 bench use test_site
 
 bench start &> bench_run_logs.txt &
