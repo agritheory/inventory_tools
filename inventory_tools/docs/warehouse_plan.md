@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Warehouse Plan
 
 <div class="byline">
-  coleandreoli 2025-08-29
+  Rohan Bansal, coleandreoli, Tyler Matteson, and Francisco Roldán 2025-10-22
 </div>
 
 

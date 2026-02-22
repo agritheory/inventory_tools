@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Using the Example Data to Experiment with Inventory Tools
 
 <div class="byline">
-  Rohan Bansal, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2024-07-23
+  Rohan Bansal, coleandreoli, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2025-10-22
 </div>
 
 
