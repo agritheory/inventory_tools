@@ -11,14 +11,10 @@ For license information, please see license.txt-->
 The Inventory Tools application enhances and extends inventory-related functionality and workflows in ERPNext. It includes the following features:
 
 - **[Material Demand](./material_demand.md)**: a report-based interface to aggregate required Items across multiple sources, then optionally create Purchase Orders or Request for Quotations
-<<<<<<< Updated upstream
-- **[UOM Enforcement](./uom_enforcement.md)**: for doctypes that have an Items table or Unit of Measure (UOM) fields, this feature restricts the user's options from arbitrary selections to only UOMs defined in the Item master with a specified conversion factor
 - **[Warehouse Path](./warehouse_path.md)**: for any warehouse selection field, this features helps clearly identify warehouses by creating a warehouse path and adding a human-readable string under the warehouse name in the format "parent warehouse(s)->warehouse"
-=======
 - **[Quotation Demand](./quotation_demand.md)**: a report-based interface to aggregate required Items across multiple Quotations, Customers, and Companies, then create draft Sales Orders
 - **[Warehouse Path](./warehouse_path.md)**: for any warehouse selection field, this feature helps clearly identify warehouses by creating a warehouse path and adding a human-readable string under the warehouse name in the format "parent warehouse(s)->warehouse"
 - **[Warehouse Plan](./warehouse_plan.md)**: optimizes pick list walking paths within a warehouse using a 2D floor plan representation and shortest-path algorithms, with support for FIFO, LIFO, and bin depletion strategies
->>>>>>> Stashed changes
 - **[Subcontracting Workflow via Work Order](./wo_subcontracting.md)**: an alternative to ERPNext's subcontracting workflow that enables a user to employ Work Orders, subcontracting Purchase Orders, and manufacturing Stock Entries in lieu of Purchase Receipts or Subcontracting Orders/Receipts. Enhancements to the subcontracting Purchase Invoice allow a user to quickly reconcile what Items have been received with what is being invoiced
 - **[Inline Landed Costing](./landed_costing.md)**: Coming soon! This feature enables a user to include any additional costs to be capitalized into an Item's valuation directly in a Purchase Receipt or Purchase Invoice without needing to create a separate Landed Cost Voucher
 - **[Manufacturing Capacity](./manufacturing_capacity.md)**: a report-based interface to show, for a given BOM, the entire hierarchy of any BOM tree containing that BOM with demand and in-stock quantities for all levels

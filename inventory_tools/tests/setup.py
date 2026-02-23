@@ -167,7 +167,7 @@ def create_suppliers(settings):
 				{
 					"company": settings.company,
 					"wip_warehouse": "Credible Contract Baking - APC",
-					"return_warehouse": "Baked Goods - APC",
+					"return_warehouse": "Refrigerated Display - APC",
 				},
 			)
 		biz.default_price_list = "Bakery Buying"
@@ -1088,6 +1088,26 @@ def create_production_plan(settings, prod_plan_from_doc):
 					"time_in_mins": time_in_mins,
 				},
 			)
+
+	# Create and submit a subcontracted Purchase Order for the subcontracted Work Order
+	from inventory_tools.inventory_tools.overrides.work_order import make_purchase_order
+
+	subcontracted_wo = frappe.db.get_value(
+		"Work Order",
+		{
+			"production_plan": pp.name,
+			"supplier": "Credible Contract Baking",
+			"docstatus": 1,
+		},
+		"name",
+	)
+	assert (
+		subcontracted_wo
+	), "Subcontracted Work Order for Pie Crust not found after production plan setup"
+	po_name = make_purchase_order(subcontracted_wo, "Credible Contract Baking")
+	assert po_name, "make_purchase_order did not return a PO name"
+	po = frappe.get_doc("Purchase Order", po_name)
+	po.submit()
 
 
 def create_fruit_material_request(settings):
