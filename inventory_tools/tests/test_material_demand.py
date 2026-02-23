@@ -65,6 +65,8 @@ def test_report_po_without_aggregation():
 			assert po.grand_total == flt(501.07, 2)
 		elif po.supplier == "Freedom Provisions":
 			assert po.grand_total == flt(375.89, 2)
+		elif po.supplier == "Credible Contract Baking":
+			continue  # subcontracting PO created by fixture, not this test
 		else:
 			raise AssertionError(f"{po.supplier} should not be in this test")
 		frappe.delete_doc("Purchase Order", po.name)
@@ -148,8 +150,8 @@ def test_report_item_based_without_aggregation():
 			assert po.grand_total == flt(501.07, 2)
 		elif po.supplier == "Freedom Provisions":
 			assert po.grand_total == flt(375.89, 2)
-		elif po.supplier == "Southern Fruit Supply":
-			continue
+		elif po.supplier in ("Southern Fruit Supply", "Credible Contract Baking"):
+			continue  # Southern Fruit Supply excluded by design; Credible Contract Baking is the subcontracting fixture PO
 		else:
 			raise AssertionError(f"{po.supplier} should not be in this test")
 		frappe.delete_doc("Purchase Order", po.name)
