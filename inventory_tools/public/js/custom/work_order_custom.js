@@ -10,6 +10,7 @@ frappe.ui.form.on('Work Order', {
 	},
 	refresh: frm => {
 		manage_subcontracting_buttons(frm)
+		manage_supplier_field_visibility(frm)
 		get_workstations(frm)
 		workstation_selection_button(frm)
 	},
@@ -43,6 +44,17 @@ function get_workstations(frm) {
 				company: frm.doc.company,
 			},
 		}
+	})
+}
+
+function manage_supplier_field_visibility(frm) {
+	if (!frm.doc.bom_no) {
+		frm.set_df_property('supplier', 'hidden', 1)
+		return
+	}
+	frappe.db.get_value('BOM', { name: frm.doc.bom_no }, 'is_subcontracted').then(r => {
+		const is_subcontracted = r && r.message && r.message.is_subcontracted
+		frm.set_df_property('supplier', 'hidden', is_subcontracted ? 0 : 1)
 	})
 }
 

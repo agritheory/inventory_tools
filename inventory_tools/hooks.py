@@ -87,7 +87,7 @@ doctype_tree_js = {"Warehouse": "public/js/custom/warehouse_tree.js"}
 
 # before_install = "inventory_tools.install.before_install"
 # after_install = "inventory_tools.install.after_install"
-after_migrate = "inventory_tools.customize.load_customizations"
+# after_migrate = "inventory_tools.customize.load_customizations"
 
 # Uninstallation
 # ------------
@@ -123,13 +123,17 @@ extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
 # Override standard doctype classes
 
 override_doctype_class = {
+	"Delivery Note": "inventory_tools.inventory_tools.overrides.delivery_note.InventoryToolsDeliveryNote",
+	"Quality Inspection": "inventory_tools.inventory_tools.overrides.quality_inspection.InventoryToolsQualityInspection",
 	"Job Card": "inventory_tools.inventory_tools.overrides.job_card.InventoryToolsJobCard",
 	"Production Plan": "inventory_tools.inventory_tools.overrides.production_plan.InventoryToolsProductionPlan",
 	"Purchase Invoice": "inventory_tools.inventory_tools.overrides.purchase_invoice.InventoryToolsPurchaseInvoice",
 	"Purchase Order": "inventory_tools.inventory_tools.overrides.purchase_order.InventoryToolsPurchaseOrder",
 	"Purchase Receipt": "inventory_tools.inventory_tools.overrides.purchase_receipt.InventoryToolsPurchaseReceipt",
+	"Sales Invoice": "inventory_tools.inventory_tools.overrides.sales_invoice.InventoryToolsSalesInvoice",
 	"Sales Order": "inventory_tools.inventory_tools.overrides.sales_order.InventoryToolsSalesOrder",
 	"Stock Entry": "inventory_tools.inventory_tools.overrides.stock_entry.InventoryToolsStockEntry",
+	"Subcontracting Receipt": "inventory_tools.inventory_tools.overrides.subcontracting_receipt.InventoryToolsSubcontractingReceipt",
 	"Work Order": "inventory_tools.inventory_tools.overrides.work_order.InventoryToolsWorkOrder",
 	"Workstation": "inventory_tools.inventory_tools.overrides.workstation.InventoryToolsWorkstation",
 	"Website Item": "inventory_tools.inventory_tools.overrides.website_item.InventoryToolsWebsiteItem",
@@ -149,34 +153,51 @@ doc_events = {
 			"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.create_inventory_tools_settings",
 		],
 	},
+	"Delivery Note": {
+		"on_submit": [
+			"inventory_tools.utils.cartonization.run_cartonization",
+		],
+	},
 	"Item": {
 		"validate": [
 			"inventory_tools.inventory_tools.overrides.uom.duplicate_weight_to_uom_conversion",
 			"inventory_tools.inventory_tools.faceted_search.update_specification_attribute_values",
 		],
 	},
-	"Warehouse": {
-		"validate": ["inventory_tools.inventory_tools.overrides.warehouse.update_warehouse_path"]
-	},
 	"Operation": {
 		"validate": [
 			"inventory_tools.inventory_tools.overrides.operation.validate_alternative_workstation"
 		]
+	},
+	"Pick List": {
+		"on_submit": [
+			"inventory_tools.utils.cartonization.run_cartonization",
+		],
+	},
+	"Purchase Receipt": {
+		"before_submit": [
+			"inventory_tools.inventory_tools.overrides.purchase_receipt.handle_pr_quarantine",
+		],
+	},
+	"Quality Inspection": {
+		"on_submit": ["inventory_tools.inventory_tools.overrides.stock_entry.release_from_quarantine"],
+	},
+	"Stock Entry": {
+		"before_submit": [
+			"inventory_tools.inventory_tools.overrides.stock_entry.handle_se_quarantine",
+		],
+		"on_submit": [
+			"inventory_tools.utils.cartonization.run_cartonization",
+		],
+	},
+	"Warehouse": {
+		"validate": ["inventory_tools.inventory_tools.overrides.warehouse.update_warehouse_path"]
 	},
 	"Workstation": {
 		"validate": [
 			"inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost.validate_workstation_costs",
 			"inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost.validate_dates",
 		]
-	},
-	"Pick List": {
-		"on_submit": "inventory_tools.utils.cartonization.run_cartonization",
-	},
-	"Stock Entry": {
-		"on_submit": "inventory_tools.utils.cartonization.run_cartonization",
-	},
-	"Delivery Note": {
-		"on_submit": "inventory_tools.utils.cartonization.run_cartonization",
 	},
 }
 

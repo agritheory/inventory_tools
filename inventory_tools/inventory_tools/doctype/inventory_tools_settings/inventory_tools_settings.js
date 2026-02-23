@@ -5,9 +5,15 @@ frappe.ui.form.on('Inventory Tools Settings', {
 	onload(frm) {
 		set_cartonization_doctype_filter(frm)
 	},
-
 	refresh(frm) {
 		set_cartonization_doctype_filter(frm)
+		frm.set_query('default_quarantine_warehouse', function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			}
+		})
 	},
 })
 

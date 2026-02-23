@@ -1,0 +1,57 @@
+[
+	{
+		"name": "Freedom Provisions",
+		"payment_terms": "Net 30",
+		"address": {
+			"address_line1": "16 Margrave",
+			"city": "Carlisle",
+			"state": "NH",
+			"country": "United States",
+			"pincode": "57173"
+		}
+	},
+	{
+		"name": "Unity Bakery Supply",
+		"payment_terms": "Net 30",
+		"address": {
+			"address_line1": "34 Pinar St",
+			"city": "Unity",
+			"state": "RI",
+			"country": "United States",
+			"pincode": "34291"
+		}
+	},
+	{
+		"name": "Chelsea Fruit Co",
+		"payment_terms": "Net 30",
+		"address": {
+			"address_line1": "67C Sweeny Street",
+			"city": "Chelsea",
+			"state": "MA",
+			"country": "United States",
+			"pincode": "89077"
+		}
+	},
+	{
+		"name": "Credible Contract Baking",
+		"payment_terms": "Net 30",
+		"address": {
+			"address_line1": "4 Crumb Circle",
+			"city": "Belmont",
+			"state": "MA",
+			"country": "United States",
+			"pincode": "89074"
+		}
+	},
+	{
+		"name": "Southern Fruit Supply",
+		"payment_terms": "Net 30",
+		"address": {
+			"address_line1": "10001 Pineapple Way",
+			"city": "Largo",
+			"state": "TX",
+			"country": "United States",
+			"pincode": "89574"
+		}
+	}
+]

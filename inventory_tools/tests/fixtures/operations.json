@@ -1,0 +1,74 @@
+[
+	[
+		"Gather Pie Crust Ingredients",
+		"Food Prep Table 2",
+		"5",
+		"- Remove flour, salt, and a pie tins from store room\n\t- Remove butter and ice water from refrigerator\n\t- Place ingredients at workstation\n\t- Measure amounts for batch size into mixing bowl",
+		["Food Prep Table 1"]
+	],
+	[
+		"Gather Pie Filling Ingredients",
+		"Food Prep Table 1",
+		"5",
+		"- Remove fruit and butter from refrigerator\n\t- Remove sugar and cornstarch\n\t- Get water from sink\n\t- Measure ingredients and place in pot, excluding 1/4 of fruit and butter",
+		["Food Prep Table 2"]
+	],
+	[
+		"Assemble Pie Op",
+		"Food Prep Table 2",
+		"5",
+		"- Use fresh pie filling or remove from refrigerator\n\t- Remove rolled pie crusts from refrigerator\n\t- Fill bottom crust with filling\n\t- Create decorative cut out for top crust\n\t- Layer top crust over bottom crust / filling and create a crimped seal",
+		["Food Prep Table 1", "Assemble Pie Station"]
+	],
+	[
+		"Cook Pie Filling Operation",
+		"Range Station",
+		"5",
+		"- Bring ingredients to simmer and cook for 15 minutes\n\t- Remove from heat and mix in remaining 1/4 berries and butter\n\t- Store in refrigerator if not using immediately"
+	],
+	[
+		"Mix Dough Op",
+		"Mixer Station",
+		"5",
+		"- Combine flour, butter, salt, and ice water in mixer\n\t- Pulse for 30 seconds\n\t- Divide into equal-sized portions, one portion for each pie crust being made\n\t- Put in refrigerator",
+		["Mix Pie Crust Station", "Mix Pie Filling Station"]
+	],
+	["Box Pie Op", "Packaging Station", "5", "- Place pie into box for sale"],
+	[
+		"Roll Pie Crust Op",
+		"Food Prep Table 2",
+		"5",
+		"- Remove chilled pie crust portions from refrigerator\n\t- Separate each portion into two (one for bottom crust, one for top)\n\t- Flour board and roll out each portion into a circle\n\t- Place bottom crust into pie tin, then layer a piece of parchment paper, followed by the top crust",
+		["Food Prep Table 1", "Roll Pie Crust Station"]
+	],
+	["Divide Dough Op", "Food Prep Table 2", "1", "Divide Dough Op", ["Food Prep Table 1"]],
+	[
+		"Bake Op",
+		"Oven Station",
+		"1",
+		"- Place assembled pies into oven\n\t- Bake at 375F for 50 minutes\n\t- Remove from oven",
+		["Baking Station"]
+	],
+	[
+		"Chill Pie Crust Op",
+		"Refrigerator Station",
+		"1",
+		"- Chill pie crust for at least 30 minutes",
+		["Cooling Station", "Cooling Racks Station"]
+	],
+	[
+		"Cool Pie Op",
+		"Cooling Racks Station",
+		"1",
+		"Cool baked pies for at least 30 minutes before boxing",
+		["Cooling Station", "Refrigerator Station"]
+	],
+	["Assemble Pocket Op", "Food Prep Table 1", "5", "- Fold 3 poppers into dough pocket"],
+	["Assemble Popper Op", "Food Prep Table 1", "5", "- Top dough bite with fruit"],
+	[
+		"Assemble Combination Product",
+		"Food Prep Table 1",
+		"5",
+		"- Tower: package one pie and one pocket, and one popper\n    - Pocketful of Bay: package one pocket with two poppers"
+	]
+]

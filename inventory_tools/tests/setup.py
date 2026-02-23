@@ -6,14 +6,16 @@ import shutil
 from pathlib import Path
 
 import frappe
+from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 from erpnext.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 )
+from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+from test_utils.utils.setup_fixtures import create_quarantine_warehouse
 from erpnext.setup.utils import set_defaults_for_tests
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
 from frappe.utils.data import add_months, flt, getdate, nowdate, get_datetime
 from webshop.webshop.doctype.website_item.website_item import make_website_item
-
 from inventory_tools.tests.fixtures import (
 	operations,
 	suppliers,
@@ -124,7 +126,6 @@ def create_test_data():
 	else:
 		create_material_request(settings)
 	create_production_plan(settings, prod_plan_from_doc)
-
 	create_fruit_material_request(settings)
 	create_quotations(settings)
 	create_specifications(settings)
@@ -152,10 +153,10 @@ def create_suppliers(settings):
 	addresses = frappe._dict({})
 	for supplier in suppliers:
 		biz = frappe.new_doc("Supplier")
-		biz.supplier_name = supplier[0]
+		biz.supplier_name = supplier["name"]
 		biz.supplier_group = "Bakery"
 		biz.country = "United States"
-		biz.supplier_default_mode_of_payment = supplier[2]
+		biz.supplier_default_mode_of_payment = supplier.get("payment_mode")
 		if biz.supplier_default_mode_of_payment == "ACH/EFT":
 			biz.bank = "Local Bank"
 			biz.bank_account = "123456789"
@@ -166,25 +167,28 @@ def create_suppliers(settings):
 				{
 					"company": settings.company,
 					"wip_warehouse": "Credible Contract Baking - APC",
-					"return_warehouse": "Baked Goods - APC",
+					"return_warehouse": "Refrigerated Display - APC",
 				},
 			)
 		biz.default_price_list = "Bakery Buying"
 		biz.save()
 
-		existing_address = frappe.get_value("Address", {"address_line1": supplier[5]["address_line1"]})
+		address_data = supplier.get("address", {})
+		existing_address = frappe.get_value(
+			"Address", {"address_line1": address_data.get("address_line1")}
+		)
 		if not existing_address:
 			addr = frappe.new_doc("Address")
-			addr.address_title = f"{supplier[0]} - {supplier[5]['city']}"
+			addr.address_title = f"{supplier['name']} - {address_data.get('city')}"
 			addr.address_type = "Billing"
-			addr.address_line1 = supplier[5]["address_line1"]
-			addr.city = supplier[5]["city"]
-			addr.state = supplier[5]["state"]
-			addr.country = supplier[5]["country"]
-			addr.pincode = supplier[5]["pincode"]
+			addr.address_line1 = address_data.get("address_line1")
+			addr.city = address_data.get("city")
+			addr.state = address_data.get("state")
+			addr.country = address_data.get("country")
+			addr.pincode = address_data.get("pincode")
 		else:
 			addr = frappe.get_doc("Address", existing_address)
-		addr.append("links", {"link_doctype": "Supplier", "link_name": supplier[0]})
+		addr.append("links", {"link_doctype": "Supplier", "link_name": supplier["name"]})
 		addr.save()
 
 
@@ -611,6 +615,192 @@ def create_warehouses(settings):
 		wh.save()
 
 
+def create_warehouse_locations():
+	for details in WAREHOUSE_LOCATIONS:
+		warehouse = frappe.new_doc("Warehouse")
+		warehouse.update(details)
+		warehouse.save()
+
+
+def _get_or_create_quarantine_account(company):
+	"""Dedicated quarantine Stock account per company (create if missing)."""
+	accounts = frappe.get_all(
+		"Account",
+		filters={"company": company, "account_type": "Stock", "is_group": 0},
+		or_filters=[
+			["account_name", "like", "Quarantine%"],
+			["name", "like", "%Quarantine%"],  # numbered chart: "1430 - Quarantine - APC"
+		],
+		pluck="name",
+		limit=1,
+	)
+	if accounts:
+		return accounts[0]
+	parent = frappe.get_value(
+		"Account",
+		{"company": company, "account_type": "Stock", "is_group": 1},
+		"name",
+	)
+	if not parent:
+		return None
+	a = frappe.new_doc("Account")
+	a.account_name = "Quarantine"
+	a.account_number = "1430"
+	a.is_group = 0
+	a.company = company
+	a.root_type = "Asset"
+	a.report_type = "Balance Sheet"
+	a.account_currency = frappe.get_value("Company", company, "default_currency")
+	a.parent_account = parent
+	a.account_type = "Stock"
+	a.insert()
+	return a.name
+
+
+def _link_quarantine_warehouses_to_account(settings):
+	"""Set dedicated quarantine account on warehouses (required for Stock Entry GL entries)."""
+	for wh_name, company in [
+		("Quarantine - APC", settings.company),
+		("Quarantine - CFC", "Chelsea Fruit Co"),
+	]:
+		if not frappe.db.exists("Warehouse", wh_name):
+			continue
+		account = _get_or_create_quarantine_account(company)
+		if account:
+			wh = frappe.get_doc("Warehouse", wh_name)
+			wh.account = account
+			wh.save()
+
+
+def create_quarantine_quality_control_data(settings):
+	"""Quarantine warehouses, QC templates, item config for quarantine quality control tests."""
+	# Quarantine warehouses (test_utils creates warehouse; we ensure dedicated account is linked)
+	for company in [settings.company, "Chelsea Fruit Co"]:
+		create_quarantine_warehouse(
+			settings=frappe._dict({"company": company}),
+			wh_name="Quarantine",
+			is_default_scrap_wh=False,
+		)
+	_link_quarantine_warehouses_to_account(settings)
+
+	if not frappe.db.exists("Quality Inspection Parameter", "Weight"):
+		frappe.get_doc(
+			{"doctype": "Quality Inspection Parameter", "parameter": "Weight", "description": "Weight"}
+		).insert()
+
+	if not frappe.db.exists("Quality Inspection Template", "Fruit QC"):
+		qit = frappe.new_doc("Quality Inspection Template")
+		qit.quality_inspection_template_name = "Fruit QC"
+		qit.quarantine_warehouse = "Quarantine - CFC"
+		qit.append(
+			"item_quality_inspection_parameter",
+			{"specification": "Weight", "numeric": 1, "min_value": 0, "max_value": 100},
+		)
+		qit.insert()
+
+	if not frappe.db.exists("Quality Inspection Template", "Ingredient QC"):
+		qit = frappe.new_doc("Quality Inspection Template")
+		qit.quality_inspection_template_name = "Ingredient QC"
+		qit.quarantine_warehouse = "Quarantine - APC"
+		qit.append(
+			"item_quality_inspection_parameter",
+			{"specification": "Weight", "numeric": 1, "min_value": 0, "max_value": 100},
+		)
+		qit.insert()
+
+	bayberry = frappe.get_doc("Item", "Bayberry")
+	bayberry.quality_inspection_template = "Fruit QC"
+	bayberry.save()
+	item_defaults = [d for d in bayberry.item_defaults if d.company == "Chelsea Fruit Co"]
+	if item_defaults:
+		item_defaults[0].inspection_required_before_purchase = 1
+	else:
+		bayberry.append(
+			"item_defaults",
+			{
+				"company": "Chelsea Fruit Co",
+				"default_warehouse": "Stores - CFC",
+				"default_supplier": "Southern Fruit Supply",
+				"inspection_required_before_purchase": 1,
+			},
+		)
+	bayberry.save()
+
+	for company, wh in [
+		("Chelsea Fruit Co", "Quarantine - CFC"),
+		(settings.company, "Quarantine - APC"),
+	]:
+		settings_doc = frappe.get_doc("Inventory Tools Settings", company)
+		settings_doc.default_quarantine_warehouse = wh
+		settings_doc.enable_quarantine_workflow = 0
+		settings_doc.save()
+
+	_link_quarantine_warehouses_to_account(settings)
+	frappe.db.commit()
+	receive_qc_workflow()
+
+
+def receive_qc_workflow():
+	"""PO (Bayberry only) -> PR (quarantine) -> QI (release). Satisfies Bayberry before material demand tests."""
+	mr_names = frappe.get_all(
+		"Material Request",
+		filters={"company": "Chelsea Fruit Co", "docstatus": 1},
+		pluck="name",
+	)
+	fruit_mr_name = None
+	bayberry_mri = None
+	for name in mr_names:
+		bayberry_mri = frappe.db.get_value(
+			"Material Request Item",
+			{"parent": name, "item_code": "Bayberry"},
+			"name",
+		)
+		if bayberry_mri:
+			fruit_mr_name = name
+			break
+	if not fruit_mr_name or not bayberry_mri:
+		return
+	mr = frappe.get_doc("Material Request", fruit_mr_name)
+	bayberry_row = next((r for r in mr.items if r.item_code == "Bayberry"), None)
+	if not bayberry_row or bayberry_row.received_qty >= bayberry_row.stock_qty:
+		return
+
+	# PO for Bayberry only (minimal change vs material demand tests)
+	po = make_purchase_order(
+		fruit_mr_name, target_doc=None, args={"filtered_children": [bayberry_mri]}
+	)
+	po.supplier = "Southern Fruit Supply"
+	po.save()
+	po.submit()
+
+	cfc_settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
+	cfc_settings.enable_quarantine_workflow = 1
+	cfc_settings.save()
+
+	pr = make_purchase_receipt(po.name)
+	pr.submit()
+
+	qa = frappe.new_doc("Quality Inspection")
+	qa.report_date = getdate()
+	qa.inspection_type = "Incoming"
+	qa.reference_type = "Purchase Receipt"
+	qa.reference_name = pr.name
+	qa.item_code = "Bayberry"
+	qa.sample_size = 5
+	qa.quality_inspection_template = "Fruit QC"
+	qa.inspected_by = frappe.session.user
+	qa.status = "Accepted"
+	qa.append(
+		"readings",
+		{"specification": "Weight", "min_value": 0, "max_value": 100, "reading_1": "50"},
+	)
+	qa.save()
+	qa.submit()
+
+	cfc_settings.enable_quarantine_workflow = 0
+	cfc_settings.save()
+
+
 def create_boms(settings):
 	for bom in BOMS[::-1]:  # reversed
 		if frappe.db.exists("BOM", {"item": bom.get("item")}) and bom.get("item") != "Pie Crust":
@@ -876,6 +1066,9 @@ def create_production_plan(settings, prod_plan_from_doc):
 	for wo in wos:
 		wo = frappe.get_doc("Work Order", wo)
 		wo.wip_warehouse = "Kitchen - APC"
+		# Set supplier on subcontracted Work Order (uses BOM with is_subcontracted=1)
+		if wo.bom_no and frappe.db.get_value("BOM", wo.bom_no, "is_subcontracted"):
+			wo.supplier = "Credible Contract Baking"
 		wo.save()
 		wo.submit()
 		job_cards = frappe.get_all("Job Card", {"work_order": wo.name})
@@ -895,6 +1088,26 @@ def create_production_plan(settings, prod_plan_from_doc):
 					"time_in_mins": time_in_mins,
 				},
 			)
+
+	# Create and submit a subcontracted Purchase Order for the subcontracted Work Order
+	from inventory_tools.inventory_tools.overrides.work_order import make_purchase_order
+
+	subcontracted_wo = frappe.db.get_value(
+		"Work Order",
+		{
+			"production_plan": pp.name,
+			"supplier": "Credible Contract Baking",
+			"docstatus": 1,
+		},
+		"name",
+	)
+	assert (
+		subcontracted_wo
+	), "Subcontracted Work Order for Pie Crust not found after production plan setup"
+	po_name = make_purchase_order(subcontracted_wo, "Credible Contract Baking")
+	assert po_name, "make_purchase_order did not return a PO name"
+	po = frappe.get_doc("Purchase Order", po_name)
+	po.submit()
 
 
 def create_fruit_material_request(settings):
@@ -1090,6 +1303,18 @@ def create_warehouse_dimensions():
 		wyd.save()
 
 
+def _get_item_buying_rate(item_code):
+	"""Get item rate from Bakery Buying price list."""
+	return (
+		frappe.db.get_value(
+			"Item Price",
+			{"item_code": item_code, "price_list": "Bakery Buying", "buying": 1},
+			"price_list_rate",
+		)
+		or 0
+	)
+
+
 def create_stock_entries():
 	j = len(ITEMS_STOCKENTRY) // 2
 	# Add items to warehouse
@@ -1106,7 +1331,7 @@ def create_stock_entries():
 				"t_warehouse": item["warehouse"],
 				"item_code": item["item_code"],
 				"qty": item["qty"],
-				"allow_zero_valuation_rate": 1,
+				"basic_rate": _get_item_buying_rate(item["item_code"]),
 			},
 		)
 
@@ -1127,16 +1352,28 @@ def create_stock_entries():
 				"t_warehouse": item["warehouse"],
 				"item_code": item["item_code"],
 				"qty": item["qty"],
-				"allow_zero_valuation_rate": 1,
+				"basic_rate": _get_item_buying_rate(item["item_code"]),
 			},
 		)
 
 	se.save()
 	se.submit()
 
-
-def create_warehouse_locations():
-	for details in WAREHOUSE_LOCATIONS:
-		warehouse = frappe.new_doc("Warehouse")
-		warehouse.update(details)
-		warehouse.save()
+	# Raw materials in Storeroom - APC for production and Material Transfer for Manufacture test
+	se = frappe.new_doc("Stock Entry")
+	se.company = "Ambrosia Pie Company"
+	se.posting_date = getdate().replace(month=1, day=1)
+	se.set_posting_time = 1
+	se.stock_entry_type = "Material Receipt"
+	for item_code, qty in [("Flour", 100), ("Cornstarch", 50), ("Sugar", 50), ("Butter", 50)]:
+		se.append(
+			"items",
+			{
+				"item_code": item_code,
+				"t_warehouse": "Storeroom - APC",
+				"qty": qty,
+				"basic_rate": _get_item_buying_rate(item_code),
+			},
+		)
+	se.save()
+	se.submit()

@@ -1,6 +1,6 @@
 [project]
 name = "inventory_tools"
-version = "15.9.2"
+version = "15.10.0"
 description = "Inventory Tools for ERPNext"
 authors = [
     { name = "AgriTheory", email = "support@agritheory.dev"}
@@ -37,6 +37,7 @@ hrms = ">=15.0.0,<16.0.0"
 pytest = "~=8.2.2"
 pytest-cov = "~=5.0.0"
 pytest-order = "~=1.2.1"
+test_utils = "@git+https://github.com/agritheory/test_utils.git#egg=test_utils"
 
 [tool.codespell]
 skip = "CHANGELOG.md"
