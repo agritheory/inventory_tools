@@ -87,7 +87,7 @@ doctype_tree_js = {"Warehouse": "public/js/custom/warehouse_tree.js"}
 
 # before_install = "inventory_tools.install.before_install"
 # after_install = "inventory_tools.install.after_install"
-after_migrate = "inventory_tools.customize.load_customizations"
+# after_migrate = "inventory_tools.customize.load_customizations"
 
 # Uninstallation
 # ------------
