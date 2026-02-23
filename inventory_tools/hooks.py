@@ -153,34 +153,51 @@ doc_events = {
 			"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.create_inventory_tools_settings",
 		],
 	},
+	"Delivery Note": {
+		"on_submit": [
+			"inventory_tools.cartonization.run_cartonization",
+		],
+	},
 	"Item": {
 		"validate": [
 			"inventory_tools.inventory_tools.overrides.uom.duplicate_weight_to_uom_conversion",
 			"inventory_tools.inventory_tools.faceted_search.update_specification_attribute_values",
 		],
 	},
-	"Warehouse": {
-		"validate": ["inventory_tools.inventory_tools.overrides.warehouse.update_warehouse_path"]
-	},
 	"Operation": {
 		"validate": [
 			"inventory_tools.inventory_tools.overrides.operation.validate_alternative_workstation"
 		]
+	},
+	"Pick List": {
+		"on_submit": [
+			"inventory_tools.cartonization.run_cartonization",
+		],
+	},
+	"Purchase Receipt": {
+		"before_submit": [
+			"inventory_tools.inventory_tools.overrides.purchase_receipt.handle_pr_quarantine",
+		],
+	},
+	"Quality Inspection": {
+		"on_submit": ["inventory_tools.inventory_tools.overrides.stock_entry.release_from_quarantine"],
+	},
+	"Stock Entry": {
+		"before_submit": [
+			"inventory_tools.inventory_tools.overrides.stock_entry.handle_se_quarantine",
+		],
+		"on_submit": [
+			"inventory_tools.cartonization.run_cartonization",
+		],
+	},
+	"Warehouse": {
+		"validate": ["inventory_tools.inventory_tools.overrides.warehouse.update_warehouse_path"]
 	},
 	"Workstation": {
 		"validate": [
 			"inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost.validate_workstation_costs",
 			"inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost.validate_dates",
 		]
-	},
-	"Purchase Receipt": {
-		"before_submit": "inventory_tools.inventory_tools.overrides.purchase_receipt.handle_pr_quarantine",
-	},
-	"Quality Inspection": {
-		"on_submit": "inventory_tools.inventory_tools.overrides.stock_entry.release_from_quarantine"
-	},
-	"Stock Entry": {
-		"before_submit": "inventory_tools.inventory_tools.overrides.stock_entry.handle_se_quarantine"
 	},
 }
 

@@ -33,10 +33,27 @@
 		"quarantine_quality_control_section",
 		"enable_quarantine_workflow",
 		"default_quarantine_warehouse",
+		"block_issue_from_quarantine",
 		"faceted_search_tab",
 		"section_break_pxnx",
 		"show_on_website",
-		"show_in_listview"
+		"show_in_listview",
+		"cartonization_tab",
+		"cartonization_section",
+		"enable_cartonization",
+		"default_packing_mode",
+		"column_break_qlam",
+		"floor_packing_policy",
+		"volumetric_policy",
+		"fitted_policy",
+		"cartonization_options_section",
+		"allow_rotation",
+		"solver_timeout_seconds",
+		"column_break_xbhv",
+		"weight_validation",
+		"max_weight_uom",
+		"applicable_document_types_section",
+		"cartonization_doctypes"
 	],
 	"fields": [
 		{
@@ -207,11 +224,108 @@
 			"fieldtype": "Link",
 			"label": "Default Quarantine Warehouse",
 			"options": "Warehouse"
+		},
+		{
+			"default": "0",
+			"fieldname": "block_issue_from_quarantine",
+			"fieldtype": "Check",
+			"label": " Block Issue from Quarantine"
+		},
+		{
+			"default": "0",
+			"fieldname": "enable_cartonization",
+			"fieldtype": "Check",
+			"label": "Enable Cartonization"
+		},
+		{
+			"fieldname": "default_packing_mode",
+			"fieldtype": "Select",
+			"label": "Default Packing Mode",
+			"options": "\n2D Floor\n3D Volumetric\n3D Fitted"
+		},
+		{
+			"fieldname": "column_break_qlam",
+			"fieldtype": "Column Break"
+		},
+		{
+			"default": "Ignore",
+			"fieldname": "floor_packing_policy",
+			"fieldtype": "Select",
+			"label": "Floor Packing Policy",
+			"options": "\nIgnore\nWarn\nError"
+		},
+		{
+			"default": "Ignore",
+			"fieldname": "volumetric_policy",
+			"fieldtype": "Select",
+			"label": "Volumetric Policy",
+			"options": "Ignore\nWarn\nError"
+		},
+		{
+			"default": "Ignore",
+			"fieldname": "fitted_policy",
+			"fieldtype": "Select",
+			"label": "Fitted Policy",
+			"options": "Ignore\nWarn\nError"
+		},
+		{
+			"fieldname": "cartonization_section",
+			"fieldtype": "Section Break",
+			"label": "Cartonization"
+		},
+		{
+			"fieldname": "cartonization_options_section",
+			"fieldtype": "Section Break",
+			"label": "Options"
+		},
+		{
+			"default": "1",
+			"fieldname": "allow_rotation",
+			"fieldtype": "Check",
+			"label": "Allow Rotation"
+		},
+		{
+			"fieldname": "cartonization_tab",
+			"fieldtype": "Tab Break",
+			"label": "Cartonization"
+		},
+		{
+			"default": "30",
+			"fieldname": "solver_timeout_seconds",
+			"fieldtype": "Int",
+			"label": "Solver Timeout Seconds"
+		},
+		{
+			"fieldname": "column_break_xbhv",
+			"fieldtype": "Column Break"
+		},
+		{
+			"fieldname": "weight_validation",
+			"fieldtype": "Select",
+			"label": "Weight Validation",
+			"options": "Ignore\nWarn\nError"
+		},
+		{
+			"fieldname": "max_weight_uom",
+			"fieldtype": "Link",
+			"label": "Max Weight Uom",
+			"options": "UOM"
+		},
+		{
+			"fieldname": "applicable_document_types_section",
+			"fieldtype": "Section Break",
+			"label": "Applicable Document Types"
+		},
+		{
+			"fieldname": "cartonization_doctypes",
+			"fieldtype": "Table MultiSelect",
+			"label": "Cartonization Doctypes",
+			"options": "Cartonization Applicable Doctype"
 		}
 	],
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2025-12-08 01:32:29.199751",
+	"modified": "2026-01-21 08:24:16.272533",
 	"modified_by": "Administrator",
 	"module": "Inventory Tools",
 	"name": "Inventory Tools Settings",

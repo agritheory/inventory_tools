@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Inventory Tools Documentation
 
 <div class="byline">
-  Rohan Bansal, Devarsh Bhatt, coleandreoli, IshwaryaM1030, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2026-02-22
+  Rohan Bansal, Devarsh Bhatt, coleandreoli, Ishwarya, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2026-01-26
 </div>
 
 
@@ -21,6 +21,8 @@ The Inventory Tools application enhances and extends inventory-related functiona
 - **[Workstation Operating Cost](./workstation_operating_cost.md)**: a flexible, time-based system for tracking and allocating manufacturing overhead to production operations with historical cost periods and detailed cost breakdowns
 - **[Faceted Search](./faceted_search.md)**: loosely-coupled attributes for Items, visible in both Ecommerce and Item Listview search contexts
 - **[Alternate Workstation](./alternate_workstation.md)**: allows selecting alternative workstations that can perform the same operation
+- **[Cartonization](./cartonization.md)**: Cartonization ensures that items involved in inventory transactions physically fit into their 
+target containers
 - **[Quarantine Quality Control](./quarantine_quality_control_workflows.md)**: allows inventory to be automatically moved to a quarantine warehouse for inspection, Items remain in quarantine until quality inspection is completed and approved
 - **[Overproduction Allowance](./overproduction_allowance.md)**: configurable percentage allowance for manufacturing more than the planned Work Order quantity, with validation across Work Orders, Job Cards, and Stock Entries
 - **[Multi-Company Sales Order](./multi_company_sales_order.md)**: enables Sales Orders to use warehouses from multiple companies, supporting centralized sales with distributed inventory fulfillment

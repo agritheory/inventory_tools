@@ -13,6 +13,9 @@ class InventoryToolsSettings(Document):
 
 	if TYPE_CHECKING:
 		from frappe.types import DF
+		from inventory_tools.inventory_tools.doctype.cartonization_applicable_doctype.cartonization_applicable_doctype import (
+			CartonizationApplicableDoctype,
+		)
 
 		aggregated_purchasing_warehouse: DF.Link | None
 		aggregated_sales_warehouse: DF.Link | None
@@ -21,20 +24,31 @@ class InventoryToolsSettings(Document):
 			"Allow Manually Defined Alternative Workstations",
 			"Allow Alternative Workstations Based on Workstation Type",
 		]
+		allow_rotation: DF.Check
+		block_issue_from_quarantine: DF.Check
+		cartonization_doctypes: DF.TableMultiSelect[CartonizationApplicableDoctype]
 		company: DF.Link | None
 		create_job_cards_automatically: DF.Literal["Yes", "No"]
 		create_purchase_orders: DF.Check
+		default_packing_mode: DF.Literal["", "2D Floor", "3D Volumetric", "3D Fitted"]
 		default_quarantine_warehouse: DF.Link | None
+		enable_cartonization: DF.Check
 		enable_quarantine_workflow: DF.Check
 		enable_work_order_subcontracting: DF.Check
 		enforce_uoms: DF.Check
+		fitted_policy: DF.Literal["Ignore", "Warn", "Error"]
+		floor_packing_policy: DF.Literal["", "Ignore", "Warn", "Error"]
+		max_weight_uom: DF.Link | None
 		overproduction_percentage_for_work_order: DF.Percent
 		prettify_warehouse_tree: DF.Check
 		purchase_order_aggregation_company: DF.Link | None
 		sales_order_aggregation_company: DF.Link | None
 		show_in_listview: DF.Check
 		show_on_website: DF.Check
+		solver_timeout_seconds: DF.Int
 		update_warehouse_path: DF.Check
+		volumetric_policy: DF.Literal["Ignore", "Warn", "Error"]
+		weight_validation: DF.Literal["Ignore", "Warn", "Error"]
 	# end: auto-generated types
 	def validate(self):
 		self.create_warehouse_path_custom_field()
@@ -45,12 +59,13 @@ class InventoryToolsSettings(Document):
 		if frappe.db.exists("Custom Field", "Warehouse-warehouse_path"):
 			if not self.update_warehouse_path:
 				frappe.set_value("Custom Field", "Warehouse-warehouse_path", "hidden", 1)
-				frappe.set_value(
+				ps_name = frappe.db.get_value(
 					"Property Setter",
 					{"doctype_or_field": "DocType", "doc_type": "Warehouse", "property": "search_fields"},
-					"search_fields",
-					"",
+					"name",
 				)
+				if ps_name:
+					frappe.set_value("Property Setter", ps_name, "value", "")
 			return
 		cf = frappe.new_doc("Custom Field")
 		cf.dt = "Warehouse"
