@@ -1,9 +1,10 @@
 # Copyright (c) 2026, AgriTheory and contributors
 # For license information, please see license.txt
 
-import frappe
-from mip import Model
 from collections import defaultdict
+
+import frappe
+from mip import BINARY, CONTINUOUS, Model, OptimizationStatus, xsum
 
 
 def get_cartonization_settings(doc):
@@ -70,7 +71,7 @@ def get_container_dimensions(item_code=None, warehouse=None):
 
 def validate_2d_floor(items, container):
 	"""
-	items: [{length, width, qty}]
+	items: [{item_length, item_width, qty}]
 	container: {item_length, item_width}
 	"""
 	total_area = 0
@@ -101,27 +102,103 @@ def validate_3d_volume(items, container):
 
 
 def validate_3d_fitted(items, container, allow_rotation, timeout):
+	"""
+	3D orthogonal bin-packing feasibility check using a MIP model (CBC solver).
+
+	Each item unit becomes a box with position variables (x, y, z). Non-overlap
+	between every pair is enforced via disjunctive big-M constraints. Optional
+	L/W rotation is handled through a binary orientation variable per box.
+	"""
+	boxes = []
+	for item in items:
+		for _ in range(int(item["qty"])):
+			boxes.append(
+				{
+					"item_code": item["item_code"],
+					"l": float(item["item_length"]),
+					"w": float(item["item_width"]),
+					"h": float(item["item_height"]),
+				}
+			)
+
+	if not boxes:
+		return {"fits": True, "status": "NO_ITEMS"}
+
+	CL = float(container["item_length"])
+	CW = float(container["item_width"])
+	CH = float(container["item_height"])
+	n = len(boxes)
+
 	model = Model(sense="MIN", solver_name="CBC")
 	model.max_seconds = timeout
+	model.verbose = 0
 
-	# This is a feasibility-only model (bin = 1)
-	# Each item must fit within container bounds
+	x = [model.add_var(var_type=CONTINUOUS, lb=0, ub=CL) for _ in range(n)]
+	y = [model.add_var(var_type=CONTINUOUS, lb=0, ub=CW) for _ in range(n)]
+	z = [model.add_var(var_type=CONTINUOUS, lb=0, ub=CH) for _ in range(n)]
 
-	for idx, item in enumerate(items):
-		l, w, h = item["item_length"], item["item_width"], item["item_height"]
+	if allow_rotation:
+		# Binary variable: 0 = original orientation, 1 = swap L and W
+		rot = [model.add_var(var_type=BINARY) for _ in range(n)]
+		el = []
+		ew = []
+		for i, box in enumerate(boxes):
+			l_i, w_i = box["l"], box["w"]
+			# el[i] = l_i + (w_i - l_i)*rot[i]  (linear since rot is binary and coefficients constant)
+			vi = model.add_var(var_type=CONTINUOUS, lb=min(l_i, w_i), ub=max(l_i, w_i))
+			ui = model.add_var(var_type=CONTINUOUS, lb=min(l_i, w_i), ub=max(l_i, w_i))
+			model += vi == l_i + (w_i - l_i) * rot[i]
+			model += ui == w_i + (l_i - w_i) * rot[i]
+			el.append(vi)
+			ew.append(ui)
+	else:
+		el = [box["l"] for box in boxes]
+		ew = [box["w"] for box in boxes]
 
-		if not allow_rotation and not item["orientation"]:
-			if l > container["item_length"] or w > container["item_width"] or h > container["item_height"]:
-				return {"fits": False, "reason": f"Item {item['item_code']} exceeds container"}
+	# Boundary constraints: each box must fit within container dimensions
+	for i in range(n):
+		model += x[i] + el[i] <= CL
+		model += y[i] + ew[i] <= CW
+		model += z[i] + boxes[i]["h"] <= CH
 
-		# Full spatial bin-packing omitted for brevity
-		# This is where x,y,z + non-overlap constraints go
+	# Non-overlap constraints via big-M disjunction for each pair (i, j):
+	# At least one of 6 separations must hold
+	M = max(CL, CW, CH)
+	for i in range(n):
+		for j in range(i + 1, n):
+			sep = [model.add_var(var_type=BINARY) for _ in range(6)]
+			model += xsum(sep) >= 1
+			model += x[i] + el[i] <= x[j] + M * (1 - sep[0])  # i left of j
+			model += x[j] + el[j] <= x[i] + M * (1 - sep[1])  # i right of j
+			model += y[i] + ew[i] <= y[j] + M * (1 - sep[2])  # i in front of j
+			model += y[j] + ew[j] <= y[i] + M * (1 - sep[3])  # i behind j
+			model += z[i] + boxes[i]["h"] <= z[j] + M * (1 - sep[4])  # i below j
+			model += z[j] + boxes[j]["h"] <= z[i] + M * (1 - sep[5])  # i above j
 
 	status = model.optimize()
 
 	return {
-		"fits": status.name == "OPTIMAL",
+		"fits": status in (OptimizationStatus.OPTIMAL, OptimizationStatus.FEASIBLE),
 		"status": status.name,
+	}
+
+
+def validate_weight(items, container):
+	"""
+	items: [{item_weight, qty}]
+	container: {item_weight}  — item_weight on an Interior Physical Dimension is the max load capacity
+	"""
+	total_weight = sum((i.get("item_weight") or 0) * i["qty"] for i in items)
+	max_weight = container.get("item_weight") or 0
+
+	if not max_weight:
+		return {"fits": True, "total_weight": total_weight, "max_weight": 0}
+
+	return {
+		"fits": total_weight <= max_weight,
+		"total_weight": total_weight,
+		"max_weight": max_weight,
+		"utilization": total_weight / max_weight,
 	}
 
 
@@ -132,7 +209,7 @@ def apply_policy(result, policy, context):
 	if result["fits"]:
 		return
 
-	message = f"Cartonization failed ({context}).\n" f"Details:\n{frappe.as_json(result, indent=2)}"
+	message = f"Cartonization failed ({context}).\nDetails:\n{frappe.as_json(result, indent=2)}"
 
 	if policy == "Warn":
 		frappe.msgprint(message, indicator="orange", title="Cartonization Warning")
@@ -161,7 +238,7 @@ def get_item_rows(doc):
 			if row.item_code and row.warehouse
 		]
 
-	if hasattr(doc, "items"):
+	if doc.get("items"):
 		return [
 			{
 				"item_code": row.item_code,
@@ -170,7 +247,7 @@ def get_item_rows(doc):
 				or getattr(row, "s_warehouse", None)
 				or getattr(row, "t_warehouse", None),
 			}
-			for row in doc.items
+			for row in doc.get("items")
 			if row.item_code
 		]
 
@@ -211,6 +288,7 @@ def run_cartonization(doc, method=None):
 			continue
 
 		mode = settings["default_mode"]
+		context = f"{doc.doctype} → Warehouse: {warehouse}"
 
 		if mode == "2D Floor":
 			result = validate_2d_floor(items, container_dim)
@@ -224,4 +302,7 @@ def run_cartonization(doc, method=None):
 				settings["solver_timeout"],
 			)
 
-		apply_policy(result, settings["policies"][mode], f"{doc.doctype} → Warehouse: {warehouse}")
+		apply_policy(result, settings["policies"][mode], context)
+
+		weight_result = validate_weight(items, container_dim)
+		apply_policy(weight_result, settings["weight_policy"], f"{context} (weight)")

@@ -155,7 +155,7 @@ doc_events = {
 	},
 	"Delivery Note": {
 		"on_submit": [
-			"inventory_tools.utils.cartonization.run_cartonization",
+			"inventory_tools.cartonization.run_cartonization",
 		],
 	},
 	"Item": {
@@ -171,7 +171,7 @@ doc_events = {
 	},
 	"Pick List": {
 		"on_submit": [
-			"inventory_tools.utils.cartonization.run_cartonization",
+			"inventory_tools.cartonization.run_cartonization",
 		],
 	},
 	"Purchase Receipt": {
@@ -187,7 +187,7 @@ doc_events = {
 			"inventory_tools.inventory_tools.overrides.stock_entry.handle_se_quarantine",
 		],
 		"on_submit": [
-			"inventory_tools.utils.cartonization.run_cartonization",
+			"inventory_tools.cartonization.run_cartonization",
 		],
 	},
 	"Warehouse": {
