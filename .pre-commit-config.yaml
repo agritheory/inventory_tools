@@ -45,7 +45,7 @@ repos:
         additional_dependencies: ['flake8-bugbear']
 
   - repo: https://github.com/agritheory/test_utils
-    rev: v1.16.0
+    rev: v1.18.0
     hooks:
       - id: update_pre_commit_config
       - id: validate_frappe_project
@@ -57,7 +57,7 @@ repos:
       - id: clean_customized_doctypes
         args: ['--app', 'inventory_tools']
       - id: validate_customizations
-      - id: patch_linters
+      - id: validate_patches
         args: ['--app', 'inventory_tools']
       - id: track_overrides
         args: ['--directory', '.', '--app', 'inventory_tools', '--base-branch', 'version-15']
