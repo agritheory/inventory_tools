@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Manufacturing Capacity Report
 
 <div class="byline">
-  Rohan Bansal, coleandreoli, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2026-02-21
+  Rohan Bansal, coleandreoli, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2026-02-22
 </div>
 
 

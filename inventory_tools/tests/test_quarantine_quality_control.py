@@ -17,9 +17,46 @@ from inventory_tools.inventory_tools.overrides.stock_entry import (
 
 @pytest.fixture(scope="module", autouse=True)
 def quarantine_qc_data():
-	"""Install quarantine warehouses, QC templates, and receive workflow (fixtured in QC tests only)."""
+	"""Install quarantine warehouses, QC templates, and receive workflow (fixtured in QC tests only).
+
+	Flour's manufacture-inspection configuration is scoped here (not in setup.py) so it doesn't
+	bleed into other test modules (test_wo_subcontracting, test_operating_costs, etc.).
+	"""
 	settings = frappe._dict({"company": "Ambrosia Pie Company"})
 	create_quarantine_quality_control_data(settings)
+
+	# Configure Flour for manufacture inspection — scoped to this module only
+	flour = frappe.get_doc("Item", "Flour")
+	original_qi_template = flour.quality_inspection_template
+	flour.quality_inspection_template = "Ingredient QC"
+	flour.save()
+	apc_default = next((d for d in flour.item_defaults if d.company == "Ambrosia Pie Company"), None)
+	original_manufacture_flag = (
+		apc_default.inspection_required_before_manufacture if apc_default else 0
+	)
+	if apc_default:
+		apc_default.inspection_required_before_manufacture = 1
+	else:
+		flour.append(
+			"item_defaults",
+			{
+				"company": "Ambrosia Pie Company",
+				"default_warehouse": "Storeroom - APC",
+				"inspection_required_before_manufacture": 1,
+			},
+		)
+	flour.save()
+
+	yield
+
+	# Restore Flour to its pre-test state so other modules are not affected
+	flour.reload()
+	flour.quality_inspection_template = original_qi_template
+	apc_default = next((d for d in flour.item_defaults if d.company == "Ambrosia Pie Company"), None)
+	if apc_default:
+		apc_default.inspection_required_before_manufacture = original_manufacture_flag
+	flour.save()
+	frappe.db.commit()
 
 
 def create_bayberry_po_pr(submit_pr=True):
@@ -36,6 +73,7 @@ def create_bayberry_po_pr(submit_pr=True):
 
 	po = make_purchase_order(mr.name)
 	po.supplier = "Southern Fruit Supply"
+	po.buying_price_list = "Bakery Buying"
 	po.save()
 	po.submit()
 
@@ -551,6 +589,7 @@ def test_multi_item_pr_partial_quarantine_routing():
 
 	po = make_purchase_order(mr.name)
 	po.supplier = "Southern Fruit Supply"
+	po.buying_price_list = "Bakery Buying"
 	po.save()
 	po.submit()
 
