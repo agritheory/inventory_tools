@@ -349,7 +349,7 @@ def get_production_item_if_work_orders_for_required_item_exists(stock_entry_name
 	return ""
 
 
-def _get_quarantine_warehouses(company):
+def get_quarantine_warehouses(company):
 	"""Return all configured quarantine warehouses visible to a company."""
 	settings = frappe.get_cached_doc("Inventory Tools Settings", company)
 	warehouses = set()
@@ -370,7 +370,7 @@ def validate_block_issue_from_quarantine(doc, method):
 	if not settings.block_issue_from_quarantine:
 		return
 
-	quarantine_warehouses = _get_quarantine_warehouses(doc.company)
+	quarantine_warehouses = get_quarantine_warehouses(doc.company)
 	if not quarantine_warehouses:
 		return
 
