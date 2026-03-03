@@ -88,7 +88,7 @@ jobs:
           node-version: '20'
 
       - name: Run Prettier
-        run: npx --yes prettier@3.1.0 --check --config ./.prettierrc.cjs --ignore-path ./.prettierignore "**/*.js" "**/*.vue" "**/*.scss"
+        run: npx --yes prettier@3.1.0 --check --config ./.prettierrc.cjs --ignore-path ./.prettierignore "**/*.js" "**/*.vue"
 
   json_diff:
     needs: [validate]

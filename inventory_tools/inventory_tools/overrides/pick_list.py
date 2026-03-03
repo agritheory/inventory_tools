@@ -1,18 +1,15 @@
 # Copyright (c) 2025, AgriTheory and contributors
 # For license information, please see license.txt
 
-from typing import TYPE_CHECKING
-
 import frappe
 from frappe.utils import safe_json_loads
 from frappe.utils.data import nowdate
 import numpy as np
 
-from inventory_tools.inventory_tools.doctype.warehouse_plan.warehouse_plan import Grid_TSP
+from erpnext.stock.doctype.pick_list.pick_list import PickList
+from erpnext.stock.doctype.pick_list_item.pick_list_item import PickListItem
 
-if TYPE_CHECKING:
-	from erpnext.stock.doctype.pick_list_item.pick_list_item import PickListItem
-	from erpnext.stock.doctype.pick_list.pick_list import PickList
+from inventory_tools.inventory_tools.doctype.warehouse_plan.warehouse_plan import Grid_TSP
 
 
 class PathFinder:
@@ -163,7 +160,7 @@ def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
 
 
 @frappe.whitelist()
-def optimize_path(doc: "PickList", strategy: str) -> list["PickListItem"]:
+def optimize_path(doc: PickList, strategy: str) -> list[PickListItem]:
 	"""Optimize the picklist route based on the specified strategy.
 
 	Parameters:

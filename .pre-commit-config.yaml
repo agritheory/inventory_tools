@@ -45,7 +45,7 @@ repos:
         additional_dependencies: ['flake8-bugbear']
 
   - repo: https://github.com/agritheory/test_utils
-    rev: v1.20.1
+    rev: v1.20.2
     hooks:
       - id: update_pre_commit_config
       - id: validate_frappe_project
@@ -63,18 +63,16 @@ repos:
         args: ['--directory', '.', '--app', 'inventory_tools', '--base-branch', 'version-15']
       - id: check_code_duplication
         args: ['--max-clones', '60', '--max-percentage', '5.0']
+      - id: static_analysis
+        args: ['.']
 
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v3.1.0
     hooks:
       - id: prettier
+        args: ['--config', '.prettierrc.cjs', '--ignore-path', '.prettierignore']
         types_or: [javascript, vue, scss]
-        exclude: |
-          (?x)^(
-            .*node_modules.*|
-            inventory_tools/public/dist/.*|
-            inventory_tools/public/js/lib/.*
-          )$
+        exclude: 'inventory_tools/public/js/lib/.*'
 
 ci:
   autoupdate_schedule: weekly

@@ -2,6 +2,7 @@
 # See license.txt
 
 import datetime
+import json
 
 import frappe
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import PurchaseInvoice
@@ -114,9 +115,8 @@ class InventoryToolsPurchaseInvoice(PurchaseInvoice):
 
 @frappe.whitelist()
 def get_stock_entries(purchase_orders, from_date=None, to_date=None):
-	# # Commented code is useful if having PO and attaching WOs to them is enforced
-	# if isinstance(purchase_orders, str):
-	# 	purchase_orders = json.loads(purchase_orders)
+	if isinstance(purchase_orders, str):
+		purchase_orders = json.loads(purchase_orders)
 
 	if not from_date:
 		from_date = datetime.date(1900, 1, 1)
