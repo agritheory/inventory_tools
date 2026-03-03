@@ -11,91 +11,97 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  mypy:
-    needs: [ py_json_merge ]
+  validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 2
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Validate JSON
+        run: |
+          python3 - <<'EOF'
+          import json, sys
+          from pathlib import Path
+          errors = []
+          for f in Path("./inventory_tools/inventory_tools/").rglob("*.json"):
+              try:
+                  json.loads(f.read_text())
+              except json.JSONDecodeError as e:
+                  errors.append(f"{f}: {e}")
+          if errors:
+              print("\n".join(errors))
+              sys.exit(1)
+          EOF
+
+      - name: Compile
+        run: python3 -m compileall -q ./
+
+      - name: Check merge conflicts
+        run: |
+          if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"; then
+            echo "Found merge conflicts"
+            exit 1
+          fi
+
+  mypy:
+    needs: [validate]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
       - name: Install mypy
         run: pip install mypy
 
-      - name: Install mypy types
+      - name: Install mypy stubs
         run: mypy ./inventory_tools/. --install-types --non-interactive
 
       - name: Run mypy
-        uses: sasanquaneuf/mypy-github-action@releases/v1
-        with:
-          checkName: 'mypy'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: mypy ./inventory_tools/.
 
   black:
-    needs: [ py_json_merge ]
+    needs: [validate]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 2
+      - uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
       - name: Install Black (Frappe)
         run: pip install git+https://github.com/frappe/black.git
 
-      - name: Run Black (Frappe)
+      - name: Run Black
         run: black --check .
 
   prettier:
-    needs: [ py_json_merge ]
+    needs: [validate]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
-          fetch-depth: 2
+      - uses: actions/checkout@v4
 
-      - name: Prettify code
-        uses: rutajdash/prettier-cli-action@v1.0.0
+      - uses: actions/setup-node@v4
         with:
-          config_path: ./.prettierrc.js
-          ignore_path: ./.prettierignore
+          node-version: '20'
 
-      - name: Prettier Output
-        if: ${{ failure() }}
-        shell: bash
-        run: |
-          echo "The following files are not formatted:"
-          echo "${{steps.prettier-run.outputs.prettier_output}}" >> $GITHUB_OUTPUT
+      - name: Run Prettier
+        run: npx --yes prettier --check --config ./.prettierrc.js --ignore-path ./.prettierignore .
 
   json_diff:
-    needs: [ py_json_merge ]
+    needs: [validate]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref }}
           fetch-depth: 2
 
       - name: Find JSON changes
         id: changed-json
-        uses: tj-actions/changed-files@v43
+        uses: tj-actions/changed-files@v45
         with:
           files: |
             **/*.json
@@ -138,25 +144,3 @@ jobs:
           for file in ${{ steps.changed-json.outputs.deleted_files }}; do
             echo "D,${file}" >> base/mrd.txt
           done
-
-
-  py_json_merge:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Fetch validator
-        run: git clone --depth 1 https://gist.github.com/f1bf2c11f78331b2417189c385022c28.git validate_json
-
-      - name: Validate JSON
-        run: python3 validate_json/validate_json.py ./inventory_tools/inventory_tools/
-
-      - name: Compile
-        run: python3 -m compileall -q ./
-
-      - name: Check merge
-        run: |
-          if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
-              then echo "Found merge conflicts"
-              exit 1
-          fi
