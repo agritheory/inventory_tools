@@ -726,6 +726,23 @@ def create_quarantine_quality_control_data(settings):
 		)
 	bayberry.save()
 
+	flour = frappe.get_doc("Item", "Flour")
+	flour.quality_inspection_template = "Ingredient QC"
+	flour.save()
+	apc_default = next((d for d in flour.item_defaults if d.company == "Ambrosia Pie Company"), None)
+	if apc_default:
+		apc_default.inspection_required_before_manufacture = 1
+	else:
+		flour.append(
+			"item_defaults",
+			{
+				"company": "Ambrosia Pie Company",
+				"default_warehouse": "Storeroom - APC",
+				"inspection_required_before_manufacture": 1,
+			},
+		)
+	flour.save()
+
 	for company, wh in [
 		("Chelsea Fruit Co", "Quarantine - CFC"),
 		(settings.company, "Quarantine - APC"),

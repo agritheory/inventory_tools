@@ -18,7 +18,11 @@ The Quarantine Quality Control feature allows inventory to be automatically move
 
 ### 1. Enable the Feature
 
-Navigate to **Inventory Tools Settings** and enable **Quarantine Quality Control**.
+Navigate to **Inventory Tools Settings** and enable **Enable Quarantine Workflow**.
+
+Optionally, set a **Default Quarantine Warehouse** as a fallback for items whose Quality Inspection Template does not specify a quarantine location.
+
+To prevent stock from leaving a quarantine warehouse through any means other than an accepted Quality Inspection, also enable **Block Issue from Quarantine**. See [Blocking Manual Removals](#blocking-manual-removals) below.
 
 ### 2. Configure Quality Inspection Templates
 
@@ -29,44 +33,63 @@ For each template requiring quarantine workflow:
 3. Configure inspection parameters as needed
 4. Save the template
 
-### 3. Configure Items (Item Default)
+### 3. Configure Items
 
-Inspection requirements are **company-scoped** via **Item Default**, not on the Item master. Item-level inspection fields are hidden.
+Quality Inspection Template assignment and inspection requirements are configured at two levels:
+
+- **Quality Inspection Template**: Set on the **Item** master. This determines which inspection parameters apply and which quarantine warehouse to use (overriding the default).
+- **Inspection Required flags**: Set on **Item Default** (company-scoped). Item-level inspection fields are hidden.
 
 On **Item Default** for each company and item:
 
-1. Assign the appropriate **Quality Inspection Template** (from the Item)
-2. Check **Inspection Required Before Purchase** (for incoming materials)
-3. Check **Inspection Required Before Delivery** (for finished goods)
-4. Check **Inspection Required Before Manufacture** (for raw materials before manufacturing)
+1. Check **Inspection Required Before Purchase** (for incoming materials via Purchase Receipt or Subcontracting Receipt)
+2. Check **Inspection Required Before Delivery** (for outgoing goods)
+3. Check **Inspection Required Before Manufacture** (for raw materials transferred to production)
 
 ## Workflow
 
-### Receiving Items (Purchase)
+### Receiving Items (Purchase Receipt)
 
 1. Create and submit **Purchase Receipt**
 2. System automatically routes items with `inspection_required_before_purchase` (Item Default) to the quarantine warehouse
 3. Items remain in quarantine until inspection is complete
 
+### Receiving Subcontracted Items (Subcontracting Receipt)
+
+Subcontracting Receipts follow the same routing logic as Purchase Receipts. Items with `inspection_required_before_purchase` set on their Item Default are automatically redirected to the quarantine warehouse on submit.
+
 ### Material Transfer for Manufacture
 
-For Stock Entry type **Material Transfer for Manufacture**, items with `inspection_required_before_manufacture` (Item Default) are routed to quarantine before use in production.
+For Stock Entry type **Material Transfer for Manufacture**, items with `inspection_required_before_manufacture` (Item Default) are routed to the quarantine warehouse instead of the production warehouse. The original target warehouse is saved as `Intended Warehouse` on the Stock Entry row and used when releasing the stock after a passed inspection.
 
 ### Inspecting Items
 
-1. Open the **Quality Inspection** record
+1. Open the **Quality Inspection** record linked to the Purchase Receipt, Subcontracting Receipt, or Stock Entry
 2. Record test results and observations
-3. Mark as **Accepted** or **Rejected**
+3. Set status to **Accepted** or **Rejected** and submit
 
 ### Releasing from Quarantine
 
-1. On submit of Quality Inspection with status **Accepted**, system automatically creates **Stock Entry** (Material Transfer)
-2. Source: Quarantine warehouse
-3. Target: Final destination warehouse (from PR/SE `intended_warehouse`)
-4. **Full quantity** is transferred (the received quantity), not the `sample_size`
-5. Stock Entry company matches the reference document's company
+Once a Quality Inspection has been submitted with status **Accepted**, a **Release from Quarantine** button appears on the form. Clicking it creates a draft **Stock Entry** (Material Transfer) for review:
 
-**Note**: Items cannot be removed from quarantine if inspection is pending or rejected.
+- **Source**: The quarantine warehouse (determined from the originating Stock Ledger Entry)
+- **Target**: The final destination warehouse (the `intended_warehouse` recorded on the reference document's item row)
+- **Quantity**: Full received/transferred quantity — not the inspection `sample_size`
+- **Company**: Inherited from the reference document
+
+Review the draft Stock Entry and submit it to complete the transfer. The draft carries the Quality Inspection as a reference on each item row, which is how **Block Issue from Quarantine** (see below) knows to allow the transfer through.
+
+If no `intended_warehouse` is recorded on the reference document (e.g. stock was moved to quarantine manually without going through the standard receipt workflow), clicking the button will raise an error. Create the transfer from quarantine manually in that case.
+
+## Blocking Manual Removals
+
+Enable **Block Issue from Quarantine** in **Inventory Tools Settings** to prevent stock from being manually removed from any configured quarantine warehouse outside of the QI-driven release workflow.
+
+When this setting is active, any Stock Entry submission where the source warehouse is a quarantine warehouse will be blocked — **unless** the Stock Entry row carries a Quality Inspection reference (i.e. it was auto-generated by an accepted QI). This allows the system-created release transfers to proceed while blocking ad-hoc issues and transfers.
+
+Quarantine warehouses are identified by comparing against:
+- The **Default Quarantine Warehouse** on Inventory Tools Settings
+- The **Quarantine Warehouse** field on any Quality Inspection Template
 
 ## Use Cases
 
