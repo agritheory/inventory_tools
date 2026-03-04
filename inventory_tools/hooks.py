@@ -48,6 +48,7 @@ doctype_js = {
 	"Pick List": "public/js/custom/pick_list_custom.js",
 	"Purchase Invoice": "public/js/custom/purchase_invoice_custom.js",
 	"Purchase Order": "public/js/custom/purchase_order_custom.js",
+	"Quality Inspection": "public/js/custom/quality_inspection_custom.js",
 	"Stock Entry": "public/js/custom/stock_entry_custom.js",
 	"Work Order": "public/js/custom/work_order_custom.js",
 	"Workstation": "public/js/custom/workstation_custom.js",
@@ -179,15 +180,19 @@ doc_events = {
 			"inventory_tools.inventory_tools.overrides.purchase_receipt.handle_pr_quarantine",
 		],
 	},
-	"Quality Inspection": {
-		"on_submit": ["inventory_tools.inventory_tools.overrides.stock_entry.release_from_quarantine"],
-	},
+	"Quality Inspection": {},
 	"Stock Entry": {
 		"before_submit": [
 			"inventory_tools.inventory_tools.overrides.stock_entry.handle_se_quarantine",
+			"inventory_tools.inventory_tools.overrides.stock_entry.validate_block_issue_from_quarantine",
 		],
 		"on_submit": [
 			"inventory_tools.cartonization.run_cartonization",
+		],
+	},
+	"Subcontracting Receipt": {
+		"before_submit": [
+			"inventory_tools.inventory_tools.overrides.subcontracting_receipt.handle_scr_quarantine",
 		],
 	},
 	"Warehouse": {

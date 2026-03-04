@@ -349,43 +349,104 @@ def get_production_item_if_work_orders_for_required_item_exists(stock_entry_name
 	return ""
 
 
-def release_from_quarantine(doc, method):
-	if doc.status != "Accepted":
+def get_quarantine_warehouses(company):
+	"""Return all configured quarantine warehouses visible to a company."""
+	settings = frappe.get_cached_doc("Inventory Tools Settings", company)
+	warehouses = set()
+	if settings.default_quarantine_warehouse:
+		warehouses.add(settings.default_quarantine_warehouse)
+	template_whs = frappe.get_all(
+		"Quality Inspection Template",
+		filters={"quarantine_warehouse": ["!=", ""]},
+		pluck="quarantine_warehouse",
+	)
+	warehouses.update(w for w in template_whs if w)
+	return warehouses
+
+
+def validate_block_issue_from_quarantine(doc, method):
+	"""Block manual stock issues from quarantine warehouses when the setting is enabled."""
+	settings = frappe.get_doc("Inventory Tools Settings", doc.company)
+	if not settings.block_issue_from_quarantine:
 		return
 
-	if not doc.reference_type or not doc.reference_name:
+	quarantine_warehouses = get_quarantine_warehouses(doc.company)
+	if not quarantine_warehouses:
 		return
+
+	for row in doc.items:
+		if row.get("s_warehouse") in quarantine_warehouses:
+			# Allow transfers created via make_quarantine_release_stock_entry (carry a QI reference)
+			if row.get("reference_doctype") == "Quality Inspection" and row.get("reference_name"):
+				continue
+			frappe.throw(
+				frappe._(
+					"Cannot issue stock directly from Quarantine Warehouse {0}. "
+					"Release inventory via an accepted Quality Inspection."
+				).format(row.s_warehouse)
+			)
+
+
+@frappe.whitelist()
+def make_quarantine_release_stock_entry(quality_inspection_name):
+	"""Create a draft Material Transfer to release stock from quarantine.
+
+	Called from the Quality Inspection form button after the QI is accepted.
+	Returns the new Stock Entry name so the browser can open it for review.
+	"""
+	doc = frappe.get_doc("Quality Inspection", quality_inspection_name)
+
+	if doc.status != "Accepted" or doc.docstatus != 1:
+		frappe.throw(
+			frappe._("Quality Inspection must be submitted and Accepted before releasing from quarantine.")
+		)
+
+	if not doc.reference_type or not doc.reference_name:
+		frappe.throw(frappe._("Quality Inspection has no reference document."))
 
 	ref_doc = frappe.get_doc(doc.reference_type, doc.reference_name)
 	settings = frappe.get_doc("Inventory Tools Settings", ref_doc.company)
+
 	if not settings.enable_quarantine_workflow:
-		return
+		frappe.throw(frappe._("Quarantine workflow is not enabled for {0}.").format(ref_doc.company))
 
 	target_wh = None
-
 	for row in ref_doc.items:
 		if row.item_code == doc.item_code:
 			target_wh = row.intended_warehouse
 			break
 
 	if not target_wh:
-		frappe.throw("Target warehouse not found for release")
+		frappe.throw(
+			frappe._(
+				"No intended warehouse found on {0} {1} for item {2}. "
+				"Please create the transfer from quarantine manually."
+			).format(doc.reference_type, doc.reference_name, doc.item_code)
+		)
 
 	# Use full quantity from reference doc, not sample_size (inspection sample)
 	release_qty = sum(flt(row.qty) for row in ref_doc.items if row.item_code == doc.item_code)
 
+	# actual_qty > 0 selects the warehouse where stock ARRIVED (the quarantine warehouse),
+	# not the source warehouse that stock LEFT (which has a negative actual_qty entry).
 	quarantine_wh = frappe.db.get_value(
 		"Stock Ledger Entry",
 		{
 			"voucher_type": doc.reference_type,
 			"voucher_no": doc.reference_name,
 			"item_code": doc.item_code,
+			"actual_qty": [">", 0],
 		},
 		"warehouse",
 	)
 
 	if not quarantine_wh:
-		frappe.throw("Quarantine warehouse not found in Stock Ledger")
+		frappe.throw(
+			frappe._(
+				"Originating quarantine warehouse could not be found in the Stock Ledger "
+				"for {0} {1}. Please create the transfer from quarantine manually."
+			).format(doc.reference_type, doc.reference_name)
+		)
 
 	se = frappe.new_doc("Stock Entry")
 	se.stock_entry_type = "Material Transfer"
@@ -404,7 +465,7 @@ def release_from_quarantine(doc, method):
 	)
 
 	se.save()
-	se.submit()
+	return se.name
 
 
 def handle_se_quarantine(doc, method):

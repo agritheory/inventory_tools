@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Cartonization Configuration & Validation Guide
 
 <div class="byline">
-  Ishwarya 2026-01-26
+  IshwaryaM1030 and Tyler Matteson 2026-02-22
 </div>
 
 

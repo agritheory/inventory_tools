@@ -622,66 +622,15 @@ def create_warehouse_locations():
 		warehouse.save()
 
 
-def _get_or_create_quarantine_account(company):
-	"""Dedicated quarantine Stock account per company (create if missing)."""
-	accounts = frappe.get_all(
-		"Account",
-		filters={"company": company, "account_type": "Stock", "is_group": 0},
-		or_filters=[
-			["account_name", "like", "Quarantine%"],
-			["name", "like", "%Quarantine%"],  # numbered chart: "1430 - Quarantine - APC"
-		],
-		pluck="name",
-		limit=1,
-	)
-	if accounts:
-		return accounts[0]
-	parent = frappe.get_value(
-		"Account",
-		{"company": company, "account_type": "Stock", "is_group": 1},
-		"name",
-	)
-	if not parent:
-		return None
-	a = frappe.new_doc("Account")
-	a.account_name = "Quarantine"
-	a.account_number = "1430"
-	a.is_group = 0
-	a.company = company
-	a.root_type = "Asset"
-	a.report_type = "Balance Sheet"
-	a.account_currency = frappe.get_value("Company", company, "default_currency")
-	a.parent_account = parent
-	a.account_type = "Stock"
-	a.insert()
-	return a.name
-
-
-def _link_quarantine_warehouses_to_account(settings):
-	"""Set dedicated quarantine account on warehouses (required for Stock Entry GL entries)."""
-	for wh_name, company in [
-		("Quarantine - APC", settings.company),
-		("Quarantine - CFC", "Chelsea Fruit Co"),
-	]:
-		if not frappe.db.exists("Warehouse", wh_name):
-			continue
-		account = _get_or_create_quarantine_account(company)
-		if account:
-			wh = frappe.get_doc("Warehouse", wh_name)
-			wh.account = account
-			wh.save()
-
-
 def create_quarantine_quality_control_data(settings):
 	"""Quarantine warehouses, QC templates, item config for quarantine quality control tests."""
-	# Quarantine warehouses (test_utils creates warehouse; we ensure dedicated account is linked)
 	for company in [settings.company, "Chelsea Fruit Co"]:
-		create_quarantine_warehouse(
-			settings=frappe._dict({"company": company}),
-			wh_name="Quarantine",
-			is_default_scrap_wh=False,
-		)
-	_link_quarantine_warehouses_to_account(settings)
+		if not frappe.db.get_value("Inventory Tools Settings", company, "default_quarantine_warehouse"):
+			create_quarantine_warehouse(
+				settings=frappe._dict({"company": company}),
+				wh_name="Quarantine",
+				is_default_scrap_wh=False,
+			)
 
 	if not frappe.db.exists("Quality Inspection Parameter", "Weight"):
 		frappe.get_doc(
@@ -735,7 +684,6 @@ def create_quarantine_quality_control_data(settings):
 		settings_doc.enable_quarantine_workflow = 0
 		settings_doc.save()
 
-	_link_quarantine_warehouses_to_account(settings)
 	frappe.db.commit()
 	receive_qc_workflow()
 
@@ -762,7 +710,11 @@ def receive_qc_workflow():
 		return
 	mr = frappe.get_doc("Material Request", fruit_mr_name)
 	bayberry_row = next((r for r in mr.items if r.item_code == "Bayberry"), None)
-	if not bayberry_row or bayberry_row.received_qty >= bayberry_row.stock_qty:
+	if (
+		not bayberry_row
+		or bayberry_row.received_qty >= bayberry_row.stock_qty
+		or bayberry_row.ordered_qty >= bayberry_row.stock_qty
+	):
 		return
 
 	# PO for Bayberry only (minimal change vs material demand tests)
@@ -770,6 +722,11 @@ def receive_qc_workflow():
 		fruit_mr_name, target_doc=None, args={"filtered_children": [bayberry_mri]}
 	)
 	po.supplier = "Southern Fruit Supply"
+	po.buying_price_list = "Bakery Buying"
+
+	if not po.items:
+		return
+
 	po.save()
 	po.submit()
 

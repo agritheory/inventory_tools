@@ -57,7 +57,7 @@ def validate_inspection_with_company_scope(doc) -> None:
 		or (
 			doc.doctype == "Stock Entry"
 			and not getattr(doc, "inspection_required", False)
-			and not _has_item_with_manufacture_inspection(doc)
+			and not has_item_with_manufacture_inspection(doc)
 		)
 		or (
 			doc.doctype in ["Sales Invoice", "Purchase Invoice"] and not getattr(doc, "update_stock", False)
@@ -86,7 +86,7 @@ def validate_inspection_with_company_scope(doc) -> None:
 				doc.validate_qi_rejection(row)
 
 
-def _has_item_with_manufacture_inspection(doc) -> bool:
+def has_item_with_manufacture_inspection(doc) -> bool:
 	"""Check if any item in doc requires manufacture inspection (for Stock Entry early-exit)."""
 	for row in doc.get("items") or []:
 		if row.get("t_warehouse") and get_inspection_required(
