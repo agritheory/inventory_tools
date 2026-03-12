@@ -6,9 +6,6 @@ from frappe.utils import safe_json_loads
 from frappe.utils.data import nowdate
 import numpy as np
 
-from erpnext.stock.doctype.pick_list.pick_list import PickList
-from erpnext.stock.doctype.pick_list_item.pick_list_item import PickListItem
-
 from inventory_tools.inventory_tools.doctype.warehouse_plan.warehouse_plan import Grid_TSP
 
 
@@ -160,7 +157,7 @@ def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
 
 
 @frappe.whitelist()
-def optimize_path(doc: PickList, strategy: str) -> list[PickListItem]:
+def optimize_path(doc: str | dict, strategy: str) -> list[dict]:
 	"""Optimize the picklist route based on the specified strategy.
 
 	Parameters:
