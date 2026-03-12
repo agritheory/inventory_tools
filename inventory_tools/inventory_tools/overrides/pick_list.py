@@ -6,9 +6,6 @@ from frappe.utils import safe_json_loads
 from frappe.utils.data import nowdate
 import numpy as np
 
-from erpnext.stock.doctype.pick_list.pick_list import PickList
-from erpnext.stock.doctype.pick_list_item.pick_list_item import PickListItem
-
 from inventory_tools.inventory_tools.doctype.warehouse_plan.warehouse_plan import Grid_TSP
 
 
@@ -160,7 +157,7 @@ def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
 
 
 @frappe.whitelist()
-def optimize_path(doc: PickList, strategy: str) -> list[PickListItem]:
+def optimize_path(doc: str | dict, strategy: str) -> list[dict]:
 	"""Optimize the picklist route based on the specified strategy.
 
 	Parameters:
@@ -187,17 +184,19 @@ def optimize_path(doc: PickList, strategy: str) -> list[PickListItem]:
 	                                indicating an inconsistency in the warehouse plan.
 	"""
 	if isinstance(doc, str):
-		doc = frappe.get_doc("Pick List", doc).as_dict()
+		doc_dict: dict = frappe.get_doc("Pick List", doc).as_dict()
+	else:
+		doc_dict = doc
 	itemdict: dict[str, dict[str, float]] = {}
-	for loc in doc["locations"]:
+	for loc in doc_dict["locations"]:
 		code = loc["item_code"]
 		qty = loc["qty"]
 		if code in itemdict:
 			itemdict[code]["qty"] += qty
 		else:
 			itemdict[code] = {"qty": qty}
-	company = doc["company"]
-	root_warehouses = [get_root_warehouse(loc["warehouse"]) for loc in doc["locations"]]
+	company = doc_dict["company"]
+	root_warehouses = [get_root_warehouse(loc["warehouse"]) for loc in doc_dict["locations"]]
 
 	if not all(wh == root_warehouses[0] for wh in root_warehouses):
 		raise frappe.ValidationError("All items in pick list do not share a common warehouse plan")
