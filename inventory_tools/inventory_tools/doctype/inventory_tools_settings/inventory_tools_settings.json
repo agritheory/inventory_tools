@@ -26,6 +26,7 @@
 		"section_break_0",
 		"update_warehouse_path",
 		"prettify_warehouse_tree",
+		"default_route_optimization_strategy",
 		"column_break_ddssn",
 		"allow_alternative_workstations",
 		"uoms_section",
@@ -207,6 +208,13 @@
 			"fieldname": "prettify_warehouse_tree",
 			"fieldtype": "Check",
 			"label": "Prettify Warehouse Tree"
+		},
+		{
+			"default": "Use Source Document Order",
+			"fieldname": "default_route_optimization_strategy",
+			"fieldtype": "Select",
+			"label": "Default Route Optimization Strategy",
+			"options": "Use Source Document Order\nFIFO\nLIFO\nDeplete maximum number of Bins\nDeplete minimum number of Bins"
 		},
 		{
 			"fieldname": "quarantine_quality_control_section",

@@ -14,6 +14,12 @@ from inventory_tools.inventory_tools.overrides.pick_list import (
 	optimize_path,
 )
 
+STRATEGY_WAREHOUSES = [
+	{"item_code": "Cranberry", "qty": 2, "warehouse": "Fruit Storage 50 - CFC"},
+	{"item_code": "Banana", "qty": 1, "warehouse": "Fruit Storage 1 - CFC"},
+	{"item_code": "Coconut", "qty": 1, "warehouse": "Fruit Storage 10 - CFC"},
+]
+
 
 # --- Grid_TSP Tests ---
 
@@ -333,3 +339,89 @@ def test_optimize_path_deplete_min_bins():
 	assert len(result) > 0
 	total_qty = sum(r["qty"] for r in result)
 	assert total_qty == 5
+
+
+# --- InventoryToolsPickList.after_mapping Tests ---
+
+
+@pytest.mark.order(75)
+def test_after_mapping_optimizes_with_default_strategy():
+	"""after_mapping reorders locations using the company's default strategy."""
+	settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
+	original_strategy = settings.default_route_optimization_strategy
+	settings.default_route_optimization_strategy = "FIFO"
+	settings.save()
+
+	try:
+		pl = frappe.new_doc("Pick List")
+		pl.company = "Chelsea Fruit Co"
+		for loc in STRATEGY_WAREHOUSES:
+			pl.append("locations", loc)
+
+		pl.after_mapping(None)
+
+		expected = optimize_path(
+			{"company": "Chelsea Fruit Co", "locations": STRATEGY_WAREHOUSES},
+			"FIFO",
+		)
+		assert [loc.warehouse for loc in pl.locations] == [r["warehouse"] for r in expected]
+	finally:
+		settings.default_route_optimization_strategy = original_strategy
+		settings.save()
+
+
+@pytest.mark.order(76)
+def test_after_mapping_is_noop_with_source_document_order():
+	"""after_mapping leaves locations unchanged when strategy is Use Source Document Order."""
+	settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
+	original_strategy = settings.default_route_optimization_strategy
+	settings.default_route_optimization_strategy = "Use Source Document Order"
+	settings.save()
+
+	try:
+		pl = frappe.new_doc("Pick List")
+		pl.company = "Chelsea Fruit Co"
+		for loc in STRATEGY_WAREHOUSES:
+			pl.append("locations", loc)
+
+		original_order = [loc["warehouse"] for loc in STRATEGY_WAREHOUSES]
+		pl.after_mapping(None)
+
+		assert [loc.warehouse for loc in pl.locations] == original_order
+	finally:
+		settings.default_route_optimization_strategy = original_strategy
+		settings.save()
+
+
+@pytest.mark.order(77)
+def test_after_mapping_populates_onload_data():
+	"""after_mapping sets __onload.default_route_optimization_strategy for the frontend dialog."""
+	settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
+	original_strategy = settings.default_route_optimization_strategy
+	settings.default_route_optimization_strategy = "LIFO"
+	settings.save()
+
+	try:
+		pl = frappe.new_doc("Pick List")
+		pl.company = "Chelsea Fruit Co"
+		pl.append("locations", STRATEGY_WAREHOUSES[0])
+
+		pl.after_mapping(None)
+
+		assert pl.get_onload("default_route_optimization_strategy") == "LIFO"
+	finally:
+		settings.default_route_optimization_strategy = original_strategy
+		settings.save()
+
+
+@pytest.mark.order(78)
+def test_after_mapping_is_noop_without_company():
+	"""after_mapping does nothing when company is not set on the document."""
+	pl = frappe.new_doc("Pick List")
+	for loc in STRATEGY_WAREHOUSES:
+		pl.append("locations", loc)
+
+	original_order = [loc["warehouse"] for loc in STRATEGY_WAREHOUSES]
+	pl.after_mapping(None)
+
+	assert [loc.warehouse for loc in pl.locations] == original_order

@@ -12,7 +12,7 @@ from frappe.utils.data import comma_and, flt, get_time, time_diff_in_hours, getd
 class InventoryToolsWorkstation(Workstation):
 	def validate_working_hours(self, row):
 		"""
-		HASH: 3b4d39766f78492bd2ba92dc6c6c5b91263d3e6d
+		HASH: 9771ed4c572510ec51586606f9d57ab6459717f1
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/workstation/workstation.py
 		METHOD: validate_working_hours
@@ -29,7 +29,7 @@ class InventoryToolsWorkstation(Workstation):
 
 	def set_total_working_hours(self):
 		"""
-		HASH: 3b4d39766f78492bd2ba92dc6c6c5b91263d3e6d
+		HASH: 9771ed4c572510ec51586606f9d57ab6459717f1
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/workstation/workstation.py
 		METHOD: set_total_working_hours
@@ -51,7 +51,7 @@ class InventoryToolsWorkstation(Workstation):
 
 	def validate_overlap_for_operation_timings(self):
 		"""
-		HASH: 3b4d39766f78492bd2ba92dc6c6c5b91263d3e6d
+		HASH: 9771ed4c572510ec51586606f9d57ab6459717f1
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/workstation/workstation.py
 		METHOD: validate_overlap_for_operation_timings
@@ -75,7 +75,7 @@ class InventoryToolsWorkstation(Workstation):
 
 	def set_hour_rate(self):
 		"""
-		HASH: 3b4d39766f78492bd2ba92dc6c6c5b91263d3e6d
+		HASH: 9771ed4c572510ec51586606f9d57ab6459717f1
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/workstation/workstation.py
 		METHOD: set_hour_rate

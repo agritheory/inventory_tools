@@ -125,6 +125,7 @@ extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
 
 override_doctype_class = {
 	"Delivery Note": "inventory_tools.inventory_tools.overrides.delivery_note.InventoryToolsDeliveryNote",
+	"Pick List": "inventory_tools.inventory_tools.overrides.pick_list.InventoryToolsPickList",
 	"Quality Inspection": "inventory_tools.inventory_tools.overrides.quality_inspection.InventoryToolsQualityInspection",
 	"Job Card": "inventory_tools.inventory_tools.overrides.job_card.InventoryToolsJobCard",
 	"Production Plan": "inventory_tools.inventory_tools.overrides.production_plan.InventoryToolsProductionPlan",
