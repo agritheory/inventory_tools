@@ -2,39 +2,62 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe.utils import safe_json_loads
+from erpnext.stock.doctype.pick_list.pick_list import PickList as ERPNextPickList
 from frappe.utils.data import nowdate
-import numpy as np
 
-from inventory_tools.inventory_tools.doctype.warehouse_plan.warehouse_plan import Grid_TSP
+
+class InventoryToolsPickList(ERPNextPickList):
+	def _get_default_strategy(self) -> str | None:
+		if not self.company:
+			return None
+		return frappe.db.get_value(
+			"Inventory Tools Settings",
+			{"company": self.company},
+			"default_route_optimization_strategy",
+		)
+
+	def after_mapping(self, source_doc):  # noqa
+		strategy = self._get_default_strategy()
+		self.set_onload("default_route_optimization_strategy", strategy or "Use Source Document Order")
+		if not strategy or strategy == "Use Source Document Order" or not self.get("locations"):
+			return
+		try:
+			result = optimize_path(self.as_dict(), strategy)
+			self.set("locations", [])
+			for item in result:
+				self.append("locations", item)
+		except Exception:
+			pass
+
+	def onload(self):
+		strategy = self._get_default_strategy()
+		self.set_onload("default_route_optimization_strategy", strategy or "Use Source Document Order")
 
 
 class PathFinder:
 	@staticmethod
-	def _process_entries(item_code, qty, company, order_by, root_warehouse, to_date):
-		# Retrieve stock ledger entries with the provided filters and ordering.
-		sle = frappe.get_all(
-			"Stock Ledger Entry",
-			fields=["actual_qty", "posting_date", "creation", "warehouse"],
-			filters={
-				"item_code": item_code,
-				"company": company,
-				"posting_date": ["<=", to_date],
-				"is_cancelled": 0,
-				"actual_qty": [">", 0],
-			},
-			order_by=order_by,
+	def _process_entries(item_code, qty, company, order_by_clauses, plan_warehouses, to_date):
+		SLE = frappe.qb.DocType("Stock Ledger Entry")
+		query = (
+			frappe.qb.from_(SLE)
+			.select(SLE.actual_qty, SLE.posting_date, SLE.creation, SLE.warehouse)
+			.where(SLE.item_code == item_code)
+			.where(SLE.company == company)
+			.where(SLE.posting_date <= to_date)
+			.where(SLE.is_cancelled == 0)
+			.where(SLE.actual_qty > 0)
 		)
+		if plan_warehouses:
+			query = query.where(SLE.warehouse.isin(list(plan_warehouses)))
+		for field, order in order_by_clauses:
+			query = query.orderby(field, order=order)
+
+		sle = query.run(as_dict=True)
 
 		newsle = []
 		qty_obtained = 0
 
-		# Process each entry until the required quantity is fulfilled.
 		for entry in sle:
-			# If a root warehouse is specified, ensure the entry belongs to it.
-			if root_warehouse and get_root_warehouse(entry["warehouse"]) != root_warehouse:
-				continue
-
 			remaining_qty = qty - qty_obtained
 
 			if entry["actual_qty"] >= remaining_qty:
@@ -47,57 +70,64 @@ class PathFinder:
 				)
 				qty_obtained += entry["actual_qty"]
 
-		# If the accumulated quantity doesn't match the requested quantity, raise an error.
 		if (qty - qty_obtained) != 0:
 			raise frappe.ValidationError("Not enough items in root warehouse")
 		return newsle
 
 	@staticmethod
-	def FIFO(item_code, qty, company, root_warehouse=None, to_date=None):
-		# FIFO: Order by posting_date and creation in ascending order.
-		if to_date is None:
-			to_date = nowdate()
+	def FIFO(item_code, qty, company, plan_warehouses=None, to_date=None):
+		SLE = frappe.qb.DocType("Stock Ledger Entry")
+		order_by = [(SLE.posting_date, frappe.qb.asc), (SLE.creation, frappe.qb.asc)]
 		return PathFinder._process_entries(
-			item_code, qty, company, "posting_date, creation", root_warehouse, to_date
+			item_code, qty, company, order_by, plan_warehouses, to_date or nowdate()
 		)
 
 	@staticmethod
-	def LIFO(item_code, qty, company, root_warehouse=None, to_date=None):
-		# LIFO: Order by posting_date and creation in descending order.
-		if to_date is None:
-			to_date = nowdate()
+	def LIFO(item_code, qty, company, plan_warehouses=None, to_date=None):
+		SLE = frappe.qb.DocType("Stock Ledger Entry")
+		order_by = [(SLE.posting_date, frappe.qb.desc), (SLE.creation, frappe.qb.desc)]
 		return PathFinder._process_entries(
-			item_code, qty, company, "posting_date desc, creation desc", root_warehouse, to_date
+			item_code, qty, company, order_by, plan_warehouses, to_date or nowdate()
 		)
 
 	@staticmethod
-	def deplete_max_bins(item_code, qty, company, root_warehouse=None, to_date=None):
-		if to_date is None:
-			to_date = nowdate()
+	def deplete_max_bins(item_code, qty, company, plan_warehouses=None, to_date=None):
+		SLE = frappe.qb.DocType("Stock Ledger Entry")
+		order_by = [
+			(SLE.actual_qty, frappe.qb.asc),
+			(SLE.posting_date, frappe.qb.asc),
+			(SLE.creation, frappe.qb.asc),
+		]
 		return PathFinder._process_entries(
-			item_code, qty, company, "actual_qty, posting_date, creation", root_warehouse, to_date
+			item_code, qty, company, order_by, plan_warehouses, to_date or nowdate()
 		)
 
 	@staticmethod
-	def deplete_min_bins(item_code, qty, company, root_warehouse=None, to_date=None):
-		if to_date is None:
-			to_date = nowdate()
+	def deplete_min_bins(item_code, qty, company, plan_warehouses=None, to_date=None):
+		SLE = frappe.qb.DocType("Stock Ledger Entry")
+		order_by = [
+			(SLE.actual_qty, frappe.qb.desc),
+			(SLE.posting_date, frappe.qb.asc),
+			(SLE.creation, frappe.qb.asc),
+		]
 		return PathFinder._process_entries(
-			item_code, qty, company, "actual_qty desc, posting_date, creation", root_warehouse, to_date
+			item_code, qty, company, order_by, plan_warehouses, to_date or nowdate()
 		)
 
 
 def get_root_warehouse(warehouse):
-	# Finds closest parent warehouse with a walkable floor plan; otherwise returns None
-	wh_plans = [wh["name"] for wh in frappe.get_all("Warehouse Plan")]
-	if warehouse in wh_plans:
-		wp_doc = frappe.get_doc("Warehouse Plan", warehouse)
-		if wp_doc.as_dict()["matrix"] is not None:
-			return warehouse
-	parent_warehouse = frappe.get_doc("Warehouse", warehouse).as_dict()["parent_warehouse"]
-	if parent_warehouse == "":
-		raise frappe.ValidationError("Warehouse does not have a parent warehouse")
-	return get_root_warehouse(parent_warehouse)
+	WP = frappe.qb.DocType("Warehouse Plan")
+	has_matrix = (
+		frappe.qb.from_(WP).select(WP.name).where((WP.name == warehouse) & (WP.matrix.isnotnull())).run()
+	)
+	if has_matrix:
+		return warehouse
+
+	Wh = frappe.qb.DocType("Warehouse")
+	result = frappe.qb.from_(Wh).select(Wh.warehouse_plan).where(Wh.name == warehouse).run()
+	if result and result[0][0]:
+		return result[0][0]
+	raise frappe.ValidationError(f"Warehouse '{warehouse}' is not part of any Warehouse Plan")
 
 
 @frappe.whitelist()
@@ -119,27 +149,22 @@ def optimize_route_picklist(item_whs: list, root_warehouse: str) -> list:
 	Returns:
 	        list: A reordered list of dictionaries, optimized for the pick-up route.
 	"""
-
-	grid = np.array(
-		safe_json_loads(frappe.get_doc("Warehouse Plan", root_warehouse).as_dict()["matrix"])
-	)
-
-	imaginary_x = grid.shape[1]
-	real_x = frappe.get_doc("Warehouse Plan", root_warehouse).as_dict()["horizontal"]
-	scale = real_x / imaginary_x
-
-	g = Grid_TSP(grid, scale=scale)
-
-	root_wh = frappe.get_doc("Warehouse Plan", root_warehouse).as_dict()
-	dropoff = [g.pos2node((root_wh["pickup_point_x"], root_wh["pickup_point_y"]))]
+	wp = frappe.get_cached_doc("Warehouse Plan", root_warehouse)
+	g = wp.graph
+	dropoff = [g.pos2node((wp.pickup_point_x, wp.pickup_point_y))]
 
 	unique_whs = list({item_wh["warehouse"] for item_wh in item_whs})
 
-	warehouse_to_node = {}
-	for wh in unique_whs:
-		accessible_path = frappe.get_doc("Warehouse", wh).as_dict()["accessible_path"].split(",")
-		coordinate = (int(accessible_path[0]), int(accessible_path[1]))
-		warehouse_to_node[wh] = g.pos2node(coordinate)
+	Wh = frappe.qb.DocType("Warehouse")
+	wh_paths = (
+		frappe.qb.from_(Wh)
+		.select(Wh.name, Wh.accessible_path)
+		.where(Wh.name.isin(unique_whs))
+		.run(as_dict=True)
+	)
+	warehouse_to_node = {
+		row.name: g.pos2node(tuple(int(x) for x in row.accessible_path.split(","))) for row in wh_paths
+	}
 	node_to_warehouse = {node: wh for wh, node in warehouse_to_node.items()}
 
 	pickup_list = list(warehouse_to_node.values())
@@ -187,6 +212,7 @@ def optimize_path(doc: str | dict, strategy: str) -> list[dict]:
 		doc_dict: dict = frappe.get_doc("Pick List", doc).as_dict()
 	else:
 		doc_dict = doc
+
 	itemdict: dict[str, dict[str, float]] = {}
 	for loc in doc_dict["locations"]:
 		code = loc["item_code"]
@@ -195,27 +221,40 @@ def optimize_path(doc: str | dict, strategy: str) -> list[dict]:
 			itemdict[code]["qty"] += qty
 		else:
 			itemdict[code] = {"qty": qty}
+
 	company = doc_dict["company"]
-	root_warehouses = [get_root_warehouse(loc["warehouse"]) for loc in doc_dict["locations"]]
+
+	unique_locations = {loc["warehouse"] for loc in doc_dict["locations"]}
+	root_wh_map = {wh: get_root_warehouse(wh) for wh in unique_locations}
+	root_warehouses = [root_wh_map[loc["warehouse"]] for loc in doc_dict["locations"]]
 
 	if not all(wh == root_warehouses[0] for wh in root_warehouses):
 		raise frappe.ValidationError("All items in pick list do not share a common warehouse plan")
 
 	root_warehouse = root_warehouses[0]
 
+	Wh = frappe.qb.DocType("Warehouse")
+	plan_warehouses = frozenset(
+		frappe.qb.from_(Wh).select(Wh.name).where(Wh.warehouse_plan == root_warehouse).run(pluck=True)
+	)
+
 	item_whs = []
 	for item in itemdict.keys():
 		if strategy == "FIFO":
-			item_whs += PathFinder.FIFO(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
+			item_whs += PathFinder.FIFO(
+				item, itemdict[item]["qty"], company, plan_warehouses=plan_warehouses
+			)
 		elif strategy == "LIFO":
-			item_whs += PathFinder.LIFO(item, itemdict[item]["qty"], company, root_warehouse=root_warehouse)
+			item_whs += PathFinder.LIFO(
+				item, itemdict[item]["qty"], company, plan_warehouses=plan_warehouses
+			)
 		elif strategy == "Deplete maximum number of Bins":
 			item_whs += PathFinder.deplete_max_bins(
-				item, itemdict[item]["qty"], company, root_warehouse=root_warehouse
+				item, itemdict[item]["qty"], company, plan_warehouses=plan_warehouses
 			)
 		elif strategy == "Deplete minimum number of Bins":
 			item_whs += PathFinder.deplete_min_bins(
-				item, itemdict[item]["qty"], company, root_warehouse=root_warehouse
+				item, itemdict[item]["qty"], company, plan_warehouses=plan_warehouses
 			)
 	try:
 		return optimize_route_picklist(item_whs, root_warehouse)
