@@ -48,6 +48,7 @@ doctype_js = {
 	"Pick List": "public/js/custom/pick_list_custom.js",
 	"Purchase Invoice": "public/js/custom/purchase_invoice_custom.js",
 	"Purchase Order": "public/js/custom/purchase_order_custom.js",
+	"Quality Inspection": "public/js/custom/quality_inspection_custom.js",
 	"Stock Entry": "public/js/custom/stock_entry_custom.js",
 	"Work Order": "public/js/custom/work_order_custom.js",
 	"Workstation": "public/js/custom/workstation_custom.js",
@@ -87,7 +88,7 @@ doctype_tree_js = {"Warehouse": "public/js/custom/warehouse_tree.js"}
 
 # before_install = "inventory_tools.install.before_install"
 # after_install = "inventory_tools.install.after_install"
-after_migrate = "inventory_tools.customize.load_customizations"
+# after_migrate = "inventory_tools.customize.load_customizations"
 
 # Uninstallation
 # ------------
@@ -123,13 +124,18 @@ extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
 # Override standard doctype classes
 
 override_doctype_class = {
+	"Delivery Note": "inventory_tools.inventory_tools.overrides.delivery_note.InventoryToolsDeliveryNote",
+	"Pick List": "inventory_tools.inventory_tools.overrides.pick_list.InventoryToolsPickList",
+	"Quality Inspection": "inventory_tools.inventory_tools.overrides.quality_inspection.InventoryToolsQualityInspection",
 	"Job Card": "inventory_tools.inventory_tools.overrides.job_card.InventoryToolsJobCard",
 	"Production Plan": "inventory_tools.inventory_tools.overrides.production_plan.InventoryToolsProductionPlan",
 	"Purchase Invoice": "inventory_tools.inventory_tools.overrides.purchase_invoice.InventoryToolsPurchaseInvoice",
 	"Purchase Order": "inventory_tools.inventory_tools.overrides.purchase_order.InventoryToolsPurchaseOrder",
 	"Purchase Receipt": "inventory_tools.inventory_tools.overrides.purchase_receipt.InventoryToolsPurchaseReceipt",
+	"Sales Invoice": "inventory_tools.inventory_tools.overrides.sales_invoice.InventoryToolsSalesInvoice",
 	"Sales Order": "inventory_tools.inventory_tools.overrides.sales_order.InventoryToolsSalesOrder",
 	"Stock Entry": "inventory_tools.inventory_tools.overrides.stock_entry.InventoryToolsStockEntry",
+	"Subcontracting Receipt": "inventory_tools.inventory_tools.overrides.subcontracting_receipt.InventoryToolsSubcontractingReceipt",
 	"Work Order": "inventory_tools.inventory_tools.overrides.work_order.InventoryToolsWorkOrder",
 	"Workstation": "inventory_tools.inventory_tools.overrides.workstation.InventoryToolsWorkstation",
 	"Website Item": "inventory_tools.inventory_tools.overrides.website_item.InventoryToolsWebsiteItem",
@@ -149,19 +155,49 @@ doc_events = {
 			"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.create_inventory_tools_settings",
 		],
 	},
+	"Delivery Note": {
+		"on_submit": [
+			"inventory_tools.cartonization.run_cartonization",
+		],
+	},
 	"Item": {
 		"validate": [
 			"inventory_tools.inventory_tools.overrides.uom.duplicate_weight_to_uom_conversion",
 			"inventory_tools.inventory_tools.faceted_search.update_specification_attribute_values",
 		],
 	},
-	"Warehouse": {
-		"validate": ["inventory_tools.inventory_tools.overrides.warehouse.update_warehouse_path"]
-	},
 	"Operation": {
 		"validate": [
 			"inventory_tools.inventory_tools.overrides.operation.validate_alternative_workstation"
 		]
+	},
+	"Pick List": {
+		"on_submit": [
+			"inventory_tools.cartonization.run_cartonization",
+		],
+	},
+	"Purchase Receipt": {
+		"before_submit": [
+			"inventory_tools.inventory_tools.overrides.purchase_receipt.handle_pr_quarantine",
+		],
+	},
+	"Quality Inspection": {},
+	"Stock Entry": {
+		"before_submit": [
+			"inventory_tools.inventory_tools.overrides.stock_entry.handle_se_quarantine",
+			"inventory_tools.inventory_tools.overrides.stock_entry.validate_block_issue_from_quarantine",
+		],
+		"on_submit": [
+			"inventory_tools.cartonization.run_cartonization",
+		],
+	},
+	"Subcontracting Receipt": {
+		"before_submit": [
+			"inventory_tools.inventory_tools.overrides.subcontracting_receipt.handle_scr_quarantine",
+		],
+	},
+	"Warehouse": {
+		"validate": ["inventory_tools.inventory_tools.overrides.warehouse.update_warehouse_path"]
 	},
 	"Workstation": {
 		"validate": [

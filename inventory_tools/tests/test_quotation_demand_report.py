@@ -10,7 +10,7 @@ from inventory_tools.inventory_tools.report.quotation_demand.quotation_demand im
 )
 
 
-@pytest.mark.order(50)
+@pytest.mark.order(7)
 def test_report_without_aggregation():
 	filters = frappe._dict({"end_date": getdate()})
 	columns, rows = execute_quotation_demand(filters)
@@ -50,7 +50,7 @@ def test_report_without_aggregation():
 		frappe.delete_doc("Sales Order", so.name)
 
 
-@pytest.mark.order(51)
+@pytest.mark.order(8)
 def test_report_with_aggregation_and_no_aggregation_warehouse():
 	settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
 	settings.sales_order_aggregation_company = settings.name
@@ -91,7 +91,7 @@ def test_report_with_aggregation_and_no_aggregation_warehouse():
 	frappe.delete_doc("Sales Order", so.name)
 
 
-@pytest.mark.order(52)
+@pytest.mark.order(9)
 def test_report_with_aggregation_and_aggregation_warehouse():
 	settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
 	settings.sales_order_aggregation_company = settings.name

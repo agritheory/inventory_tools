@@ -3,8 +3,11 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import safe_json_loads
 import networkx as nx
 import numpy as np
+
+GRAPH_CACHE_KEY = "warehouse_plan:graph:{}"
 
 
 class WarehousePlan(Document):
@@ -28,6 +31,28 @@ class WarehousePlan(Document):
 		vertical: DF.Float
 	# end: auto-generated types
 
+	@property
+	def graph(self) -> "Grid_TSP | None":
+		g = frappe.cache.get_value(GRAPH_CACHE_KEY.format(self.name))
+		if g is None and self.matrix:
+			g = self._build_graph()
+			frappe.cache.set_value(GRAPH_CACHE_KEY.format(self.name), g)
+		return g
+
+	def _build_graph(self) -> "Grid_TSP":
+		grid = np.array(safe_json_loads(self.matrix))
+		return Grid_TSP(grid, scale=self.horizontal / grid.shape[1])
+
+	def on_load(self):
+		if self.matrix and not frappe.cache.get_value(GRAPH_CACHE_KEY.format(self.name)):
+			frappe.cache.set_value(GRAPH_CACHE_KEY.format(self.name), self._build_graph())
+
+	def on_save(self):
+		if self.matrix:
+			frappe.cache.set_value(GRAPH_CACHE_KEY.format(self.name), self._build_graph())
+		else:
+			frappe.cache.delete_value(GRAPH_CACHE_KEY.format(self.name))
+
 	@frappe.whitelist()
 	def get_plan_warehouses(self):
 		return frappe.get_all(
@@ -38,34 +63,35 @@ class WarehousePlan(Document):
 
 	@frappe.whitelist()
 	def set_warehouse_plan_details(self, warehouses: list):
-		existing_warehouses = frappe.get_all(
-			"Warehouse",
-			filters={"warehouse_plan": self.name},
-			pluck="name",
+		Wh = frappe.qb.DocType("Warehouse")
+		existing_warehouses = (
+			frappe.qb.from_(Wh).select(Wh.name).where(Wh.warehouse_plan == self.name).run(pluck=True)
 		)
 
 		for warehouse in warehouses:
-			warehouse_doc = frappe.get_doc("Warehouse", warehouse.get("warehouse_name"))
-			warehouse_doc.update(
-				{
-					"warehouse_plan": self.name,
-					"warehouse_plan_coordinates": warehouse.get("coordinates"),
-					"rotation": warehouse.get("rotation"),
-					"accessible_path": warehouse.get("accessible_path"),
-				}
+			wh_name = warehouse.get("warehouse_name")
+			(
+				frappe.qb.update(Wh)
+				.set(Wh.warehouse_plan, self.name)
+				.set(Wh.warehouse_plan_coordinates, warehouse.get("coordinates"))
+				.set(Wh.rotation, warehouse.get("rotation"))
+				.set(Wh.accessible_path, warehouse.get("accessible_path"))
+				.where(Wh.name == wh_name)
+				.run()
 			)
-			warehouse_doc.save()
+			if wh_name in existing_warehouses:
+				existing_warehouses.remove(wh_name)
 
-			if warehouse_doc.name in existing_warehouses:
-				existing_warehouses.remove(warehouse_doc.name)
-
-		# if warehouses are deleted, remove them from the warehouse plan
-		if len(existing_warehouses) > 0:
-			for warehouse in existing_warehouses:
-				frappe.db.set_value("Warehouse", warehouse, "warehouse_plan", None)
-				frappe.db.set_value("Warehouse", warehouse, "warehouse_plan_coordinates", None)
-				frappe.db.set_value("Warehouse", warehouse, "rotation", 0)
-				frappe.db.set_value("Warehouse", warehouse, "accessible_path", None)
+		if existing_warehouses:
+			(
+				frappe.qb.update(Wh)
+				.set(Wh.warehouse_plan, None)
+				.set(Wh.warehouse_plan_coordinates, None)
+				.set(Wh.rotation, 0)
+				.set(Wh.accessible_path, None)
+				.where(Wh.name.isin(existing_warehouses))
+				.run()
+			)
 
 	@frappe.whitelist()
 	def get_warehouse_dimensions(self, warehouse: str):

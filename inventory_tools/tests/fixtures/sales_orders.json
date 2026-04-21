@@ -1,0 +1,602 @@
+[
+	{
+		"customer": "Downtown Deli",
+		"items": [
+			{
+				"item_code": "Horned Melon",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Sambucus",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Desert Banana",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Durian",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Bearberry",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Whole Harvest Grocery Group",
+		"items": [
+			{
+				"item_code": "Cranberry",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Lawton Blackberry",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Canary Melon",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Camu Camu",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Kakadu Lime",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Beans and Dreams Roasters",
+		"items": [
+			{
+				"item_code": "Photinia",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Empetrum",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Bilimbi",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Guava",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Cryptocarya Alba",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Draws Groceries",
+		"items": [
+			{
+				"item_code": "Genip",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Lime",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Bilberry",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Bael",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Mini Watermelon",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Longwoods Sandwich Shop",
+		"items": [
+			{
+				"item_code": "Coco Plum",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Gac",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Goji",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Berberis Vulgaris",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Louvi",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Sand Street Deli",
+		"items": [
+			{
+				"item_code": "Hackberry",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Whinberry",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Karonda",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Desert Lime",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Boquila",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Sand Street Deli",
+		"items": [
+			{
+				"item_code": "Camu Camu",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Berberis Vulgaris",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Jaltomata Procumbens",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Fragaria",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Barbados Cherry",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Almacs Food Group",
+		"items": [
+			{
+				"item_code": "Seedless Watermelon",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Raisin",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Kapok",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Banana",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Horned Melon",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Happy Basket Food Distribution Group",
+		"items": [
+			{
+				"item_code": "Candlenut",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Louvi",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "European Raspberry",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Kakadu Lime",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Beach Plum",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Draws Groceries",
+		"items": [
+			{
+				"item_code": "Highbush Cranberry",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Horned Melon",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Horned Melon",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Empetrum",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "White Currant",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Sand Street Deli",
+		"items": [
+			{
+				"item_code": "Boysenberry",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Kakadu Lime",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Triphasia Brassii",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Kakadu Lime",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Bilberry",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Cafe 27 Cafeteria",
+		"items": [
+			{
+				"item_code": "Coco Plum",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Kakadu Lime",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Hackberry",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Lime",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Cowberry",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Whole Harvest Grocery Group",
+		"items": [
+			{
+				"item_code": "Durian",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Coco Plum",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Gac",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Kakadu Lime",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Photinia",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Capital Grille Restaurant Group",
+		"items": [
+			{
+				"item_code": "Whinberry",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Empetrum",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Batuan",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Goji",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Banana",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "TransAmerica Bank Cafeteria",
+		"items": [
+			{
+				"item_code": "Raisin",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Desert Lime",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Kakadu Lime",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Blood Orange",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Desert Lime",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Cafe 27 Cafeteria",
+		"items": [
+			{
+				"item_code": "Bearberry",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Coffee",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Kepel",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Lime",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Dabai",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "TransAmerica Bank Cafeteria",
+		"items": [
+			{
+				"item_code": "Huckleberry",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Banana",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Kepel",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Kepel",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Physalis",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Whole Harvest Grocery Group",
+		"items": [
+			{
+				"item_code": "Bilberry",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Kaffir Lime",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Kepel",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Myrciaria Floribunda",
+				"qty": 6,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Empetrum",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Grab n Go Bodega",
+		"items": [
+			{
+				"item_code": "Raisin",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Cowberry",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Raisin",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Date",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Bitter Melon",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	},
+	{
+		"customer": "Whole Harvest Grocery Group",
+		"items": [
+			{
+				"item_code": "Triphasia Brassii",
+				"qty": 5,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Dabai",
+				"qty": 7,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Kahikatea",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Doubah",
+				"qty": 4,
+				"warehouse": "Refrigerator - APC"
+			},
+			{
+				"item_code": "Batuan",
+				"qty": 3,
+				"warehouse": "Refrigerator - APC"
+			}
+		]
+	}
+]

@@ -103,7 +103,14 @@ def get_operating_costs_by_operation(
 			continue
 
 		ws = frappe.get_doc("Workstation", op.workstation)
-		hours = flt(op.time_in_mins) / 60.0
+		jc_filters = {
+			"work_order": work_order.name,
+			"workstation": op.workstation,
+			"operation": op.operation,
+			"status": "Completed",
+		}
+		jc_time_in_mins = frappe.get_value("Job Card", jc_filters, "total_time_in_mins")
+		hours = (jc_time_in_mins or flt(op.time_in_mins)) / 60.0
 
 		if ws.workstation_operating_cost:
 			for row in ws.workstation_operating_cost:
@@ -123,7 +130,7 @@ def get_operating_costs_by_operation(
 
 					qty = flt(work_order.qty)
 					if qty:
-						cost_per_unit = flt(total_cost / qty, 2)
+						cost_per_unit = total_cost / qty
 
 						operation_name = op.operation or ws.workstation_name or ws.name
 						account_short = row.account.split(" - ")[0] if " - " in row.account else row.account
@@ -148,7 +155,7 @@ def get_operating_costs_by_operation(
 						)
 		else:
 			account = frappe.db.get_value("Company", ws.company, "expenses_included_in_valuation")
-			cost_per_unit = flt((ws.hour_rate * hours) / flt(work_order.qty), 2)
+			cost_per_unit = (ws.hour_rate * hours) / flt(work_order.qty)
 			operating_costs.append(
 				frappe._dict(
 					{

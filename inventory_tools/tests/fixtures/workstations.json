@@ -1,0 +1,476 @@
+[
+	{
+		"name": "Mix Pie Crust Station",
+		"workstation_type": "Table",
+		"hour_rate": "20",
+		"off_status_image": "mixer.png",
+		"on_status_image": "mixer.png",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 2.35,
+				"rent_cost": 3.76,
+				"wages": 18.8
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 2.5,
+				"rent_cost": 4.0,
+				"wages": 20.0
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 2.65,
+				"rent_cost": 4.24,
+				"wages": 21.2
+			}
+		]
+	},
+	{
+		"name": "Roll Pie Crust Station",
+		"workstation_type": "Table",
+		"hour_rate": "20",
+		"off_status_image": "rolling.png",
+		"on_status_image": "rolling.png",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 1.88,
+				"rent_cost": 3.76,
+				"wages": 18.8
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 2.0,
+				"rent_cost": 4.0,
+				"wages": 20.0
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 2.12,
+				"rent_cost": 4.24,
+				"wages": 21.2
+			}
+		]
+	},
+	{
+		"name": "Make Pie Filling Station",
+		"workstation_type": "Table",
+		"hour_rate": "20",
+		"off_status_image": "table.png",
+		"on_status_image": "table.png",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 2.82,
+				"rent_cost": 3.76,
+				"wages": 18.8
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 3.0,
+				"rent_cost": 4.0,
+				"wages": 20.0
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 3.18,
+				"rent_cost": 4.24,
+				"wages": 21.2
+			}
+		]
+	},
+	{
+		"name": "Cooling Station",
+		"workstation_type": "Table",
+		"hour_rate": "100",
+		"off_status_image": "rack.png",
+		"on_status_image": "rack.png",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 1.41,
+				"rent_cost": 2.82,
+				"wages": 94.0
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 1.5,
+				"rent_cost": 3.0,
+				"wages": 100.0
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 1.59,
+				"rent_cost": 3.18,
+				"wages": 106.0
+			}
+		]
+	},
+	{
+		"name": "Box Pie Station",
+		"workstation_type": "Table",
+		"hour_rate": "100",
+		"off_status_image": "box.png",
+		"on_status_image": "box.png",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 0.94,
+				"rent_cost": 1.88,
+				"wages": 94.0
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 1.0,
+				"rent_cost": 2.0,
+				"wages": 100.0
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 1.06,
+				"rent_cost": 2.12,
+				"wages": 106.0
+			}
+		]
+	},
+	{
+		"name": "Baking Station",
+		"workstation_type": "Table",
+		"hour_rate": "20",
+		"off_status_image": "oven.png",
+		"on_status_image": "oven.png",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 4.7,
+				"rent_cost": 3.76,
+				"wages": 18.8
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 5.0,
+				"rent_cost": 4.0,
+				"wages": 20.0
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 5.3,
+				"rent_cost": 4.24,
+				"wages": 21.2
+			}
+		]
+	},
+	{
+		"name": "Assemble Pie Station",
+		"workstation_type": "Table",
+		"hour_rate": "20",
+		"off_status_image": "table.png",
+		"on_status_image": "table.png",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 1.88,
+				"rent_cost": 3.76,
+				"wages": 18.8
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 2.0,
+				"rent_cost": 4.0,
+				"wages": 20.0
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 2.12,
+				"rent_cost": 4.24,
+				"wages": 21.2
+			}
+		]
+	},
+	{
+		"name": "Mix Pie Filling Station",
+		"workstation_type": "Table",
+		"hour_rate": "20",
+		"off_status_image": "mixer.png",
+		"on_status_image": "mixer.png",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 2.35,
+				"rent_cost": 3.76,
+				"wages": 18.8
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 2.5,
+				"rent_cost": 4.0,
+				"wages": 20.0
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 2.65,
+				"rent_cost": 4.24,
+				"wages": 21.2
+			}
+		]
+	},
+	{
+		"name": "Packaging Station",
+		"workstation_type": "Table",
+		"hour_rate": "2",
+		"off_status_image": "box.png",
+		"on_status_image": "box.png",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 1.41,
+				"rent_cost": 0.94,
+				"wages": 1.88
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 1.5,
+				"rent_cost": 1.0,
+				"wages": 2.0
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 1.59,
+				"rent_cost": 1.06,
+				"wages": 2.12
+			}
+		]
+	},
+	{
+		"name": "Food Prep Table 2",
+		"workstation_type": "Table",
+		"hour_rate": "10",
+		"off_status_image": "table.png",
+		"on_status_image": "table.png",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 0.94,
+				"rent_cost": 1.88,
+				"wages": 9.4
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 1.0,
+				"rent_cost": 2.0,
+				"wages": 10.0
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 1.06,
+				"rent_cost": 2.12,
+				"wages": 10.6
+			}
+		]
+	},
+	{
+		"name": "Food Prep Table 1",
+		"workstation_type": "Table",
+		"hour_rate": "5",
+		"off_status_image": "table.png",
+		"on_status_image": "table.png",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 0.47,
+				"rent_cost": 0.94,
+				"wages": 4.7
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 0.5,
+				"rent_cost": 1.0,
+				"wages": 5.0
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 0.53,
+				"rent_cost": 1.06,
+				"wages": 5.3
+			}
+		]
+	},
+	{
+		"name": "Range Station",
+		"workstation_type": "Range",
+		"hour_rate": "20",
+		"off_status_image": "range.png",
+		"on_status_image": "range.png",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 5.64,
+				"rent_cost": 3.76,
+				"wages": 18.8
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 6.0,
+				"rent_cost": 4.0,
+				"wages": 20.0
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 6.36,
+				"rent_cost": 4.24,
+				"wages": 21.2
+			}
+		]
+	},
+	{
+		"name": "Cooling Racks Station",
+		"workstation_type": "Cooling",
+		"hour_rate": "80",
+		"off_status_image": "rack.png",
+		"on_status_image": "rack.png",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 0.47,
+				"rent_cost": 1.41
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 0.5,
+				"rent_cost": 1.5
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 0.53,
+				"rent_cost": 1.59
+			}
+		]
+	},
+	{
+		"name": "Refrigerator Station",
+		"workstation_type": "Refrigerator",
+		"hour_rate": "200",
+		"off_status_image": "fridge.png",
+		"on_status_image": "fridge.png",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 7.52,
+				"rent_cost": 5.64
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 8.0,
+				"rent_cost": 6.0
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 8.48,
+				"rent_cost": 6.36
+			}
+		]
+	},
+	{
+		"name": "Oven Station",
+		"workstation_type": "Oven",
+		"hour_rate": "20",
+		"off_status_image": "oven.png",
+		"on_status_image": "oven.png",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 6.58,
+				"rent_cost": 4.7,
+				"wages": 18.8
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 7.0,
+				"rent_cost": 5.0,
+				"wages": 20.0
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 7.42,
+				"rent_cost": 5.3,
+				"wages": 21.2
+			}
+		]
+	},
+	{
+		"name": "Mixer Station",
+		"workstation_type": "Mixer",
+		"off_status_image": "mixer.png",
+		"on_status_image": "mixer.png",
+		"hour_rate": "10",
+		"operating_costs": [
+			{
+				"from_date": "2024-01-01",
+				"to_date": "2024-12-31",
+				"electricity_cost": 2.82,
+				"rent_cost": 1.88,
+				"wages": 9.4
+			},
+			{
+				"from_date": "2025-01-01",
+				"to_date": "2025-12-31",
+				"electricity_cost": 3.0,
+				"rent_cost": 2.0,
+				"wages": 10.0
+			},
+			{
+				"from_date": "2026-01-01",
+				"to_date": "2026-12-31",
+				"electricity_cost": 3.18,
+				"rent_cost": 2.12,
+				"wages": 10.6
+			}
+		]
+	}
+]

@@ -156,7 +156,7 @@ def get_data(filters):
 		.where(MaterialRequest.docstatus < 2)
 		.where(
 			MaterialRequest.schedule_date[
-				filters.start_date or "1900-01-01" : filters.en_date or "2100-12-31"
+				filters.start_date or "1900-01-01" : filters.end_date or "2100-12-31"
 			]
 		)
 		.where(MaterialRequestItem.ordered_qty < MaterialRequestItem.stock_qty)
@@ -314,12 +314,12 @@ def create_pos(company, filters, rows):
 		return
 	counter = 0
 	settings = frappe.get_doc("Inventory Tools Settings", company)
-	requesting_companies = list({row.company for row in rows})
+	requesting_companies = list({row.company for row in rows if row.get("company")})
 	if settings.purchase_order_aggregation_company == company:
 		requesting_companies = [company]
 	for requesting_company in requesting_companies:
 		for supplier, _rows in groupby(rows, lambda x: x.get("supplier")):
-			rows = list(_rows)
+			supplier_rows = list(_rows)
 			po = frappe.new_doc("Purchase Order")
 			po.schedule_date = po.posting_date = getdate()
 			po.supplier = supplier
@@ -329,7 +329,7 @@ def create_pos(company, filters, rows):
 				po.company = settings.purchase_order_aggregation_company
 			else:
 				po.company = requesting_company
-			for row in rows:
+			for row in supplier_rows:
 				if not row.get("item_code"):
 					continue
 				if settings.purchase_order_aggregation_company == po.company or po.company == row.company:

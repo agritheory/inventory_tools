@@ -5,7 +5,7 @@ import frappe
 import pytest
 
 
-@pytest.mark.order(45)
+@pytest.mark.order(26)
 def test_alternative_workstation_query():
 	# test default settings
 	response = frappe.call(
@@ -41,7 +41,7 @@ def test_alternative_workstation_query():
 	assert response[1].get("value") == "Food Prep Table 2"
 
 
-@pytest.mark.order(46)
+@pytest.mark.order(27)
 def test_alternative_workstation_by_type_query():
 	# test default settings
 	response = frappe.call(

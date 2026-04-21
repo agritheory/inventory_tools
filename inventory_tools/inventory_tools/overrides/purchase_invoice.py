@@ -2,11 +2,16 @@
 # See license.txt
 
 import datetime
+import json
 
 import frappe
 from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import PurchaseInvoice
 from frappe import _
 from frappe.utils.data import cint
+
+from inventory_tools.inventory_tools.overrides.inspection import (
+	validate_inspection_with_company_scope,
+)
 
 
 class InventoryToolsPurchaseInvoice(PurchaseInvoice):
@@ -79,6 +84,9 @@ class InventoryToolsPurchaseInvoice(PurchaseInvoice):
 		settings = frappe.get_doc("Inventory Tools Settings", {"company": self.company})
 		return bool(settings and settings.enable_work_order_subcontracting)
 
+	def validate_inspection(self):
+		validate_inspection_with_company_scope(self)
+
 	def validate_subcontracting_to_pay_qty(self):
 		# Checks the qty the invoice will cover is not more than the outstanding qty
 		for subc in self.get("subcontracting"):
@@ -107,9 +115,8 @@ class InventoryToolsPurchaseInvoice(PurchaseInvoice):
 
 @frappe.whitelist()
 def get_stock_entries(purchase_orders, from_date=None, to_date=None):
-	# # Commented code is useful if having PO and attaching WOs to them is enforced
-	# if isinstance(purchase_orders, str):
-	# 	purchase_orders = json.loads(purchase_orders)
+	if isinstance(purchase_orders, str):
+		purchase_orders = json.loads(purchase_orders)
 
 	if not from_date:
 		from_date = datetime.date(1900, 1, 1)
