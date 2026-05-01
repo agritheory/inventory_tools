@@ -50,6 +50,7 @@ doctype_js = {
 	"Purchase Order": "public/js/custom/purchase_order_custom.js",
 	"Quality Inspection": "public/js/custom/quality_inspection_custom.js",
 	"Stock Entry": "public/js/custom/stock_entry_custom.js",
+	"UOM Category": "public/js/custom/uom_category_custom.js",
 	"Work Order": "public/js/custom/work_order_custom.js",
 	"Workstation": "public/js/custom/workstation_custom.js",
 }
