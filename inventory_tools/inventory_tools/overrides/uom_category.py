@@ -10,7 +10,6 @@ import frappe
 from frappe import _
 from frappe.model.meta import get_parent_dt
 from frappe.model.rename_doc import get_link_fields
-from frappe.query_builder import functions
 
 qb = frappe.qb
 
@@ -198,13 +197,7 @@ def disable_unused_uoms_for_categories(categories) -> dict[str, Any]:
 		return {"disabled": [], "count": 0, "categories": validated}
 
 	U = qb.DocType("UOM")
-	(
-		qb.update(U)
-		.set(U.enabled, 0)
-		.where(U.name.isin(to_disable))
-		.where(functions.Ifnull(U.enabled, 1) == 1)
-		.run()
-	)
+	(qb.update(U).set(U.enabled, 0).where(U.name.isin(to_disable)).run())
 
 	return {"disabled": to_disable, "count": len(to_disable), "categories": validated}
 
@@ -236,13 +229,7 @@ def enable_unused_uoms_for_categories(categories) -> dict[str, Any]:
 		return {"enabled": [], "count": 0, "categories": validated}
 
 	U = qb.DocType("UOM")
-	(
-		qb.update(U)
-		.set(U.enabled, 1)
-		.where(U.name.isin(to_enable))
-		.where(functions.Ifnull(U.enabled, 1) == 0)
-		.run()
-	)
+	(qb.update(U).set(U.enabled, 1).where(U.name.isin(to_enable)).run())
 
 	return {"enabled": to_enable, "count": len(to_enable), "categories": validated}
 
