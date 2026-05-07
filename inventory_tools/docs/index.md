@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Inventory Tools Documentation
 
 <div class="byline">
-  Rohan Bansal, Devarsh Bhatt, coleandreoli, IshwaryaM1030, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2026-02-22
+  AgriTheory 2026-03-26
 </div>
 
 
@@ -26,6 +26,7 @@ target containers
 - **[Quarantine Quality Control](./quarantine_quality_control_workflows.md)**: allows inventory to be automatically moved to a quarantine warehouse for inspection, Items remain in quarantine until quality inspection is completed and approved
 - **[Overproduction Allowance](./overproduction_allowance.md)**: configurable percentage allowance for manufacturing more than the planned Work Order quantity, with validation across Work Orders, Job Cards, and Stock Entries
 - **[Multi-Company Sales Order](./multi_company_sales_order.md)**: enables Sales Orders to use warehouses from multiple companies, supporting centralized sales with distributed inventory fulfillment
+- **[UOM Category curation](./uom_category_curation.md)**: overview and bulk enable/disable helpers on **UOM Category** for Units of Measure that appear only on conversion factors for that category versus Item, transactional, and cross-category usage
 
 ## Configuration
 Any feature in Inventory Tools may be toggled on or off via the Inventory Tools Settings document. The only exception to this is the Material Demand report, which is generally available upon installation of the app. There may be one settings document for each company in ERPNext to enable features on a per-company basis. Follow the links above for further details around feature-specific configuration.
