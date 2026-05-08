@@ -11,6 +11,30 @@
 		"uom": "Meter"
 	},
 	{
+		"item_length": 1.2,
+		"item_height": 0.55,
+		"item_width": 1.1,
+		"item_weight": 6.6,
+		"dimension_type": "Exterior",
+		"orientation": 1,
+		"reference_doctype": "Item",
+		"reference_document": "Bilberry",
+		"item_uom": "Box",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 0.25,
+		"item_height": 0.21,
+		"item_width": 0.2,
+		"item_weight": 12.0,
+		"dimension_type": "Exterior",
+		"orientation": 1,
+		"reference_doctype": "Item",
+		"reference_document": "Solo Case Berry",
+		"item_uom": "Box",
+		"uom": "Meter"
+	},
+	{
 		"item_length": 1.42,
 		"item_height": 0.51,
 		"item_width": 0.95,
