@@ -1,7 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
- "autoname": "format:{reference_document}-{dimension_type}-{uom}",
+ "autoname": "",
  "creation": "2025-01-30 06:32:13.516968",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -157,7 +157,7 @@
  "modified_by": "Administrator",
  "module": "Inventory Tools",
  "name": "Physical Dimension",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "By script",
  "owner": "Administrator",
  "permissions": [
   {

@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Cartonization Configuration & Validation Guide
 
 <div class="byline">
-  IshwaryaM1030 and Tyler Matteson 2026-02-22
+  AgriTheory 2026-05-07
 </div>
 
 
@@ -102,7 +102,8 @@ Dimension record with:
 - **Reference Doctype**: `Item` or `Warehouse`
 - **Reference Document**: the Item or Warehouse name
 - **Dimension Type**: `Exterior` for items, `Interior` for containers
-- **UOM**: the unit for all dimension values (e.g., `Meter`)
+- **Item UOM** (`Item` references only): which handling unit the exterior dimensions describe
+- **UOM**: the unit for length / width / height numeric values (e.g., `Meter`)
 - Length, Width, Height, Weight fields as described below
 
 Volume is computed automatically from Length × Width × Height on save.
@@ -111,20 +112,31 @@ Volume is computed automatically from Length × Width × Height on save.
 
 Attached to Item records.
 
-Represents the space the item occupies.
+Represents the space the item occupies **per unit of handling UOM** (see **Item UOM** below).
 
 Required fields:
 - Length
 - Width
 - Height
-- Weight (weight per unit)
-- UOM (the dimensional unit, e.g., `Meter`)
+- Weight (weight per unit **in this Item UOM**)
+- **Item UOM** (mandatory): the stocking / handling unit these dimensions describe (for example stock UOM **Pound** vs alternate **Box**). Must be either the Item’s stock UOM or an alternate UOM defined on **UOM Conversion Detail** rows for that Item.
+- UOM (dimensional unit for L/W/H numeric fields, e.g., `Meter`)
+
+You may maintain **multiple** Exterior Physical Dimensions for one Item — for example **Pound-level** dims and **Box-level** dims. Document names default to **`{Item}-{Interior|Exterior}-{dimensional UOM}-{Item UOM}`** for Items, and **`{Reference}-{Interior|Exterior}-{dimensional UOM}`** for Warehouses.
 
 Quantity handling:
+
+Cartonization converts each transaction line **first to quantity in Stock UOM** (using `picked_qty`, `stock_qty`, or `transfer_qty` when ERPNext exposes them on the row, otherwise `qty` × conversion from line UOM to Stock UOM), **then divides by the Conversion Detail factor for the resolved Physical Dimension’s Item UOM** to get how many rigid units to validate.
+
+Effective counts use the Exterior row whose **Item UOM** matches the line’s **transaction UOM** when possible; otherwise the row whose **Item UOM** equals the Item’s Stock UOM, otherwise the alphabetically earliest matching Exterior row:
+
 ```
-Effective floor area = item length × item width × quantity
-Effective volume     = item volume × quantity
-Effective weight     = item weight × quantity
+effective_unit_count =
+    qty_stock_uom / conversion_factor(one unit of pd_row.item_uom, expressed in stock_uom)
+
+Effective floor area = item length × item width × effective_unit_count
+Effective volume     = item volume × effective_unit_count
+Effective weight     = item weight × effective_unit_count
 ```
 
 ---
