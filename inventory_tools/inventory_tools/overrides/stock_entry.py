@@ -183,7 +183,7 @@ class InventoryToolsStockEntry(StockEntry):
 	@frappe.whitelist()
 	def get_items(self):
 		"""
-		HASH: 279cf6fe007528f624f8f1e5ef7d169124584756
+		HASH: 4dd9f0b25545a034ae3cc2012dc5a1049449c5b7
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
 		METHOD: get_items

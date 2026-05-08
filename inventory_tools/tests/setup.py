@@ -108,6 +108,7 @@ def create_test_data():
 	copy_image_fixtures()
 	frappe.db.set_single_value("Stock Settings", "valuation_method", "Moving Average")
 	frappe.db.set_single_value("Stock Settings", "default_warehouse", "")
+	frappe.db.set_single_value("Stock Settings", "allow_uom_with_conversion_rate_defined_in_item", 1)
 	create_warehouse_plan(cfc)
 	create_warehouses(settings)
 	create_warehouse_locations()

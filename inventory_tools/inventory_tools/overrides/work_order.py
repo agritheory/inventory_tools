@@ -17,7 +17,7 @@ from frappe.utils import cint, flt, get_link_to_form, getdate
 class InventoryToolsWorkOrder(WorkOrder):
 	def onload(self):
 		"""
-		HASH: 46a2b7a07e5326ad5fde89d030460a5e9f2b67b0
+		HASH: 4dd9f0b25545a034ae3cc2012dc5a1049449c5b7
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: onload
