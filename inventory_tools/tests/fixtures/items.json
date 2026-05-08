@@ -367,7 +367,24 @@
 		"item_price": 0.52,
 		"default_warehouse": "Refrigerator - APC",
 		"description": "A small, deep-blue berry with a tart flavor, perfect for jams and desserts.",
-		"supplier": ["Chelsea Fruit Co", "Southern Fruit Supply"]
+		"supplier": ["Chelsea Fruit Co", "Southern Fruit Supply"],
+		"uom_conversion_detail": {
+			"Box": 12
+		}
+	},
+	{
+		"item_code": "Solo Case Berry",
+		"item_group": "Ingredients",
+		"uom": "Pound",
+		"weight_per_unit": 1.0,
+		"weight_uom": "Pound",
+		"item_price": 0.1,
+		"default_warehouse": "Refrigerator - APC",
+		"description": "Test ingredient with only Exterior Physical Dimensions in Boxes.",
+		"supplier": ["Chelsea Fruit Co"],
+		"uom_conversion_detail": {
+			"Box": 12
+		}
 	},
 	{
 		"item_code": "Kepel",

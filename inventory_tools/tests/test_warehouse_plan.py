@@ -21,9 +21,6 @@ STRATEGY_WAREHOUSES = [
 ]
 
 
-# --- Grid_TSP Tests ---
-
-
 @pytest.mark.order(60)
 def test_grid_tsp_graph_construction():
 	"""Grid_TSP creates a connected graph from the warehouse plan matrix."""
@@ -97,9 +94,6 @@ def test_grid_tsp_tsp_optimization():
 
 	assert len(pickup_order) == len(warehouse_nodes)
 	assert set(pickup_order) == set(warehouse_nodes)
-
-
-# --- PathFinder Tests ---
 
 
 @pytest.mark.order(64)
@@ -237,9 +231,6 @@ def test_pathfinder_insufficient_stock_raises():
 		PathFinder.FIFO(item_code, 999999, company)
 
 
-# --- Route Optimization Tests ---
-
-
 @pytest.mark.order(69)
 def test_get_root_warehouse():
 	"""get_root_warehouse finds parent warehouse with Warehouse Plan."""
@@ -265,9 +256,6 @@ def test_optimize_route_picklist():
 	assert len(result) == len(item_whs)
 	# All items should be present
 	assert {r["item_code"] for r in result} == {i["item_code"] for i in item_whs}
-
-
-# --- Pick List Integration Tests ---
 
 
 @pytest.mark.order(71)
@@ -339,9 +327,6 @@ def test_optimize_path_deplete_min_bins():
 	assert len(result) > 0
 	total_qty = sum(r["qty"] for r in result)
 	assert total_qty == 5
-
-
-# --- InventoryToolsPickList.after_mapping Tests ---
 
 
 @pytest.mark.order(75)

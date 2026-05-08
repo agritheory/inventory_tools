@@ -288,11 +288,6 @@ def test_missing_quarantine_warehouse_throws():
 	settings.save()
 
 
-# ---------------------------------------------------------------------------
-# Helpers — APC manufacture path
-# ---------------------------------------------------------------------------
-
-
 def create_flour_manufacture_se(submit_se=True):
 	"""Create Material Transfer for Manufacture SE for Flour in APC.
 
@@ -349,11 +344,6 @@ def get_release_transfers_for_qi(qi_name):
 		for n in set(parent_names)
 		if frappe.db.get_value("Stock Entry", n, "stock_entry_type") == "Material Transfer"
 	]
-
-
-# ---------------------------------------------------------------------------
-# Tests — manufacture (SE) quarantine path
-# ---------------------------------------------------------------------------
 
 
 @pytest.mark.order(17)
@@ -439,11 +429,6 @@ def test_release_from_quarantine_blocked_on_se_rejected_qi():
 	assert qty_in_quarantine > 0
 
 
-# ---------------------------------------------------------------------------
-# Test — make_quarantine_release_stock_entry produces correct draft
-# ---------------------------------------------------------------------------
-
-
 @pytest.mark.order(21)
 def test_release_se_is_draft_with_qi_reference():
 	"""Draft SE from the Release button carries QI reference so block_issue_from_quarantine allows it."""
@@ -462,11 +447,6 @@ def test_release_se_is_draft_with_qi_reference():
 	assert se.docstatus == 0
 	assert se.items[0].reference_doctype == "Quality Inspection"
 	assert se.items[0].reference_name == qa.name
-
-
-# ---------------------------------------------------------------------------
-# Test — PR cancellation while items are in quarantine
-# ---------------------------------------------------------------------------
 
 
 @pytest.mark.order(22)
@@ -502,11 +482,6 @@ def test_cancel_pr_while_in_quarantine():
 		or 0
 	)
 	assert qty_after == qty_before - received_qty
-
-
-# ---------------------------------------------------------------------------
-# Tests — block_issue_from_quarantine
-# ---------------------------------------------------------------------------
 
 
 @pytest.mark.order(23)
@@ -562,11 +537,6 @@ def test_block_issue_allows_qi_referenced_release():
 	settings.save()
 
 
-# ---------------------------------------------------------------------------
-# Test — multi-item PR with mixed quarantine/non-quarantine items
-# ---------------------------------------------------------------------------
-
-
 @pytest.mark.order(25)
 def test_multi_item_pr_partial_quarantine_routing():
 	settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
@@ -604,11 +574,6 @@ def test_multi_item_pr_partial_quarantine_routing():
 
 	assert cocoplum_row.warehouse == "Stores - CFC"
 	assert not cocoplum_row.intended_warehouse
-
-
-# ---------------------------------------------------------------------------
-# Test — graceful degradation when intended_warehouse is absent
-# ---------------------------------------------------------------------------
 
 
 @pytest.mark.order(26)

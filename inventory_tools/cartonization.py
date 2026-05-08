@@ -4,6 +4,8 @@
 from collections import defaultdict
 
 import frappe
+from erpnext.stock.get_item_details import get_conversion_factor
+from frappe.utils import flt
 from mip import BINARY, CONTINUOUS, Model, OptimizationStatus, xsum
 
 
@@ -50,7 +52,74 @@ def get_physical_dimension(reference_doctype, reference_name, dimension_type):
 
 
 def get_item_dimensions(item_code):
-	return get_physical_dimension("Item", item_code, "Exterior")
+	return resolve_item_physical_dimension(item_code, "Exterior")
+
+
+def resolve_item_physical_dimension(item_code, dimension_type, line_uom=None):
+	rows = frappe.get_all(
+		"Physical Dimension",
+		filters={
+			"reference_doctype": "Item",
+			"reference_document": item_code,
+			"dimension_type": dimension_type,
+		},
+		fields=[
+			"name",
+			"item_length",
+			"item_width",
+			"item_height",
+			"item_weight",
+			"item_volume",
+			"orientation",
+			"uom",
+			"item_uom",
+		],
+		order_by="name asc",
+	)
+	if not rows:
+		return None
+	if line_uom:
+		exact_match = next((r for r in rows if r.get("item_uom") == line_uom), None)
+		if exact_match:
+			return frappe._dict(exact_match)
+
+	stock_uom = frappe.db.get_value("Item", item_code, "stock_uom")
+	if stock_uom:
+		fallback_stock = next((r for r in rows if r.get("item_uom") == stock_uom), None)
+		if fallback_stock:
+			return frappe._dict(fallback_stock)
+
+	return frappe._dict(rows[0])
+
+
+def cartonization_row_qty_stock_uom(row_dict, item_code):
+	for key in ("picked_qty", "stock_qty", "transfer_qty"):
+		sq = flt(row_dict.get(key))
+		if sq > 0:
+			return sq
+
+	line_qty = flt(row_dict.get("qty") or 0)
+	if not line_qty:
+		return 0.0
+
+	stock_uom = row_dict.get("stock_uom") or frappe.db.get_value("Item", item_code, "stock_uom")
+	line_uom = row_dict.get("uom") or stock_uom
+
+	if line_uom == stock_uom:
+		return line_qty
+
+	return line_qty * float(get_conversion_factor(item_code, line_uom)["conversion_factor"] or 1)
+
+
+def convert_stock_qty_to_physical_dimension_units(stock_qty, pd_item_uom, item_code):
+	if not pd_item_uom or pd_item_uom == frappe.db.get_value("Item", item_code, "stock_uom"):
+		return float(stock_qty)
+
+	cf = float(get_conversion_factor(item_code, pd_item_uom)["conversion_factor"] or 1)
+	if cf <= 0:
+		return float(stock_qty)
+
+	return float(stock_qty) / cf
 
 
 def get_container_dimensions(item_code=None, warehouse=None):
@@ -221,37 +290,49 @@ def apply_policy(result, policy, context):
 def get_item_rows(doc):
 	"""
 	Normalize item rows across doctypes.
-	Returns a list of rows with:
-	- item_code
-	- qty
-	- warehouse
+
+	Returns a list of plain dict rows with:
+	        item_code, qty (line UOM), warehouse, optional uom, stock_uom, conversion_factor,
+	        and optional ERPNext-maintained qty-in-stock-uom helpers (picked_qty, stock_qty, transfer_qty).
 	"""
 
-	if doc.doctype == "Pick List":
-		return [
-			{
-				"item_code": row.item_code,
-				"qty": row.qty,
-				"warehouse": row.warehouse,
-			}
-			for row in doc.locations
-			if row.item_code and row.warehouse
-		]
+	row_out = []
 
-	if doc.get("items"):
-		return [
+	if doc.doctype == "Pick List":
+		for row in doc.locations:
+			if row.item_code and row.warehouse:
+				row_out.append(
+					{
+						"item_code": row.item_code,
+						"qty": row.qty,
+						"warehouse": row.warehouse,
+						"uom": getattr(row, "uom", None),
+						"stock_uom": getattr(row, "stock_uom", None),
+						"conversion_factor": getattr(row, "conversion_factor", None),
+						"picked_qty": getattr(row, "picked_qty", None),
+						"stock_qty": getattr(row, "stock_qty", None),
+					}
+				)
+		return row_out
+
+	for row in doc.get("items") or []:
+		if not row.item_code:
+			continue
+		row_out.append(
 			{
 				"item_code": row.item_code,
 				"qty": row.qty,
 				"warehouse": getattr(row, "warehouse", None)
 				or getattr(row, "s_warehouse", None)
 				or getattr(row, "t_warehouse", None),
+				"uom": getattr(row, "uom", None),
+				"stock_uom": getattr(row, "stock_uom", None),
+				"conversion_factor": getattr(row, "conversion_factor", None),
+				"transfer_qty": getattr(row, "transfer_qty", None),
 			}
-			for row in doc.get("items")
-			if row.item_code
-		]
+		)
 
-	return []
+	return row_out
 
 
 def run_cartonization(doc, method=None):
@@ -268,18 +349,25 @@ def run_cartonization(doc, method=None):
 		if not row["warehouse"]:
 			continue
 
-		dim = get_item_dimensions(row["item_code"])
-		if not dim:
+		resolved_dimension = resolve_item_physical_dimension(
+			row["item_code"], "Exterior", row.get("uom")
+		)
+		if not resolved_dimension:
 			continue
 
-		dim.update(
-			{
-				"qty": row["qty"],
-				"item_code": row["item_code"],
-			}
+		item_code = row["item_code"]
+
+		physical_units = convert_stock_qty_to_physical_dimension_units(
+			cartonization_row_qty_stock_uom(row, item_code),
+			resolved_dimension["item_uom"],
+			item_code,
 		)
 
-		items_by_warehouse[row["warehouse"]].append(dim)
+		dimension_row = frappe._dict(resolved_dimension)
+
+		dimension_row.update({"qty": physical_units, "item_code": row["item_code"]})
+
+		items_by_warehouse[row["warehouse"]].append(dimension_row)
 
 	for warehouse, items in items_by_warehouse.items():
 		container_dim, exempt = get_container_dimensions(warehouse=warehouse)
