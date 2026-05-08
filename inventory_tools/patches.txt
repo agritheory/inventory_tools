@@ -1,1 +1,2 @@
 inventory_tools.patches.rename_alternative_workstation # Tyler Matteson 5/13/24
+inventory_tools.patches.populate_physical_dimension_item_uom_from_stock_uom

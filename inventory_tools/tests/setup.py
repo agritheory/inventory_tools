@@ -1250,6 +1250,9 @@ def create_item_dimensions():
 	for item in ITEM_DIMENSIONS:
 		pyd = frappe.new_doc("Physical Dimension")
 		pyd.update(item)
+		if pyd.reference_doctype == "Item":
+			stock_uom = frappe.db.get_value("Item", pyd.reference_document, "stock_uom")
+			pyd.item_uom = stock_uom or pyd.item_uom or pyd.uom
 		pyd.save()
 
 
