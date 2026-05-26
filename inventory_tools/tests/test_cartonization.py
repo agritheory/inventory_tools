@@ -547,3 +547,43 @@ def test_run_cartonization_falls_back_to_box_physical_dimension_when_stock_row_m
 		run_cartonization(doc)
 	finally:
 		disable_cfc_cartonization()
+
+
+@pytest.mark.order(120)
+def test_solve_cartonization_assigns_bilberry_to_chelsea_fruit_storage_warehouse_bin():
+	"""Multi-bin solver uses Interior Physical Dimensions for Chelsea Fruit Co storage bins."""
+
+	from inventory_tools.cartonization import solve_cartonization
+
+	out = solve_cartonization(
+		[
+			{
+				"item_code": "Bilberry",
+				"qty": 2,
+				"uom": "Pound",
+				"stock_uom": "Pound",
+				"name": "manual-packing-line-001",
+			}
+		],
+		container_doctypes=["Warehouse"],
+		settings={"mode": "3D Volumetric"},
+		reference_document_filters={"Warehouse": ["Fruit Storage 1 - CFC"]},
+	)
+
+	assert isinstance(out.bins, list)
+	assert len(out.bins) >= 1
+
+	first_bin = out.bins[0]
+	container = getattr(first_bin, "container", None) or first_bin.get("container")
+	assert container
+	assert container.get("doctype") == "Warehouse"
+	assert container.get("name") == "Fruit Storage 1 - CFC"
+
+	items_block = list(getattr(first_bin, "items", None) or first_bin.get("items") or [])
+	written_row = False
+	for row in items_block:
+		payload = dict(row) if hasattr(row, "keys") else row
+		if payload.get("row_name") == "manual-packing-line-001":
+			written_row = True
+			assert payload.get("item_code") == "Bilberry"
+	assert written_row
