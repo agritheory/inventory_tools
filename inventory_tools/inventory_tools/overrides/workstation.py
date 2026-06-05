@@ -202,3 +202,14 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 			workstation.insert(0, _default)
 
 	return workstation
+
+
+def refresh_all_workstation_hour_rates(doc, method=None):
+	if doc.update_type != "Update Cost":
+		return
+	for ws_name in frappe.get_all("Workstation", pluck="name"):
+		ws = frappe.get_doc("Workstation", ws_name)
+		old_rate = flt(ws.hour_rate)
+		ws.set_hour_rate()
+		if ws.hour_rate != old_rate:
+			frappe.db.set_value("Workstation", ws_name, "hour_rate", ws.hour_rate)

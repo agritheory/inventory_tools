@@ -206,6 +206,11 @@ doc_events = {
 			"inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost.validate_dates",
 		]
 	},
+	"BOM Update Log": {
+		"before_submit": [
+			"inventory_tools.inventory_tools.overrides.workstation.refresh_all_workstation_hour_rates"
+		]
+	},
 }
 
 # Scheduled Tasks
