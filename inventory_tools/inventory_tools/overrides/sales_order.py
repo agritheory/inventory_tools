@@ -22,7 +22,7 @@ class InventoryToolsSalesOrder(SalesOrder):
 
 	def validate_warehouse(self):
 		"""
-		HASH: bc7f884ae12dccd443ff9a409708f7c95dae4b98
+		HASH: 04e28f95564e1579e25b25f87214a5916a069b87
 		REPO: https://github.com/frappe/erpnext
 		PATH: erpnext/selling/doctype/sales_order/sales_order.py
 		METHOD: validate_warehouse
