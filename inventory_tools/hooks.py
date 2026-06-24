@@ -42,6 +42,7 @@ web_include_js = [
 
 # include js in doctype views
 doctype_js = {
+	"BOM": "public/js/custom/bom_custom.js",
 	"Item": "public/js/custom/item_custom.js",
 	"Job Card": "public/js/custom/job_card_custom.js",
 	"Operation": "public/js/custom/operation_custom.js",
@@ -125,6 +126,7 @@ extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
 # Override standard doctype classes
 
 override_doctype_class = {
+	"BOM": "inventory_tools.inventory_tools.overrides.bom.InventoryToolsBOM",
 	"Delivery Note": "inventory_tools.inventory_tools.overrides.delivery_note.InventoryToolsDeliveryNote",
 	"Pick List": "inventory_tools.inventory_tools.overrides.pick_list.InventoryToolsPickList",
 	"Quality Inspection": "inventory_tools.inventory_tools.overrides.quality_inspection.InventoryToolsQualityInspection",
@@ -204,11 +206,6 @@ doc_events = {
 		"validate": [
 			"inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost.validate_workstation_costs",
 			"inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost.validate_dates",
-		]
-	},
-	"BOM Update Log": {
-		"before_submit": [
-			"inventory_tools.inventory_tools.overrides.workstation.refresh_all_workstation_hour_rates"
 		]
 	},
 }
