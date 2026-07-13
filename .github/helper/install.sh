@@ -21,13 +21,12 @@ pip install --upgrade pip
 pip install frappe-bench
 
 if [ "$DB" == "mariadb" ]; then
-  mysql --host 127.0.0.1 --port 3306 -u root -e "SET GLOBAL character_set_server = 'utf8mb4'"
-  mysql --host 127.0.0.1 --port 3306 -u root -e "SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
-  mysql --host 127.0.0.1 --port 3306 -u root -e "CREATE OR REPLACE DATABASE test_site"
-  mysql --host 127.0.0.1 --port 3306 -u root -e "CREATE OR REPLACE USER 'test_site'@'localhost' IDENTIFIED BY 'test_site'"
-  mysql --host 127.0.0.1 --port 3306 -u root -e "GRANT ALL PRIVILEGES ON \`test_site\`.* TO 'test_site'@'localhost'"
-  mysql --host 127.0.0.1 --port 3306 -u root -e "ALTER USER 'root'@'localhost' IDENTIFIED BY 'root'"  # match site_cofig
-  mysql --host 127.0.0.1 --port 3306 -u root -e "FLUSH PRIVILEGES"
+  mysql --host 127.0.0.1 --port 3306 -u root -proot -e "SET GLOBAL character_set_server = 'utf8mb4'"
+  mysql --host 127.0.0.1 --port 3306 -u root -proot -e "SET GLOBAL collation_server = 'utf8mb4_unicode_ci'"
+  mysql --host 127.0.0.1 --port 3306 -u root -proot -e "CREATE OR REPLACE DATABASE test_site"
+  mysql --host 127.0.0.1 --port 3306 -u root -proot -e "CREATE OR REPLACE USER 'test_site'@'localhost' IDENTIFIED BY 'test_site'"
+  mysql --host 127.0.0.1 --port 3306 -u root -proot -e "GRANT ALL PRIVILEGES ON \`test_site\`.* TO 'test_site'@'localhost'"
+  mysql --host 127.0.0.1 --port 3306 -u root -proot -e "FLUSH PRIVILEGES"
 fi
 
 echo "BRANCH_NAME: ${BRANCH_NAME}"
