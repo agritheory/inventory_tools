@@ -2,48 +2,19 @@
 name = "inventory_tools"
 version = "15.13.2"
 description = "Inventory Tools for ERPNext"
-authors = [
-    { name = "AgriTheory", email = "support@agritheory.dev"}
-]
 readme = "README.md"
-requires-python = ">=3.10"
-dynamic = ["dependencies"]
-
-[tool.poetry.dependencies]
-python = "^3.10"
-matplotlib = "^3.10.1"
-numpy = "^2.0.2"
-networkx = "^3.4.2"
-packaging = "<25"
-typing-extensions = "<4.16"
-mip = "^1.14"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.2.2"
-pytest-cov = "^5.0.0"
-pytest-order = "^1.2.1"
-mypy = "^1.10.0"
+requires-python = ">=3.14,<3.15"
+dynamic = [ "dependencies",]
+[[project.authors]]
+name = "AgriTheory"
+email = "support@agritheory.dev"
 
 [build-system]
-requires = ["poetry-core"]
+requires = [ "poetry-core",]
 build-backend = "poetry.core.masonry.api"
-
-[tool.bench.frappe-dependencies]
-frappe = ">=15.0.0,<16.0.0"
-erpnext = ">=15.0.0,<16.0.0"
-hrms = ">=15.0.0,<16.0.0"
-
-[tool.bench.dev-dependencies]
-pytest = "~=8.2.2"
-pytest-cov = "~=5.0.0"
-pytest-order = "~=1.2.1"
-test_utils = "@git+https://github.com/agritheory/test_utils.git#egg=test_utils"
 
 [tool.codespell]
 skip = "CHANGELOG.md"
-
-[tool.pytest.ini_options]
-addopts = "-s --disable-warnings" #--cov=inventory_tools --cov-report term-missing"
 
 [tool.black]
 line-length = 99
@@ -58,11 +29,38 @@ ensure_newline_before_comments = true
 indent = "\t"
 
 [tool.semantic_release]
-version_toml = ["pyproject.toml:project.version"]
-version_variables = [
-    "inventory_tools/__init__.py:__version__"
-]
+version_toml = [ "pyproject.toml:project.version",]
+version_variables = [ "inventory_tools/__init__.py:__version__",]
 build_command = "echo 1"
 
+[tool.poetry.dependencies]
+python = ">=3.14,<3.15"
+matplotlib = "^3.10.1"
+numpy = "^2.0.2"
+networkx = "^3.4.2"
+packaging = "<25"
+typing-extensions = "<4.16"
+mip = "^1.14"
+
+[tool.bench.frappe-dependencies]
+frappe = ">=16.0.0-dev,<17.0.0"
+erpnext = ">=15.0.0,<16.0.0"
+hrms = ">=15.0.0,<16.0.0"
+
+[tool.bench.dev-dependencies]
+pytest = "~=8.2.2"
+pytest-cov = "~=5.0.0"
+pytest-order = "~=1.2.1"
+test_utils = "@git+https://github.com/agritheory/test_utils.git#egg=test_utils"
+
+[tool.pytest.ini_options]
+addopts = "-s --disable-warnings"
+
 [tool.semantic_release.branches.version]
-match = "version-(14|15)"
+match = "version-(14|15|16)"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.2.2"
+pytest-cov = "^5.0.0"
+pytest-order = "^1.2.1"
+mypy = "^1.10.0"
