@@ -16,11 +16,11 @@ MIT
 
 ## Install Instructions
 
-Set up a new bench, substitute a path to the python version to use, which should 3.10 latest
+Set up a new bench, substitute a path to the python version to use, which should 3.14 latest
 
 ```
 # for linux development
-bench init --frappe-branch version-15 {{ bench name }} --python ~/.pyenv/versions/3.10.16/bin/python3
+bench init --frappe-branch version-16 {{ bench name }} --python ~/.pyenv/versions/3.14/bin/python3
 ```
 Create a new site in that bench
 ```
@@ -30,11 +30,11 @@ bench use {{ site name }}
 ```
 Download the ERPNext app, other dependencies, and this application
 ```
-bench get-app erpnext --branch version-15
-bench get-app hrms --branch version-15
-bench get-app payments --branch version-15
-bench get-app webshop --branch version-15
-bench get-app inventory_tools --branch version-15 git@github.com:agritheory/inventory_tools.git
+bench get-app erpnext --branch version-16
+bench get-app hrms --branch version-16
+bench get-app payments --branch version-16
+bench get-app webshop --branch version-16
+bench get-app inventory_tools --branch version-16 git@github.com:agritheory/inventory_tools.git
 ```
 Install all apps into the site
 ```
