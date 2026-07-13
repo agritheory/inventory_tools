@@ -1,0 +1,28 @@
+name: Frappe CI - MariaDB
+
+on:
+  push:
+    branches:
+      - version-14
+      - version-15
+      - version-16
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  tests:
+    uses: ./.github/workflows/_base-pytest.yml
+    permissions:
+      contents: write
+      checks: write
+      issues: write
+      pull-requests: write
+    with:
+      db: mariadb
+      job-name: Server
