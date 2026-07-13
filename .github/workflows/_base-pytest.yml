@@ -21,13 +21,13 @@ env:
 
 jobs:
   tests:
-    name: ${ inputs.job-name }
+    name: ${{ inputs.job-name }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
       fail-fast: false
     env:
-      DB: ${ inputs.db }
+      DB: ${{ inputs.db }}
       CI: 'Yes'
 
     services:
@@ -119,7 +119,7 @@ jobs:
             ${{ runner.os }}-yarn-
 
       - name: Install
-        run: bash ${{GITHUB_WORKSPACE}}/.github/helper/install.sh
+        run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
       - name: Install Test Fixtures
         working-directory: /home/runner/frappe-bench
         run: |
