@@ -29,6 +29,11 @@ if [ "$DB" == "mariadb" ]; then
   mysql --host 127.0.0.1 --port 3306 -u root -proot -e "FLUSH PRIVILEGES"
 fi
 
+if [ "${GITHUB_EVENT_NAME}" = 'pull_request' ]; then
+    BRANCH_NAME="${GITHUB_BASE_REF}"
+else
+    BRANCH_NAME="${GITHUB_REF_NAME}"
+fi
 echo "BRANCH_NAME: ${BRANCH_NAME}"
 
 git clone https://github.com/frappe/frappe --branch "${BRANCH_NAME}"
