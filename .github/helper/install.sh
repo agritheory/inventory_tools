@@ -15,7 +15,7 @@ fi
 
 cd ~ || exit
 
-# sudo apt update -y && sudo apt install redis-server -y 
+sudo apt update -y && sudo apt install redis-server -y
 
 pip install --upgrade pip
 pip install frappe-bench
