@@ -1,0 +1,143 @@
+name: Frappe CI Base
+
+on:
+  workflow_call:
+    inputs:
+      db:
+        required: true
+        type: string
+      job-name:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  checks: write
+  issues: write
+  pull-requests: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  tests:
+    name: ${ inputs.job-name }
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+    env:
+      DB: ${ inputs.db }
+      CI: 'Yes'
+
+    services:
+      redis-cache:
+        image: redis:alpine
+        ports:
+          - 13000:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 2s
+          --health-retries 3
+      redis-queue:
+        image: redis:alpine
+        ports:
+          - 11000:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 2s
+          --health-retries 3
+      mariadb:
+        image: mariadb:11.8
+        env:
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=5s
+          --health-timeout=2s
+          --health-retries=3
+      postgres:
+        image: postgres:18.0
+        env:
+          POSTGRES_PASSWORD: travis
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v6
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Check for valid Python & Merge Conflicts
+        run: |
+          python -m compileall -q -f "${GITHUB_WORKSPACE}"
+          if grep -lr --exclude-dir=node_modules "^<<<<<<< " "${GITHUB_WORKSPACE}"
+              then echo "Found merge conflicts"
+              exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          check-latest: true
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Add to Hosts
+        run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
+
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-
+
+      - name: Cache yarn
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/yarn
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install
+        run: bash ${{GITHUB_WORKSPACE}}/.github/helper/install.sh
+      - name: Install Test Fixtures
+        working-directory: /home/runner/frappe-bench
+        run: |
+          bench execute 'inventory_tools.tests.setup.before_test'
+
+      - name: Run Tests
+        working-directory: /home/runner/frappe-bench
+        run: |
+          source env/bin/activate
+          cd apps/inventory_tools
+          pytest --cov=inventory_tools --cov-report=xml --disable-warnings -s | tee pytest-coverage.txt
+        env:
+          TYPE: server
+          FRAPPE_REDIS_CACHE: redis://127.0.0.1:13000
+          FRAPPE_REDIS_QUEUE: redis://127.0.0.1:11000
+
+      - name: Pytest coverage comment
+        uses: MishaKav/pytest-coverage-comment@main
+        with:
+          pytest-coverage-path: /home/runner/frappe-bench/apps/inventory_tools/pytest-coverage.txt
+          pytest-xml-coverage-path: /home/runner/frappe-bench/apps/inventory_tools/coverage.xml
