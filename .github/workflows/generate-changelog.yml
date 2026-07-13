@@ -6,6 +6,9 @@ on:
   issue_comment:
     types: [created]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   generate-changelog:
     runs-on: ubuntu-latest
@@ -14,7 +17,7 @@ jobs:
       pull-requests: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Generate Changelog
         uses: agritheory/test_utils/actions/generate_changelog@main
