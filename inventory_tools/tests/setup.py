@@ -966,7 +966,7 @@ def create_production_plan(settings, prod_plan_from_doc):
 	pp.posting_date = settings.day
 	pp.company = settings.company
 	pp.combine_sub_items = 1
-	pp.skip_available_sub_assembly_item = 0
+	pp.sub_assembly_warehouse = "Storeroom - APC"
 	if prod_plan_from_doc == "Sales Order":
 		pp.get_items_from = "Sales Order"
 		pp.append(
