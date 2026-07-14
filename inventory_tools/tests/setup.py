@@ -211,6 +211,11 @@ def setup_manufacturing_settings(settings):
 	mfg_settings.job_card_excess_transfer = 1
 	mfg_settings.save()
 
+	company = frappe.get_doc("Company", settings.company)
+	company.default_wip_warehouse = "Kitchen - APC"
+	company.default_fg_warehouse = "Refrigerated Display - APC"
+	company.save()
+
 	if not frappe.db.exists(
 		"Account", {"account_name": "Work In Progress", "company": settings.company}
 	):
