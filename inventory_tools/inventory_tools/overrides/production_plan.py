@@ -20,7 +20,7 @@ class InventoryToolsProductionPlan(ProductionPlan):
 
 		wo_list, po_list = [], []
 		subcontracted_po = {}
-		default_warehouses = get_default_warehouse()
+		default_warehouses = get_default_warehouse(self.company)
 		create_purchase_orders = frappe.get_value(
 			"Inventory Tools Settings", self.company, "create_purchase_orders"
 		)
