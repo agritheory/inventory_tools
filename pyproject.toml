@@ -1,6 +1,6 @@
 [project]
 name = "inventory_tools"
-version = "15.13.2"
+version = "16.0.0"
 description = "Inventory Tools for ERPNext"
 readme = "README.md"
 requires-python = ">=3.14,<3.15"
@@ -44,8 +44,8 @@ mip = "^1.14"
 
 [tool.bench.frappe-dependencies]
 frappe = ">=16.0.0-dev,<17.0.0"
-erpnext = ">=15.0.0,<16.0.0"
-hrms = ">=15.0.0,<16.0.0"
+erpnext = ">=16.0.0-dev,<17.0.0"
+hrms = ">=16.0.0-dev,<17.0.0"
 
 [tool.bench.dev-dependencies]
 pytest = "~=8.2.2"
