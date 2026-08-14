@@ -90,7 +90,13 @@ def validate_dates(doc, method):
 def get_operating_costs_by_operation(
 	work_order=None, bom_no=None, posting_date=None
 ) -> list[frappe._dict]:
-	"""Returns operating costs per operation and account for the given date range."""
+	"""Return operating costs per Work Order operation and expense account.
+
+	Uses total_time_in_mins from a Completed Job Card matching work_order and
+	workstation when present; otherwise falls back to the BOM operation time.
+	Operation name is intentionally not part of the Job Card lookup because WO
+	operation rows and Job Card operation fields can differ in formatting.
+	"""
 	posting_date = getdate(posting_date or nowdate())
 
 	if not work_order or not hasattr(work_order, "operations"):
@@ -103,10 +109,11 @@ def get_operating_costs_by_operation(
 			continue
 
 		ws = frappe.get_doc("Workstation", op.workstation)
+		# Query by work_order + workstation + status only; operation name can have
+		# minor discrepancies between Work Order operations table and Job Card field
 		jc_filters = {
 			"work_order": work_order.name,
 			"workstation": op.workstation,
-			"operation": op.operation,
 			"status": "Completed",
 		}
 		jc_time_in_mins = frappe.get_value("Job Card", jc_filters, "total_time_in_mins")
