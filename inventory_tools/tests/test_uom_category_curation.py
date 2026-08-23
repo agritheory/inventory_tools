@@ -6,7 +6,7 @@ import pytest
 import inventory_tools.inventory_tools.overrides.uom_category as uc
 
 
-@pytest.mark.order(100)
+@pytest.mark.order(120)
 def test_transactional_uom_link_scan_rules():
 	"""Link parents used for Item/submitted UOM usage: include Item, skip Singles and UOM Conversion Factor."""
 

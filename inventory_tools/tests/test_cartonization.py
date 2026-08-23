@@ -579,7 +579,7 @@ def test_solve_cartonization_assigns_bilberry_to_chelsea_fruit_storage_warehouse
 	assert container.get("doctype") == "Warehouse"
 	assert container.get("name") == "Fruit Storage 1 - CFC"
 
-	items_block = list(getattr(first_bin, "items", None) or first_bin.get("items") or [])
+	items_block = first_bin["items"] if isinstance(first_bin, dict) else first_bin.get("items", [])
 	written_row = False
 	for row in items_block:
 		payload = dict(row) if hasattr(row, "keys") else row

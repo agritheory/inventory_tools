@@ -81,9 +81,10 @@ async function create_sis(frm) {
 }
 
 async function create_dialog(frm, title, label, method, primary_action_label) {
-	let items_data = frm.doc.items.filter(r => {
-		return r.company != frm.doc.company && r.rate != 0.0 && r.stock_qty > 0.0
-	})
+	let items_data = await frappe.xcall(
+		'inventory_tools.inventory_tools.overrides.purchase_order.get_multi_company_po_receipt_rows',
+		{ docname: frm.doc.name }
+	)
 	return new Promise(resolve => {
 		let table_fields = {
 			fieldname: 'locations',
@@ -92,6 +93,12 @@ async function create_dialog(frm, title, label, method, primary_action_label) {
 			editable_grid: 0,
 			read_only: 1,
 			fields: [
+				{
+					fieldtype: 'Data',
+					fieldname: 'name',
+					label: __('Name'),
+					hidden: 1,
+				},
 				{
 					fieldtype: 'Data',
 					fieldname: 'company',

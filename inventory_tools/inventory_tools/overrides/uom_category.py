@@ -11,8 +11,6 @@ from frappe import _
 from frappe.model.meta import get_parent_dt
 from frappe.model.rename_doc import get_link_fields
 
-qb = frappe.qb
-
 
 def transactional_uom_link_parent(parent_dt: str) -> bool:
 	if parent_dt == "Item":
@@ -83,13 +81,13 @@ def unused_uom_names(validated_categories: list[str]) -> list[str]:
 
 
 def conversion_uoms_for_categories(categories: list[str]) -> set[str]:
-	ucf = qb.DocType("UOM Conversion Factor")
+	ucf = frappe.qb.DocType("UOM Conversion Factor")
 	fr = getattr(ucf, "from_uom")
 	to = getattr(ucf, "to_uom")
 	wc = ucf.category == categories[0] if len(categories) == 1 else ucf.category.isin(categories)
 
-	q1 = qb.from_(ucf).select(fr.as_("n")).where(wc & fr.isnotnull() & (fr != ""))
-	q2 = qb.from_(ucf).select(to.as_("n")).where(wc & to.isnotnull() & (to != ""))
+	q1 = frappe.qb.from_(ucf).select(fr.as_("n")).where(wc & fr.isnotnull() & (fr != ""))
+	q2 = frappe.qb.from_(ucf).select(to.as_("n")).where(wc & to.isnotnull() & (to != ""))
 	rows_raw = q1.union(q2).run(pluck=True)
 	return {x for x in rows_raw if x}
 
@@ -100,9 +98,9 @@ def conversion_uoms_outside_categories(
 	if not limit_to:
 		return set()
 
-	ucf = qb.DocType("UOM Conversion Factor")
+	ucf = frappe.qb.DocType("UOM Conversion Factor")
 	fr, to = getattr(ucf, "from_uom"), getattr(ucf, "to_uom")
-	q = qb.from_(ucf).select(fr, to).where(~ucf.category.isin(exclude_categories))
+	q = frappe.qb.from_(ucf).select(fr, to).where(~ucf.category.isin(exclude_categories))
 
 	out = set()
 	for a, b in q.run(as_dict=False):
@@ -121,11 +119,11 @@ def transactional_uom_refs(cat_names: set[str]) -> set[str]:
 	out = set()
 	for parent_dt, fieldname in collect_transactional_item_uom_link_branches():
 		try:
-			T = qb.DocType(parent_dt)
+			T = frappe.qb.DocType(parent_dt)
 			col = getattr(T, fieldname)
 		except AttributeError:
 			continue
-		q = qb.from_(T).select(col).distinct().where(col.isin(lnames))
+		q = frappe.qb.from_(T).select(col).distinct().where(col.isin(lnames))
 		for v in q.run(pluck=True):
 			if v:
 				out.add(v)
@@ -154,9 +152,9 @@ def get_uom_category_overview(category_name: str) -> dict[str, Any]:
 	txn_used = transactional_uom_refs(cat_set)
 	refs_other_cat = conversion_uoms_outside_categories([category_name], cat_set)
 
-	U = qb.DocType("UOM")
+	U = frappe.qb.DocType("UOM")
 	masters = (
-		qb.from_(U)
+		frappe.qb.from_(U)
 		.select(U.name, U.uom_name, U.enabled)
 		.where(U.name.isin(list(cat_set)))
 		.run(as_dict=True)
@@ -196,8 +194,8 @@ def disable_unused_uoms_for_categories(categories) -> dict[str, Any]:
 	if not to_disable:
 		return {"disabled": [], "count": 0, "categories": validated}
 
-	U = qb.DocType("UOM")
-	(qb.update(U).set(U.enabled, 0).where(U.name.isin(to_disable)).run())
+	U = frappe.qb.DocType("UOM")
+	(frappe.qb.update(U).set(U.enabled, 0).where(U.name.isin(to_disable)).run())
 
 	return {"disabled": to_disable, "count": len(to_disable), "categories": validated}
 
@@ -228,8 +226,8 @@ def enable_unused_uoms_for_categories(categories) -> dict[str, Any]:
 	if not to_enable:
 		return {"enabled": [], "count": 0, "categories": validated}
 
-	U = qb.DocType("UOM")
-	(qb.update(U).set(U.enabled, 1).where(U.name.isin(to_enable)).run())
+	U = frappe.qb.DocType("UOM")
+	(frappe.qb.update(U).set(U.enabled, 1).where(U.name.isin(to_enable)).run())
 
 	return {"enabled": to_enable, "count": len(to_enable), "categories": validated}
 

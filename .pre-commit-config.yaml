@@ -45,7 +45,7 @@ repos:
         additional_dependencies: ['flake8-bugbear']
 
   - repo: https://github.com/agritheory/test_utils
-    rev: v1.25.1
+    rev: v1.29.1
     hooks:
       - id: update_pre_commit_config
       - id: validate_frappe_project
@@ -63,6 +63,12 @@ repos:
         args: ['--directory', '.', '--app', 'inventory_tools', '--base-branch', 'version-15']
       - id: check_code_duplication
         args: ['--max-clones', '60', '--max-percentage', '5.0']
+      - id: semgrep_fmt
+        args:
+          - "--config=.semgrep.yml"
+          - "--config=https://raw.githubusercontent.com/frappe/semgrep-rules/develop/rules/frappe_correctness.yml"
+          - "--disable-version-check"
+          - "--skip-unknown-extensions"
       - id: static_analysis
         args: ['.']
 

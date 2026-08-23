@@ -9,6 +9,7 @@ from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	make_inter_company_purchase_invoice,
 )
+from erpnext.accounts.party import get_party_account
 from erpnext.buying.doctype.purchase_order.purchase_order import (
 	PurchaseOrder,
 	make_purchase_invoice,
@@ -21,10 +22,95 @@ from erpnext.controllers.accounts_controller import (
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 from frappe import _, throw
+from frappe.utils import cint, flt
 
 
-def _bypass(*args, **kwargs):
+def skip_bound_method(*args, **kwargs):
 	return
+
+
+def resolve_purchase_order_item_company(item):
+	"""Return the company that should receive this PO line (Material Request company)."""
+	if item.get("company"):
+		return item.company
+	if item.get("material_request"):
+		company = frappe.get_value("Material Request", item.material_request, "company")
+		if company:
+			return company
+	if item.get("warehouse"):
+		return frappe.get_value("Warehouse", item.warehouse, "company")
+	return None
+
+
+def normalize_selected_row_names(rows):
+	rows = json.loads(rows) if isinstance(rows, str) else rows
+	names = set()
+	for row in rows or []:
+		if isinstance(row, str):
+			names.add(row)
+		elif isinstance(row, dict) and row.get("name"):
+			names.add(row["name"])
+	return names
+
+
+def group_po_items_by_requesting_company(po, selected_names):
+	forwarding = frappe._dict()
+	for row in po.items:
+		if row.name not in selected_names:
+			continue
+		company = resolve_purchase_order_item_company(row)
+		if company in forwarding:
+			forwarding[company].append(row.name)
+		else:
+			forwarding[company] = [row.name]
+	return forwarding
+
+
+def multi_company_receipt_applies_putaway_rule(company):
+	return cint(
+		frappe.db.get_value(
+			"Inventory Tools Settings",
+			company,
+			"apply_putaway_rule_on_multi_company_receipt",
+		)
+	)
+
+
+def apply_requesting_company_to_purchase_receipt(pr, po, company):
+	pr.company = company
+	if company != po.company:
+		pr.credit_to = get_party_account("Supplier", po.supplier, company)
+	company_cost_center = frappe.get_value("Company", company, "cost_center")
+	for item in pr.items:
+		item.cost_center = company_cost_center
+	if multi_company_receipt_applies_putaway_rule(company):
+		pr.apply_putaway_rule = 1
+	pr.run_method("set_missing_values")
+	pr.run_method("calculate_taxes_and_totals")
+
+
+def apply_requesting_company_to_purchase_invoice(pi, po, company):
+	pi.company = company
+	pi.credit_to = get_party_account("Supplier", po.supplier, company)
+	company_cost_center = frappe.get_value("Company", company, "cost_center")
+	for item in pi.items:
+		item.cost_center = company_cost_center
+	pi.run_method("set_missing_values")
+	pi.run_method("calculate_taxes_and_totals")
+
+
+def build_purchase_receipt_for_company(po_name, company, po_item_names):
+	po = frappe.get_doc("Purchase Order", po_name)
+	pr = make_purchase_receipt(po_name, args={"filtered_children": po_item_names})
+	apply_requesting_company_to_purchase_receipt(pr, po, company)
+	return pr
+
+
+def build_purchase_invoice_for_company(po_name, company, po_item_names):
+	po = frappe.get_doc("Purchase Order", po_name)
+	pi = make_purchase_invoice(po_name, args={"filtered_children": po_item_names})
+	apply_requesting_company_to_purchase_invoice(pi, po, company)
+	return pi
 
 
 class InventoryToolsPurchaseOrder(PurchaseOrder):
@@ -82,6 +168,10 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 				validate_warehouse_company(w, self.company)
 
 	def validate(self):
+		if self.multi_company_purchase_order:
+			for item in self.items:
+				item.company = resolve_purchase_order_item_company(item)
+
 		if self.is_work_order_subcontracting_enabled() and self.is_subcontracted:
 			self.validate_subcontracting_fg_qty()
 			for row in self.subcontracting:
@@ -143,6 +233,8 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 				if item.get("item_code"):
 					args = parent_dict.copy()
 					args.update(item.as_dict())
+					# Item custom field "company" (Requesting Company) must not replace PO company.
+					args["company"] = self.company
 
 					args["doctype"] = self.doctype
 					args["name"] = self.name
@@ -236,65 +328,67 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 
 
 @frappe.whitelist()
-def make_purchase_invoices(docname: str, rows: list | str) -> None:
-	rows = json.loads(rows) if isinstance(rows, str) else rows
+def get_multi_company_po_receipt_rows(docname: str) -> list[dict]:
+	"""Rows for the multi-company Purchase Receipt dialog."""
 	doc = frappe.get_doc("Purchase Order", docname)
-	forwarding = frappe._dict()
-	for row in doc.items:
-		if row.name in rows:
-			if row.company in forwarding:
-				forwarding[row.company].append(row.name)
-			else:
-				forwarding[row.company] = [row.name]
-
-	for company, rows in forwarding.items():
-		pi = make_purchase_invoice(docname)
-		pi.company = company
-		pi.credit_to = frappe.get_value("Company", pi.company, "default_payable_account")
-		for row in pi.items:
-			if row.po_detail in rows:
-				continue
-			else:
-				pi.items.remove(row)
-		pi.save()
+	rows = []
+	for item in doc.items:
+		if flt(item.rate) == 0 or flt(item.stock_qty) <= 0:
+			continue
+		pending_qty = flt(item.qty) - flt(item.received_qty)
+		if pending_qty <= 0:
+			continue
+		rows.append(
+			{
+				"name": item.name,
+				"company": resolve_purchase_order_item_company(item),
+				"warehouse": item.warehouse,
+				"item_code": item.item_code,
+				"qty": pending_qty,
+				"material_request_item": item.material_request_item,
+			}
+		)
+	return rows
 
 
 @frappe.whitelist()
-def make_purchase_receipts(docname: str, rows: list | str) -> None:
-	rows = json.loads(rows) if isinstance(rows, str) else rows
+def make_purchase_invoices(docname: str, rows: list | str) -> list[str]:
+	selected_names = normalize_selected_row_names(rows)
 	doc = frappe.get_doc("Purchase Order", docname)
-	forwarding = frappe._dict()
-	for row in doc.items:
-		if row.name in rows:
-			if row.company in forwarding:
-				forwarding[row.company].append(row.name)
-			else:
-				forwarding[row.company] = [row.name]
+	created = []
+	for company, po_item_names in group_po_items_by_requesting_company(doc, selected_names).items():
+		pi = build_purchase_invoice_for_company(docname, company, po_item_names)
+		pi.save()
+		created.append(pi.name)
+	return created
 
-	for company, rows in forwarding.items():
-		pr = make_purchase_receipt(docname)
-		pr.company = company
-		for row in pr.items:
-			if row.purchase_order_item in rows:
-				continue
-			else:
-				pr.items.remove(row)
+
+@frappe.whitelist()
+def make_purchase_receipts(docname: str, rows: list | str) -> list[str]:
+	selected_names = normalize_selected_row_names(rows)
+	doc = frappe.get_doc("Purchase Order", docname)
+	created = []
+	for company, po_item_names in group_po_items_by_requesting_company(doc, selected_names).items():
+		pr = build_purchase_receipt_for_company(docname, company, po_item_names)
 		pr.save()
+		created.append(pr.name)
+	return created
 
 
 @frappe.whitelist()
 def make_sales_invoices(docname: str, rows: list | str) -> None:
-	rows = json.loads(rows) if isinstance(rows, str) else rows
+	selected_names = normalize_selected_row_names(rows)
 	doc = frappe.get_doc("Purchase Order", docname)
 	buying_settings = frappe.get_doc("Buying Settings", "Buying Settings")
 	forwarding = frappe._dict()
 
 	for row in doc.items:
-		if row.name in rows:
-			if row.company in forwarding:
-				forwarding[row.company].append(row.name)
+		if row.name in selected_names:
+			company = resolve_purchase_order_item_company(row)
+			if company in forwarding:
+				forwarding[company].append(row.name)
 			else:
-				forwarding[row.company] = [row.name]
+				forwarding[company] = [row.name]
 
 	for company, rows in forwarding.items():
 		si = frappe.new_doc("Sales Invoice")
@@ -327,8 +421,8 @@ def make_sales_invoices(docname: str, rows: list | str) -> None:
 			si.append("taxes", tax)
 		si.is_internal_supplier = 1
 		si.bill_date = doc.schedule_date
-		si.set_total_in_words = types.MethodType(_bypass, si)
-		si.set_payment_schedule = types.MethodType(_bypass, si)
+		si.set_total_in_words = types.MethodType(skip_bound_method, si)
+		si.set_payment_schedule = types.MethodType(skip_bound_method, si)
 		si.title = f"Transfer {doc.supplier} to {si.customer}"
 		si.save()
 
@@ -353,7 +447,7 @@ def make_sales_invoices(docname: str, rows: list | str) -> None:
 @frappe.whitelist()
 def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=True):
 	"""
-	HASH: d47f3cc1014db0f395aab21c6632458e85cb27ff
+	HASH: 41effcf7543095575cec7ff7b66ee06113882253
 	REPO: https://github.com/frappe/erpnext/
 	PATH: erpnext/stock/get_item_details.py
 	METHOD: get_item_details
