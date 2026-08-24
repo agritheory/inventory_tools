@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Warehouse Location Optimization
 
 <div class="byline">
-  AgriTheory 2026-08-23
+  Tyler Matteson 2026-08-23
 </div>
 
 

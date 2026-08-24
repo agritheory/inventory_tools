@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Inventory Tools Documentation
 
 <div class="byline">
-  AgriTheory and Tyler Matteson 2026-08-23
+  Tyler Matteson 2026-08-24
 </div>
 
 

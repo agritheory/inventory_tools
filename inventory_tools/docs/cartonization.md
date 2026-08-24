@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Cartonization Configuration & Validation Guide
 
 <div class="byline">
-  AgriTheory 2026-05-07
+  Tyler Matteson and Francisco Roldan 2026-05-08
 </div>
 
 

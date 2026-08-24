@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Alternative Workstation Functionality
 
 <div class="byline">
-  Rohan Bansal, coleandreoli, IshwaryaM1030, Tyler Matteson, and Francisco Roldán 2026-02-22
+  Tyler Matteson 2026-05-07
 </div>
 
 

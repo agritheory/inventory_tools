@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # UOM Category Curation
 
 <div class="byline">
-  AgriTheory 2026-05-07
+  Tyler Matteson 2026-08-14
 </div>
 
 ERPNext’s bundled setup fixtures contribute **239** packaged **UOM** masters plus **235** **UOM Conversion Factor** rows spread across **17** categories and certainly not all of them apply in all business contexts. Inventory Tools adds an **overview** panel and **UOM curation** actions on the **UOM Category** DocType to allow you to bulk enable or disable UOMs within that category.
