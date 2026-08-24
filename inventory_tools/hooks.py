@@ -140,6 +140,7 @@ override_doctype_class = {
 	"Work Order": "inventory_tools.inventory_tools.overrides.work_order.InventoryToolsWorkOrder",
 	"Workstation": "inventory_tools.inventory_tools.overrides.workstation.InventoryToolsWorkstation",
 	"Website Item": "inventory_tools.inventory_tools.overrides.website_item.InventoryToolsWebsiteItem",
+	"UOM Category": "inventory_tools.inventory_tools.overrides.uom_category.InventoryToolsUOMCategory",
 }
 
 
