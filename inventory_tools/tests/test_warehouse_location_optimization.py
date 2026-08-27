@@ -168,7 +168,87 @@ def test_heat_rank_assigns_distinct_slots_to_top_items():
 	assert with_slots[0]["heat"] >= with_slots[1]["heat"]
 
 
+@pytest.mark.order(79)
+def test_heat_rank_advances_cursor_past_skipped_no_fit_candidates(monkeypatch):
+	"""After skipping no_fit slots, the next item starts after the assigned warehouse index."""
+	from inventory_tools.warehouse_location_optimization import suggest_warehouse_by_heat_rank
+
+	candidates = [
+		{"name": "Fruit Storage 1 - CFC"},
+		{"name": "Fruit Storage 2 - CFC"},
+		{"name": "Fruit Storage 3 - CFC"},
+		{"name": "Fruit Storage 4 - CFC"},
+	]
+	context = {"ordered_candidates": candidates, "pickup_x": 0.0, "pickup_y": 0.0}
+
+	def mock_fits(item_code, warehouse):
+		if warehouse in {"Fruit Storage 1 - CFC", "Fruit Storage 2 - CFC"}:
+			return "no_fit"
+		return "fits"
+
+	monkeypatch.setattr(
+		"inventory_tools.warehouse_location_optimization.item_fits_warehouse",
+		mock_fits,
+	)
+	monkeypatch.setattr(
+		"inventory_tools.warehouse_location_optimization.location_score",
+		lambda item_code, warehouse, context: 1.0,
+	)
+
+	first_wh, _, _, cursor = suggest_warehouse_by_heat_rank("Banana", candidates, context, 0)
+	assert first_wh == "Fruit Storage 3 - CFC"
+	assert cursor == 3
+
+	second_wh, _, _, next_cursor = suggest_warehouse_by_heat_rank(
+		"Coconut", candidates, context, cursor
+	)
+	assert second_wh == "Fruit Storage 4 - CFC"
+	assert next_cursor == 4
+
+
 @pytest.mark.order(80)
+def test_item_fits_warehouse_normalizes_item_and_warehouse_length_uom(monkeypatch):
+	"""Exterior and interior dimensions in different length UOMs compare in meters."""
+	from inventory_tools.warehouse_location_optimization import item_fits_warehouse
+
+	length_uom = "Foot" if frappe.db.exists("UOM", "Foot") else "Meter"
+	if length_uom == "Meter":
+		item_length = 0.9
+	else:
+		item_length = 3
+
+	def mock_item_dim(item_code, dimension_type, line_uom=None):
+		return frappe._dict(
+			item_length=item_length,
+			item_width=item_length,
+			item_height=1,
+			item_volume=item_length**3,
+			uom=length_uom,
+			item_uom="Nos",
+		)
+
+	def mock_wh_dim(reference_doctype, reference_name, dimension_type):
+		return frappe._dict(
+			item_length=1.5,
+			item_width=1.5,
+			item_height=1,
+			item_volume=2.25,
+			uom="Meter",
+		)
+
+	monkeypatch.setattr(
+		"inventory_tools.warehouse_location_optimization.resolve_item_physical_dimension",
+		mock_item_dim,
+	)
+	monkeypatch.setattr(
+		"inventory_tools.warehouse_location_optimization.get_physical_dimension",
+		mock_wh_dim,
+	)
+
+	assert item_fits_warehouse("Banana", "Fruit Storage 1 - CFC") == "fits"
+
+
+@pytest.mark.order(81)
 def test_slot_capacity_is_physical_hold_not_qty_moved():
 	"""When an item fits, Slot Capacity is how many units the bin holds — not Qty Moved."""
 	result = run_warehouse_location_optimization(

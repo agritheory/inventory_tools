@@ -13,6 +13,7 @@ from frappe.utils import flt, getdate
 
 from inventory_tools.cartonization import (
 	get_physical_dimension,
+	interior_physical_dimension_to_meter_normalized,
 	resolve_item_physical_dimension,
 	validate_2d_floor,
 	validate_3d_volume,
@@ -195,12 +196,15 @@ def slot_dimension_payloads(item_code: str, warehouse: str):
 	if not item_dim or not wh_dim:
 		return None
 
-	item_length = flt(item_dim.get("item_length"))
-	item_width = flt(item_dim.get("item_width"))
-	item_height = flt(item_dim.get("item_height"))
-	wh_length = flt(wh_dim.get("item_length"))
-	wh_width = flt(wh_dim.get("item_width"))
-	wh_height = flt(wh_dim.get("item_height"))
+	item_normalized = interior_physical_dimension_to_meter_normalized(frappe._dict(item_dim))
+	wh_normalized = interior_physical_dimension_to_meter_normalized(frappe._dict(wh_dim))
+
+	item_length = flt(item_normalized.get("item_length"))
+	item_width = flt(item_normalized.get("item_width"))
+	item_height = flt(item_normalized.get("item_height"))
+	wh_length = flt(wh_normalized.get("item_length"))
+	wh_width = flt(wh_normalized.get("item_width"))
+	wh_height = flt(wh_normalized.get("item_height"))
 
 	if not all([item_length, item_width, wh_length, wh_width]):
 		return None
@@ -209,7 +213,7 @@ def slot_dimension_payloads(item_code: str, warehouse: str):
 		"item_length": item_length,
 		"item_width": item_width,
 		"item_height": item_height or 0,
-		"item_volume": flt(item_dim.get("item_volume"))
+		"item_volume": flt(item_normalized.get("item_volume"))
 		or (item_length * item_width * (item_height or 0)),
 		"qty": 1,
 	}
@@ -217,7 +221,8 @@ def slot_dimension_payloads(item_code: str, warehouse: str):
 		"item_length": wh_length,
 		"item_width": wh_width,
 		"item_height": wh_height or 0,
-		"item_volume": flt(wh_dim.get("item_volume")) or (wh_length * wh_width * (wh_height or 0)),
+		"item_volume": flt(wh_normalized.get("item_volume"))
+		or (wh_length * wh_width * (wh_height or 0)),
 	}
 	return item_dim, item_payload, container_payload, stock_uom
 
@@ -355,29 +360,6 @@ def location_score(item_code: str, warehouse: dict, context: dict) -> float:
 	return score
 
 
-def suggest_warehouse(
-	item_code: str,
-	candidates: list[dict],
-	context: dict,
-) -> tuple[str | None, str, float | None]:
-	best_warehouse = None
-	best_fit = "no_fit"
-	best_score = None
-
-	for candidate in candidates:
-		fit_status = item_fits_warehouse(item_code, candidate["name"])
-		if fit_status == "no_fit":
-			continue
-
-		score = location_score(item_code, candidate, context)
-		if best_score is None or score < best_score:
-			best_warehouse = candidate["name"]
-			best_fit = fit_status
-			best_score = score
-
-	return best_warehouse, best_fit, best_score
-
-
 def suggest_warehouse_by_heat_rank(
 	item_code: str,
 	candidates: list[dict],
@@ -397,7 +379,7 @@ def suggest_warehouse_by_heat_rank(
 			continue
 
 		score = location_score(item_code, candidate, context)
-		return candidate["name"], fit_status, score, slot_cursor + 1
+		return candidate["name"], fit_status, score, index + 1
 
 	return None, "no_fit", None, slot_cursor
 
