@@ -31,6 +31,8 @@
 		"allow_alternative_workstations",
 		"uoms_section",
 		"enforce_uoms",
+		"outbound_shipping_section",
+		"enable_sales_order_outbound_shipping",
 		"quarantine_quality_control_section",
 		"enable_quarantine_workflow",
 		"default_quarantine_warehouse",
@@ -215,6 +217,18 @@
 			"fieldtype": "Select",
 			"label": "Default Route Optimization Strategy",
 			"options": "Use Source Document Order\nFIFO\nLIFO\nDeplete maximum number of Bins\nDeplete minimum number of Bins"
+		},
+		{
+			"fieldname": "outbound_shipping_section",
+			"fieldtype": "Section Break",
+			"label": "Outbound Shipping"
+		},
+		{
+			"default": "0",
+			"description": "When enabled, adds Create mappings from Sales Order and staging Stock Entry to Packing Slip and Shipment, and from pack documents to Delivery Note. Existing Create buttons are not removed.",
+			"fieldname": "enable_sales_order_outbound_shipping",
+			"fieldtype": "Check",
+			"label": "Enable Sales Order Outbound Shipping"
 		},
 		{
 			"fieldname": "quarantine_quality_control_section",

@@ -20,6 +20,7 @@ app_include_css = [
 app_include_js = [
 	"inventory_tools.bundle.js",
 	"/assets/inventory_tools/dist/js/inventory_tools.js",
+	"/assets/inventory_tools/js/custom/outbound_shipping_utils.js",
 ]
 
 # include js, css files in header of web template
@@ -46,10 +47,16 @@ doctype_js = {
 	"Job Card": "public/js/custom/job_card_custom.js",
 	"Operation": "public/js/custom/operation_custom.js",
 	"Pick List": "public/js/custom/pick_list_custom.js",
+	"Packing Slip": "public/js/custom/packing_slip_custom.js",
 	"Purchase Invoice": "public/js/custom/purchase_invoice_custom.js",
 	"Purchase Order": "public/js/custom/purchase_order_custom.js",
 	"Quality Inspection": "public/js/custom/quality_inspection_custom.js",
-	"Stock Entry": "public/js/custom/stock_entry_custom.js",
+	"Sales Order": "public/js/custom/sales_order_custom.js",
+	"Shipment": "public/js/custom/shipment_custom.js",
+	"Stock Entry": [
+		"public/js/custom/stock_entry_custom.js",
+		"public/js/custom/stock_entry_outbound_shipping.js",
+	],
 	"UOM Category": "public/js/custom/uom_category_custom.js",
 	"Work Order": "public/js/custom/work_order_custom.js",
 	"Workstation": "public/js/custom/workstation_custom.js",

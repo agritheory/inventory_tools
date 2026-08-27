@@ -34,6 +34,7 @@ class InventoryToolsSettings(Document):
 		default_quarantine_warehouse: DF.Link | None
 		enable_cartonization: DF.Check
 		enable_quarantine_workflow: DF.Check
+		enable_sales_order_outbound_shipping: DF.Check
 		enable_work_order_subcontracting: DF.Check
 		enforce_uoms: DF.Check
 		fitted_policy: DF.Literal["Ignore", "Warn", "Error"]
