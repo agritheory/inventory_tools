@@ -193,13 +193,33 @@ def create_suppliers(settings):
 
 
 def create_customers(settings):
-	for customer_name in CUSTOMERS:
+	for index, customer_name in enumerate(CUSTOMERS):
 		customer = frappe.new_doc("Customer")
 		customer.customer_name = customer_name
 		customer.customer_group = "Commercial"
 		customer.customer_type = "Company"
 		customer.territory = "United States"
 		customer.save()
+		create_customer_address(customer_name, index)
+
+
+def create_customer_address(customer_name, index):
+	address = frappe.new_doc("Address")
+	address.address_title = customer_name
+	address.address_type = "Shipping"
+	if customer_name == "Whole Harvest Grocery Group":
+		address.address_line1 = "4400 Harvest Way"
+		address.pincode = "02150"
+	else:
+		address.address_line1 = f"{100 + index} Harbor Street"
+		address.pincode = "02150"
+	address.city = "Chelsea"
+	address.state = "MA"
+	address.country = "United States"
+	address.is_primary_address = 1
+	address.is_shipping_address = 1
+	address.append("links", {"link_doctype": "Customer", "link_name": customer_name})
+	address.save()
 
 
 def setup_manufacturing_settings(settings):
@@ -438,6 +458,20 @@ def create_price_lists(settings):
 		pr.append("item_groups", {"item_group": "Baked Goods"})
 		pr.save()
 
+	if not frappe.db.exists("Pricing Rule", {"title": "Fruit Selling"}):
+		pr = frappe.new_doc("Pricing Rule")
+		pr.title = "Fruit Selling"
+		pr.selling = 1
+		pr.apply_on = "Item Group"
+		pr.company = "Chelsea Fruit Co"
+		pr.margin_type = "Percentage"
+		pr.margin_rate_or_amount = 60.0
+		pr.valid_from = settings.day
+		pr.for_price_list = "Standard Selling"
+		pr.currency = "USD"
+		pr.append("item_groups", {"item_group": "Ingredients"})
+		pr.save()
+
 
 def create_items(settings):
 	for item in ITEMS:
@@ -515,6 +549,16 @@ def create_items(settings):
 				ip.uom = i.stock_uom
 				ip.price_list = "Bakery Buying"
 				ip.buying = 1
+				ip.valid_from = "2018-1-1"
+				ip.price_list_rate = item.get("item_price")
+				ip.save()
+
+			if i.is_sales_item and i.item_group == "Ingredients":
+				ip = frappe.new_doc("Item Price")
+				ip.item_code = i.item_code
+				ip.uom = i.stock_uom
+				ip.price_list = "Standard Selling"
+				ip.selling = 1
 				ip.valid_from = "2018-1-1"
 				ip.price_list_rate = item.get("item_price")
 				ip.save()
@@ -1333,6 +1377,57 @@ def create_stock_entries():
 				"t_warehouse": "Storeroom - APC",
 				"qty": qty,
 				"basic_rate": _get_item_buying_rate(item_code),
+			},
+		)
+	se.save()
+	se.submit()
+
+	se = frappe.new_doc("Stock Entry")
+	se.company = "Ambrosia Pie Company"
+	se.posting_date = getdate().replace(month=1, day=1)
+	se.set_posting_time = 1
+	se.stock_entry_type = "Material Receipt"
+	for item_code, qty in (
+		("Ambrosia Pie", 100),
+		("Double Plum Pie", 50),
+		("Gooseberry Pie", 20),
+		("Kaduka Key Lime Pie", 20),
+		("Pocketful of Bay", 20),
+		("Tower of Bay-bel", 30),
+	):
+		se.append(
+			"items",
+			{
+				"item_code": item_code,
+				"t_warehouse": "Refrigerated Display - APC",
+				"qty": qty,
+				"basic_rate": _get_item_buying_rate(item_code),
+				"expense_account": "1910 - Temporary Opening - APC",
+			},
+		)
+	se.save()
+	se.submit()
+
+	se = frappe.new_doc("Stock Entry")
+	se.company = "Ambrosia Pie Company"
+	se.posting_date = getdate().replace(month=1, day=1)
+	se.set_posting_time = 1
+	se.stock_entry_type = "Material Receipt"
+	for item_code, qty in (
+		("Flour", 50),
+		("Butter", 30),
+		("Salt", 5),
+		("Parchment Paper", 50),
+		("Pie Tin", 50),
+	):
+		se.append(
+			"items",
+			{
+				"item_code": item_code,
+				"t_warehouse": "Credible Contract Baking - APC",
+				"qty": qty,
+				"basic_rate": _get_item_buying_rate(item_code),
+				"expense_account": "1910 - Temporary Opening - APC",
 			},
 		)
 	se.save()

@@ -8,6 +8,7 @@ from __future__ import annotations
 import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
+from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from frappe.utils import flt, getdate, nowtime, today
 
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
@@ -46,6 +47,7 @@ def save_draft_delivery_note_from_sales_order(
 		frappe.throw(_("Sales Order is closed or completed"))
 
 	dn = make_delivery_note(sales_order_name)
+	apply_customer_delivery_address(dn)
 	dn.save()
 	return dn
 
@@ -86,6 +88,7 @@ def make_delivery_note_from_stock_entry(stock_entry_name: str):
 
 	so_name = next(iter(sales_orders))
 	dn = make_delivery_note(so_name)
+	apply_customer_delivery_address(dn)
 	for item in dn.items:
 		item.warehouse = se.to_warehouse
 	dn.save()
@@ -162,7 +165,24 @@ def submit_delivery_note_from_shipment_whitelisted(shipment_name: str):
 	return submit_delivery_note_from_shipment(shipment_name)
 
 
+def apply_customer_delivery_address(dn) -> None:
+	address_name = (
+		dn.shipping_address_name or dn.customer_address or get_default_address("Customer", dn.customer)
+	)
+	if not address_name:
+		return
+	if not dn.shipping_address_name:
+		dn.shipping_address_name = address_name
+	if not dn.customer_address:
+		dn.customer_address = address_name
+	if not dn.shipping_address:
+		dn.shipping_address = get_address_display(address_name)
+	if not dn.address_display:
+		dn.address_display = dn.shipping_address
+
+
 def get_draft_delivery_note_for_pack(pack_doc):
+
 	dn_name = None
 	if pack_doc.doctype == "Packing Slip":
 		dn_name = pack_doc.delivery_note
@@ -255,12 +275,16 @@ def make_shipment_from_draft_delivery_note(delivery_note_name: str, target_doc=N
 					delivery_contact_display += "<br>" + contact.mobile_no
 			target.delivery_contact = delivery_contact_display
 
-		if source.shipping_address_name:
-			target.delivery_address_name = source.shipping_address_name
-			target.delivery_address = source.shipping_address
-		elif source.customer_address:
-			target.delivery_address_name = source.customer_address
-			target.delivery_address = source.address_display
+		address_name = (
+			source.shipping_address_name
+			or source.customer_address
+			or get_default_address("Customer", source.customer)
+		)
+		if address_name:
+			target.delivery_address_name = address_name
+			target.delivery_address = (
+				source.shipping_address or source.address_display or get_address_display(address_name)
+			)
 
 		target.pickup_date = target.pickup_date or getdate(today())
 		target.pickup_from = target.pickup_from or nowtime()
