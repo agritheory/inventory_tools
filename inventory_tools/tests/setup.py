@@ -1849,15 +1849,13 @@ def create_southern_fruit_purchase_orders(
 		settings.save()
 
 	frappe.db.commit()
-	result = {
+	return {
 		"supplier": supplier,
 		"company": company,
 		"selected_row_count": len(selected_rows),
 		"purchase_orders": purchase_orders,
 		"errors": errors,
 	}
-	print_demo_summary(result)
-	return result
 
 
 def install_warehouse_location_optimization_demo(
@@ -1899,6 +1897,7 @@ def install_warehouse_location_optimization_demo(
 			enable_quarantine=enable_quarantine,
 			force=force,
 		)
+		print_demo_summary(summary["southern_fruit_pos"])
 
 	print(
 		"\nDemo ready.\n"

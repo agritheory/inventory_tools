@@ -256,7 +256,7 @@ def test_multi_company_receipt_apply_putaway_rule_setting():
 
 	item_code = "Coconut"
 	slot_warehouse = "Fruit Storage 55 - CFC"
-	mr_warehouse = "Stores - CFC"
+	mr_warehouse = "Receiving - CFC"
 	stock_uom = frappe.db.get_value("Item", item_code, "stock_uom")
 
 	rule = frappe.new_doc("Putaway Rule")
