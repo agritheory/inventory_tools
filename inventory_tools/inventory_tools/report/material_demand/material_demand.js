@@ -41,11 +41,39 @@ frappe.query_reports['Material Demand'] = {
 		})
 	},
 	onload: reportview => {
+		show_aggregation_banner(reportview)
 		manage_buttons(reportview)
 	},
 	refresh: reportview => {
+		show_aggregation_banner(reportview)
 		manage_buttons(reportview)
 	},
+}
+
+function aggregation_settings() {
+	const all = frappe.boot.inventory_tools_settings || {}
+	for (const company of Object.keys(all)) {
+		const settings = all[company]
+		if (settings && settings.purchase_order_aggregation_company) {
+			return settings
+		}
+	}
+	return null
+}
+
+function show_aggregation_banner(reportview) {
+	const settings = aggregation_settings()
+	let sub_heading = $(reportview.$page.find('.sub-heading')[0])
+	sub_heading.find('.material-demand-aggregation-banner').remove()
+	if (!settings) {
+		return
+	}
+	sub_heading.removeClass('hide')
+	let message = __('Purchase Orders will be created for {0}.', [settings.purchase_order_aggregation_company])
+	if (settings.aggregated_purchasing_warehouse) {
+		message += ' ' + __('Items will be received into {0}.', [settings.aggregated_purchasing_warehouse])
+	}
+	sub_heading.append(`<span class="material-demand-aggregation-banner">${message}</span>`)
 }
 
 function manage_buttons(reportview) {
@@ -78,39 +106,91 @@ function manage_buttons(reportview) {
 	$(".btn-default:contains('Set Chart')").addClass('hidden')
 }
 
-async function create(type) {
-	let values = frappe.query_report.get_filter_values()
-	let company = undefined
-	let email_template = undefined
-	if (type != 'po') {
-		values = await select_company_and_email_template(values.company)
-		company = values['company']
-		email_template = values['email_template']
-	} else {
-		if (!values.company) {
-			company = await select_company()
-		} else {
-			company = values.company
-		}
-	}
-
+function selected_report_rows() {
 	let selected_rows = frappe.query_report.datatable.rowmanager.getCheckedRows()
-	let selected_items = frappe.query_report.datatable.datamanager.data.filter((row, index) => {
+	return frappe.query_report.datatable.datamanager.data.filter((row, index) => {
 		return selected_rows.includes(String(index)) ? row : false
 	})
-	if (!selected_items.length) {
-		frappe.show_alert({ message: 'Please select one or more rows.', seconds: 5, indicator: 'red' })
-	} else {
-		await frappe
-			.xcall('inventory_tools.inventory_tools.report.material_demand.material_demand.create', {
-				company: company,
-				email_template: email_template || '',
-				filters: values,
-				creation_type: type,
-				rows: selected_items,
-			})
-			.then(r => {})
+}
+
+async function select_companies(filter_company, selected_items, include_email_template) {
+	const mr_names = [...new Set((selected_items || []).map(row => row.material_request).filter(Boolean))]
+	const company_by_mr = {}
+	if (mr_names.length) {
+		const mrs = await frappe.db.get_list('Material Request', {
+			filters: { name: ['in', mr_names] },
+			fields: ['name', 'company'],
+			limit: mr_names.length,
+		})
+		for (const mr of mrs || []) {
+			company_by_mr[mr.name] = mr.company
+		}
 	}
+	for (const row of selected_items || []) {
+		if (row.material_request && company_by_mr[row.material_request]) {
+			row.company = company_by_mr[row.material_request]
+		}
+	}
+	const available = [...new Set((selected_items || []).map(row => row.company).filter(Boolean))]
+	const defaults = filter_company ? [filter_company] : available
+	const settings = aggregation_settings()
+
+	return new Promise(resolve => {
+		let fields = [
+			{
+				fieldtype: 'MultiSelectList',
+				fieldname: 'companies',
+				label: __('Companies'),
+				reqd: 1,
+				get_data: function (txt) {
+					return available
+						.filter(company => !txt || company.toLowerCase().includes(String(txt).toLowerCase()))
+						.map(company => ({ value: company, description: '' }))
+				},
+			},
+		]
+		if (settings) {
+			let note = __('Purchase Orders will be created for {0}.', [settings.purchase_order_aggregation_company])
+			if (settings.aggregated_purchasing_warehouse) {
+				note += ' ' + __('Items will be received into {0}.', [settings.aggregated_purchasing_warehouse])
+			}
+			fields.unshift({
+				fieldtype: 'HTML',
+				fieldname: 'aggregation_note',
+				options: `<p class="text-muted">${note}</p>`,
+			})
+		}
+		if (include_email_template) {
+			fields.push({
+				fieldtype: 'Link',
+				fieldname: 'email_template',
+				label: 'Email Template',
+				options: 'Email Template',
+				reqd: 1,
+			})
+		}
+		let dialog = new frappe.ui.Dialog({
+			title: include_email_template ? __('Select Companies and Email Template') : __('Select Companies'),
+			fields: fields,
+			primary_action: () => {
+				let values = dialog.get_values()
+				if (!values.companies || !values.companies.length) {
+					frappe.msgprint(__('Please select one or more companies.'))
+					return
+				}
+				dialog.hide()
+				return resolve({
+					companies: values.companies,
+					email_template: values.email_template,
+					company: values.companies[0],
+				})
+			},
+			primary_action_label: __('Create'),
+		})
+		dialog.show()
+		dialog.set_value('companies', defaults)
+		dialog.get_close_btn().on('click', () => resolve(null))
+	})
 }
 
 function update_selection(row) {
@@ -184,61 +264,3 @@ async function select_all_supplier_items(row, toggle) {
 	})
 }
 /* jscpd:ignore-end */
-
-async function select_company() {
-	return new Promise(resolve => {
-		let dialog = new frappe.ui.Dialog({
-			title: __('Select a Company'),
-			fields: [
-				{
-					fieldtype: 'Link',
-					fieldname: 'company',
-					label: 'Company',
-					options: 'Company',
-					reqd: 1,
-				},
-			],
-			primary_action: () => {
-				let values = dialog.get_values()
-				dialog.hide()
-				return resolve(values.company)
-			},
-			primary_action_label: __('Select'),
-		})
-		dialog.show()
-		dialog.get_close_btn()
-	})
-}
-
-async function select_company_and_email_template(company) {
-	return new Promise(resolve => {
-		let dialog = new frappe.ui.Dialog({
-			title: __('Select Company and Email Template'),
-			fields: [
-				{
-					fieldtype: 'Link',
-					fieldname: 'company',
-					label: 'Company',
-					options: 'Company',
-					reqd: 1,
-					default: company,
-				},
-				{
-					fieldtype: 'Link',
-					fieldname: 'email_template',
-					label: 'Email Template',
-					options: 'Email Template',
-					reqd: 1,
-				},
-			],
-			primary_action: () => {
-				let values = dialog.get_values()
-				dialog.hide()
-				return resolve(values)
-			},
-			primary_action_label: __('Select'),
-		})
-		dialog.show()
-		dialog.get_close_btn()
-	})
-}
