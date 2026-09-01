@@ -1,6 +1,6 @@
 [project]
 name = "inventory_tools"
-version = "15.11.0"
+version = "15.15.0"
 description = "Inventory Tools for ERPNext"
 authors = [
     { name = "AgriTheory", email = "support@agritheory.dev"}

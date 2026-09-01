@@ -24,6 +24,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 		"""
 
 		ms = frappe.get_doc("Manufacturing Settings")
+		self.set_onload("allow_editing_items", ms.allow_editing_of_items_and_quantities_in_work_order)
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
 		self.set_onload("overproduction_percentage", get_allowance_percentage(self.company, self.bom_no))
@@ -113,7 +114,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 
 	def update_work_order_qty(self):
 		"""
-		HASH: 1ffd814f928a0805877b89dc76e0dd4c7eb19148
+		HASH: 4dd9f0b25545a034ae3cc2012dc5a1049449c5b7
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: update_work_order_qty
@@ -159,7 +160,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 
 	def update_operation_status(self):
 		"""
-		HASH: 1693e3ef3fdd03d51454791915c0601d3a7a13e6
+		HASH: 4dd9f0b25545a034ae3cc2012dc5a1049449c5b7
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: update_operation_status
@@ -185,7 +186,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 
 	def validate_qty(self):
 		"""
-		HASH: 46a2b7a07e5326ad5fde89d030460a5e9f2b67b0
+		HASH: 4dd9f0b25545a034ae3cc2012dc5a1049449c5b7
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: validate_qty

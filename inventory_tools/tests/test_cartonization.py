@@ -8,16 +8,14 @@ import pytest
 
 from inventory_tools.cartonization import (
 	apply_policy,
+	convert_stock_qty_to_physical_dimension_units,
+	resolve_item_physical_dimension,
 	run_cartonization,
 	validate_2d_floor,
 	validate_3d_fitted,
 	validate_3d_volume,
 	validate_weight,
 )
-
-# ---------------------------------------------------------------------------
-# Shared test data
-# ---------------------------------------------------------------------------
 
 # Fruit Storage 1 - CFC: 1.5m × 2.5m floor, 1.0m height, 5.0 kg max weight
 CONTAINER = {
@@ -52,22 +50,30 @@ def make_doc(
 	items_list, company="Chelsea Fruit Co", doctype="Stock Entry", warehouse="Fruit Storage 1 - CFC"
 ):
 	"""Build a minimal synthetic document object for run_cartonization."""
+	items = []
+
+	for item in items_list:
+		row = frappe._dict(
+			{
+				"item_code": item["item_code"],
+				"qty": item["qty"],
+				"warehouse": None,
+				"s_warehouse": None,
+				"t_warehouse": warehouse,
+			}
+		)
+
+		for key in ("uom", "stock_uom", "conversion_factor", "transfer_qty"):
+			if key in item:
+				row[key] = item[key]
+
+		items.append(row)
+
 	return frappe._dict(
 		{
 			"company": company,
 			"doctype": doctype,
-			"items": [
-				frappe._dict(
-					{
-						"item_code": item["item_code"],
-						"qty": item["qty"],
-						"warehouse": None,
-						"s_warehouse": None,
-						"t_warehouse": warehouse,
-					}
-				)
-				for item in items_list
-			],
+			"items": items,
 		}
 	)
 
@@ -97,11 +103,6 @@ def disable_cfc_cartonization():
 	settings.save()
 
 
-# ---------------------------------------------------------------------------
-# Unit tests – validate_2d_floor
-# ---------------------------------------------------------------------------
-
-
 @pytest.mark.order(75)
 def test_validate_2d_floor_fits():
 	items = make_items(BILBERRY, qty=3)
@@ -123,11 +124,6 @@ def test_validate_2d_floor_fails():
 	assert result["utilization"] > 1.0
 
 
-# ---------------------------------------------------------------------------
-# Unit tests – validate_3d_volume
-# ---------------------------------------------------------------------------
-
-
 @pytest.mark.order(77)
 def test_validate_3d_volume_fits():
 	items = make_items(BILBERRY, qty=8)
@@ -142,11 +138,6 @@ def test_validate_3d_volume_fails():
 	result = validate_3d_volume(items, CONTAINER)
 	assert result["fits"] is False
 	assert result["used_volume"] > result["container_volume"]
-
-
-# ---------------------------------------------------------------------------
-# Unit tests – validate_3d_fitted
-# ---------------------------------------------------------------------------
 
 
 @pytest.mark.order(79)
@@ -181,11 +172,6 @@ def test_validate_3d_fitted_no_items():
 	assert result["status"] == "NO_ITEMS"
 
 
-# ---------------------------------------------------------------------------
-# Unit tests – validate_weight
-# ---------------------------------------------------------------------------
-
-
 @pytest.mark.order(82)
 def test_validate_weight_fits():
 	items = make_items(BILBERRY, qty=9)
@@ -210,11 +196,6 @@ def test_validate_weight_no_max_weight():
 	items = make_items(BILBERRY, qty=1000)
 	result = validate_weight(items, container_no_weight)
 	assert result["fits"] is True
-
-
-# ---------------------------------------------------------------------------
-# Unit tests – apply_policy
-# ---------------------------------------------------------------------------
 
 
 @pytest.mark.order(85)
@@ -242,11 +223,6 @@ def test_apply_policy_warn():
 def test_apply_policy_error():
 	with pytest.raises(frappe.ValidationError):
 		apply_policy({"fits": False}, "Error", "test context")
-
-
-# ---------------------------------------------------------------------------
-# Integration tests – run_cartonization with synthetic document objects
-# ---------------------------------------------------------------------------
 
 
 @pytest.mark.order(89)
@@ -279,7 +255,7 @@ def test_run_cartonization_items_without_dimensions_skipped():
 
 	try:
 		doc = make_doc([{"item_code": "Bilberry", "qty": 100}])
-		with patch("inventory_tools.cartonization.get_item_dimensions", return_value=None):
+		with patch("inventory_tools.cartonization.resolve_item_physical_dimension", return_value=None):
 			run_cartonization(doc)
 	finally:
 		disable_cfc_cartonization()
@@ -404,6 +380,7 @@ def test_run_cartonization_3d_fitted_overflow():
 			"reference_doctype": "Item",
 			"reference_document": "Bilberry",
 			"dimension_type": "Exterior",
+			"item_uom": "Pound",
 		},
 	)
 	orig_item = {k: getattr(item_dim, k) for k in ("item_length", "item_width", "item_height")}
@@ -457,3 +434,156 @@ def test_run_cartonization_3d_fitted_overflow():
 		item_dim.update(orig_item)
 		item_dim.save()
 		disable_cfc_cartonization()
+
+
+@pytest.mark.order(100)
+def test_resolve_item_physical_dimension_exact_pound():
+	row = resolve_item_physical_dimension("Bilberry", "Exterior", "Pound")
+	assert row.item_uom == "Pound"
+
+
+@pytest.mark.order(101)
+def test_resolve_item_physical_dimension_exact_box():
+	row = resolve_item_physical_dimension("Bilberry", "Exterior", "Box")
+	assert row.item_uom == "Box"
+	assert (
+		float(row.item_length) * float(row.item_width) > BILBERRY["item_length"] * BILBERRY["item_width"]
+	)
+
+
+@pytest.mark.order(102)
+def test_resolve_item_physical_dimension_defaults_to_stock_uom_row():
+	row = resolve_item_physical_dimension("Bilberry", "Exterior", None)
+	assert row.item_uom == "Pound"
+
+
+@pytest.mark.order(103)
+def test_resolve_item_physical_dimension_returns_none_when_no_record():
+	assert resolve_item_physical_dimension("Pie Box", "Exterior") is None
+
+
+@pytest.mark.order(104)
+def test_convert_stock_to_physical_dimension_units_same_as_stock():
+	assert convert_stock_qty_to_physical_dimension_units(4.0, "Pound", "Bilberry") == 4.0
+
+
+@pytest.mark.order(105)
+def test_convert_stock_to_physical_dimension_units_boxes_from_bilberry_stock():
+	assert convert_stock_qty_to_physical_dimension_units(24.0, "Box", "Bilberry") == pytest.approx(
+		2.0
+	)
+
+
+@pytest.mark.order(106)
+def test_convert_stock_to_physical_dimension_units_handles_none_pd_uom():
+	assert convert_stock_qty_to_physical_dimension_units(8.0, None, "Bilberry") == 8.0
+
+
+@pytest.mark.order(110)
+def test_run_cartonization_explicit_pound_uom_matches_pound_physical_dimension_row():
+	configure_cfc_cartonization("2D Floor", "Error")
+
+	try:
+		doc = make_doc([{"item_code": "Bilberry", "qty": 3, "uom": "Pound", "stock_uom": "Pound"}])
+		run_cartonization(doc)
+	finally:
+		disable_cfc_cartonization()
+
+
+@pytest.mark.order(111)
+def test_run_cartonization_box_line_uses_box_exterior_physical_dimension_row():
+	configure_cfc_cartonization("2D Floor", "Error")
+
+	try:
+		doc = make_doc(
+			[
+				{
+					"item_code": "Bilberry",
+					"qty": 1,
+					"uom": "Box",
+					"stock_uom": "Pound",
+					"conversion_factor": 12,
+					"transfer_qty": 12,
+				}
+			]
+		)
+		run_cartonization(doc)
+	finally:
+		disable_cfc_cartonization()
+
+
+@pytest.mark.order(112)
+def test_run_cartonization_box_line_overflow_raises():
+	configure_cfc_cartonization("2D Floor", "Error")
+
+	try:
+		doc = make_doc(
+			[
+				{
+					"item_code": "Bilberry",
+					"qty": 5,
+					"uom": "Box",
+					"stock_uom": "Pound",
+					"conversion_factor": 12,
+					"transfer_qty": 60,
+				}
+			]
+		)
+		with pytest.raises(frappe.ValidationError) as exc_info:
+			run_cartonization(doc)
+		assert "Cartonization" in str(exc_info.value)
+	finally:
+		disable_cfc_cartonization()
+
+
+@pytest.mark.order(113)
+def test_run_cartonization_falls_back_to_box_physical_dimension_when_stock_row_missing():
+	configure_cfc_cartonization("2D Floor", "Error")
+
+	try:
+		doc = make_doc(
+			[{"item_code": "Solo Case Berry", "qty": 12, "uom": "Pound", "stock_uom": "Pound"}]
+		)
+		run_cartonization(doc)
+	finally:
+		disable_cfc_cartonization()
+
+
+@pytest.mark.order(120)
+def test_solve_cartonization_assigns_bilberry_to_chelsea_fruit_storage_warehouse_bin():
+	"""Multi-bin solver uses Interior Physical Dimensions for Chelsea Fruit Co storage bins."""
+
+	from inventory_tools.cartonization import solve_cartonization
+
+	out = solve_cartonization(
+		[
+			{
+				"item_code": "Bilberry",
+				"qty": 2,
+				"uom": "Pound",
+				"stock_uom": "Pound",
+				"name": "manual-packing-line-001",
+			}
+		],
+		container_doctypes=["Warehouse"],
+		settings={"mode": "3D Volumetric"},
+		reference_document_filters={"Warehouse": ["Fruit Storage 1 - CFC"]},
+	)
+
+	assert isinstance(out.bins, list)
+	assert len(out.bins) >= 1
+
+	first_bin = out.bins[0]
+	container = getattr(first_bin, "container", None) or first_bin.get("container")
+	assert container
+	assert container.get("doctype") == "Warehouse"
+	assert container.get("name") == "Fruit Storage 1 - CFC"
+
+	items_block = list(first_bin.get("items") or [])
+	written_row = False
+	for row in items_block:
+		payload = dict(row) if hasattr(row, "keys") else row
+		if payload.get("row_name") == "manual-packing-line-001":
+			written_row = True
+			assert payload.get("item_code") == "Bilberry"
+	assert written_row

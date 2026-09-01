@@ -19,7 +19,7 @@ from inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstat
 class InventoryToolsStockEntry(StockEntry):
 	def check_if_operations_completed(self):
 		"""
-		HASH: 32bfc2f5553661c2ba46109e6b22bdbea963a108
+		HASH: 4dd9f0b25545a034ae3cc2012dc5a1049449c5b7
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
 		METHOD: check_if_operations_completed
@@ -61,7 +61,7 @@ class InventoryToolsStockEntry(StockEntry):
 
 	def validate_finished_goods(self):
 		"""
-		HASH: 7ce97ce0c2fdc2f6308e5b9266b1db198984061b
+		HASH: 4dd9f0b25545a034ae3cc2012dc5a1049449c5b7
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
 		METHOD: validate_finished_goods
@@ -127,7 +127,7 @@ class InventoryToolsStockEntry(StockEntry):
 
 	def get_pending_raw_materials(self, backflush_based_on=None):
 		"""
-		HASH: 32bfc2f5553661c2ba46109e6b22bdbea963a108
+		HASH: 4dd9f0b25545a034ae3cc2012dc5a1049449c5b7
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
 		METHOD: get_pending_raw_materials
@@ -183,7 +183,7 @@ class InventoryToolsStockEntry(StockEntry):
 	@frappe.whitelist()
 	def get_items(self):
 		"""
-		HASH: 4dd9f0b25545a034ae3cc2012dc5a1049449c5b7
+		HASH: a5ed3a59450aae98bf3d9a59a8c7a8eddbb58f6b
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
 		METHOD: get_items

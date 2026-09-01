@@ -11,6 +11,30 @@
 		"uom": "Meter"
 	},
 	{
+		"item_length": 1.2,
+		"item_height": 0.55,
+		"item_width": 1.1,
+		"item_weight": 6.6,
+		"dimension_type": "Exterior",
+		"orientation": 1,
+		"reference_doctype": "Item",
+		"reference_document": "Bilberry",
+		"item_uom": "Box",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 0.25,
+		"item_height": 0.21,
+		"item_width": 0.2,
+		"item_weight": 12.0,
+		"dimension_type": "Exterior",
+		"orientation": 1,
+		"reference_doctype": "Item",
+		"reference_document": "Solo Case Berry",
+		"item_uom": "Box",
+		"uom": "Meter"
+	},
+	{
 		"item_length": 1.42,
 		"item_height": 0.51,
 		"item_width": 0.95,
@@ -1064,6 +1088,114 @@
 		"orientation": 1,
 		"reference_doctype": "Item",
 		"reference_document": "Cloudberry",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 0.3048,
+		"item_width": 0.3048,
+		"item_height": 0.1016,
+		"item_weight": 1.2,
+		"dimension_type": "Exterior",
+		"orientation": 1,
+		"reference_doctype": "Item",
+		"reference_document": "Ambrosia Pie",
+		"item_uom": "Nos",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 0.3048,
+		"item_width": 0.3048,
+		"item_height": 0.1016,
+		"item_weight": 1.2,
+		"dimension_type": "Exterior",
+		"orientation": 1,
+		"reference_doctype": "Item",
+		"reference_document": "Double Plum Pie",
+		"item_uom": "Nos",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 0.3048,
+		"item_width": 0.3048,
+		"item_height": 0.1016,
+		"item_weight": 1.2,
+		"dimension_type": "Exterior",
+		"orientation": 1,
+		"reference_doctype": "Item",
+		"reference_document": "Gooseberry Pie",
+		"item_uom": "Nos",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 0.3048,
+		"item_width": 0.3048,
+		"item_height": 0.1016,
+		"item_weight": 1.2,
+		"dimension_type": "Exterior",
+		"orientation": 1,
+		"reference_doctype": "Item",
+		"reference_document": "Kaduka Key Lime Pie",
+		"item_uom": "Nos",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 0.3048,
+		"item_width": 0.3048,
+		"item_height": 0.1016,
+		"item_weight": 1.2,
+		"dimension_type": "Exterior",
+		"orientation": 1,
+		"reference_doctype": "Item",
+		"reference_document": "Tower of Bay-bel",
+		"item_uom": "Nos",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 0.3048,
+		"item_width": 0.3048,
+		"item_height": 0.1016,
+		"item_weight": 1.2,
+		"dimension_type": "Exterior",
+		"orientation": 1,
+		"reference_doctype": "Item",
+		"reference_document": "Pocketful of Bay",
+		"item_uom": "Nos",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 0.3048,
+		"item_width": 0.3048,
+		"item_height": 0.1016,
+		"item_weight": 1.2,
+		"dimension_type": "Exterior",
+		"orientation": 1,
+		"reference_doctype": "Item",
+		"reference_document": "Bayberry Pie",
+		"item_uom": "Nos",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 0.3048,
+		"item_width": 0.3048,
+		"item_height": 0.1016,
+		"item_weight": 1.2,
+		"dimension_type": "Exterior",
+		"orientation": 1,
+		"reference_doctype": "Item",
+		"reference_document": "Bayberry Pocket",
+		"item_uom": "Nos",
+		"uom": "Meter"
+	},
+	{
+		"item_length": 0.3048,
+		"item_width": 0.3048,
+		"item_height": 0.1016,
+		"item_weight": 1.2,
+		"dimension_type": "Exterior",
+		"orientation": 1,
+		"reference_doctype": "Item",
+		"reference_document": "Bayberry Popper",
+		"item_uom": "Nos",
 		"uom": "Meter"
 	}
 ]
