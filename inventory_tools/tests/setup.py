@@ -118,6 +118,7 @@ def create_test_data():
 	create_suppliers(settings)
 	create_customers(settings)
 	create_items(settings)
+	create_chelsea_standard_selling_prices(settings)
 	create_workstations(settings)
 	create_operations()
 	create_boms(settings)
@@ -135,7 +136,7 @@ def create_test_data():
 	create_stock_entries()
 	install_demo_putaway_rules(company="Chelsea Fruit Co")
 	install_items_stockentry_transactions(company="Chelsea Fruit Co")
-	create_sales_order_2()
+	create_cfc_sales_order()
 
 
 def copy_image_fixtures():
@@ -441,6 +442,64 @@ def create_price_lists(settings):
 		pr.append("item_groups", {"item_group": "Baked Goods"})
 		pr.save()
 
+	if not frappe.db.exists("Pricing Rule", {"title": "Fruit Selling"}):
+		pr = frappe.new_doc("Pricing Rule")
+		pr.title = "Fruit Selling"
+		pr.selling = 1
+		pr.apply_on = "Item Group"
+		pr.company = "Chelsea Fruit Co"
+		pr.margin_type = "Percentage"
+		pr.margin_rate_or_amount = 60.0
+		pr.valid_from = settings.day
+		pr.for_price_list = "Standard Selling"
+		pr.currency = "USD"
+		pr.append("item_groups", {"item_group": "Ingredients"})
+		pr.save()
+
+
+def create_chelsea_standard_selling_prices(settings):
+	"""Standard Selling list rates for Ingredients, plus Chelsea Fruit Co Fruit Selling markup.
+
+	Idempotent: safe to re-run on a site that already has items. Without this, Chelsea
+	sales orders default to Standard Selling and price fruit at $0.
+	"""
+	if not frappe.db.exists("Pricing Rule", {"title": "Fruit Selling"}):
+		pr = frappe.new_doc("Pricing Rule")
+		pr.title = "Fruit Selling"
+		pr.selling = 1
+		pr.apply_on = "Item Group"
+		pr.company = "Chelsea Fruit Co"
+		pr.margin_type = "Percentage"
+		pr.margin_rate_or_amount = 60.0
+		pr.valid_from = settings.day
+		pr.for_price_list = "Standard Selling"
+		pr.currency = "USD"
+		pr.append("item_groups", {"item_group": "Ingredients"})
+		pr.save()
+
+	for item in ITEMS:
+		if item.get("item_group") != "Ingredients" or not item.get("item_price"):
+			continue
+		if not frappe.db.exists("Item", item.get("item_code")):
+			continue
+		if frappe.db.exists(
+			"Item Price",
+			{
+				"item_code": item.get("item_code"),
+				"price_list": "Standard Selling",
+				"selling": 1,
+			},
+		):
+			continue
+		ip = frappe.new_doc("Item Price")
+		ip.item_code = item.get("item_code")
+		ip.uom = item.get("uom")
+		ip.price_list = "Standard Selling"
+		ip.selling = 1
+		ip.valid_from = "2018-1-1"
+		ip.price_list_rate = item.get("item_price")
+		ip.save()
+
 
 def create_items(settings):
 	for item in ITEMS:
@@ -518,6 +577,16 @@ def create_items(settings):
 				ip.uom = i.stock_uom
 				ip.price_list = "Bakery Buying"
 				ip.buying = 1
+				ip.valid_from = "2018-1-1"
+				ip.price_list_rate = item.get("item_price")
+				ip.save()
+
+			if i.item_group == "Ingredients":
+				ip = frappe.new_doc("Item Price")
+				ip.item_code = i.item_code
+				ip.uom = i.stock_uom
+				ip.price_list = "Standard Selling"
+				ip.selling = 1
 				ip.valid_from = "2018-1-1"
 				ip.price_list_rate = item.get("item_price")
 				ip.save()
@@ -616,6 +685,10 @@ def create_warehouses(settings):
 		wh.parent_warehouse = "All Warehouses - APC"
 		wh.company = settings.company
 		wh.save()
+	if frappe.db.exists("Warehouse", "Stores - CFC"):
+		frappe.rename_doc("Warehouse", "Stores - CFC", "Receiving - CFC", force=True)
+	if frappe.db.exists("Warehouse", "Finished Goods - CFC"):
+		frappe.rename_doc("Warehouse", "Finished Goods - CFC", "Shipping - CFC", force=True)
 
 
 def create_warehouse_locations():
@@ -671,7 +744,7 @@ def create_quarantine_quality_control_data(settings):
 			"item_defaults",
 			{
 				"company": "Chelsea Fruit Co",
-				"default_warehouse": "Stores - CFC",
+				"default_warehouse": "Receiving - CFC",
 				"default_supplier": "Southern Fruit Supply",
 				"inspection_required_before_purchase": 1,
 			},
@@ -857,12 +930,29 @@ def create_sales_order(settings):
 	so.submit()
 
 
-def create_sales_order_2():
+def create_cfc_sales_order():
+	settings = frappe._dict({"day": getdate().replace(month=1, day=1)})
+
+	existing = frappe.get_all(
+		"Sales Order",
+		filters={"customer": "Whole Harvest Grocery Group", "company": "Chelsea Fruit Co"},
+		fields=["name", "docstatus", "grand_total"],
+	)
+	priced = [so for so in existing if flt(so.grand_total) > 0]
+	if priced:
+		return
+	for so in existing:
+		so_doc = frappe.get_doc("Sales Order", so.name)
+		if so_doc.docstatus == 1:
+			so_doc.cancel()
+		so_doc.delete()
+
 	so = frappe.new_doc("Sales Order")
-	so.transaction_date = getdate().replace(month=1, day=1)
+	so.transaction_date = settings.day
 	so.delivery_date = getdate().replace(month=1, day=3)
 	so.customer = "Whole Harvest Grocery Group"
 	so.company = "Chelsea Fruit Co"
+	so.selling_price_list = "Standard Selling"
 	so.append(
 		"items",
 		{
@@ -1092,7 +1182,7 @@ def create_fruit_material_request(settings):
 			"item_defaults",
 			{
 				"company": "Chelsea Fruit Co",
-				"default_warehouse": "Stores - CFC",
+				"default_warehouse": "Receiving - CFC",
 				"default_supplier": "Southern Fruit Supply",
 			},
 		)
@@ -1114,7 +1204,7 @@ def create_fruit_material_request(settings):
 				"item_code": f,
 				"qty": 100,
 				"schedule_date": mr.schedule_date,
-				"warehouse": "Stores - CFC",
+				"warehouse": "Receiving - CFC",
 				"uom": "Pound",
 			},
 		)
@@ -1132,7 +1222,7 @@ def create_quotations(settings):
 			"item_defaults",
 			{
 				"company": "Chelsea Fruit Co",
-				"default_warehouse": "Finished Goods - CFC",
+				"default_warehouse": "Shipping - CFC",
 			},
 		)
 		i.save()

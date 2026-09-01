@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Workstation Operating Cost
 
 <div class="byline">
-  Tyler Matteson 2026-05-07
+  IshwaryaM1030, Heather Kusmierz, and Tyler Matteson 2026-08-24
 </div>
 
 

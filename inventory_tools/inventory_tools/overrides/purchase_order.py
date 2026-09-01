@@ -31,12 +31,13 @@ def skip_bound_method(*args, **kwargs):
 
 def resolve_purchase_order_item_company(item):
 	"""Return the company that should receive this PO line (Material Request company)."""
-	if item.get("company"):
-		return item.company
 	if item.get("material_request"):
-		company = frappe.get_value("Material Request", item.material_request, "company")
+		company = frappe.db.get_value("Material Request", item.material_request, "company")
 		if company:
+			item.requesting_company = company
 			return company
+	if item.get("requesting_company"):
+		return item.requesting_company
 	if item.get("warehouse"):
 		return frappe.get_value("Warehouse", item.warehouse, "company")
 	return None
@@ -59,10 +60,9 @@ def group_po_items_by_requesting_company(po, selected_names):
 		if row.name not in selected_names:
 			continue
 		company = resolve_purchase_order_item_company(row)
-		if company in forwarding:
-			forwarding[company].append(row.name)
-		else:
-			forwarding[company] = [row.name]
+		if not company:
+			throw(_("Could not determine requesting company for {0} on {1}").format(row.item_code, po.name))
+		forwarding.setdefault(company, []).append(row.name)
 	return forwarding
 
 
@@ -76,13 +76,42 @@ def multi_company_receipt_applies_putaway_rule(company):
 	)
 
 
+def apply_requesting_company_fields(doc, company):
+	cost_center = get_default_cost_center(company)
+	if doc.meta.get_field("cost_center"):
+		cost_center_company = (
+			frappe.get_cached_value("Cost Center", doc.cost_center, "company") if doc.cost_center else None
+		)
+		if not doc.cost_center or (cost_center_company and cost_center_company != company):
+			doc.cost_center = cost_center
+	for row in doc.items:
+		if row.get("material_request_item"):
+			mr_warehouse = frappe.db.get_value(
+				"Material Request Item", row.material_request_item, "warehouse"
+			)
+			if mr_warehouse:
+				row.warehouse = mr_warehouse
+		if row.meta.get_field("cost_center"):
+			row_cost_center_company = (
+				frappe.get_cached_value("Cost Center", row.cost_center, "company") if row.cost_center else None
+			)
+			if not row.cost_center or (row_cost_center_company and row_cost_center_company != company):
+				row.cost_center = cost_center
+		if (
+			doc.doctype == "Purchase Invoice"
+			and row.meta.get_field("expense_account")
+			and row.expense_account
+		):
+			account_company = frappe.get_cached_value("Account", row.expense_account, "company")
+			if account_company and account_company != company:
+				row.expense_account = frappe.get_cached_value("Company", company, "default_expense_account")
+
+
 def apply_requesting_company_to_purchase_receipt(pr, po, company):
 	pr.company = company
 	if company != po.company:
 		pr.credit_to = get_party_account("Supplier", po.supplier, company)
-	company_cost_center = frappe.get_value("Company", company, "cost_center")
-	for item in pr.items:
-		item.cost_center = company_cost_center
+	apply_requesting_company_fields(pr, company)
 	if multi_company_receipt_applies_putaway_rule(company):
 		pr.apply_putaway_rule = 1
 	pr.run_method("set_missing_values")
@@ -92,9 +121,7 @@ def apply_requesting_company_to_purchase_receipt(pr, po, company):
 def apply_requesting_company_to_purchase_invoice(pi, po, company):
 	pi.company = company
 	pi.credit_to = get_party_account("Supplier", po.supplier, company)
-	company_cost_center = frappe.get_value("Company", company, "cost_center")
-	for item in pi.items:
-		item.cost_center = company_cost_center
+	apply_requesting_company_fields(pi, company)
 	pi.run_method("set_missing_values")
 	pi.run_method("calculate_taxes_and_totals")
 
@@ -170,7 +197,7 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 	def validate(self):
 		if self.multi_company_purchase_order:
 			for item in self.items:
-				item.company = resolve_purchase_order_item_company(item)
+				item.requesting_company = resolve_purchase_order_item_company(item)
 
 		if self.is_work_order_subcontracting_enabled() and self.is_subcontracted:
 			self.validate_subcontracting_fg_qty()
@@ -233,7 +260,7 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 				if item.get("item_code"):
 					args = parent_dict.copy()
 					args.update(item.as_dict())
-					# Item custom field "company" (Requesting Company) must not replace PO company.
+					# Child requesting_company must not replace PO company on item-details args.
 					args["company"] = self.company
 
 					args["doctype"] = self.doctype
@@ -341,7 +368,7 @@ def get_multi_company_po_receipt_rows(docname: str) -> list[dict]:
 		rows.append(
 			{
 				"name": item.name,
-				"company": resolve_purchase_order_item_company(item),
+				"requesting_company": resolve_purchase_order_item_company(item),
 				"warehouse": item.warehouse,
 				"item_code": item.item_code,
 				"qty": pending_qty,
@@ -379,25 +406,20 @@ def make_purchase_receipts(docname: str, rows: list | str) -> list[str]:
 def make_sales_invoices(docname: str, rows: list | str) -> None:
 	selected_names = normalize_selected_row_names(rows)
 	doc = frappe.get_doc("Purchase Order", docname)
-	buying_settings = frappe.get_doc("Buying Settings", "Buying Settings")
-	forwarding = frappe._dict()
+	settings = frappe.get_doc("Inventory Tools Settings", doc.company)
+	aggregated_warehouse = settings.aggregated_purchasing_warehouse
+	forwarding = group_po_items_by_requesting_company(doc, selected_names)
 
-	for row in doc.items:
-		if row.name in selected_names:
-			company = resolve_purchase_order_item_company(row)
-			if company in forwarding:
-				forwarding[company].append(row.name)
-			else:
-				forwarding[company] = [row.name]
-
-	for company, rows in forwarding.items():
+	for company, item_names in forwarding.items():
+		if company == doc.company:
+			continue
 		si = frappe.new_doc("Sales Invoice")
 		si.company = doc.company
 		si.customer = company
 		si.update_stock = 1
 		si.selling_price_list = frappe.get_value("Price List", {"buying": 1, "selling": 1})
 		for row in doc.items:
-			if row.name not in rows:
+			if row.name not in item_names:
 				continue
 			si.append(
 				"items",
@@ -409,7 +431,7 @@ def make_sales_invoices(docname: str, rows: list | str) -> None:
 					"uom": row.uom,
 					"rate": row.rate,
 					"purchase_order": doc.name,
-					"warehouse": buying_settings.aggregated_purchasing_warehouse,
+					"warehouse": aggregated_warehouse,
 					"cost_center": frappe.get_value("Company", si.company, "cost_center"),
 				},
 			)
@@ -430,7 +452,7 @@ def make_sales_invoices(docname: str, rows: list | str) -> None:
 		pi.update_stock = 1
 		for row in si.items:
 			row.purchase_order = doc.name
-			row.warehouse = buying_settings.aggregated_purchasing_warehouse
+			row.warehouse = aggregated_warehouse
 		pi.buying_price_list = si.selling_price_list
 		taxes_and_charges = get_default_taxes_and_charges(
 			"Purchase Taxes and Charges Template", company=pi.company

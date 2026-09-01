@@ -354,7 +354,7 @@ def test_run_cartonization_3d_fitted_overflow():
 	"""
 	End-to-end 3D Fitted test through the on_submit hook.
 
-	Story: Finished Goods - CFC is temporarily resized to 2 m × 2 m × 1.5 m.
+	Story: Receiving - CFC is temporarily resized to 2 m × 2 m × 1.5 m.
 	Bilberry is temporarily resized to a 1 m³ cube.  Four boxes tile neatly on
 	the 2×2 floor (4 fits), but a fifth cannot fit — stacking two high would
 	require 2 m which exceeds the 1.5 m ceiling.  The failing submission is
@@ -366,7 +366,7 @@ def test_run_cartonization_3d_fitted_overflow():
 		"Physical Dimension",
 		{
 			"reference_doctype": "Warehouse",
-			"reference_document": "Finished Goods - CFC",
+			"reference_document": "Receiving - CFC",
 			"dimension_type": "Interior",
 		},
 	)
@@ -400,7 +400,7 @@ def test_run_cartonization_3d_fitted_overflow():
 		se4.stock_entry_type = "Material Receipt"
 		se4.append(
 			"items",
-			{"item_code": "Bilberry", "t_warehouse": "Finished Goods - CFC", "qty": 4, "basic_rate": rate},
+			{"item_code": "Bilberry", "t_warehouse": "Receiving - CFC", "qty": 4, "basic_rate": rate},
 		)
 		se4.save()
 		se4.submit()
@@ -411,7 +411,7 @@ def test_run_cartonization_3d_fitted_overflow():
 		se5.stock_entry_type = "Material Receipt"
 		se5.append(
 			"items",
-			{"item_code": "Bilberry", "t_warehouse": "Finished Goods - CFC", "qty": 5, "basic_rate": rate},
+			{"item_code": "Bilberry", "t_warehouse": "Receiving - CFC", "qty": 5, "basic_rate": rate},
 		)
 		se5.save()
 		draft_se = se5.name

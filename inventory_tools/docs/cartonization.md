@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Cartonization Configuration & Validation Guide
 
 <div class="byline">
-  Tyler Matteson and Francisco Roldan 2026-05-08
+  IshwaryaM1030, Tyler Matteson, and Francisco Roldán 2026-08-24
 </div>
 
 

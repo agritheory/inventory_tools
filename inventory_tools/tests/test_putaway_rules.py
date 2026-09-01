@@ -290,7 +290,7 @@ def test_multi_company_receipt_apply_putaway_rule_setting():
 	po.multi_company_purchase_order = 1
 	po.schedule_date = getdate()
 	for item in po.items:
-		item.company = "Chelsea Fruit Co"
+		item.requesting_company = "Chelsea Fruit Co"
 		item.warehouse = mr_warehouse
 		item.schedule_date = getdate()
 	po.save()
@@ -317,7 +317,7 @@ def test_multi_company_receipt_apply_putaway_rule_setting():
 	po.multi_company_purchase_order = 1
 	po.schedule_date = getdate()
 	for item in po.items:
-		item.company = "Chelsea Fruit Co"
+		item.requesting_company = "Chelsea Fruit Co"
 		item.warehouse = mr_warehouse
 		item.schedule_date = getdate()
 	po.save()

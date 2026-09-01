@@ -15,9 +15,8 @@ function override_create_buttons(frm) {
 		return
 	}
 
-	let aggregated_purchasing_warehouse = undefined
-	frappe.db.get_value('Buying Settings', 'Buying Settings', 'aggregated_purchasing_warehouse').then(r => {
-		aggregated_purchasing_warehouse = r.message.aggregated_purchasing_warehouse
+	frappe.db.get_value('Inventory Tools Settings', frm.doc.company, 'aggregated_purchasing_warehouse').then(r => {
+		let aggregated_purchasing_warehouse = r.message && r.message.aggregated_purchasing_warehouse
 		if (!aggregated_purchasing_warehouse) {
 			frm.remove_custom_button('Purchase Invoice', 'Create')
 			frm.remove_custom_button('Purchase Receipt', 'Create')
@@ -56,7 +55,8 @@ async function create_pis(frm) {
 		__('Create New Purchase Invoices'),
 		__('Select Items and Locations to Invoice'),
 		'inventory_tools.inventory_tools.overrides.purchase_order.make_purchase_invoices',
-		__('Create Purchase Invoices')
+		__('Create Purchase Invoices'),
+		true
 	)
 }
 
@@ -66,7 +66,8 @@ async function create_prs(frm) {
 		__('Create New Purchase Receipts'),
 		__('Select Items and Locations to Receive'),
 		'inventory_tools.inventory_tools.overrides.purchase_order.make_purchase_receipts',
-		__('Create Purchase Receipts')
+		__('Create Purchase Receipts'),
+		true
 	)
 }
 
@@ -76,15 +77,19 @@ async function create_sis(frm) {
 		__('Create Intercompany Sale and Transfer'),
 		__('Select Items and Locations to Transfer'),
 		'inventory_tools.inventory_tools.overrides.purchase_order.make_sales_invoices',
-		__('Create Intercompany Sales Invoice')
+		__('Create Intercompany Sales Invoice'),
+		false
 	)
 }
 
-async function create_dialog(frm, title, label, method, primary_action_label) {
+async function create_dialog(frm, title, label, method, primary_action_label, include_own_company) {
 	let items_data = await frappe.xcall(
 		'inventory_tools.inventory_tools.overrides.purchase_order.get_multi_company_po_receipt_rows',
 		{ docname: frm.doc.name }
 	)
+	if (!include_own_company) {
+		items_data = items_data.filter(r => r.requesting_company != frm.doc.company)
+	}
 	return new Promise(resolve => {
 		let table_fields = {
 			fieldname: 'locations',
@@ -101,7 +106,7 @@ async function create_dialog(frm, title, label, method, primary_action_label) {
 				},
 				{
 					fieldtype: 'Data',
-					fieldname: 'company',
+					fieldname: 'requesting_company',
 					label: __('Company'),
 					read_only: 1,
 					in_list_view: 1,
@@ -153,6 +158,5 @@ async function create_dialog(frm, title, label, method, primary_action_label) {
 		})
 		dialog.show()
 		dialog.wrapper.find('.grid-buttons').hide()
-		// dialog.get_close_btn()
 	})
 }
