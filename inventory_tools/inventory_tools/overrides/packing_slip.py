@@ -44,6 +44,17 @@ STOCK_ENTRY_TO_PACKING_SLIP_ITEM_MAP = {
 
 
 class InventoryToolsPackingSlip(PackingSlip):
+	def _validate_mandatory(self):  # nosemgrep: no-underscore-prefix-function
+		if self.uses_alternative_sales_workflow_without_delivery_note():
+			previous = self.flags.ignore_mandatory
+			self.flags.ignore_mandatory = True
+			try:
+				super()._validate_mandatory()
+			finally:
+				self.flags.ignore_mandatory = previous
+			return
+		super()._validate_mandatory()
+
 	def validate(self) -> None:
 		if self.uses_alternative_sales_workflow_without_delivery_note():
 			self.validate_alternative_sales_workflow()
@@ -51,11 +62,27 @@ class InventoryToolsPackingSlip(PackingSlip):
 		super().validate()
 
 	def on_submit(self):
+		if self.uses_alternative_sales_workflow_without_delivery_note():
+			super().on_submit()
+			from inventory_tools.inventory_tools.overrides.pack_stock_reservation import (
+				maybe_reserve_stock_on_pack_submit,
+			)
+
+			maybe_reserve_stock_on_pack_submit(self, "Packing Slip")
+			if self.get("reserve_stock_on_submit"):
+				self.db_set("reserve_stock_on_submit", 0)
+			return
 		if self.delivery_note:
 			super().on_submit()
 
 	def on_cancel(self):
-		if self.delivery_note:
+		if self.uses_alternative_sales_workflow_without_delivery_note():
+			from inventory_tools.inventory_tools.overrides.pack_stock_reservation import (
+				cancel_stock_reservation_entries_from_pack,
+			)
+
+			cancel_stock_reservation_entries_from_pack("Packing Slip", self.name, notify=False)
+		if self.delivery_note or self.uses_alternative_sales_workflow_without_delivery_note():
 			super().on_cancel()
 
 	def validate_case_nos(self):
@@ -68,6 +95,22 @@ class InventoryToolsPackingSlip(PackingSlip):
 				frappe.throw(_("'To Package No.' cannot be less than 'From Package No.'"))
 			return
 		super().validate_case_nos()
+
+	def onload(self):
+		from inventory_tools.inventory_tools.overrides.pack_stock_reservation import (
+			has_pack_originated_reservation,
+			is_stock_reservation_enabled,
+			pack_lines_need_reservation,
+			uses_pack_stock_reservation,
+		)
+
+		if not is_stock_reservation_enabled() or not uses_pack_stock_reservation(self, "Packing Slip"):
+			return
+
+		if pack_lines_need_reservation(self, "Packing Slip"):
+			self.set_onload("has_unreserved_pack_stock", True)
+		if has_pack_originated_reservation("Packing Slip", self.name):
+			self.set_onload("has_pack_reserved_stock", True)
 
 	def uses_alternative_sales_workflow_without_delivery_note(self) -> bool:
 		if self.delivery_note:

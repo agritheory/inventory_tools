@@ -4,6 +4,10 @@
 frappe.ui.form.on('Packing Slip', {
 	refresh(frm) {
 		show_packing_slip_delivery_note_button(frm)
+		inventory_tools.alternative_sales_workflow.setup_pack_stock_reservation(frm, 'Packing Slip')
+	},
+	async before_submit(frm) {
+		return inventory_tools.alternative_sales_workflow.confirm_pack_stock_reservation_on_submit(frm, 'Packing Slip')
 	},
 })
 

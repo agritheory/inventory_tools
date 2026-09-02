@@ -83,8 +83,8 @@ ERPNext’s stock Shipment child table is named **Shipment Delivery Note** and w
 
 In Alternative Sales Workflow the same table becomes the **ship line list** when you create a Shipment from a Sales Order or staging Stock Entry:
 
-| Phase | What each row represents | `delivery_note` | Other fields |
-|-------|--------------------------|-----------------|--------------|
+| When | What each row represents | `delivery_note` | Other fields |
+|------|--------------------------|-----------------|--------------|
 | Draft Shipment (SO path) | One pending Sales Order line | Empty | `against_sales_order`, `so_detail`, item, qty, line **Value** |
 | After **Delivery Note** fulfillment | Same rows, now linked to the submitted DN | Set on every row | `dn_detail` stamped per line |
 
@@ -99,6 +99,53 @@ When **Enable Alternative Sales Workflow** is on, Inventory Tools:
 Use **Delivery Note** on the Shipment (or complete packing on a Packing Slip) to map and submit the DN; Inventory Tools then back-fills `delivery_note` on each row.
 
 The classic ERPNext path (Shipment from submitted Delivery Note) is unchanged: rows still point at existing DNs from the start.
+
+## Stock reservation
+
+Packing and shipping can happen **before** the Delivery Note is submitted. Until that DN goes through, ERPNext has not yet reduced on-hand stock — but the Sales Order line is already spoken for. Without reservation, another order or transfer can still claim the same units sitting in the warehouse.
+
+When **Enable Stock Reservation** is turned on in **Stock Settings**, Inventory Tools can **hold** that quantity when you submit a Packing Slip or Shipment, so it stays available for this order until you deliver or release it.
+
+You need **Reserved Stock** checked on the Sales Order line (standard ERPNext). Reservation settings appear on **Inventory Tools Settings** only when Alternative Sales Workflow and stock reservation are both enabled for the company.
+
+| Setting | Default | What it controls |
+|---------|---------|------------------|
+| **Reserve Stock on Packing Slip** | Always | Whether submitting a Packing Slip holds stock |
+| **Reserve Stock on Shipment** | Ask | Whether submitting a Shipment holds stock |
+
+Each setting is independent: **Never**, **Always**, or **Ask**.
+
+### What each option means
+
+| Option | In practice |
+|--------|-------------|
+| **Never** | Submitting the document does **not** hold stock. Use this when you only want reservation from the Sales Order or Pick List — or when the Shipment is just for quoting freight and you are not ready to commit inventory yet. |
+| **Always** | Submitting holds any quantity on the pack lines that is **not already held** elsewhere. If the Sales Order or Pick List already reserved those units, nothing extra happens. |
+| **Ask** | On submit, you are prompted **only when** something is still unreserved. You can also use **Reserve** and **Unreserve** on the submitted Packing Slip or Shipment to hold or release stock without resubmitting the document. |
+
+Stock is held on **submit**, not when you first save a draft. That way a draft Shipment built for a carrier quote does not lock inventory until you are ready.
+
+### Where reservation can come from
+
+Several steps can hold the same Sales Order line. They work together; you are not picking one “winner”:
+
+1. **Sales Order** — if **Reserved Stock** is checked on the line and your site reserves on SO submit.
+2. **Pick List** — after picking, use **Reserve** on the Pick List (required once items are picked).
+3. **Packing Slip or Shipment** — according to the settings above.
+
+If stock is already held at an earlier step, **Always** and **Ask** on the pack document will not double-book or bother you with a prompt.
+
+### Delivery Note warehouse
+
+When you create a Delivery Note from a Packing Slip or Shipment, Inventory Tools picks the warehouse where that line’s stock was **held**, when one exists. That keeps delivery aligned with what was reserved and avoids submit errors on sites that enforce reservation.
+
+### Quoting freight before you pick
+
+A common pattern: create a **draft** Shipment to get rates, accept a quote, **then** submit and optionally reserve, **then** pick and fulfill.
+
+For that workflow, leave **Reserve Stock on Shipment** at **Ask** (default) or **Never**. Use **Reserve** on the submitted Shipment after the customer accepts the quote, if you want to hold stock before the Pick List runs.
+
+**Reserve Stock on Packing Slip** defaults to **Always** because a submitted Packing Slip usually means the goods are packed and should be protected in the warehouse until delivery.
 
 ## Freight
 

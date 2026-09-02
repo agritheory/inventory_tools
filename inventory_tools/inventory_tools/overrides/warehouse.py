@@ -30,7 +30,7 @@ def update_warehouse_path(doc, method=None) -> None:
 				break
 		return parents
 
-	def _update_warehouse_path(doc):
+	def build_warehouse_path(doc):
 		parents = get_parents(doc)
 		if parents:
 			if len(parents) > 1:
@@ -41,7 +41,7 @@ def update_warehouse_path(doc, method=None) -> None:
 		else:
 			return ""
 
-	doc.warehouse_path = _update_warehouse_path(doc)
+	doc.warehouse_path = build_warehouse_path(doc)
 
 
 @frappe.whitelist()

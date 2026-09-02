@@ -423,35 +423,38 @@ def test_make_purchase_receipts_creates_one_pr_per_requesting_company():
 	new_pos = new_purchase_orders(existing_pos)
 	assert len(new_pos) == 1
 	po = new_pos[0]
-	po.submit()
+	try:
+		po.submit()
 
-	frappe.call(
-		"inventory_tools.inventory_tools.overrides.purchase_order.make_purchase_receipts",
-		docname=po.name,
-		rows=frappe.as_json([item.name for item in po.items]),
-	)
-	new_prs = [
-		frappe.get_doc("Purchase Receipt", name)
-		for name in set(frappe.get_all("Purchase Receipt", pluck="name")) - existing_prs
-	]
-	pr_companies = {pr.company for pr in new_prs}
-	assert pr_companies == {item.requesting_company for item in po.items}
-	for pr in new_prs:
-		assert pr.items
-		assert frappe.get_cached_value("Cost Center", pr.cost_center, "company") == pr.company
-		for pr_item in pr.items:
-			po_item = next(item for item in po.items if item.name == pr_item.purchase_order_item)
-			assert po_item.requesting_company == pr.company
-			assert frappe.get_cached_value("Cost Center", pr_item.cost_center, "company") == pr.company
-			mr_warehouse = frappe.db.get_value(
-				"Material Request Item", pr_item.material_request_item, "warehouse"
-			)
-			assert pr_item.warehouse == mr_warehouse
-			assert frappe.get_cached_value("Warehouse", pr_item.warehouse, "company") == pr.company
-		frappe.delete_doc("Purchase Receipt", pr.name)
-	po.cancel()
-	frappe.delete_doc("Purchase Order", po.name)
-	clear_purchase_order_aggregation()
+		frappe.call(
+			"inventory_tools.inventory_tools.overrides.purchase_order.make_purchase_receipts",
+			docname=po.name,
+			rows=frappe.as_json([item.name for item in po.items]),
+		)
+		new_prs = [
+			frappe.get_doc("Purchase Receipt", name)
+			for name in set(frappe.get_all("Purchase Receipt", pluck="name")) - existing_prs
+		]
+		pr_companies = {pr.company for pr in new_prs}
+		assert pr_companies == {item.requesting_company for item in po.items}
+		for pr in new_prs:
+			assert pr.items
+			assert frappe.get_cached_value("Cost Center", pr.cost_center, "company") == pr.company
+			for pr_item in pr.items:
+				po_item = next(item for item in po.items if item.name == pr_item.purchase_order_item)
+				assert po_item.requesting_company == pr.company
+				assert frappe.get_cached_value("Cost Center", pr_item.cost_center, "company") == pr.company
+				mr_warehouse = frappe.db.get_value(
+					"Material Request Item", pr_item.material_request_item, "warehouse"
+				)
+				assert pr_item.warehouse == mr_warehouse
+				assert frappe.get_cached_value("Warehouse", pr_item.warehouse, "company") == pr.company
+			frappe.delete_doc("Purchase Receipt", pr.name)
+	finally:
+		if po.docstatus == 1:
+			po.cancel()
+		frappe.delete_doc("Purchase Order", po.name)
+		clear_purchase_order_aggregation()
 
 
 @pytest.mark.order(38)

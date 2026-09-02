@@ -13,10 +13,12 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, getdate, nowtime, today
 
 from erpnext.accounts.party import get_party_shipping_address
+from erpnext.stock.doctype.shipment.shipment import Shipment
 
 from inventory_tools.inventory_tools.overrides.alternative_sales_workflow import (
 	ensure_alternative_sales_workflow_enabled,
 	ensure_alternative_sales_workflow_for_shipment,
+	is_alternative_sales_workflow_enabled,
 )
 from inventory_tools.inventory_tools.overrides.delivery_note import (
 	copy_freight_from_pack_to_delivery_note,
@@ -349,3 +351,66 @@ def submit_delivery_note_from_shipment(shipment_name: str) -> str:
 	dn.save()
 	dn.submit()
 	return dn.name
+
+
+class InventoryToolsShipment(Shipment):
+	def _validate_mandatory(self):  # nosemgrep: no-underscore-prefix-function
+		if self.uses_alternative_sales_workflow_without_delivery_note():
+			previous = self.flags.ignore_mandatory
+			self.flags.ignore_mandatory = True
+			try:
+				super()._validate_mandatory()
+			finally:
+				self.flags.ignore_mandatory = previous
+			return
+		super()._validate_mandatory()
+
+	def uses_alternative_sales_workflow_without_delivery_note(self) -> bool:
+		if self.get("delivery_note"):
+			return False
+		if not any(row.get("so_detail") for row in self.get("shipment_delivery_note") or []):
+			return False
+		company = self.get_alternative_sales_workflow_company()
+		return bool(company and is_alternative_sales_workflow_enabled(company))
+
+	def get_alternative_sales_workflow_company(self) -> str | None:
+		if self.get("pickup_company"):
+			return self.pickup_company
+		for row in self.get("shipment_delivery_note") or []:
+			if row.get("against_sales_order"):
+				return frappe.db.get_value("Sales Order", row.against_sales_order, "company")
+		return None
+
+	def onload(self):
+		from inventory_tools.inventory_tools.overrides.pack_stock_reservation import (
+			has_pack_originated_reservation,
+			is_stock_reservation_enabled,
+			pack_lines_need_reservation,
+			uses_pack_stock_reservation,
+		)
+
+		if not is_stock_reservation_enabled() or not uses_pack_stock_reservation(self, "Shipment"):
+			return
+
+		if pack_lines_need_reservation(self, "Shipment"):
+			self.set_onload("has_unreserved_pack_stock", True)
+		if has_pack_originated_reservation("Shipment", self.name):
+			self.set_onload("has_pack_reserved_stock", True)
+
+	def on_submit(self):
+		super().on_submit()
+		from inventory_tools.inventory_tools.overrides.pack_stock_reservation import (
+			maybe_reserve_stock_on_pack_submit,
+		)
+
+		maybe_reserve_stock_on_pack_submit(self, "Shipment")
+		if self.get("reserve_stock_on_submit"):
+			self.db_set("reserve_stock_on_submit", 0)
+
+	def on_cancel(self):
+		from inventory_tools.inventory_tools.overrides.pack_stock_reservation import (
+			cancel_stock_reservation_entries_from_pack,
+		)
+
+		cancel_stock_reservation_entries_from_pack("Shipment", self.name, notify=False)
+		super().on_cancel()

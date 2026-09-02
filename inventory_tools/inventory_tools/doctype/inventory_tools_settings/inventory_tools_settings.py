@@ -36,6 +36,8 @@ class InventoryToolsSettings(Document):
 		enable_quarantine_workflow: DF.Check
 		enable_alternative_sales_workflow: DF.Check
 		enable_work_order_subcontracting: DF.Check
+		reserve_stock_on_packing_slip: DF.Literal["Never", "Always", "Ask"]
+		reserve_stock_on_shipment: DF.Literal["Never", "Always", "Ask"]
 		enforce_uoms: DF.Check
 		fitted_policy: DF.Literal["Ignore", "Warn", "Error"]
 		floor_packing_policy: DF.Literal["", "Ignore", "Warn", "Error"]

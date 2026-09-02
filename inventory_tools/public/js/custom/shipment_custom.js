@@ -4,6 +4,10 @@
 frappe.ui.form.on('Shipment', {
 	refresh(frm) {
 		show_shipment_delivery_note_button(frm)
+		inventory_tools.alternative_sales_workflow.setup_pack_stock_reservation(frm, 'Shipment')
+	},
+	async before_submit(frm) {
+		return inventory_tools.alternative_sales_workflow.confirm_pack_stock_reservation_on_submit(frm, 'Shipment')
 	},
 })
 

@@ -21,9 +21,10 @@ from erpnext.controllers.accounts_controller import (
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 from frappe import _, throw
+from frappe.contacts.doctype.address.address import get_company_address
 
 
-def _bypass(*args, **kwargs):
+def skip_method(*args, **kwargs):
 	return
 
 
@@ -244,6 +245,22 @@ def requesting_company_for_item(item):
 	return item.get("requesting_company")
 
 
+def address_belongs_to_company(address_name: str | None, company: str) -> bool:
+	if not address_name:
+		return False
+	return bool(
+		frappe.db.exists(
+			"Dynamic Link",
+			{
+				"parent": address_name,
+				"parenttype": "Address",
+				"link_doctype": "Company",
+				"link_name": company,
+			},
+		)
+	)
+
+
 def apply_requesting_company_fields(doc, company):
 	cost_center = get_default_cost_center(company)
 	if doc.meta.get_field("cost_center"):
@@ -252,6 +269,24 @@ def apply_requesting_company_fields(doc, company):
 		)
 		if not doc.cost_center or (cost_center_company and cost_center_company != company):
 			doc.cost_center = cost_center
+
+	company_address = get_company_address(company)
+	if doc.meta.get_field("billing_address") and company_address.get("company_address"):
+		doc.billing_address = company_address.company_address
+		if doc.meta.get_field("billing_address_display"):
+			doc.billing_address_display = company_address.company_address_display
+
+	is_drop_ship = any(getattr(row, "delivered_by_supplier", 0) for row in doc.get("items") or [])
+	if (
+		doc.meta.get_field("shipping_address")
+		and company_address.get("company_address")
+		and not is_drop_ship
+		and not address_belongs_to_company(doc.shipping_address, company)
+	):
+		doc.shipping_address = company_address.company_address
+		if doc.meta.get_field("shipping_address_display"):
+			doc.shipping_address_display = company_address.company_address_display
+
 	for row in doc.items:
 		if row.get("material_request_item"):
 			mr_warehouse = frappe.db.get_value(
@@ -361,8 +396,8 @@ def make_sales_invoices(docname: str, rows: list | str) -> None:
 			si.append("taxes", tax)
 		si.is_internal_supplier = 1
 		si.bill_date = doc.schedule_date
-		si.set_total_in_words = types.MethodType(_bypass, si)
-		si.set_payment_schedule = types.MethodType(_bypass, si)
+		si.set_total_in_words = types.MethodType(skip_method, si)
+		si.set_payment_schedule = types.MethodType(skip_method, si)
 		si.title = f"Transfer {doc.supplier} to {si.customer}"
 		si.save()
 

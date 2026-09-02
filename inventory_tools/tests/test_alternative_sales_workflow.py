@@ -7,7 +7,7 @@ import frappe
 import pytest
 from frappe.contacts.doctype.address.address import get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
-from frappe.utils import flt, getdate
+from frappe.utils import cint, flt, getdate
 
 from erpnext.selling.doctype.sales_order.sales_order import create_pick_list, make_delivery_note
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
@@ -290,7 +290,7 @@ def test_stock_entry_to_packing_slip_without_delivery_note():
 
 		assert ps.docstatus == 0
 		assert not ps.delivery_note
-		assert all(row.warehouse == STAGING_WAREHOUSE for row in ps.items)
+		assert all(row.t_warehouse == STAGING_WAREHOUSE for row in se.items)
 		assert_pick_list_sales_order(pl.locations, so)
 		assert_against_sales_order(se.items, so)
 		assert_against_sales_order(ps.items, so)
@@ -439,3 +439,246 @@ def test_vanilla_sales_order_to_invoice_still_works_when_enabled():
 		assert_sales_invoice_sales_order(si.items, so)
 	finally:
 		restore_apc_alternative_sales_workflow(previous)
+
+
+def configure_stock_reservation(enabled: bool):
+	previous = cint(frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"))
+	frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", 1 if enabled else 0)
+	return previous
+
+
+def restore_stock_reservation(previous):
+	frappe.db.set_single_value("Stock Settings", "enable_stock_reservation", previous)
+
+
+def configure_pack_reserve_modes(packing_slip_mode="Always", shipment_mode="Ask"):
+	settings = frappe.get_doc("Inventory Tools Settings", COMPANY)
+	previous = (
+		settings.reserve_stock_on_packing_slip,
+		settings.reserve_stock_on_shipment,
+	)
+	settings.reserve_stock_on_packing_slip = packing_slip_mode
+	settings.reserve_stock_on_shipment = shipment_mode
+	settings.save()
+	return previous
+
+
+def restore_pack_reserve_modes(previous):
+	ps_mode, sh_mode = previous
+	settings = frappe.get_doc("Inventory Tools Settings", COMPANY)
+	settings.reserve_stock_on_packing_slip = ps_mode
+	settings.reserve_stock_on_shipment = sh_mode
+	settings.save()
+
+
+def make_test_sales_order_with_reserve(qty=5):
+	so = make_test_sales_order(qty)
+	frappe.db.set_value("Sales Order Item", so.items[0].name, "reserve_stock", 1)
+	so.reload()
+	return so
+
+
+def add_shipment_parcel(shipment):
+	shipment.append(
+		"shipment_parcel",
+		{"length": 5, "width": 5, "height": 5, "weight": 5, "count": 1},
+	)
+	shipment.save()
+	return shipment
+
+
+def submit_shipment(shipment_name):
+	shipment = frappe.get_doc("Shipment", shipment_name)
+	if not shipment.shipment_parcel:
+		add_shipment_parcel(shipment)
+	shipment.submit()
+	return shipment
+
+
+def get_pack_sres(pack_doctype, pack_name):
+	return frappe.get_all(
+		"Stock Reservation Entry",
+		filters={
+			"pack_from_doctype": pack_doctype,
+			"pack_from_name": pack_name,
+			"docstatus": 1,
+		},
+		pluck="name",
+	)
+
+
+@pytest.mark.order(112)
+def test_packing_slip_always_creates_stock_reservation_on_submit():
+	previous_alt = configure_apc_alternative_sales_workflow(True)
+	previous_reservation = configure_stock_reservation(True)
+	previous_modes = configure_pack_reserve_modes("Always", "Ask")
+	try:
+		so = make_test_sales_order_with_reserve(qty=2)
+		ps_name = save_mapped_doc(make_packing_slip_from_sales_order(so.name))
+		submit_packing_slip(ps_name)
+
+		sres = get_pack_sres("Packing Slip", ps_name)
+		assert len(sres) == 1
+		assert frappe.db.get_value("Stock Reservation Entry", sres[0], "warehouse") == SOURCE_WAREHOUSE
+	finally:
+		restore_pack_reserve_modes(previous_modes)
+		restore_stock_reservation(previous_reservation)
+		restore_apc_alternative_sales_workflow(previous_alt)
+
+
+@pytest.mark.order(114)
+def test_packing_slip_ask_skips_reservation_without_confirm():
+	previous_alt = configure_apc_alternative_sales_workflow(True)
+	previous_reservation = configure_stock_reservation(True)
+	previous_modes = configure_pack_reserve_modes("Ask", "Ask")
+	try:
+		from inventory_tools.inventory_tools.overrides.pack_stock_reservation import (
+			packing_slip_needs_stock_reservation,
+		)
+
+		so = make_test_sales_order_with_reserve(qty=2)
+		ps_name = save_mapped_doc(make_packing_slip_from_sales_order(so.name))
+		assert packing_slip_needs_stock_reservation(ps_name)
+		submit_packing_slip(ps_name)
+
+		assert not get_pack_sres("Packing Slip", ps_name)
+	finally:
+		restore_pack_reserve_modes(previous_modes)
+		restore_stock_reservation(previous_reservation)
+		restore_apc_alternative_sales_workflow(previous_alt)
+
+
+@pytest.mark.order(116)
+def test_packing_slip_ask_reserves_when_flag_set():
+	previous_alt = configure_apc_alternative_sales_workflow(True)
+	previous_reservation = configure_stock_reservation(True)
+	previous_modes = configure_pack_reserve_modes("Ask", "Ask")
+	try:
+		so = make_test_sales_order_with_reserve(qty=2)
+		ps_name = save_mapped_doc(make_packing_slip_from_sales_order(so.name))
+		ps = frappe.get_doc("Packing Slip", ps_name)
+		ps.reserve_stock_on_submit = 1
+		ps.from_case_no = 1
+		ps.to_case_no = 1
+		ps.save()
+		ps.submit()
+
+		assert len(get_pack_sres("Packing Slip", ps_name)) == 1
+	finally:
+		restore_pack_reserve_modes(previous_modes)
+		restore_stock_reservation(previous_reservation)
+		restore_apc_alternative_sales_workflow(previous_alt)
+
+
+@pytest.mark.order(118)
+def test_pick_list_reservation_skips_packing_slip_ask():
+	previous_alt = configure_apc_alternative_sales_workflow(True)
+	previous_reservation = configure_stock_reservation(True)
+	previous_modes = configure_pack_reserve_modes("Ask", "Ask")
+	try:
+		from inventory_tools.inventory_tools.overrides.pack_stock_reservation import (
+			packing_slip_needs_stock_reservation,
+		)
+
+		so = make_test_sales_order_with_reserve(qty=2)
+		pl = create_pick_list(so.name)
+		for loc in pl.locations:
+			loc.picked_qty = loc.qty
+		pl.save()
+		pl.submit()
+		pl.create_stock_reservation_entries()
+
+		ps_name = save_mapped_doc(make_packing_slip_from_sales_order(so.name))
+		assert not packing_slip_needs_stock_reservation(ps_name)
+		submit_packing_slip(ps_name)
+		assert not get_pack_sres("Packing Slip", ps_name)
+	finally:
+		restore_pack_reserve_modes(previous_modes)
+		restore_stock_reservation(previous_reservation)
+		restore_apc_alternative_sales_workflow(previous_alt)
+
+
+@pytest.mark.order(120)
+def test_shipment_never_skips_stock_reservation():
+	previous_alt = configure_apc_alternative_sales_workflow(True)
+	previous_reservation = configure_stock_reservation(True)
+	previous_modes = configure_pack_reserve_modes("Always", "Never")
+	try:
+		so = make_test_sales_order_with_reserve(qty=2)
+		shipment_name = save_mapped_doc(make_shipment_from_sales_order(so.name))
+		submit_shipment(shipment_name)
+
+		assert not get_pack_sres("Shipment", shipment_name)
+	finally:
+		restore_pack_reserve_modes(previous_modes)
+		restore_stock_reservation(previous_reservation)
+		restore_apc_alternative_sales_workflow(previous_alt)
+
+
+@pytest.mark.order(122)
+def test_shipment_ask_quote_path_submits_without_reservation():
+	previous_alt = configure_apc_alternative_sales_workflow(True)
+	previous_reservation = configure_stock_reservation(True)
+	previous_modes = configure_pack_reserve_modes("Always", "Ask")
+	try:
+		from inventory_tools.inventory_tools.overrides.pack_stock_reservation import (
+			shipment_needs_stock_reservation,
+		)
+
+		so = make_test_sales_order_with_reserve(qty=2)
+		shipment_name = save_mapped_doc(make_shipment_from_sales_order(so.name))
+		assert shipment_needs_stock_reservation(shipment_name)
+		submit_shipment(shipment_name)
+
+		assert not get_pack_sres("Shipment", shipment_name)
+	finally:
+		restore_pack_reserve_modes(previous_modes)
+		restore_stock_reservation(previous_reservation)
+		restore_apc_alternative_sales_workflow(previous_alt)
+
+
+@pytest.mark.order(124)
+def test_delivery_note_from_pack_uses_sre_warehouse():
+	previous_alt = configure_apc_alternative_sales_workflow(True)
+	previous_reservation = configure_stock_reservation(True)
+	previous_modes = configure_pack_reserve_modes("Always", "Ask")
+	try:
+		from inventory_tools.inventory_tools.overrides.delivery_note_from_pack import (
+			make_delivery_note_from_packing_slip,
+		)
+
+		so = make_test_sales_order_with_reserve(qty=2)
+		ps_name = save_mapped_doc(make_packing_slip_from_sales_order(so.name))
+		submit_packing_slip(ps_name)
+
+		sres = get_pack_sres("Packing Slip", ps_name)
+		assert len(sres) == 1
+		reserved_warehouse = frappe.db.get_value("Stock Reservation Entry", sres[0], "warehouse")
+		assert reserved_warehouse == SOURCE_WAREHOUSE
+
+		dn = make_delivery_note_from_packing_slip(ps_name)
+		assert dn.items[0].warehouse == reserved_warehouse
+	finally:
+		restore_pack_reserve_modes(previous_modes)
+		restore_stock_reservation(previous_reservation)
+		restore_apc_alternative_sales_workflow(previous_alt)
+
+
+@pytest.mark.order(126)
+def test_packing_slip_cancel_cancels_pack_stock_reservation():
+	previous_alt = configure_apc_alternative_sales_workflow(True)
+	previous_reservation = configure_stock_reservation(True)
+	previous_modes = configure_pack_reserve_modes("Always", "Ask")
+	try:
+		so = make_test_sales_order_with_reserve(qty=2)
+		ps_name = save_mapped_doc(make_packing_slip_from_sales_order(so.name))
+		submit_packing_slip(ps_name)
+		assert len(get_pack_sres("Packing Slip", ps_name)) == 1
+
+		ps = frappe.get_doc("Packing Slip", ps_name)
+		ps.cancel()
+		assert not get_pack_sres("Packing Slip", ps_name)
+	finally:
+		restore_pack_reserve_modes(previous_modes)
+		restore_stock_reservation(previous_reservation)
+		restore_apc_alternative_sales_workflow(previous_alt)

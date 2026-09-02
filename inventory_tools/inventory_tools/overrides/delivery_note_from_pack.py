@@ -52,6 +52,18 @@ def resolve_so_detail(row) -> str | None:
 
 
 def get_warehouse_for_pack_line(row, so_item) -> str | None:
+	so_detail = resolve_so_detail(row)
+	if row.get("against_sales_order") and so_detail:
+		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+			get_sre_reserved_warehouses_for_voucher,
+		)
+
+		reserved_warehouses = get_sre_reserved_warehouses_for_voucher(
+			"Sales Order", row.against_sales_order, so_detail
+		)
+		if reserved_warehouses:
+			return reserved_warehouses[0]
+
 	dn_detail = row.get("dn_detail")
 	if dn_detail:
 		warehouse = frappe.db.get_value("Delivery Note Item", dn_detail, "warehouse")

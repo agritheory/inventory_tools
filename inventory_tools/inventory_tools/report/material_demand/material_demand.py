@@ -239,7 +239,8 @@ def create(company, email_template, filters, creation_type, rows, companies=None
 		message = create_rfqs(company, email_template, filters, rows, companies=companies)
 	elif creation_type == "item_based":
 		message = create_item_based(company, email_template, filters, rows, companies=companies)
-	frappe.msgprint(message, alert=True, indicator="green")
+	if message:
+		frappe.msgprint(message, alert=True, indicator="green")
 
 
 @frappe.whitelist()
@@ -351,7 +352,7 @@ def create_pos(company, filters, rows, companies=None):
 	rows = [frappe._dict(r) for r in json.loads(rows)] if isinstance(rows, str) else rows
 	requesting = parse_companies(companies)
 	if not rows:
-		return
+		return frappe._("0 Purchase Orders created")
 	counter = 0
 	aggregation = configured_purchase_aggregation()
 	aggregation_company = aggregation.purchase_order_aggregation_company if aggregation else None
