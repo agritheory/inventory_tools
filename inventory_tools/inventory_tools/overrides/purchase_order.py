@@ -23,6 +23,7 @@ from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 from frappe import _, throw
 from frappe.utils import cint, flt
+from frappe.model.document import Document
 
 
 def skip_bound_method(*args, **kwargs):
@@ -467,9 +468,14 @@ def make_sales_invoices(docname: str, rows: list | str) -> None:
 
 
 @frappe.whitelist()
-def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=True):
+def get_item_details(
+	args: dict | str,
+	doc: Document | dict | str | None = None,
+	for_validate: bool | str = False,
+	overwrite_warehouse: bool | str = True,
+):
 	"""
-	HASH: 41effcf7543095575cec7ff7b66ee06113882253
+	HASH: 1187fb8e012f920bd53ee8353648e76588ece38b
 	REPO: https://github.com/frappe/erpnext/
 	PATH: erpnext/stock/get_item_details.py
 	METHOD: get_item_details
