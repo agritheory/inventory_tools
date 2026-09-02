@@ -113,6 +113,29 @@ function selected_report_rows() {
 	})
 }
 
+async function create(type) {
+	const filters = frappe.query_report.get_filter_values()
+	const selected_items = selected_report_rows()
+	if (!selected_items.length) {
+		frappe.show_alert({ message: 'Please select one or more rows.', seconds: 5, indicator: 'red' })
+		return
+	}
+
+	const selection = await select_companies(filters.company, selected_items, type != 'po')
+	if (!selection) {
+		return
+	}
+
+	await frappe.xcall('inventory_tools.inventory_tools.report.material_demand.material_demand.create', {
+		company: selection.company,
+		companies: selection.companies,
+		email_template: selection.email_template || '',
+		filters: filters,
+		creation_type: type,
+		rows: selected_items,
+	})
+}
+
 async function select_companies(filter_company, selected_items, include_email_template) {
 	const mr_names = [...new Set((selected_items || []).map(row => row.material_request).filter(Boolean))]
 	const company_by_mr = {}
