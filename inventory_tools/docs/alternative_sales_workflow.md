@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Alternative Sales Workflow
 
 <div class="byline">
-  AgriTheory 2026-08-27
+  Tyler Matteson 2026-09-02
 </div>
 
 ## Purpose
@@ -33,6 +33,8 @@ flowchart LR
   SE --> SH
   PS --> DN
   SH --> DN
+  SO --> PS
+  SO --> SH
 ```
 
 ## What Inventory Tools adds
