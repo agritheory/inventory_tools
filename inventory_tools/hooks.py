@@ -20,7 +20,7 @@ app_include_css = [
 app_include_js = [
 	"inventory_tools.bundle.js",
 	"/assets/inventory_tools/dist/js/inventory_tools.js",
-	"/assets/inventory_tools/js/custom/outbound_shipping_utils.js",
+	"/assets/inventory_tools/js/custom/alternative_sales_workflow_utils.js",
 ]
 
 # include js, css files in header of web template
@@ -55,7 +55,7 @@ doctype_js = {
 	"Shipment": "public/js/custom/shipment_custom.js",
 	"Stock Entry": [
 		"public/js/custom/stock_entry_custom.js",
-		"public/js/custom/stock_entry_outbound_shipping.js",
+		"public/js/custom/stock_entry_alternative_sales_workflow.js",
 	],
 	"UOM Category": "public/js/custom/uom_category_custom.js",
 	"Work Order": "public/js/custom/work_order_custom.js",
@@ -96,7 +96,9 @@ doctype_tree_js = {"Warehouse": "public/js/custom/warehouse_tree.js"}
 
 # before_install = "inventory_tools.install.before_install"
 # after_install = "inventory_tools.install.after_install"
-# after_migrate = "inventory_tools.customize.load_customizations"
+after_migrate = [
+	"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.InventoryToolsSettings.sync_alternative_sales_workflow_property_setters",
+]
 
 # Uninstallation
 # ------------
@@ -133,6 +135,7 @@ extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
 
 override_doctype_class = {
 	"Delivery Note": "inventory_tools.inventory_tools.overrides.delivery_note.InventoryToolsDeliveryNote",
+	"Packing Slip": "inventory_tools.inventory_tools.overrides.packing_slip.InventoryToolsPackingSlip",
 	"Pick List": "inventory_tools.inventory_tools.overrides.pick_list.InventoryToolsPickList",
 	"Quality Inspection": "inventory_tools.inventory_tools.overrides.quality_inspection.InventoryToolsQualityInspection",
 	"Job Card": "inventory_tools.inventory_tools.overrides.job_card.InventoryToolsJobCard",
@@ -191,7 +194,20 @@ doc_events = {
 		],
 	},
 	"Quality Inspection": {},
+	"Packing Slip": {
+		"validate": [
+			"inventory_tools.inventory_tools.overrides.sales_order_identity.stamp_packing_slip_on_validate",
+		],
+	},
+	"Shipment": {
+		"validate": [
+			"inventory_tools.inventory_tools.overrides.sales_order_identity.stamp_shipment_on_validate",
+		],
+	},
 	"Stock Entry": {
+		"before_save": [
+			"inventory_tools.inventory_tools.overrides.sales_order_identity.stamp_stock_entry_before_save",
+		],
 		"before_submit": [
 			"inventory_tools.inventory_tools.overrides.stock_entry.handle_se_quarantine",
 			"inventory_tools.inventory_tools.overrides.stock_entry.validate_block_issue_from_quarantine",

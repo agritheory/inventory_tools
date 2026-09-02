@@ -14,6 +14,8 @@ from erpnext.stock.doctype.material_request.material_request import make_purchas
 from test_utils.utils.setup_fixtures import create_quarantine_warehouse
 from erpnext.setup.utils import set_defaults_for_tests
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
+from frappe.contacts.doctype.address.address import get_default_address
+from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.utils.data import add_months, flt, getdate, nowdate, get_datetime
 from webshop.webshop.doctype.website_item.website_item import make_website_item
 from inventory_tools.tests.fixtures import (
@@ -30,6 +32,7 @@ def read_json(name):
 
 BOMS = read_json("boms")
 CUSTOMERS = read_json("customers")
+CONTACTS = read_json("contacts")
 ITEM_DIMENSIONS = read_json("item_dimensions")
 ITEMS = read_json("items")
 ITEMS_STOCKENTRY = read_json("items_stockentry")
@@ -91,6 +94,7 @@ def create_test_data():
 	company_address.state = "MA"
 	company_address.pincode = "89077"
 	company_address.is_your_company_address = 1
+	company_address.is_primary_address = 1
 	company_address.append("links", {"link_doctype": "Company", "link_name": settings.company})
 	company_address.save()
 
@@ -202,6 +206,51 @@ def create_customers(settings):
 		customer.territory = "United States"
 		customer.save()
 		create_customer_address(customer_name, index)
+	create_customer_contacts()
+
+
+def create_customer_contacts():
+	for contact_data in CONTACTS:
+		customer_name = contact_data["customer"]
+		if get_default_contact("Customer", customer_name):
+			continue
+
+		existing = frappe.db.get_value(
+			"Contact Email",
+			{"email_id": contact_data["email_id"]},
+			"parent",
+		)
+		if existing:
+			contact = frappe.get_doc("Contact", existing)
+		else:
+			contact = frappe.new_doc("Contact")
+			contact.first_name = contact_data["first_name"]
+			contact.last_name = contact_data["last_name"]
+			if contact_data.get("is_primary_contact"):
+				contact.is_primary_contact = 1
+			contact.append(
+				"email_ids",
+				{"email_id": contact_data["email_id"], "is_primary": 1},
+			)
+			contact.append(
+				"phone_nos",
+				{"phone": contact_data["phone"], "is_primary_phone": 1},
+			)
+
+		if not any(
+			link.link_doctype == "Customer" and link.link_name == customer_name for link in contact.links
+		):
+			contact.append("links", {"link_doctype": "Customer", "link_name": customer_name})
+		contact.save()
+
+
+def ensure_customer_contact(customer_name):
+	contact_name = get_default_contact("Customer", customer_name)
+	if contact_name:
+		return contact_name
+
+	create_customer_contacts()
+	return get_default_contact("Customer", customer_name)
 
 
 def create_customer_address(customer_name, index):
@@ -943,6 +992,35 @@ def create_sales_order(settings):
 	so.submit()
 
 
+def ensure_cfc_company_address():
+	company = "Chelsea Fruit Co"
+	existing = get_default_address("Company", company)
+	if existing:
+		return existing
+
+	existing_address = frappe.db.get_value(
+		"Address",
+		{"address_title": company, "address_type": "Office"},
+		"name",
+	)
+	if existing_address:
+		return existing_address
+
+	address = frappe.new_doc("Address")
+	address.address_title = company
+	address.address_type = "Office"
+	address.address_line1 = "12 Harbor Street"
+	address.city = "Chelsea"
+	address.state = "MA"
+	address.pincode = "02150"
+	address.country = "United States"
+	address.is_your_company_address = 1
+	address.is_primary_address = 1
+	address.append("links", {"link_doctype": "Company", "link_name": company})
+	address.save()
+	return address.name
+
+
 def create_cfc_sales_order():
 	settings = frappe._dict({"day": getdate().replace(month=1, day=1)})
 
@@ -966,6 +1044,14 @@ def create_cfc_sales_order():
 	so.customer = "Whole Harvest Grocery Group"
 	so.company = "Chelsea Fruit Co"
 	so.selling_price_list = "Standard Selling"
+	ensure_cfc_company_address()
+	customer_address = get_default_address("Customer", so.customer)
+	if not customer_address:
+		create_customer_address(so.customer, 19)
+		customer_address = get_default_address("Customer", so.customer)
+	so.customer_address = customer_address
+	so.shipping_address_name = customer_address
+	so.contact_person = ensure_customer_contact(so.customer)
 	so.append(
 		"items",
 		{

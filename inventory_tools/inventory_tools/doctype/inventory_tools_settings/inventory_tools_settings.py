@@ -34,7 +34,7 @@ class InventoryToolsSettings(Document):
 		default_quarantine_warehouse: DF.Link | None
 		enable_cartonization: DF.Check
 		enable_quarantine_workflow: DF.Check
-		enable_sales_order_outbound_shipping: DF.Check
+		enable_alternative_sales_workflow: DF.Check
 		enable_work_order_subcontracting: DF.Check
 		enforce_uoms: DF.Check
 		fitted_policy: DF.Literal["Ignore", "Warn", "Error"]
@@ -51,10 +51,18 @@ class InventoryToolsSettings(Document):
 		volumetric_policy: DF.Literal["Ignore", "Warn", "Error"]
 		weight_validation: DF.Literal["Ignore", "Warn", "Error"]
 	# end: auto-generated types
+
+	ALTERNATIVE_SALES_WORKFLOW_PROPERTY_SETTERS = (
+		("Packing Slip", "delivery_note", "reqd", "Check", "0"),
+		("Shipment Delivery Note", "delivery_note", "reqd", "Check", "0"),
+		("Shipment Delivery Note", "delivery_note", "hidden", "Check", "1"),
+	)
+
 	def validate(self):
 		self.create_warehouse_path_custom_field()
 		self.validate_single_aggregation_company()
 		self.set_faceted_search_for_all_companies()
+		self.sync_alternative_sales_workflow_property_setters()
 
 	def create_warehouse_path_custom_field(self):
 		if frappe.db.exists("Custom Field", "Warehouse-warehouse_path"):
@@ -132,6 +140,46 @@ class InventoryToolsSettings(Document):
 				continue
 			frappe.db.set_value("Inventory Tools Settings", its, "show_on_website", self.show_on_website)
 			frappe.db.set_value("Inventory Tools Settings", its, "show_in_listview", self.show_in_listview)
+
+	def sync_alternative_sales_workflow_property_setters(self) -> None:
+		enabled = frappe.db.exists(
+			"Inventory Tools Settings",
+			{"enable_alternative_sales_workflow": 1},
+		)
+		seen_doctypes = set()
+		for (
+			doc_type,
+			field_name,
+			property_name,
+			property_type,
+			enabled_value,
+		) in self.ALTERNATIVE_SALES_WORKFLOW_PROPERTY_SETTERS:
+			setter_name = f"{doc_type}-{field_name}-{property_name}-alternative-sales-workflow"
+			if enabled:
+				if frappe.db.exists("Property Setter", setter_name):
+					frappe.db.set_value("Property Setter", setter_name, "value", enabled_value)
+				else:
+					property_setter = frappe.new_doc("Property Setter")
+					property_setter.doctype_or_field = "DocField"
+					property_setter.doc_type = doc_type
+					property_setter.field_name = field_name
+					property_setter.property = property_name
+					property_setter.property_type = property_type
+					property_setter.value = enabled_value
+					property_setter.module = "Inventory Tools"
+					property_setter.name = setter_name
+					property_setter.insert(ignore_permissions=True)
+			elif frappe.db.exists("Property Setter", setter_name):
+				frappe.delete_doc("Property Setter", setter_name, force=1)
+			seen_doctypes.add(doc_type)
+
+		for doc_type in seen_doctypes:
+			frappe.clear_cache(doctype=doc_type)
+
+		legacy_setter = "Shipment Delivery Note-delivery_note-in_list_view-alternative-sales-workflow"
+		if frappe.db.exists("Property Setter", legacy_setter):
+			frappe.delete_doc("Property Setter", legacy_setter, force=1)
+			frappe.clear_cache(doctype="Shipment Delivery Note")
 
 
 @frappe.whitelist()

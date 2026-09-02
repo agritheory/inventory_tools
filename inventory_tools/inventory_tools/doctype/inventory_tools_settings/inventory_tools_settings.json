@@ -31,8 +31,8 @@
 		"allow_alternative_workstations",
 		"uoms_section",
 		"enforce_uoms",
-		"outbound_shipping_section",
-		"enable_sales_order_outbound_shipping",
+		"alternative_sales_workflow_section",
+		"enable_alternative_sales_workflow",
 		"quarantine_quality_control_section",
 		"enable_quarantine_workflow",
 		"default_quarantine_warehouse",
@@ -219,16 +219,16 @@
 			"options": "Use Source Document Order\nFIFO\nLIFO\nDeplete maximum number of Bins\nDeplete minimum number of Bins"
 		},
 		{
-			"fieldname": "outbound_shipping_section",
+			"fieldname": "alternative_sales_workflow_section",
 			"fieldtype": "Section Break",
-			"label": "Outbound Shipping"
+			"label": "Alternative Sales Workflow"
 		},
 		{
 			"default": "0",
 			"description": "When enabled, adds Create mappings from Sales Order and staging Stock Entry to Packing Slip and Shipment, and from pack documents to Delivery Note. Existing Create buttons are not removed.",
-			"fieldname": "enable_sales_order_outbound_shipping",
+			"fieldname": "enable_alternative_sales_workflow",
 			"fieldtype": "Check",
-			"label": "Enable Sales Order Outbound Shipping"
+			"label": "Enable Alternative Sales Workflow"
 		},
 		{
 			"fieldname": "quarantine_quality_control_section",
@@ -347,7 +347,7 @@
 	],
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2026-01-21 08:24:16.272533",
+	"modified": "2026-09-02 11:05:00.000000",
 	"modified_by": "Administrator",
 	"module": "Inventory Tools",
 	"name": "Inventory Tools Settings",

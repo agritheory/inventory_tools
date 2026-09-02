@@ -6,7 +6,7 @@ frappe.ui.form.on('Sales Order', {
 		if (frm.is_new() || frm.doc.docstatus !== 1) {
 			return
 		}
-		if (!inventory_tools.outbound_shipping.is_enabled(frm.doc.company)) {
+		if (!inventory_tools.alternative_sales_workflow.is_enabled(frm.doc.company)) {
 			return
 		}
 		if (['Closed', 'Completed'].includes(frm.doc.status)) {
@@ -16,8 +16,9 @@ frappe.ui.form.on('Sales Order', {
 		frm.add_custom_button(
 			__('Packing Slip'),
 			() =>
-				inventory_tools.outbound_shipping.call_and_route(
-					'inventory_tools.inventory_tools.overrides.outbound_shipping.make_packing_slip_from_sales_order_whitelisted',
+				inventory_tools.alternative_sales_workflow.open_mapped_doc(
+					'inventory_tools.inventory_tools.overrides.alternative_sales_workflow.make_packing_slip_from_sales_order_whitelisted',
+					frm,
 					{ sales_order_name: frm.doc.name }
 				),
 			__('Create')
@@ -26,8 +27,9 @@ frappe.ui.form.on('Sales Order', {
 		frm.add_custom_button(
 			__('Shipment'),
 			() =>
-				inventory_tools.outbound_shipping.call_and_route(
-					'inventory_tools.inventory_tools.overrides.outbound_shipping.make_shipment_from_sales_order_whitelisted',
+				inventory_tools.alternative_sales_workflow.open_mapped_doc(
+					'inventory_tools.inventory_tools.overrides.alternative_sales_workflow.make_shipment_from_sales_order_whitelisted',
+					frm,
 					{ sales_order_name: frm.doc.name }
 				),
 			__('Create')
