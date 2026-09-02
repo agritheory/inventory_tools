@@ -14,8 +14,6 @@ from frappe.model.meta import get_parent_dt
 from frappe.model.rename_doc import get_link_fields
 from frappe.query_builder.functions import Count
 
-qb = frappe.qb
-
 
 def transactional_uom_link_parent(parent_dt: str) -> bool:
 	if parent_dt == "Item":
@@ -79,13 +77,13 @@ def validated_categories_argument(categories) -> list[str]:
 
 
 def conversion_uoms_for_categories(categories: list[str]) -> set[str]:
-	ucf = qb.DocType("UOM Conversion Factor")
+	ucf = frappe.qb.DocType("UOM Conversion Factor")
 	fr = getattr(ucf, "from_uom")
 	to = getattr(ucf, "to_uom")
 	wc = ucf.category == categories[0] if len(categories) == 1 else ucf.category.isin(categories)
 
-	q1 = qb.from_(ucf).select(fr.as_("n")).where(wc & fr.isnotnull() & (fr != ""))
-	q2 = qb.from_(ucf).select(to.as_("n")).where(wc & to.isnotnull() & (to != ""))
+	q1 = frappe.qb.from_(ucf).select(fr.as_("n")).where(wc & fr.isnotnull() & (fr != ""))
+	q2 = frappe.qb.from_(ucf).select(to.as_("n")).where(wc & to.isnotnull() & (to != ""))
 	rows_raw = q1.union(q2).run(pluck=True)
 	return {x for x in rows_raw if x}
 
@@ -96,9 +94,9 @@ def conversion_uoms_outside_categories(
 	if not limit_to:
 		return set()
 
-	ucf = qb.DocType("UOM Conversion Factor")
+	ucf = frappe.qb.DocType("UOM Conversion Factor")
 	fr, to = getattr(ucf, "from_uom"), getattr(ucf, "to_uom")
-	q = qb.from_(ucf).select(fr, to).where(~ucf.category.isin(exclude_categories))
+	q = frappe.qb.from_(ucf).select(fr, to).where(~ucf.category.isin(exclude_categories))
 
 	out = set()
 	for a, b in q.run(as_dict=False):
@@ -132,7 +130,7 @@ def scan_transactional_uom_usage(
 		start = timeit.default_timer()
 		branch_key = f"{parent_dt}.{fieldname}"
 		try:
-			T = qb.DocType(parent_dt)
+			T = frappe.qb.DocType(parent_dt)
 			col = getattr(T, fieldname)
 		except AttributeError:
 			processing_time = timeit.default_timer() - start
@@ -140,7 +138,7 @@ def scan_transactional_uom_usage(
 			publish_uom_curation_progress(category_name, phase, idx, total, last_eta)
 			continue
 
-		q = qb.from_(T).select(col, Count("*").as_("n")).where(col.isin(lnames)).groupby(col)
+		q = frappe.qb.from_(T).select(col, Count("*").as_("n")).where(col.isin(lnames)).groupby(col)
 		for uom, count in q.run(as_dict=False):
 			if not uom or uom not in usage:
 				continue
@@ -210,9 +208,9 @@ def build_overview_rows(
 
 	refs_other_cat = conversion_uoms_outside_categories([category_name], cat_set)
 
-	U = qb.DocType("UOM")
+	U = frappe.qb.DocType("UOM")
 	masters = (
-		qb.from_(U)
+		frappe.qb.from_(U)
 		.select(U.name, U.uom_name, U.enabled)
 		.where(U.name.isin(list(cat_set)))
 		.run(as_dict=True)
@@ -300,10 +298,10 @@ class InventoryToolsUOMCategory(UOMCategory):
 	def start_uom_usage_scan(self) -> dict[str, Any]:
 		validate_uom_curation_access(self.name)
 		clear_uom_category_overview_cache(self.name)
-		enqueue_uom_curation_doc_method(self, "_run_uom_usage_scan")
+		enqueue_uom_curation_doc_method(self, "run_uom_usage_scan")
 		return {"queued": True, "category": self.name}
 
-	def _run_uom_usage_scan(self) -> None:
+	def run_uom_usage_scan(self) -> None:
 		cat_set = conversion_uoms_for_categories([self.name])
 		if not cat_set:
 			payload = cache_uom_category_overview(self.name, [])
@@ -335,16 +333,16 @@ class InventoryToolsUOMCategory(UOMCategory):
 			rows=payload["rows"],
 			complete=1,
 		)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep: frappe-manual-commit
 
 	@frappe.whitelist()
 	def start_disable_unused_uoms(self) -> dict[str, Any]:
 		validate_uom_curation_access(self.name)
 		clear_uom_category_overview_cache(self.name)
-		enqueue_uom_curation_doc_method(self, "_run_disable_unused_uoms")
+		enqueue_uom_curation_doc_method(self, "run_disable_unused_uoms")
 		return {"queued": True, "category": self.name}
 
-	def _run_disable_unused_uoms(self) -> None:
+	def run_disable_unused_uoms(self) -> None:
 		cat_set = conversion_uoms_for_categories([self.name])
 		if not cat_set:
 			publish_uom_curation_progress(
@@ -373,8 +371,8 @@ class InventoryToolsUOMCategory(UOMCategory):
 				pluck="name",
 			)
 			if to_disable:
-				U = qb.DocType("UOM")
-				(qb.update(U).set(U.enabled, 0).where(U.name.isin(to_disable)).run())
+				U = frappe.qb.DocType("UOM")
+				(frappe.qb.update(U).set(U.enabled, 0).where(U.name.isin(to_disable)).run())
 
 		rows = build_overview_rows(self.name, usage_counts)
 		payload = cache_uom_category_overview(self.name, rows)
@@ -390,16 +388,16 @@ class InventoryToolsUOMCategory(UOMCategory):
 			count=len(to_disable),
 			complete=1,
 		)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep: frappe-manual-commit
 
 	@frappe.whitelist()
 	def start_enable_unused_uoms(self) -> dict[str, Any]:
 		validate_uom_curation_access(self.name)
 		clear_uom_category_overview_cache(self.name)
-		enqueue_uom_curation_doc_method(self, "_run_enable_unused_uoms")
+		enqueue_uom_curation_doc_method(self, "run_enable_unused_uoms")
 		return {"queued": True, "category": self.name}
 
-	def _run_enable_unused_uoms(self) -> None:
+	def run_enable_unused_uoms(self) -> None:
 		cat_set = conversion_uoms_for_categories([self.name])
 		if not cat_set:
 			publish_uom_curation_progress(
@@ -428,8 +426,8 @@ class InventoryToolsUOMCategory(UOMCategory):
 				pluck="name",
 			)
 			if to_enable:
-				U = qb.DocType("UOM")
-				(qb.update(U).set(U.enabled, 1).where(U.name.isin(to_enable)).run())
+				U = frappe.qb.DocType("UOM")
+				(frappe.qb.update(U).set(U.enabled, 1).where(U.name.isin(to_enable)).run())
 
 		rows = build_overview_rows(self.name, usage_counts)
 		payload = cache_uom_category_overview(self.name, rows)
@@ -445,4 +443,4 @@ class InventoryToolsUOMCategory(UOMCategory):
 			count=len(to_enable),
 			complete=1,
 		)
-		frappe.db.commit()
+		frappe.db.commit()  # nosemgrep: frappe-manual-commit

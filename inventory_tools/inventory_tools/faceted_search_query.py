@@ -196,7 +196,7 @@ def get_specification_items(attributes, start=0, sort_order=""):
 	def add_display_details(self, result, discount_list, cart_items):
 		"""Add price and availability details in result."""
 		for item in result:
-			product_info = _get_product_info_for_website(item.item_code, skip_quotation_creation=True).get(
+			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get(
 				"product_info"
 			)
 
@@ -218,7 +218,7 @@ def get_specification_items(attributes, start=0, sort_order=""):
 		return result, discount_list
 
 
-def _get_product_info_for_website(item_code, skip_quotation_creation=False):
+def get_product_info_for_website(item_code, skip_quotation_creation=False):
 	cart_settings = get_shopping_cart_settings()
 	if not cart_settings.enabled:
 		# return settings even if cart is disabled
@@ -256,7 +256,7 @@ def _get_product_info_for_website(item_code, skip_quotation_creation=False):
 		# Show Price if logged in.
 		# If not logged in, check if price is hidden for guest.
 		if not is_guest or not cart_settings.hide_price_for_guest:
-			price = _get_price(
+			price = get_product_price(
 				item_code,
 				selling_price_list,
 				cart_settings.default_customer_group,
@@ -311,7 +311,7 @@ def _get_product_info_for_website(item_code, skip_quotation_creation=False):
 
 def set_product_info_for_website(item):
 	"""set product price uom for website"""
-	product_info = _get_product_info_for_website(item.item_code, skip_quotation_creation=True).get(
+	product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get(
 		"product_info"
 	)
 
@@ -337,7 +337,7 @@ def get_product_list(search=None, start=0, limit=12):
 	return [get_item_for_list_in_html(r) for r in data]
 
 
-def _get_price(item_code, price_list, customer_group, company, qty=1, uom=None):
+def get_product_price(item_code, price_list, customer_group, company, qty=1, uom=None):
 	template_item_code = frappe.db.get_value("Item", item_code, "variant_of")
 
 	if price_list:

@@ -14,8 +14,9 @@ from erpnext.stock.doctype.material_request.material_request import make_purchas
 from test_utils.utils.setup_fixtures import create_quarantine_warehouse
 from erpnext.setup.utils import set_defaults_for_tests
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
-from frappe.utils.data import add_months, flt, getdate, nowdate, get_datetime
+from frappe.utils.data import add_days, add_months, flt, getdate, nowdate, get_datetime
 from webshop.webshop.doctype.website_item.website_item import make_website_item
+from inventory_tools.warehouse_location_optimization import set_putaway_rule_capacity
 from inventory_tools.tests.fixtures import (
 	operations,
 	suppliers,
@@ -117,6 +118,7 @@ def create_test_data():
 	create_suppliers(settings)
 	create_customers(settings)
 	create_items(settings)
+	create_chelsea_standard_selling_prices(settings)
 	create_workstations(settings)
 	create_operations()
 	create_boms(settings)
@@ -132,7 +134,9 @@ def create_test_data():
 	create_item_dimensions()
 	create_warehouse_dimensions()
 	create_stock_entries()
-	create_sales_order_2()
+	install_demo_putaway_rules(company="Chelsea Fruit Co")
+	install_items_stockentry_transactions(company="Chelsea Fruit Co")
+	create_cfc_sales_order()
 
 
 def copy_image_fixtures():
@@ -438,6 +442,64 @@ def create_price_lists(settings):
 		pr.append("item_groups", {"item_group": "Baked Goods"})
 		pr.save()
 
+	if not frappe.db.exists("Pricing Rule", {"title": "Fruit Selling"}):
+		pr = frappe.new_doc("Pricing Rule")
+		pr.title = "Fruit Selling"
+		pr.selling = 1
+		pr.apply_on = "Item Group"
+		pr.company = "Chelsea Fruit Co"
+		pr.margin_type = "Percentage"
+		pr.margin_rate_or_amount = 60.0
+		pr.valid_from = settings.day
+		pr.for_price_list = "Standard Selling"
+		pr.currency = "USD"
+		pr.append("item_groups", {"item_group": "Ingredients"})
+		pr.save()
+
+
+def create_chelsea_standard_selling_prices(settings):
+	"""Standard Selling list rates for Ingredients, plus Chelsea Fruit Co Fruit Selling markup.
+
+	Idempotent: safe to re-run on a site that already has items. Without this, Chelsea
+	sales orders default to Standard Selling and price fruit at $0.
+	"""
+	if not frappe.db.exists("Pricing Rule", {"title": "Fruit Selling"}):
+		pr = frappe.new_doc("Pricing Rule")
+		pr.title = "Fruit Selling"
+		pr.selling = 1
+		pr.apply_on = "Item Group"
+		pr.company = "Chelsea Fruit Co"
+		pr.margin_type = "Percentage"
+		pr.margin_rate_or_amount = 60.0
+		pr.valid_from = settings.day
+		pr.for_price_list = "Standard Selling"
+		pr.currency = "USD"
+		pr.append("item_groups", {"item_group": "Ingredients"})
+		pr.save()
+
+	for item in ITEMS:
+		if item.get("item_group") != "Ingredients" or not item.get("item_price"):
+			continue
+		if not frappe.db.exists("Item", item.get("item_code")):
+			continue
+		if frappe.db.exists(
+			"Item Price",
+			{
+				"item_code": item.get("item_code"),
+				"price_list": "Standard Selling",
+				"selling": 1,
+			},
+		):
+			continue
+		ip = frappe.new_doc("Item Price")
+		ip.item_code = item.get("item_code")
+		ip.uom = item.get("uom")
+		ip.price_list = "Standard Selling"
+		ip.selling = 1
+		ip.valid_from = "2018-1-1"
+		ip.price_list_rate = item.get("item_price")
+		ip.save()
+
 
 def create_items(settings):
 	for item in ITEMS:
@@ -515,6 +577,16 @@ def create_items(settings):
 				ip.uom = i.stock_uom
 				ip.price_list = "Bakery Buying"
 				ip.buying = 1
+				ip.valid_from = "2018-1-1"
+				ip.price_list_rate = item.get("item_price")
+				ip.save()
+
+			if i.item_group == "Ingredients":
+				ip = frappe.new_doc("Item Price")
+				ip.item_code = i.item_code
+				ip.uom = i.stock_uom
+				ip.price_list = "Standard Selling"
+				ip.selling = 1
 				ip.valid_from = "2018-1-1"
 				ip.price_list_rate = item.get("item_price")
 				ip.save()
@@ -613,6 +685,10 @@ def create_warehouses(settings):
 		wh.parent_warehouse = "All Warehouses - APC"
 		wh.company = settings.company
 		wh.save()
+	if frappe.db.exists("Warehouse", "Stores - CFC"):
+		frappe.rename_doc("Warehouse", "Stores - CFC", "Receiving - CFC", force=True)
+	if frappe.db.exists("Warehouse", "Finished Goods - CFC"):
+		frappe.rename_doc("Warehouse", "Finished Goods - CFC", "Shipping - CFC", force=True)
 
 
 def create_warehouse_locations():
@@ -668,7 +744,7 @@ def create_quarantine_quality_control_data(settings):
 			"item_defaults",
 			{
 				"company": "Chelsea Fruit Co",
-				"default_warehouse": "Stores - CFC",
+				"default_warehouse": "Receiving - CFC",
 				"default_supplier": "Southern Fruit Supply",
 				"inspection_required_before_purchase": 1,
 			},
@@ -726,6 +802,10 @@ def receive_qc_workflow():
 
 	if not po.items:
 		return
+
+	po.schedule_date = getdate()
+	for item in po.items:
+		item.schedule_date = getdate()
 
 	po.save()
 	po.submit()
@@ -850,12 +930,29 @@ def create_sales_order(settings):
 	so.submit()
 
 
-def create_sales_order_2():
+def create_cfc_sales_order():
+	settings = frappe._dict({"day": getdate().replace(month=1, day=1)})
+
+	existing = frappe.get_all(
+		"Sales Order",
+		filters={"customer": "Whole Harvest Grocery Group", "company": "Chelsea Fruit Co"},
+		fields=["name", "docstatus", "grand_total"],
+	)
+	priced = [so for so in existing if flt(so.grand_total) > 0]
+	if priced:
+		return
+	for so in existing:
+		so_doc = frappe.get_doc("Sales Order", so.name)
+		if so_doc.docstatus == 1:
+			so_doc.cancel()
+		so_doc.delete()
+
 	so = frappe.new_doc("Sales Order")
-	so.transaction_date = getdate().replace(month=1, day=1)
+	so.transaction_date = settings.day
 	so.delivery_date = getdate().replace(month=1, day=3)
 	so.customer = "Whole Harvest Grocery Group"
 	so.company = "Chelsea Fruit Co"
+	so.selling_price_list = "Standard Selling"
 	so.append(
 		"items",
 		{
@@ -1085,7 +1182,7 @@ def create_fruit_material_request(settings):
 			"item_defaults",
 			{
 				"company": "Chelsea Fruit Co",
-				"default_warehouse": "Stores - CFC",
+				"default_warehouse": "Receiving - CFC",
 				"default_supplier": "Southern Fruit Supply",
 			},
 		)
@@ -1107,7 +1204,7 @@ def create_fruit_material_request(settings):
 				"item_code": f,
 				"qty": 100,
 				"schedule_date": mr.schedule_date,
-				"warehouse": "Stores - CFC",
+				"warehouse": "Receiving - CFC",
 				"uom": "Pound",
 			},
 		)
@@ -1125,7 +1222,7 @@ def create_quotations(settings):
 			"item_defaults",
 			{
 				"company": "Chelsea Fruit Co",
-				"default_warehouse": "Finished Goods - CFC",
+				"default_warehouse": "Shipping - CFC",
 			},
 		)
 		i.save()
@@ -1337,3 +1434,490 @@ def create_stock_entries():
 		)
 	se.save()
 	se.submit()
+
+
+DEMO_TRANSACTION_MARKER = "inventory_tools:warehouse_location_transactions"
+DEMO_PUTAWAY_PRIORITY = 50
+
+
+def install_items_stockentry_transactions(
+	company="Chelsea Fruit Co",
+	days_back=90,
+	include_transfers=True,
+	force=False,
+	batch_size=40,
+):
+	"""Post recent Material Receipts (and optional transfers) from items_stockentry.json.
+
+	Intended for bench console / bench execute on a seeded site so reports like
+	Warehouse Location Optimization have SLE activity inside the default lookback window.
+
+	Example:
+	    bench execute inventory_tools.tests.setup.install_items_stockentry_transactions
+	"""
+	if not force and frappe.db.exists("Stock Entry", {"remarks": DEMO_TRANSACTION_MARKER}):
+		print(
+			f"Demo transactions already installed (marker: {DEMO_TRANSACTION_MARKER}). Use force=True to repeat."
+		)
+		return {"skipped": True}
+
+	lines = eligible_stockentry_lines(company)
+	if not lines:
+		frappe.throw(f"No items_stockentry lines with existing warehouses for {company}")
+
+	refresh_demo_putaway_capacities(company=company, lines=lines)
+
+	receipt_entries = submit_receipt_batches(
+		company=company,
+		lines=lines,
+		days_back=days_back,
+		batch_size=batch_size,
+	)
+
+	transfer_entries = []
+	if include_transfers:
+		transfer_entries = submit_demo_transfers(company=company, lines=lines[:60])
+
+	frappe.db.commit()
+	return {
+		"receipt_stock_entries": receipt_entries,
+		"transfer_stock_entries": transfer_entries,
+		"line_count": len(lines),
+	}
+
+
+def eligible_stockentry_lines(company):
+	lines = []
+	for row in ITEMS_STOCKENTRY:
+		if not frappe.db.exists("Item", row["item_code"]):
+			continue
+		warehouse = row["warehouse"]
+		if not frappe.db.exists("Warehouse", warehouse):
+			continue
+		if frappe.db.get_value("Warehouse", warehouse, "company") != company:
+			continue
+		lines.append(row)
+	return lines
+
+
+def submit_receipt_batches(company, lines, days_back, batch_size):
+	entries = []
+	batches = list(chunked(lines, batch_size))
+	if not batches:
+		return entries
+
+	step = max(days_back // max(len(batches), 1), 1)
+	for index, batch in enumerate(batches):
+		posting_date = add_days(nowdate(), -(days_back - index * step))
+		se = frappe.new_doc("Stock Entry")
+		se.company = company
+		se.posting_date = posting_date
+		se.set_posting_time = 1
+		se.stock_entry_type = "Material Receipt"
+		se.remarks = DEMO_TRANSACTION_MARKER
+
+		for row in batch:
+			se.append(
+				"items",
+				{
+					"t_warehouse": row["warehouse"],
+					"item_code": row["item_code"],
+					"qty": row["qty"],
+					"basic_rate": _get_item_buying_rate(row["item_code"]) or 1,
+				},
+			)
+
+		se.save()
+		se.submit()
+		entries.append(se.name)
+
+	return entries
+
+
+def submit_demo_transfers(company, lines):
+	entries = []
+	plan_warehouses = frappe.get_all(
+		"Warehouse",
+		filters={
+			"company": company,
+			"warehouse_plan": ["is", "set"],
+			"is_group": 0,
+			"disabled": 0,
+		},
+		pluck="name",
+	)
+	if len(plan_warehouses) < 2:
+		return entries
+
+	for index, row in enumerate(lines):
+		source = row["warehouse"]
+		if source not in plan_warehouses:
+			continue
+
+		target = plan_warehouses[(plan_warehouses.index(source) + 1) % len(plan_warehouses)]
+		if target == source:
+			continue
+
+		qty = min(flt(row["qty"]), 2) or 1
+		posting_date = add_days(nowdate(), -(index % 7))
+
+		se = frappe.new_doc("Stock Entry")
+		se.company = company
+		se.posting_date = posting_date
+		se.set_posting_time = 1
+		se.stock_entry_type = "Material Transfer"
+		se.remarks = DEMO_TRANSACTION_MARKER
+		se.append(
+			"items",
+			{
+				"item_code": row["item_code"],
+				"s_warehouse": source,
+				"t_warehouse": target,
+				"qty": qty,
+				"basic_rate": _get_item_buying_rate(row["item_code"]) or 1,
+			},
+		)
+		se.save()
+		se.submit()
+		entries.append(se.name)
+
+	return entries
+
+
+def chunked(values, size):
+	for start in range(0, len(values), size):
+		yield values[start : start + size]
+
+
+def stockentry_qty_totals_by_item_warehouse(company):
+	totals = {}
+	for row in eligible_stockentry_lines(company):
+		key = (row["item_code"], row["warehouse"])
+		totals[key] = totals.get(key, 0) + flt(row["qty"])
+	return totals
+
+
+def demo_putaway_target_capacity(item_code, warehouse, company, fixture_totals=None):
+	from erpnext.stock.utils import get_stock_balance
+
+	if fixture_totals is None:
+		fixture_totals = stockentry_qty_totals_by_item_warehouse(company)
+	fixture_qty = fixture_totals.get((item_code, warehouse), 0)
+	balance_qty = get_stock_balance(item_code, warehouse, nowdate())
+	# create_stock_entries posts the full fixture once; demo transactions post it again.
+	return max(balance_qty + fixture_qty + 50, fixture_qty * 2 + 50, 100)
+
+
+def refresh_demo_putaway_capacities(company="Chelsea Fruit Co", lines=None):
+	totals = stockentry_qty_totals_by_item_warehouse(company)
+	keys = {(row["item_code"], row["warehouse"]) for row in lines} if lines else totals.keys()
+	updated = []
+
+	for item_code, warehouse in keys:
+		rule_name = frappe.db.get_value(
+			"Putaway Rule",
+			{
+				"item_code": item_code,
+				"warehouse": warehouse,
+				"company": company,
+				"priority": DEMO_PUTAWAY_PRIORITY,
+			},
+			"name",
+		)
+		if not rule_name:
+			continue
+
+		doc = frappe.get_doc("Putaway Rule", rule_name)
+		set_putaway_rule_capacity(
+			doc,
+			demo_putaway_target_capacity(item_code, warehouse, company, fixture_totals=totals),
+		)
+		doc.save()
+		updated.append(rule_name)
+
+	return updated
+
+
+def install_demo_putaway_rules(
+	company="Chelsea Fruit Co",
+	force=False,
+	limit=None,
+	item_codes=None,
+):
+	"""Create naive Putaway Rules from items_stockentry.json receipt warehouses.
+
+	Each item is assigned to the warehouse where demo receipts land — not the
+	heat/distance-optimized slot the Warehouse Location Optimization report suggests.
+	Use this to populate putaway_rule columns and to exercise rule updates.
+
+	Example:
+	    bench execute inventory_tools.tests.setup.install_demo_putaway_rules
+	"""
+	if not force and frappe.db.exists(
+		"Putaway Rule",
+		{"company": company, "priority": DEMO_PUTAWAY_PRIORITY, "disable": 0},
+	):
+		print(
+			f"Demo putaway rules already installed (priority={DEMO_PUTAWAY_PRIORITY}). "
+			"Use force=True to replace."
+		)
+		return {"skipped": True}
+
+	if force:
+		remove_demo_putaway_rules(company=company)
+
+	totals = stockentry_qty_totals_by_item_warehouse(company)
+	keys = list(totals.keys())
+	if item_codes:
+		item_codes = set(item_codes)
+		keys = [key for key in keys if key[0] in item_codes]
+	if limit:
+		keys = keys[:limit]
+
+	created = []
+	skipped = []
+	for item_code, warehouse in keys:
+		if frappe.db.exists(
+			"Putaway Rule",
+			{"item_code": item_code, "warehouse": warehouse, "company": company},
+		):
+			skipped.append(item_code)
+			continue
+
+		doc = frappe.new_doc("Putaway Rule")
+		doc.item_code = item_code
+		doc.warehouse = warehouse
+		doc.company = company
+		doc.priority = DEMO_PUTAWAY_PRIORITY
+		set_putaway_rule_capacity(
+			doc,
+			demo_putaway_target_capacity(item_code, warehouse, company, fixture_totals=totals),
+		)
+		doc.insert()
+		created.append(doc.name)
+
+	frappe.db.commit()
+	return {"created": created, "skipped": skipped, "count": len(created)}
+
+
+def remove_demo_putaway_rules(company="Chelsea Fruit Co"):
+	"""Delete demo Putaway Rules installed with install_demo_putaway_rules."""
+	names = frappe.get_all(
+		"Putaway Rule",
+		filters={"company": company, "priority": DEMO_PUTAWAY_PRIORITY},
+		pluck="name",
+	)
+	for name in names:
+		frappe.delete_doc("Putaway Rule", name, force=1)
+	frappe.db.commit()
+	return {"deleted": names, "count": len(names)}
+
+
+DEMO_SOUTHERN_FRUIT_SUPPLIER = "Southern Fruit Supply"
+
+
+def configure_material_demand_aggregation(company="Chelsea Fruit Co"):
+	settings = frappe.get_doc("Inventory Tools Settings", company)
+	settings.purchase_order_aggregation_company = settings.name
+	settings.aggregated_purchasing_warehouse = None
+	settings.update_warehouse_path = True
+	settings.save()
+	return settings
+
+
+def select_southern_fruit_material_demand_rows(company="Chelsea Fruit Co", supplier=None):
+	from inventory_tools.inventory_tools.report.material_demand.material_demand import (
+		execute as execute_material_demand,
+	)
+
+	supplier = supplier or DEMO_SOUTHERN_FRUIT_SUPPLIER
+	filters = frappe._dict({"end_date": getdate(), "price_list": "Bakery Wholesale"})
+	_columns, rows = execute_material_demand(filters)
+	return [
+		frappe._dict(row)
+		for row in rows
+		if row.get("item_code")
+		and row.get("supplier") == supplier
+		and row.get("supplier") not in [company, "Unity Bakery Supply"]
+	]
+
+
+def prepare_purchase_order_for_submit(po):
+	po.schedule_date = getdate()
+	for item in po.items:
+		item.schedule_date = getdate()
+
+
+def create_southern_fruit_purchase_orders(
+	company="Chelsea Fruit Co",
+	supplier=None,
+	submit=True,
+	create_draft_prs=False,
+	submit_prs=False,
+	enable_quarantine=False,
+	force=False,
+):
+	"""Create Purchase Orders for Southern Fruit Supply from Material Demand rows.
+
+	By default submits POs so you can create Purchase Receipts from the desk
+	(Buying → Purchase Order → Create → Purchase Receipt).
+
+	Example:
+	    bench execute inventory_tools.tests.setup.create_southern_fruit_purchase_orders
+	    bench execute "inventory_tools.tests.setup.create_southern_fruit_purchase_orders" --kwargs "{'create_draft_prs': True}"
+	"""
+	from inventory_tools.inventory_tools.report.material_demand.material_demand import create_pos
+
+	supplier = supplier or DEMO_SOUTHERN_FRUIT_SUPPLIER
+
+	if not force:
+		open_po = frappe.db.get_value(
+			"Purchase Order",
+			{"supplier": supplier, "company": company, "docstatus": 1, "per_received": ["<", 100]},
+			"name",
+		)
+		if open_po:
+			print(
+				f"Open Purchase Order {open_po} already exists for {supplier}. "
+				"Use force=True to create another."
+			)
+			return {"skipped": True, "purchase_order": open_po}
+
+	configure_material_demand_aggregation(company=company)
+	selected_rows = select_southern_fruit_material_demand_rows(company=company, supplier=supplier)
+	if not selected_rows:
+		frappe.throw(f"No Material Demand rows for supplier {supplier}")
+
+	filters = frappe._dict({"end_date": getdate(), "price_list": "Bakery Wholesale"})
+	existing_pos = set(frappe.get_all("Purchase Order", pluck="name"))
+	create_pos(company, filters, selected_rows)
+	new_po_names = sorted(set(frappe.get_all("Purchase Order", pluck="name")) - existing_pos)
+
+	settings = frappe.get_doc("Inventory Tools Settings", company)
+	previous_quarantine = settings.enable_quarantine_workflow
+	if enable_quarantine:
+		settings.enable_quarantine_workflow = 1
+		settings.save()
+
+	purchase_orders = []
+	errors = []
+	for po_name in new_po_names:
+		po = frappe.get_doc("Purchase Order", po_name)
+		if po.supplier != supplier:
+			continue
+		try:
+			prepare_purchase_order_for_submit(po)
+			if submit:
+				po.submit()
+
+			entry = {
+				"purchase_order": po.name,
+				"docstatus": po.docstatus,
+				"items": [row.item_code for row in po.items],
+				"grand_total": po.grand_total,
+			}
+
+			if create_draft_prs or submit_prs:
+				if po.multi_company_purchase_order:
+					from inventory_tools.inventory_tools.overrides.purchase_order import (
+						make_purchase_receipts,
+					)
+
+					pr_names = make_purchase_receipts(po.name, [item.name for item in po.items])
+					if submit_prs:
+						for pr_name in pr_names:
+							frappe.get_doc("Purchase Receipt", pr_name).submit()
+					entry["purchase_receipts"] = pr_names
+					entry["purchase_receipt"] = pr_names[0] if pr_names else None
+					entry["pr_docstatus"] = (
+						frappe.db.get_value("Purchase Receipt", pr_names[0], "docstatus") if pr_names else None
+					)
+				else:
+					pr = make_purchase_receipt(po.name)
+					if submit_prs:
+						pr.submit()
+					entry["purchase_receipt"] = pr.name
+					entry["purchase_receipts"] = [pr.name]
+					entry["pr_docstatus"] = pr.docstatus
+
+			purchase_orders.append(entry)
+		except Exception as exc:
+			errors.append({"purchase_order": po.name, "error": str(exc)})
+
+	if enable_quarantine:
+		settings.enable_quarantine_workflow = previous_quarantine
+		settings.save()
+
+	frappe.db.commit()
+	return {
+		"supplier": supplier,
+		"company": company,
+		"selected_row_count": len(selected_rows),
+		"purchase_orders": purchase_orders,
+		"errors": errors,
+	}
+
+
+def install_warehouse_location_optimization_demo(
+	company="Chelsea Fruit Co",
+	include_transactions=True,
+	include_putaway_rules=True,
+	include_southern_fruit_pos=True,
+	create_draft_prs=False,
+	submit_prs=False,
+	enable_quarantine=False,
+	force=False,
+):
+	"""One-shot demo: SLE heat, naive putaway rules, and Southern Fruit POs ready for PR.
+
+	After this runs:
+	  1. Open report Warehouse Location Optimization (CFC / All Warehouses - CFC).
+	  2. Compare Putaway Warehouse vs Suggested Warehouse; apply Create Putaway Rule.
+	  3. Buying → Purchase Order → open a Southern Fruit PO → Purchase Receipt.
+
+	Example:
+	    bench execute inventory_tools.tests.setup.install_warehouse_location_optimization_demo
+	"""
+	summary = {}
+
+	if include_transactions:
+		summary["transactions"] = install_items_stockentry_transactions(
+			company=company,
+			force=force,
+		)
+
+	if include_putaway_rules:
+		summary["putaway_rules"] = install_demo_putaway_rules(company=company, force=force)
+
+	if include_southern_fruit_pos:
+		summary["southern_fruit_pos"] = create_southern_fruit_purchase_orders(
+			company=company,
+			create_draft_prs=create_draft_prs,
+			submit_prs=submit_prs,
+			enable_quarantine=enable_quarantine,
+			force=force,
+		)
+		print_demo_summary(summary["southern_fruit_pos"])
+
+	print(
+		"\nDemo ready.\n"
+		"  Report: Warehouse Location Optimization\n"
+		"    Company: Chelsea Fruit Co | Plan: All Warehouses - CFC | Last 90 days\n"
+		"  PRs: Buying → Purchase Order (Southern Fruit Supply, docstatus Submitted) → Create → Purchase Receipt\n"
+	)
+	return summary
+
+
+def print_demo_summary(po_result):
+	if po_result.get("skipped"):
+		return
+	print(f"\nSouthern Fruit Supply: {len(po_result.get('purchase_orders', []))} purchase order(s)")
+	for entry in po_result.get("purchase_orders", []):
+		line = f"  {entry['purchase_order']} — {len(entry['items'])} item(s)"
+		if entry.get("purchase_receipt"):
+			line += f" → draft PR {entry['purchase_receipt']}"
+		print(line)
+	if po_result.get("errors"):
+		print("Errors:")
+		for error in po_result["errors"]:
+			print(f"  {error['purchase_order']}: {error['error']}")

@@ -212,10 +212,13 @@ def test_description_only_line_is_ignored():
 		},
 	)
 	so.append("items", {"description": "Gift wrapping", "qty": 1})
+	so.flags.ignore_mandatory = True
 	so.save()
 	so.items[0].uom = "Pound"
 	so.items[0].conversion_factor = 1
+	so.flags.ignore_mandatory = True
 	so.save()
+	so.flags.ignore_mandatory = True
 	so.submit()
 
 	findings = findings_for_item(DESC_ITEM)

@@ -12,6 +12,7 @@
 		"purchase_order_aggregation_company",
 		"column_break_vgsiq",
 		"aggregated_purchasing_warehouse",
+		"apply_putaway_rule_on_multi_company_receipt",
 		"quotation_demand_section",
 		"sales_order_aggregation_company",
 		"column_break_ljy4o",
@@ -27,6 +28,9 @@
 		"update_warehouse_path",
 		"prettify_warehouse_tree",
 		"default_route_optimization_strategy",
+		"warehouse_slotting_section",
+		"require_plan_for_location_suggestion",
+		"location_suggestion_excluded_warehouse_types",
 		"column_break_ddssn",
 		"allow_alternative_workstations",
 		"uoms_section",
@@ -86,6 +90,13 @@
 			"fieldtype": "Link",
 			"label": "Aggregated Purchasing Warehouse",
 			"options": "Warehouse"
+		},
+		{
+			"default": "1",
+			"description": "When enabled, Purchase Receipts created from a multi-company Purchase Order (Create Purchase Receipts) are saved with Apply Putaway Rule checked. Disable when receiving to the Material Request warehouse and putting away later via Stock Entry.",
+			"fieldname": "apply_putaway_rule_on_multi_company_receipt",
+			"fieldtype": "Check",
+			"label": "Apply Putaway Rule on Multi-Company Purchase Receipt"
 		},
 		{
 			"fieldname": "work_order_subcontracting_section",
@@ -215,6 +226,25 @@
 			"fieldtype": "Select",
 			"label": "Default Route Optimization Strategy",
 			"options": "Use Source Document Order\nFIFO\nLIFO\nDeplete maximum number of Bins\nDeplete minimum number of Bins"
+		},
+		{
+			"fieldname": "warehouse_slotting_section",
+			"fieldtype": "Section Break",
+			"label": "Warehouse Slotting"
+		},
+		{
+			"default": "1",
+			"description": "When enabled, only warehouses placed on a Warehouse Plan with coordinates are eligible for location suggestions.",
+			"fieldname": "require_plan_for_location_suggestion",
+			"fieldtype": "Check",
+			"label": "Require Plan for Location Suggestion"
+		},
+		{
+			"default": "Transit",
+			"description": "Comma-separated Warehouse Type names excluded from location suggestion candidates.",
+			"fieldname": "location_suggestion_excluded_warehouse_types",
+			"fieldtype": "Small Text",
+			"label": "Excluded Warehouse Types"
 		},
 		{
 			"fieldname": "quarantine_quality_control_section",

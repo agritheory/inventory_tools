@@ -38,10 +38,12 @@ class InventoryToolsSettings(Document):
 		enforce_uoms: DF.Check
 		fitted_policy: DF.Literal["Ignore", "Warn", "Error"]
 		floor_packing_policy: DF.Literal["", "Ignore", "Warn", "Error"]
+		location_suggestion_excluded_warehouse_types: DF.SmallText | None
 		max_weight_uom: DF.Link | None
 		overproduction_percentage_for_work_order: DF.Percent
 		prettify_warehouse_tree: DF.Check
 		purchase_order_aggregation_company: DF.Link | None
+		require_plan_for_location_suggestion: DF.Check
 		sales_order_aggregation_company: DF.Link | None
 		show_in_listview: DF.Check
 		show_on_website: DF.Check

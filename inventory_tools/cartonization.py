@@ -209,7 +209,7 @@ def validate_3d_fitted(items, container, allow_rotation, timeout):
 	"""
 	boxes = []
 	for item in items:
-		for _ in range(int(item["qty"])):
+		for unit_index in range(int(item["qty"])):
 			boxes.append(
 				{
 					"item_code": item["item_code"],

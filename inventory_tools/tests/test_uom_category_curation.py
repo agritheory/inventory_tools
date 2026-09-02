@@ -7,7 +7,7 @@ import frappe
 import inventory_tools.inventory_tools.overrides.uom_category as uc
 
 
-@pytest.mark.order(100)
+@pytest.mark.order(120)
 def test_transactional_uom_link_scan_rules():
 	"""Link parents used for Item/submitted UOM usage: include Item, skip Singles and UOM Conversion Factor."""
 
@@ -80,14 +80,14 @@ def test_enqueue_uom_curation_doc_method_runs_inline_in_tests():
 		doctype = "UOM Category"
 		name = "Length"
 
-		def _run_uom_usage_scan(self):
-			called.append("_run_uom_usage_scan")
+		def run_uom_usage_scan(self):
+			called.append("run_uom_usage_scan")
 
 	original_in_test = frappe.flags.in_test
 	try:
 		frappe.flags.in_test = True
-		uc.enqueue_uom_curation_doc_method(FakeDoc(), "_run_uom_usage_scan")
+		uc.enqueue_uom_curation_doc_method(FakeDoc(), "run_uom_usage_scan")
 	finally:
 		frappe.flags.in_test = original_in_test
 
-	assert called == ["_run_uom_usage_scan"]
+	assert called == ["run_uom_usage_scan"]

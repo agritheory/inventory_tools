@@ -15,26 +15,28 @@ def get_data(filters, specification):
 	doctypes = [row.applied_on for row in specification.attributes]
 	attributes = [row.attribute_name for row in specification.attributes]
 	fields = {row.attribute_name: row.field for row in specification.attributes if row.field}
-	_data = frappe.get_all(
+	spec_values = frappe.get_all(
 		"Specification Value",
 		{"reference_doctype": ["in", doctypes], "attribute": ["in", attributes]},
 		["reference_doctype", "reference_name", "attribute", "value", "name"],
 		order_by="reference_name",
 	)
 	data = []
-	for ref, d in groupby(_data, key=lambda x: x.get("reference_name")):
-		_d = sorted(sorted(list(d), key=lambda x: x.get("value")), key=lambda x: x.get("attribute"))
+	for ref, d in groupby(spec_values, key=lambda x: x.get("reference_name")):
+		reference_rows = sorted(
+			sorted(list(d), key=lambda x: x.get("value")), key=lambda x: x.get("attribute")
+		)
 		data.append(
 			{
 				"reference_name": frappe.bold(ref),
 				"indent": 0,
 			}
 		)
-		for __d in _d:
-			if __d.attribute in fields:
-				__d.field = fields[__d.attribute]
-			__d.indent = 1
-			data.append(__d)
+		for row in reference_rows:
+			if row.attribute in fields:
+				row.field = fields[row.attribute]
+			row.indent = 1
+			data.append(row)
 	return data
 
 

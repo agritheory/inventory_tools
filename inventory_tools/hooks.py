@@ -289,3 +289,7 @@ standard_queries = {
 # ]
 
 export_python_type_annotations = True
+
+# Warehouse Location Optimization
+# signature: (item_code, warehouse, score, context) -> float
+warehouse_location_score: list[str] = []
