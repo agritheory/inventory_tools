@@ -21,6 +21,8 @@ from erpnext.controllers.accounts_controller import (
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 from frappe import _, throw
+from frappe.utils import cint
+from frappe.model.document import Document
 
 
 def _bypass(*args, **kwargs):
@@ -235,75 +237,109 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 				self.set_expense_account(for_validate)
 
 
-@frappe.whitelist()
-def make_purchase_invoices(docname: str, rows: list | str) -> None:
+def requesting_company_for_item(item):
+	if item.get("material_request"):
+		company = frappe.db.get_value("Material Request", item.material_request, "company")
+		if company:
+			item.requesting_company = company
+			return company
+	return item.get("requesting_company")
+
+
+def apply_requesting_company_fields(doc, company):
+	cost_center = get_default_cost_center(company)
+	if doc.meta.get_field("cost_center"):
+		cost_center_company = (
+			frappe.get_cached_value("Cost Center", doc.cost_center, "company") if doc.cost_center else None
+		)
+		if not doc.cost_center or (cost_center_company and cost_center_company != company):
+			doc.cost_center = cost_center
+	for row in doc.items:
+		if row.get("material_request_item"):
+			mr_warehouse = frappe.db.get_value(
+				"Material Request Item", row.material_request_item, "warehouse"
+			)
+			if mr_warehouse:
+				row.warehouse = mr_warehouse
+		if row.meta.get_field("cost_center"):
+			row_cost_center_company = (
+				frappe.get_cached_value("Cost Center", row.cost_center, "company") if row.cost_center else None
+			)
+			if not row.cost_center or (row_cost_center_company and row_cost_center_company != company):
+				row.cost_center = cost_center
+		if (
+			doc.doctype == "Purchase Invoice"
+			and row.meta.get_field("expense_account")
+			and row.expense_account
+		):
+			account_company = frappe.get_cached_value("Account", row.expense_account, "company")
+			if account_company and account_company != company:
+				row.expense_account = frappe.get_cached_value("Company", company, "default_expense_account")
+
+
+def selected_items_by_requesting_company(doc, rows):
 	rows = json.loads(rows) if isinstance(rows, str) else rows
-	doc = frappe.get_doc("Purchase Order", docname)
 	forwarding = frappe._dict()
 	for row in doc.items:
-		if row.name in rows:
-			if row.company in forwarding:
-				forwarding[row.company].append(row.name)
-			else:
-				forwarding[row.company] = [row.name]
+		if row.name not in rows:
+			continue
+		company = requesting_company_for_item(row)
+		if not company:
+			throw(
+				_("Could not determine requesting company for {0} on {1}").format(row.item_code, doc.name)
+			)
+		forwarding.setdefault(company, []).append(row.name)
+	return forwarding
 
-	for company, rows in forwarding.items():
+
+@frappe.whitelist()
+def make_purchase_invoices(docname: str, rows: list | str) -> None:
+	doc = frappe.get_doc("Purchase Order", docname)
+	forwarding = selected_items_by_requesting_company(doc, rows)
+
+	for company, item_names in forwarding.items():
 		pi = make_purchase_invoice(docname)
 		pi.company = company
 		pi.credit_to = frappe.get_value("Company", pi.company, "default_payable_account")
-		for row in pi.items:
-			if row.po_detail in rows:
-				continue
-			else:
-				pi.items.remove(row)
+		for row in list(pi.items):
+			if row.po_detail not in item_names:
+				pi.remove(row)
+		apply_requesting_company_fields(pi, company)
 		pi.save()
 
 
 @frappe.whitelist()
 def make_purchase_receipts(docname: str, rows: list | str) -> None:
-	rows = json.loads(rows) if isinstance(rows, str) else rows
 	doc = frappe.get_doc("Purchase Order", docname)
-	forwarding = frappe._dict()
-	for row in doc.items:
-		if row.name in rows:
-			if row.company in forwarding:
-				forwarding[row.company].append(row.name)
-			else:
-				forwarding[row.company] = [row.name]
+	forwarding = selected_items_by_requesting_company(doc, rows)
 
-	for company, rows in forwarding.items():
+	for company, item_names in forwarding.items():
 		pr = make_purchase_receipt(docname)
 		pr.company = company
-		for row in pr.items:
-			if row.purchase_order_item in rows:
-				continue
-			else:
-				pr.items.remove(row)
+		for row in list(pr.items):
+			if row.purchase_order_item not in item_names:
+				pr.remove(row)
+		apply_requesting_company_fields(pr, company)
 		pr.save()
 
 
 @frappe.whitelist()
 def make_sales_invoices(docname: str, rows: list | str) -> None:
-	rows = json.loads(rows) if isinstance(rows, str) else rows
 	doc = frappe.get_doc("Purchase Order", docname)
-	buying_settings = frappe.get_doc("Buying Settings", "Buying Settings")
-	forwarding = frappe._dict()
+	settings = frappe.get_doc("Inventory Tools Settings", doc.company)
+	aggregated_warehouse = settings.aggregated_purchasing_warehouse
+	forwarding = selected_items_by_requesting_company(doc, rows)
 
-	for row in doc.items:
-		if row.name in rows:
-			if row.company in forwarding:
-				forwarding[row.company].append(row.name)
-			else:
-				forwarding[row.company] = [row.name]
-
-	for company, rows in forwarding.items():
+	for company, item_names in forwarding.items():
+		if company == doc.company:
+			continue
 		si = frappe.new_doc("Sales Invoice")
 		si.company = doc.company
 		si.customer = company
 		si.update_stock = 1
 		si.selling_price_list = frappe.get_value("Price List", {"buying": 1, "selling": 1})
 		for row in doc.items:
-			if row.name not in rows:
+			if row.name not in item_names:
 				continue
 			si.append(
 				"items",
@@ -315,7 +351,7 @@ def make_sales_invoices(docname: str, rows: list | str) -> None:
 					"uom": row.uom,
 					"rate": row.rate,
 					"purchase_order": doc.name,
-					"warehouse": buying_settings.aggregated_purchasing_warehouse,
+					"warehouse": aggregated_warehouse,
 					"cost_center": frappe.get_value("Company", si.company, "cost_center"),
 				},
 			)
@@ -336,7 +372,7 @@ def make_sales_invoices(docname: str, rows: list | str) -> None:
 		pi.update_stock = 1
 		for row in si.items:
 			row.purchase_order = doc.name
-			row.warehouse = buying_settings.aggregated_purchasing_warehouse
+			row.warehouse = aggregated_warehouse
 		pi.buying_price_list = si.selling_price_list
 		taxes_and_charges = get_default_taxes_and_charges(
 			"Purchase Taxes and Charges Template", company=pi.company
@@ -351,9 +387,14 @@ def make_sales_invoices(docname: str, rows: list | str) -> None:
 
 
 @frappe.whitelist()
-def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=True):
+def get_item_details(
+	args: dict | str,
+	doc: Document | dict | str | None = None,
+	for_validate: bool | str = False,
+	overwrite_warehouse: bool | str = True,
+):
 	"""
-	HASH: 41effcf7543095575cec7ff7b66ee06113882253
+	HASH: 1187fb8e012f920bd53ee8353648e76588ece38b
 	REPO: https://github.com/frappe/erpnext/
 	PATH: erpnext/stock/get_item_details.py
 	METHOD: get_item_details

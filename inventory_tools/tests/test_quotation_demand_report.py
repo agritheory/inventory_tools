@@ -95,7 +95,7 @@ def test_report_with_aggregation_and_no_aggregation_warehouse():
 def test_report_with_aggregation_and_aggregation_warehouse():
 	settings = frappe.get_doc("Inventory Tools Settings", "Chelsea Fruit Co")
 	settings.sales_order_aggregation_company = settings.name
-	settings.aggregated_sales_warehouse = "Stores - CFC"
+	settings.aggregated_sales_warehouse = "Shipping - CFC"
 	settings.update_warehouse_path = True
 	settings.save()
 
@@ -127,5 +127,27 @@ def test_report_with_aggregation_and_aggregation_warehouse():
 	assert so.company == "Chelsea Fruit Co"
 	assert so.grand_total == flt(304.84, 2)
 	for item in so.items:
-		assert item.warehouse == "Stores - CFC"
+		assert item.warehouse == "Shipping - CFC"
 	frappe.delete_doc("Sales Order", so.name)
+
+
+@pytest.mark.order(39)
+def test_chelsea_fruit_sales_order_uses_standard_selling_prices():
+	"""Whole Harvest fruit order on Chelsea Fruit Co must not price Bayberry, Kepel, and Lychee at zero."""
+	so_name = frappe.db.get_value(
+		"Sales Order",
+		{
+			"customer": "Whole Harvest Grocery Group",
+			"company": "Chelsea Fruit Co",
+			"docstatus": 1,
+		},
+	)
+	assert so_name, "Setup should create the Chelsea Fruit Co sales order for Whole Harvest"
+	so = frappe.get_doc("Sales Order", so_name)
+	assert so.selling_price_list == "Standard Selling"
+	assert so.grand_total > 0
+	expected_list_rate = {"Bayberry": 0.45, "Kepel": 0.93, "Lychee": 0.21}
+	assert {item.item_code for item in so.items} == set(expected_list_rate)
+	for item in so.items:
+		assert item.price_list_rate == expected_list_rate[item.item_code]
+		assert item.rate > 0
