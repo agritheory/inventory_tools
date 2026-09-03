@@ -290,7 +290,7 @@ def packing_slip_needs_stock_reservation(packing_slip_name: str) -> bool:
 	if not uses_pack_stock_reservation(ps, "Packing Slip"):
 		return False
 	company = get_pack_company(ps, "Packing Slip")
-	if get_pack_reserve_mode(company, "Packing Slip") != "Ask":
+	if not company or get_pack_reserve_mode(company, "Packing Slip") != "Ask":
 		return False
 	return pack_lines_need_reservation(ps, "Packing Slip")
 
@@ -301,7 +301,7 @@ def shipment_needs_stock_reservation(shipment_name: str) -> bool:
 	if not uses_pack_stock_reservation(shipment, "Shipment"):
 		return False
 	company = get_pack_company(shipment, "Shipment")
-	if get_pack_reserve_mode(company, "Shipment") != "Ask":
+	if not company or get_pack_reserve_mode(company, "Shipment") != "Ask":
 		return False
 	return pack_lines_need_reservation(shipment, "Shipment")
 

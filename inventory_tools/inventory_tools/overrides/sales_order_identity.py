@@ -42,7 +42,7 @@ def stamp_packing_slip_items_from_delivery_note(packing_slip) -> None:
 			continue
 		so_identity = get_delivery_note_item_so_identity(item.get("dn_detail"))
 		if so_identity:
-			apply_so_identity(item, so_identity.against_sales_order, so_identity.so_detail)
+			apply_so_identity(item, so_identity["against_sales_order"], so_identity["so_detail"])
 
 
 def stamp_shipment_delivery_notes_from_delivery_note(shipment) -> None:
@@ -57,7 +57,7 @@ def stamp_shipment_delivery_notes_from_delivery_note(shipment) -> None:
 		if dn_detail:
 			so_identity = get_delivery_note_item_so_identity(dn_detail)
 			if so_identity:
-				apply_so_identity(row, so_identity.against_sales_order, so_identity.so_detail)
+				apply_so_identity(row, so_identity["against_sales_order"], so_identity["so_detail"])
 				continue
 
 		delivery_note = row.get("delivery_note")

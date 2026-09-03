@@ -40,7 +40,9 @@ def get_company_for_packing_slip(packing_slip_name: str) -> str:
 		if item.against_sales_order:
 			return frappe.db.get_value("Sales Order", item.against_sales_order, "company")
 
-	frappe.throw(_("Could not determine company for Packing Slip {0}").format(packing_slip_name))
+	return frappe.throw(
+		_("Could not determine company for Packing Slip {0}").format(packing_slip_name)
+	)
 
 
 def get_company_for_shipment(shipment_name: str) -> str:
@@ -61,7 +63,7 @@ def get_company_for_shipment(shipment_name: str) -> str:
 		if row.against_sales_order:
 			return frappe.db.get_value("Sales Order", row.against_sales_order, "company")
 
-	frappe.throw(_("Could not determine company for Shipment {0}").format(shipment_name))
+	return frappe.throw(_("Could not determine company for Shipment {0}").format(shipment_name))
 
 
 def ensure_alternative_sales_workflow_for_packing_slip(packing_slip_name: str) -> None:
