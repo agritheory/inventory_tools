@@ -184,6 +184,13 @@ class InventoryToolsSettings(Document):
 			frappe.clear_cache(doctype="Shipment Delivery Note")
 
 
+def sync_alternative_sales_workflow_property_setters() -> None:
+	for name in frappe.get_all("Inventory Tools Settings", pluck="name"):
+		frappe.get_doc(
+			"Inventory Tools Settings", name
+		).sync_alternative_sales_workflow_property_setters()
+
+
 @frappe.whitelist()
 def create_inventory_tools_settings(doc, method=None) -> None:
 	if not frappe.db.exists("Company", doc.name) or frappe.db.exists(

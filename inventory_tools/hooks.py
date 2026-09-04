@@ -97,7 +97,7 @@ doctype_tree_js = {"Warehouse": "public/js/custom/warehouse_tree.js"}
 # before_install = "inventory_tools.install.before_install"
 # after_install = "inventory_tools.install.after_install"
 after_migrate = [
-	"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.InventoryToolsSettings.sync_alternative_sales_workflow_property_setters",
+	"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.sync_alternative_sales_workflow_property_setters",
 ]
 
 # Uninstallation
