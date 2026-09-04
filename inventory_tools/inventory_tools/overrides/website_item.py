@@ -4,7 +4,7 @@
 import frappe
 
 from webshop.webshop.doctype.website_item.website_item import WebsiteItem
-from inventory_tools.inventory_tools.faceted_search_query import _get_product_info_for_website
+from inventory_tools.inventory_tools.faceted_search_query import get_website_product_info
 from webshop.webshop.shopping_cart.cart import get_party
 
 
@@ -27,7 +27,7 @@ class InventoryToolsWebsiteItem(WebsiteItem):
 				order_by="modified desc",
 				limit_page_length=1,
 			)
-			context.shopping_cart = _get_product_info_for_website(
+			context.shopping_cart = get_website_product_info(
 				self.item_code, skip_quotation_creation=not bool(quotation)
 			)
 			context.shopping_cart.cart_items = []

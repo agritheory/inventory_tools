@@ -485,24 +485,28 @@ def group_rows(lines, group_by):
 def build_uom_pair_group(key, group_lines):
 	undeclared_uom, stock_uom = key
 	identity_count = sum(1 for line in group_lines if line.get("identity_conversion"))
-	header = {
-		"group_label": f"{undeclared_uom} → {stock_uom}",
-		"line_count": len(group_lines),
-		"identity_count": identity_count,
-		"indent": 0,
-	}
-	children = [{**line, "indent": 1} for line in group_lines]
+	header = frappe._dict(
+		{
+			"group_label": f"{undeclared_uom} → {stock_uom}",
+			"line_count": len(group_lines),
+			"identity_count": identity_count,
+			"indent": 0,
+		}
+	)
+	children = [frappe._dict({**line, "indent": 1}) for line in group_lines]
 	return [header, *children]
 
 
 def build_document_group(key, group_lines):
 	transaction_type, transaction = key
 	identity_count = sum(1 for line in group_lines if line.get("identity_conversion"))
-	header = {
-		"group_label": f"{transaction_type} {transaction}",
-		"line_count": len(group_lines),
-		"identity_count": identity_count,
-		"indent": 0,
-	}
-	children = [{**line, "indent": 1} for line in group_lines]
+	header = frappe._dict(
+		{
+			"group_label": f"{transaction_type} {transaction}",
+			"line_count": len(group_lines),
+			"identity_count": identity_count,
+			"indent": 0,
+		}
+	)
+	children = [frappe._dict({**line, "indent": 1}) for line in group_lines]
 	return [header, *children]

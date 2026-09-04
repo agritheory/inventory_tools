@@ -1,0 +1,47 @@
+rules:
+  # ---------------------------------------------------------------------------
+  # Naming conventions
+  # ---------------------------------------------------------------------------
+
+  - id: no-underscore-prefix-function
+    patterns:
+      - pattern: |
+          def $FUNC(...):
+              ...
+      - metavariable-regex:
+          metavariable: $FUNC
+          # Matches single-underscore prefix; excludes dunder (__init__ etc.)
+          regex: '^_[^_]'
+    message: |
+      Function `$FUNC` uses a single-underscore prefix to signal private scope.
+      Restructure code or use explicit module boundaries instead of underscore
+      conventions. Suppress with `# nosemgrep: no-underscore-prefix-function`.
+    languages: [python]
+    severity: ERROR
+
+  - id: no-underscore-prefix-variable
+    patterns:
+      - pattern: $VAR = ...
+      - metavariable-regex:
+          metavariable: $VAR
+          regex: '^_[^_]'
+    message: |
+      Variable `$VAR` uses a single-underscore prefix. Avoid using underscore-prefixed
+      names to signal private scope. Suppress with `# nosemgrep: no-underscore-prefix-variable`.
+    languages: [python]
+    severity: ERROR
+
+  - id: frappe-underscore-is-translation-function
+    # In Frappe, `_` is the translation function (`from frappe import _`).
+    # Using it as a throwaway variable shadows that import.
+    pattern-either:
+      - pattern: _ = ...
+      - pattern: |
+          for _ in ...:
+              ...
+    message: |
+      `_` is Frappe's translation function. Using it as a throwaway variable shadows `from frappe import _`.
+      Name the variable explicitly or use index access instead.
+      Suppress with `# nosemgrep: frappe-underscore-is-translation-function`.
+    languages: [python]
+    severity: ERROR

@@ -1,0 +1,10 @@
+[
+	{
+		"customer": "Whole Harvest Grocery Group",
+		"first_name": "Jordan",
+		"last_name": "Ellis",
+		"email_id": "jordan.ellis@wholeharvest.example",
+		"phone": "6175550142",
+		"is_primary_contact": 1
+	}
+]

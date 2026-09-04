@@ -35,7 +35,7 @@ def validate_uom_conversion(doc, field):
 def duplicate_weight_to_uom_conversion(doc, method=None):
 	if not (doc.weight_per_unit and doc.weight_uom):
 		return
-	if len(list(filter(lambda x: x.uom == doc.weight_uom, doc.uoms))) == 1:
+	if len([row for row in doc.uoms if row.uom == doc.weight_uom]) == 1:
 		return
 
 	doc.append(

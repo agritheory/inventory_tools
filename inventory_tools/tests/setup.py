@@ -14,6 +14,8 @@ from erpnext.stock.doctype.material_request.material_request import make_purchas
 from test_utils.utils.setup_fixtures import create_quarantine_warehouse
 from erpnext.setup.utils import set_defaults_for_tests
 from frappe.desk.page.setup_wizard.setup_wizard import setup_complete
+from frappe.contacts.doctype.address.address import get_default_address
+from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.utils.data import add_months, flt, getdate, nowdate, get_datetime
 from webshop.webshop.doctype.website_item.website_item import make_website_item
 from inventory_tools.tests.fixtures import (
@@ -30,6 +32,7 @@ def read_json(name):
 
 BOMS = read_json("boms")
 CUSTOMERS = read_json("customers")
+CONTACTS = read_json("contacts")
 ITEM_DIMENSIONS = read_json("item_dimensions")
 ITEMS = read_json("items")
 ITEMS_STOCKENTRY = read_json("items_stockentry")
@@ -91,6 +94,7 @@ def create_test_data():
 	company_address.state = "MA"
 	company_address.pincode = "89077"
 	company_address.is_your_company_address = 1
+	company_address.is_primary_address = 1
 	company_address.append("links", {"link_doctype": "Company", "link_name": settings.company})
 	company_address.save()
 
@@ -117,6 +121,7 @@ def create_test_data():
 	create_suppliers(settings)
 	create_customers(settings)
 	create_items(settings)
+	create_chelsea_standard_selling_prices(settings)
 	create_workstations(settings)
 	create_operations()
 	create_boms(settings)
@@ -132,7 +137,7 @@ def create_test_data():
 	create_item_dimensions()
 	create_warehouse_dimensions()
 	create_stock_entries()
-	create_sales_order_2()
+	create_cfc_sales_order()
 
 
 def copy_image_fixtures():
@@ -193,13 +198,78 @@ def create_suppliers(settings):
 
 
 def create_customers(settings):
-	for customer_name in CUSTOMERS:
+	for index, customer_name in enumerate(CUSTOMERS):
 		customer = frappe.new_doc("Customer")
 		customer.customer_name = customer_name
 		customer.customer_group = "Commercial"
 		customer.customer_type = "Company"
 		customer.territory = "United States"
 		customer.save()
+		create_customer_address(customer_name, index)
+	create_customer_contacts()
+
+
+def create_customer_contacts():
+	for contact_data in CONTACTS:
+		customer_name = contact_data["customer"]
+		if get_default_contact("Customer", customer_name):
+			continue
+
+		existing = frappe.db.get_value(
+			"Contact Email",
+			{"email_id": contact_data["email_id"]},
+			"parent",
+		)
+		if existing:
+			contact = frappe.get_doc("Contact", existing)
+		else:
+			contact = frappe.new_doc("Contact")
+			contact.first_name = contact_data["first_name"]
+			contact.last_name = contact_data["last_name"]
+			if contact_data.get("is_primary_contact"):
+				contact.is_primary_contact = 1
+			contact.append(
+				"email_ids",
+				{"email_id": contact_data["email_id"], "is_primary": 1},
+			)
+			contact.append(
+				"phone_nos",
+				{"phone": contact_data["phone"], "is_primary_phone": 1},
+			)
+
+		if not any(
+			link.link_doctype == "Customer" and link.link_name == customer_name for link in contact.links
+		):
+			contact.append("links", {"link_doctype": "Customer", "link_name": customer_name})
+		contact.save()
+
+
+def ensure_customer_contact(customer_name):
+	contact_name = get_default_contact("Customer", customer_name)
+	if contact_name:
+		return contact_name
+
+	create_customer_contacts()
+	return get_default_contact("Customer", customer_name)
+
+
+def create_customer_address(customer_name, index):
+	address = frappe.new_doc("Address")
+	address.address_title = customer_name
+	address.address_type = "Shipping"
+	if customer_name == "Whole Harvest Grocery Group":
+		address.address_line1 = "4400 Harvest Way"
+		address.pincode = "02150"
+	else:
+		address.address_line1 = f"{100 + index} Harbor Street"
+		address.pincode = "02150"
+	address.city = "Chelsea"
+	address.state = "MA"
+	address.country = "United States"
+	address.is_primary_address = 1
+	address.is_shipping_address = 1
+	address.append("links", {"link_doctype": "Customer", "link_name": customer_name})
+	address.save()
 
 
 def setup_manufacturing_settings(settings):
@@ -438,6 +508,64 @@ def create_price_lists(settings):
 		pr.append("item_groups", {"item_group": "Baked Goods"})
 		pr.save()
 
+	if not frappe.db.exists("Pricing Rule", {"title": "Fruit Selling"}):
+		pr = frappe.new_doc("Pricing Rule")
+		pr.title = "Fruit Selling"
+		pr.selling = 1
+		pr.apply_on = "Item Group"
+		pr.company = "Chelsea Fruit Co"
+		pr.margin_type = "Percentage"
+		pr.margin_rate_or_amount = 60.0
+		pr.valid_from = settings.day
+		pr.for_price_list = "Standard Selling"
+		pr.currency = "USD"
+		pr.append("item_groups", {"item_group": "Ingredients"})
+		pr.save()
+
+
+def create_chelsea_standard_selling_prices(settings):
+	"""Standard Selling list rates for Ingredients, plus Chelsea Fruit Co Fruit Selling markup.
+
+	Idempotent: safe to re-run on a site that already has items. Without this, Chelsea
+	sales orders default to Standard Selling and price fruit at $0.
+	"""
+	if not frappe.db.exists("Pricing Rule", {"title": "Fruit Selling"}):
+		pr = frappe.new_doc("Pricing Rule")
+		pr.title = "Fruit Selling"
+		pr.selling = 1
+		pr.apply_on = "Item Group"
+		pr.company = "Chelsea Fruit Co"
+		pr.margin_type = "Percentage"
+		pr.margin_rate_or_amount = 60.0
+		pr.valid_from = settings.day
+		pr.for_price_list = "Standard Selling"
+		pr.currency = "USD"
+		pr.append("item_groups", {"item_group": "Ingredients"})
+		pr.save()
+
+	for item in ITEMS:
+		if item.get("item_group") != "Ingredients" or not item.get("item_price"):
+			continue
+		if not frappe.db.exists("Item", item.get("item_code")):
+			continue
+		if frappe.db.exists(
+			"Item Price",
+			{
+				"item_code": item.get("item_code"),
+				"price_list": "Standard Selling",
+				"selling": 1,
+			},
+		):
+			continue
+		ip = frappe.new_doc("Item Price")
+		ip.item_code = item.get("item_code")
+		ip.uom = item.get("uom")
+		ip.price_list = "Standard Selling"
+		ip.selling = 1
+		ip.valid_from = "2018-1-1"
+		ip.price_list_rate = item.get("item_price")
+		ip.save()
+
 
 def create_items(settings):
 	for item in ITEMS:
@@ -515,6 +643,16 @@ def create_items(settings):
 				ip.uom = i.stock_uom
 				ip.price_list = "Bakery Buying"
 				ip.buying = 1
+				ip.valid_from = "2018-1-1"
+				ip.price_list_rate = item.get("item_price")
+				ip.save()
+
+			if i.item_group == "Ingredients":
+				ip = frappe.new_doc("Item Price")
+				ip.item_code = i.item_code
+				ip.uom = i.stock_uom
+				ip.price_list = "Standard Selling"
+				ip.selling = 1
 				ip.valid_from = "2018-1-1"
 				ip.price_list_rate = item.get("item_price")
 				ip.save()
@@ -613,6 +751,10 @@ def create_warehouses(settings):
 		wh.parent_warehouse = "All Warehouses - APC"
 		wh.company = settings.company
 		wh.save()
+	if frappe.db.exists("Warehouse", "Stores - CFC"):
+		frappe.rename_doc("Warehouse", "Stores - CFC", "Receiving - CFC", force=True)
+	if frappe.db.exists("Warehouse", "Finished Goods - CFC"):
+		frappe.rename_doc("Warehouse", "Finished Goods - CFC", "Shipping - CFC", force=True)
 
 
 def create_warehouse_locations():
@@ -668,7 +810,7 @@ def create_quarantine_quality_control_data(settings):
 			"item_defaults",
 			{
 				"company": "Chelsea Fruit Co",
-				"default_warehouse": "Stores - CFC",
+				"default_warehouse": "Receiving - CFC",
 				"default_supplier": "Southern Fruit Supply",
 				"inspection_required_before_purchase": 1,
 			},
@@ -850,12 +992,66 @@ def create_sales_order(settings):
 	so.submit()
 
 
-def create_sales_order_2():
+def ensure_cfc_company_address():
+	company = "Chelsea Fruit Co"
+	existing = get_default_address("Company", company)
+	if existing:
+		return existing
+
+	existing_address = frappe.db.get_value(
+		"Address",
+		{"address_title": company, "address_type": "Office"},
+		"name",
+	)
+	if existing_address:
+		return existing_address
+
+	address = frappe.new_doc("Address")
+	address.address_title = company
+	address.address_type = "Office"
+	address.address_line1 = "12 Harbor Street"
+	address.city = "Chelsea"
+	address.state = "MA"
+	address.pincode = "02150"
+	address.country = "United States"
+	address.is_your_company_address = 1
+	address.is_primary_address = 1
+	address.append("links", {"link_doctype": "Company", "link_name": company})
+	address.save()
+	return address.name
+
+
+def create_cfc_sales_order():
+	settings = frappe._dict({"day": getdate().replace(month=1, day=1)})
+
+	existing = frappe.get_all(
+		"Sales Order",
+		filters={"customer": "Whole Harvest Grocery Group", "company": "Chelsea Fruit Co"},
+		fields=["name", "docstatus", "grand_total"],
+	)
+	priced = [so for so in existing if flt(so.grand_total) > 0]
+	if priced:
+		return
+	for so in existing:
+		so_doc = frappe.get_doc("Sales Order", so.name)
+		if so_doc.docstatus == 1:
+			so_doc.cancel()
+		so_doc.delete()
+
 	so = frappe.new_doc("Sales Order")
-	so.transaction_date = getdate().replace(month=1, day=1)
+	so.transaction_date = settings.day
 	so.delivery_date = getdate().replace(month=1, day=3)
 	so.customer = "Whole Harvest Grocery Group"
 	so.company = "Chelsea Fruit Co"
+	so.selling_price_list = "Standard Selling"
+	ensure_cfc_company_address()
+	customer_address = get_default_address("Customer", so.customer)
+	if not customer_address:
+		create_customer_address(so.customer, 19)
+		customer_address = get_default_address("Customer", so.customer)
+	so.customer_address = customer_address
+	so.shipping_address_name = customer_address
+	so.contact_person = ensure_customer_contact(so.customer)
 	so.append(
 		"items",
 		{
@@ -1085,7 +1281,7 @@ def create_fruit_material_request(settings):
 			"item_defaults",
 			{
 				"company": "Chelsea Fruit Co",
-				"default_warehouse": "Stores - CFC",
+				"default_warehouse": "Receiving - CFC",
 				"default_supplier": "Southern Fruit Supply",
 			},
 		)
@@ -1107,7 +1303,7 @@ def create_fruit_material_request(settings):
 				"item_code": f,
 				"qty": 100,
 				"schedule_date": mr.schedule_date,
-				"warehouse": "Stores - CFC",
+				"warehouse": "Receiving - CFC",
 				"uom": "Pound",
 			},
 		)
@@ -1125,7 +1321,7 @@ def create_quotations(settings):
 			"item_defaults",
 			{
 				"company": "Chelsea Fruit Co",
-				"default_warehouse": "Finished Goods - CFC",
+				"default_warehouse": "Shipping - CFC",
 			},
 		)
 		i.save()
@@ -1333,6 +1529,57 @@ def create_stock_entries():
 				"t_warehouse": "Storeroom - APC",
 				"qty": qty,
 				"basic_rate": _get_item_buying_rate(item_code),
+			},
+		)
+	se.save()
+	se.submit()
+
+	se = frappe.new_doc("Stock Entry")
+	se.company = "Ambrosia Pie Company"
+	se.posting_date = getdate().replace(month=1, day=1)
+	se.set_posting_time = 1
+	se.stock_entry_type = "Material Receipt"
+	for item_code, qty in (
+		("Ambrosia Pie", 100),
+		("Double Plum Pie", 50),
+		("Gooseberry Pie", 20),
+		("Kaduka Key Lime Pie", 20),
+		("Pocketful of Bay", 20),
+		("Tower of Bay-bel", 30),
+	):
+		se.append(
+			"items",
+			{
+				"item_code": item_code,
+				"t_warehouse": "Refrigerated Display - APC",
+				"qty": qty,
+				"basic_rate": _get_item_buying_rate(item_code),
+				"expense_account": "1910 - Temporary Opening - APC",
+			},
+		)
+	se.save()
+	se.submit()
+
+	se = frappe.new_doc("Stock Entry")
+	se.company = "Ambrosia Pie Company"
+	se.posting_date = getdate().replace(month=1, day=1)
+	se.set_posting_time = 1
+	se.stock_entry_type = "Material Receipt"
+	for item_code, qty in (
+		("Flour", 50),
+		("Butter", 30),
+		("Salt", 5),
+		("Parchment Paper", 50),
+		("Pie Tin", 50),
+	):
+		se.append(
+			"items",
+			{
+				"item_code": item_code,
+				"t_warehouse": "Credible Contract Baking - APC",
+				"qty": qty,
+				"basic_rate": _get_item_buying_rate(item_code),
+				"expense_account": "1910 - Temporary Opening - APC",
 			},
 		)
 	se.save()

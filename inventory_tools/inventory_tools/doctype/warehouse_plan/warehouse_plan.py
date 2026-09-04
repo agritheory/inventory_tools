@@ -35,21 +35,21 @@ class WarehousePlan(Document):
 	def graph(self) -> "Grid_TSP | None":
 		g = frappe.cache.get_value(GRAPH_CACHE_KEY.format(self.name))
 		if g is None and self.matrix:
-			g = self._build_graph()
+			g = self.build_graph()
 			frappe.cache.set_value(GRAPH_CACHE_KEY.format(self.name), g)
 		return g
 
-	def _build_graph(self) -> "Grid_TSP":
+	def build_graph(self) -> "Grid_TSP":
 		grid = np.array(safe_json_loads(self.matrix))
 		return Grid_TSP(grid, scale=self.horizontal / grid.shape[1])
 
 	def on_load(self):
 		if self.matrix and not frappe.cache.get_value(GRAPH_CACHE_KEY.format(self.name)):
-			frappe.cache.set_value(GRAPH_CACHE_KEY.format(self.name), self._build_graph())
+			frappe.cache.set_value(GRAPH_CACHE_KEY.format(self.name), self.build_graph())
 
 	def on_save(self):
 		if self.matrix:
-			frappe.cache.set_value(GRAPH_CACHE_KEY.format(self.name), self._build_graph())
+			frappe.cache.set_value(GRAPH_CACHE_KEY.format(self.name), self.build_graph())
 		else:
 			frappe.cache.delete_value(GRAPH_CACHE_KEY.format(self.name))
 
@@ -173,13 +173,13 @@ class Grid_TSP:
 		try:
 			path = nx.shortest_path(self.G, start, end)
 		except nx.NetworkXNoPath:
-			print("No path found between the given nodes.")
+			frappe.logger("warehouse_plan").warning("No path found between the given nodes.")
 			path = []
 		except nx.NodeNotFound as e:
-			print(f"Error: {e}")
+			frappe.logger("warehouse_plan").warning(f"Error: {e}")
 			path = []
 		except Exception as e:
-			print(f"Unexpected error: {e}")
+			frappe.logger("warehouse_plan").error(f"Unexpected error: {e}")
 			path = []
 
 		distance = sum(self.G[u][v]["weight"] for u, v in zip(path, path[1:]))
@@ -203,7 +203,7 @@ class Grid_TSP:
 		else:
 			return (pickup_order, None, None)
 
-	def _plot(self, tsp_route: list[int] | None = None) -> None:
+	def plot(self, tsp_route: list[int] | None = None) -> None:
 		"""Debug plot of the grid and (optional) TSP route."""
 		import matplotlib.pyplot as plt
 

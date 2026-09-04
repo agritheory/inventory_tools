@@ -31,6 +31,11 @@
 		"allow_alternative_workstations",
 		"uoms_section",
 		"enforce_uoms",
+		"alternative_sales_workflow_section",
+		"enable_alternative_sales_workflow",
+		"reserve_stock_on_packing_slip",
+		"column_break_pack_reserve",
+		"reserve_stock_on_shipment",
 		"quarantine_quality_control_section",
 		"enable_quarantine_workflow",
 		"default_quarantine_warehouse",
@@ -217,6 +222,41 @@
 			"options": "Use Source Document Order\nFIFO\nLIFO\nDeplete maximum number of Bins\nDeplete minimum number of Bins"
 		},
 		{
+			"fieldname": "alternative_sales_workflow_section",
+			"fieldtype": "Section Break",
+			"label": "Alternative Sales Workflow"
+		},
+		{
+			"default": "0",
+			"description": "When enabled, adds Create mappings from Sales Order and staging Stock Entry to Packing Slip and Shipment, and from pack documents to Delivery Note. Existing Create buttons are not removed.",
+			"fieldname": "enable_alternative_sales_workflow",
+			"fieldtype": "Check",
+			"label": "Enable Alternative Sales Workflow"
+		},
+		{
+			"default": "Always",
+			"depends_on": "eval:doc.enable_alternative_sales_workflow",
+			"description": "When Stock Reservation is enabled in Stock Settings, controls whether submitting a Packing Slip creates Stock Reservation Entries for unreserved Sales Order lines.",
+			"fieldname": "reserve_stock_on_packing_slip",
+			"fieldtype": "Select",
+			"label": "Reserve Stock on Packing Slip",
+			"options": "Never\nAlways\nAsk"
+		},
+		{
+			"depends_on": "eval:doc.enable_alternative_sales_workflow",
+			"fieldname": "column_break_pack_reserve",
+			"fieldtype": "Column Break"
+		},
+		{
+			"default": "Ask",
+			"depends_on": "eval:doc.enable_alternative_sales_workflow",
+			"description": "When Stock Reservation is enabled in Stock Settings, controls whether submitting a Shipment creates Stock Reservation Entries. Ask is recommended when Shipments are used for carrier quotes before picking.",
+			"fieldname": "reserve_stock_on_shipment",
+			"fieldtype": "Select",
+			"label": "Reserve Stock on Shipment",
+			"options": "Never\nAlways\nAsk"
+		},
+		{
 			"fieldname": "quarantine_quality_control_section",
 			"fieldtype": "Section Break",
 			"label": "Quarantine Quality Control"
@@ -333,7 +373,7 @@
 	],
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2026-01-21 08:24:16.272533",
+	"modified": "2026-09-02 11:05:00.000000",
 	"modified_by": "Administrator",
 	"module": "Inventory Tools",
 	"name": "Inventory Tools Settings",
