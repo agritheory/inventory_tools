@@ -146,7 +146,7 @@ class InventoryToolsSettings(Document):
 	def any_company_has_alternative_sales_workflow(self) -> bool:
 		if self.enable_alternative_sales_workflow:
 			return True
-		filters = {"enable_alternative_sales_workflow": 1}
+		filters: dict[str, int | list[str]] = {"enable_alternative_sales_workflow": 1}
 		if self.name:
 			filters["name"] = ["!=", self.name]
 		return bool(frappe.db.exists("Inventory Tools Settings", filters))
