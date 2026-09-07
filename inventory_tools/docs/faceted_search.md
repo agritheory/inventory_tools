@@ -5,7 +5,7 @@ For license information, please see license.txt-->
 # Faceted Search
 
 <div class="byline">
-  Rohan Bansal, Devarsh Bhatt, coleandreoli, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2026-03-04
+  Rohan Bansal, Devarsh Bhatt, coleandreoli, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2026-09-01
 </div>
 
 

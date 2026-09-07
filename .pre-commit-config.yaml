@@ -63,6 +63,16 @@ repos:
         args: ['--directory', '.', '--app', 'inventory_tools', '--base-branch', 'version-15']
       - id: check_code_duplication
         args: ['--max-clones', '60', '--max-percentage', '5.0']
+      - id: semgrep_fmt
+        args:
+          - "--config=.semgrep.yml"
+          - "--config=https://raw.githubusercontent.com/frappe/semgrep-rules/develop/rules/frappe_correctness.yml"
+          - "--disable-version-check"
+          - "--skip-unknown-extensions"
+      - id: mypy
+        pass_filenames: false
+        always_run: true
+        args: ['./inventory_tools/.', '--install-types', '--non-interactive']
       - id: static_analysis
         args: ['.']
       - id: semgrep_fmt

@@ -352,7 +352,7 @@ def create_pos(company, filters, rows, companies=None):
 	rows = [frappe._dict(r) for r in json.loads(rows)] if isinstance(rows, str) else rows
 	requesting = parse_companies(companies)
 	if not rows:
-		return frappe._("0 Purchase Orders created")
+		return
 	counter = 0
 	aggregation = configured_purchase_aggregation()
 	aggregation_company = aggregation.purchase_order_aggregation_company if aggregation else None

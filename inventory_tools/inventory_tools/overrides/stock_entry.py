@@ -188,7 +188,6 @@ class InventoryToolsStockEntry(StockEntry):
 		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
 		METHOD: get_items
 		"""
-
 		super().get_items()
 		if self.work_order and self.purpose == "Manufacture":
 			work_order = frappe.get_doc("Work Order", self.work_order)

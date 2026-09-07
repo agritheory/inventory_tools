@@ -82,30 +82,14 @@ async function create_sis(frm) {
 	)
 }
 
-async function locations_for_dialog(frm, include_own_company) {
-	let items = frm.doc.items.filter(r => r.rate != 0.0 && r.stock_qty > 0.0)
-	const mr_names = [...new Set(items.map(r => r.material_request).filter(Boolean))]
-	let mr_company = {}
-	if (mr_names.length) {
-		const mrs = await frappe.db.get_list('Material Request', {
-			filters: { name: ['in', mr_names] },
-			fields: ['name', 'company'],
-			limit: mr_names.length,
-		})
-		for (const mr of mrs) {
-			mr_company[mr.name] = mr.company
-		}
-	}
-	return items
-		.map(r => {
-			const requesting_company = (r.material_request && mr_company[r.material_request]) || r.requesting_company
-			return Object.assign({}, r, { requesting_company })
-		})
-		.filter(r => include_own_company || r.requesting_company != frm.doc.company)
-}
-
 async function create_dialog(frm, title, label, method, primary_action_label, include_own_company) {
-	let items_data = await locations_for_dialog(frm, include_own_company)
+	let items_data = await frappe.xcall(
+		'inventory_tools.inventory_tools.overrides.purchase_order.get_multi_company_po_receipt_rows',
+		{ docname: frm.doc.name }
+	)
+	if (!include_own_company) {
+		items_data = items_data.filter(r => r.requesting_company != frm.doc.company)
+	}
 	return new Promise(resolve => {
 		let table_fields = {
 			fieldname: 'locations',
@@ -114,6 +98,12 @@ async function create_dialog(frm, title, label, method, primary_action_label, in
 			editable_grid: 0,
 			read_only: 1,
 			fields: [
+				{
+					fieldtype: 'Data',
+					fieldname: 'name',
+					label: __('Name'),
+					hidden: 1,
+				},
 				{
 					fieldtype: 'Data',
 					fieldname: 'requesting_company',

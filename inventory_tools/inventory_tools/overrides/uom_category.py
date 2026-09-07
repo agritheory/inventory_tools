@@ -333,7 +333,7 @@ class InventoryToolsUOMCategory(UOMCategory):
 			rows=payload["rows"],
 			complete=1,
 		)
-		frappe.db.commit()  # nosemgrep: frappe-manual-commit — persist before realtime complete
+		frappe.db.commit()  # nosemgrep: frappe-manual-commit
 
 	@frappe.whitelist()
 	def start_disable_unused_uoms(self) -> dict[str, Any]:
@@ -388,7 +388,7 @@ class InventoryToolsUOMCategory(UOMCategory):
 			count=len(to_disable),
 			complete=1,
 		)
-		frappe.db.commit()  # nosemgrep: frappe-manual-commit — persist before realtime complete
+		frappe.db.commit()  # nosemgrep: frappe-manual-commit
 
 	@frappe.whitelist()
 	def start_enable_unused_uoms(self) -> dict[str, Any]:
@@ -443,4 +443,4 @@ class InventoryToolsUOMCategory(UOMCategory):
 			count=len(to_enable),
 			complete=1,
 		)
-		frappe.db.commit()  # nosemgrep: frappe-manual-commit — persist before realtime complete
+		frappe.db.commit()  # nosemgrep: frappe-manual-commit

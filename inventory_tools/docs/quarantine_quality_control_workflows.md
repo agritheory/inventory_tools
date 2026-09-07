@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Quarantine Quality Control
 
 <div class="byline">
-  IshwaryaM1030 and Tyler Matteson 2026-03-04
+  IshwaryaM1030 and Tyler Matteson 2026-09-01
 </div>
 
 

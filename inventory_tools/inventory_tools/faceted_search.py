@@ -51,8 +51,9 @@ def show_faceted_search_components(doctype="Item", filters=None):
 			min_value, max_value = min(numeric_values), max(numeric_values)
 			attribute.values = [min_value, max_value]
 		elif attribute.date_values and values:
-			date_times = [localtime(int(flt(v))) for v in values]
-			min_date, max_date = min(date_times), max(date_times)
+			date_values = [localtime(int(flt(v))) for v in values]
+			min_value, max_value = min(date_values), max(date_values)
+			attribute.values = [min_value, max_value]
 		elif attribute.component == "FacetedSearchColorPicker":
 			values = [
 				tuple(r.values())

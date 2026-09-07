@@ -183,7 +183,7 @@ Should return a union of existing specification values and specification attribu
 
 @frappe.whitelist()
 def get_specification_values(reference_doctype, reference_name, specification=None):
-	rows = []
+	results = []
 	if not specification:
 		specs = get_applicable_specification(frappe.get_doc(reference_doctype, reference_name))
 	else:
@@ -203,7 +203,7 @@ def get_specification_values(reference_doctype, reference_name, specification=No
 				order_by="attribute ASC, value ASC",
 			)
 			if not r:
-				rows.append(
+				results.append(
 					frappe._dict(
 						{
 							"row_name": None,
@@ -215,9 +215,9 @@ def get_specification_values(reference_doctype, reference_name, specification=No
 					)
 				)
 			else:
-				rows.extend(r)
+				[results.append(i) for i in r]
 
-	return rows
+	return results
 
 
 @frappe.whitelist()
@@ -239,10 +239,10 @@ def create_specification_values(
 			continue
 		value = specification_values.get(row.attribute_name) or None
 		if frappe.flags.in_test:
-			create_specification_value_records(specification, row, value)
+			write_specification_value_rows(specification, row, value)
 		else:
 			frappe.enqueue(
-				create_specification_value_records,
+				write_specification_value_rows,
 				specification=specification,
 				attribute=row,
 				value=value,
@@ -250,7 +250,7 @@ def create_specification_values(
 			)
 
 
-def create_specification_value_records(specification, attribute, value):
+def write_specification_value_rows(specification, attribute, value):
 	apply_on_filters = []
 	if specification.apply_on:
 		apply_on_filters.append([frappe.scrub(specification.dt), "=", specification.apply_on])
@@ -340,15 +340,15 @@ def get_apply_on_fields(doctype):
 # @frappe.readonly()
 @frappe.validate_and_sanitize_search_inputs
 def specification_query(doctype, txt, searchfield, start, page_len, filters):
-	search_filters = {}
+	query_filters = {}
 	if filters.get("reference_doctype") != "Specification":
 		doc = frappe.get_doc(filters.get("reference_doctype"), filters.get("reference_name"))
-		search_filters["name"] = ["in", get_applicable_specification(doc)]
+		query_filters["name"] = ["in", get_applicable_specification(doc)]
 
 	search_fields = get_fields("Specification")
 	specifications = frappe.get_all(
 		"Specification",
-		filters=search_filters,
+		filters=query_filters,
 		fields=search_fields,
 		limit_start=start,
 		limit_page_length=page_len,
