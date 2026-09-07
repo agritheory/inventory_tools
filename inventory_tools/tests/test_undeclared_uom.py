@@ -31,11 +31,11 @@ def report_filters(**overrides):
 
 
 def line_rows(rows):
-	return [row for row in rows if row.get("indent") == 1]
+	return [frappe._dict(row) for row in rows if row.get("indent") == 1]
 
 
 def header_rows(rows):
-	return [row for row in rows if row.get("indent") == 0]
+	return [frappe._dict(row) for row in rows if row.get("indent") == 0]
 
 
 def cleanup_item_documents(item_code):
@@ -212,10 +212,13 @@ def test_description_only_line_is_ignored():
 		},
 	)
 	so.append("items", {"description": "Gift wrapping", "qty": 1})
+	so.flags.ignore_mandatory = True
 	so.save()
 	so.items[0].uom = "Pound"
 	so.items[0].conversion_factor = 1
+	so.flags.ignore_mandatory = True
 	so.save()
+	so.flags.ignore_mandatory = True
 	so.submit()
 
 	findings = findings_for_item(DESC_ITEM)

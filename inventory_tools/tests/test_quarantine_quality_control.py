@@ -67,7 +67,7 @@ def create_bayberry_po_pr(submit_pr=True):
 	mr.transaction_date = getdate()
 	mr.schedule_date = getdate()
 	mr.append(
-		"items", {"item_code": "Bayberry", "qty": 100, "warehouse": "Stores - CFC", "uom": "Pound"}
+		"items", {"item_code": "Bayberry", "qty": 100, "warehouse": "Receiving - CFC", "uom": "Pound"}
 	)
 	mr.submit()
 
@@ -115,7 +115,7 @@ def test_purchase_receipt_routes_to_quarantine_when_enabled():
 
 	bayberry_row = next(r for r in pr.items if r.item_code == "Bayberry")
 	assert bayberry_row.warehouse == "Quarantine - CFC"
-	assert bayberry_row.intended_warehouse == "Stores - CFC"
+	assert bayberry_row.intended_warehouse == "Receiving - CFC"
 	assert not bayberry_row.quality_inspection
 
 	sle = frappe.db.get_value(
@@ -158,7 +158,7 @@ def test_release_from_quarantine_on_quality_inspection_accept():
 
 	assert se.docstatus == 0  # Draft — user must review and submit
 	assert se.items[0].s_warehouse == "Quarantine - CFC"
-	assert se.items[0].t_warehouse == "Stores - CFC"
+	assert se.items[0].t_warehouse == "Receiving - CFC"
 	assert se.items[0].qty == full_qty  # full PR qty, not sample_size
 
 
@@ -243,7 +243,7 @@ def test_missing_quarantine_warehouse_throws():
 			"item_defaults",
 			{
 				"company": "Chelsea Fruit Co",
-				"default_warehouse": "Stores - CFC",
+				"default_warehouse": "Receiving - CFC",
 				"inspection_required_before_purchase": 1,
 			},
 		)
@@ -256,7 +256,7 @@ def test_missing_quarantine_warehouse_throws():
 	mr.transaction_date = getdate()
 	mr.schedule_date = getdate()
 	mr.append(
-		"items", {"item_code": "Cocoplum", "qty": 10, "warehouse": "Stores - CFC", "uom": "Pound"}
+		"items", {"item_code": "Cocoplum", "qty": 10, "warehouse": "Receiving - CFC", "uom": "Pound"}
 	)
 	mr.submit()
 
@@ -550,10 +550,10 @@ def test_multi_item_pr_partial_quarantine_routing():
 	mr.transaction_date = getdate()
 	mr.schedule_date = getdate()
 	mr.append(
-		"items", {"item_code": "Bayberry", "qty": 50, "warehouse": "Stores - CFC", "uom": "Pound"}
+		"items", {"item_code": "Bayberry", "qty": 50, "warehouse": "Receiving - CFC", "uom": "Pound"}
 	)
 	mr.append(
-		"items", {"item_code": "Cocoplum", "qty": 20, "warehouse": "Stores - CFC", "uom": "Pound"}
+		"items", {"item_code": "Cocoplum", "qty": 20, "warehouse": "Receiving - CFC", "uom": "Pound"}
 	)
 	mr.submit()
 
@@ -570,9 +570,9 @@ def test_multi_item_pr_partial_quarantine_routing():
 	cocoplum_row = next(r for r in pr.items if r.item_code == "Cocoplum")
 
 	assert bayberry_row.warehouse == "Quarantine - CFC"
-	assert bayberry_row.intended_warehouse == "Stores - CFC"
+	assert bayberry_row.intended_warehouse == "Receiving - CFC"
 
-	assert cocoplum_row.warehouse == "Stores - CFC"
+	assert cocoplum_row.warehouse == "Receiving - CFC"
 	assert not cocoplum_row.intended_warehouse
 
 
@@ -593,7 +593,7 @@ def test_release_no_intended_warehouse_raises():
 		{
 			"item_code": "Bayberry",
 			"qty": 5,
-			"s_warehouse": "Stores - CFC",
+			"s_warehouse": "Receiving - CFC",
 			"t_warehouse": "Quarantine - CFC",
 			"uom": "Pound",
 		},

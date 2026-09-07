@@ -47,12 +47,12 @@ def show_faceted_search_components(doctype="Item", filters=None):
 			key=lambda x: x or "",
 		)
 		if attribute.numeric_values and values:
-			_values = [flt(v) for v in values]
-			_min, _max = min(_values), max(_values)
-			attribute.values = [_min, _max]
+			numeric_values = [flt(v) for v in values]
+			min_value, max_value = min(numeric_values), max(numeric_values)
+			attribute.values = [min_value, max_value]
 		elif attribute.date_values and values:
-			_values = [localtime(int(flt(v))) for v in values]
-			_min, _max = min(_values), max(_values)
+			date_times = [localtime(int(flt(v))) for v in values]
+			min_date, max_date = min(date_times), max(date_times)
 		elif attribute.component == "FacetedSearchColorPicker":
 			values = [
 				tuple(r.values())

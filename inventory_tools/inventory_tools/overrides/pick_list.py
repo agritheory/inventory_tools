@@ -7,7 +7,7 @@ from frappe.utils.data import nowdate
 
 
 class InventoryToolsPickList(ERPNextPickList):
-	def _get_default_strategy(self) -> str | None:
+	def get_default_strategy(self) -> str | None:
 		if not self.company:
 			return None
 		return frappe.db.get_value(
@@ -17,7 +17,7 @@ class InventoryToolsPickList(ERPNextPickList):
 		)
 
 	def after_mapping(self, source_doc):  # noqa
-		strategy = self._get_default_strategy()
+		strategy = self.get_default_strategy()
 		self.set_onload("default_route_optimization_strategy", strategy or "Use Source Document Order")
 		if not strategy or strategy == "Use Source Document Order" or not self.get("locations"):
 			return
@@ -30,13 +30,13 @@ class InventoryToolsPickList(ERPNextPickList):
 			pass
 
 	def onload(self):
-		strategy = self._get_default_strategy()
+		strategy = self.get_default_strategy()
 		self.set_onload("default_route_optimization_strategy", strategy or "Use Source Document Order")
 
 
 class PathFinder:
 	@staticmethod
-	def _process_entries(item_code, qty, company, order_by_clauses, plan_warehouses, to_date):
+	def process_entries(item_code, qty, company, order_by_clauses, plan_warehouses, to_date):
 		SLE = frappe.qb.DocType("Stock Ledger Entry")
 		query = (
 			frappe.qb.from_(SLE)
@@ -78,7 +78,7 @@ class PathFinder:
 	def FIFO(item_code, qty, company, plan_warehouses=None, to_date=None):
 		SLE = frappe.qb.DocType("Stock Ledger Entry")
 		order_by = [(SLE.posting_date, frappe.qb.asc), (SLE.creation, frappe.qb.asc)]
-		return PathFinder._process_entries(
+		return PathFinder.process_entries(
 			item_code, qty, company, order_by, plan_warehouses, to_date or nowdate()
 		)
 
@@ -86,7 +86,7 @@ class PathFinder:
 	def LIFO(item_code, qty, company, plan_warehouses=None, to_date=None):
 		SLE = frappe.qb.DocType("Stock Ledger Entry")
 		order_by = [(SLE.posting_date, frappe.qb.desc), (SLE.creation, frappe.qb.desc)]
-		return PathFinder._process_entries(
+		return PathFinder.process_entries(
 			item_code, qty, company, order_by, plan_warehouses, to_date or nowdate()
 		)
 
@@ -98,7 +98,7 @@ class PathFinder:
 			(SLE.posting_date, frappe.qb.asc),
 			(SLE.creation, frappe.qb.asc),
 		]
-		return PathFinder._process_entries(
+		return PathFinder.process_entries(
 			item_code, qty, company, order_by, plan_warehouses, to_date or nowdate()
 		)
 
@@ -110,7 +110,7 @@ class PathFinder:
 			(SLE.posting_date, frappe.qb.asc),
 			(SLE.creation, frappe.qb.asc),
 		]
-		return PathFinder._process_entries(
+		return PathFinder.process_entries(
 			item_code, qty, company, order_by, plan_warehouses, to_date or nowdate()
 		)
 
