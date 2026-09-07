@@ -143,11 +143,34 @@ class InventoryToolsSettings(Document):
 			frappe.db.set_value("Inventory Tools Settings", its, "show_on_website", self.show_on_website)
 			frappe.db.set_value("Inventory Tools Settings", its, "show_in_listview", self.show_in_listview)
 
-	def sync_alternative_sales_workflow_property_setters(self) -> None:
-		enabled = frappe.db.exists(
-			"Inventory Tools Settings",
-			{"enable_alternative_sales_workflow": 1},
+	def any_company_has_alternative_sales_workflow(self) -> bool:
+		if self.enable_alternative_sales_workflow:
+			return True
+		filters = {"enable_alternative_sales_workflow": 1}
+		if self.name:
+			filters["name"] = ["!=", self.name]
+		return bool(frappe.db.exists("Inventory Tools Settings", filters))
+
+	def alternative_sales_workflow_property_setter_names(
+		self, doc_type: str, field_name: str, property_name: str
+	) -> list[str]:
+		names = frappe.get_all(
+			"Property Setter",
+			{
+				"doc_type": doc_type,
+				"field_name": field_name,
+				"property": property_name,
+				"module": "Inventory Tools",
+			},
+			pluck="name",
 		)
+		legacy_name = f"{doc_type}-{field_name}-{property_name}-alternative-sales-workflow"
+		if frappe.db.exists("Property Setter", legacy_name) and legacy_name not in names:
+			names.append(legacy_name)
+		return names
+
+	def sync_alternative_sales_workflow_property_setters(self) -> None:
+		enabled = self.any_company_has_alternative_sales_workflow()
 		seen_doctypes = set()
 		for (
 			doc_type,
@@ -156,10 +179,14 @@ class InventoryToolsSettings(Document):
 			property_type,
 			enabled_value,
 		) in self.ALTERNATIVE_SALES_WORKFLOW_PROPERTY_SETTERS:
-			setter_name = f"{doc_type}-{field_name}-{property_name}-alternative-sales-workflow"
+			existing = self.alternative_sales_workflow_property_setter_names(
+				doc_type, field_name, property_name
+			)
 			if enabled:
-				if frappe.db.exists("Property Setter", setter_name):
-					frappe.db.set_value("Property Setter", setter_name, "value", enabled_value)
+				if existing:
+					frappe.db.set_value("Property Setter", existing[0], "value", enabled_value)
+					for extra in existing[1:]:
+						frappe.delete_doc("Property Setter", extra, force=1)
 				else:
 					property_setter = frappe.new_doc("Property Setter")
 					property_setter.doctype_or_field = "DocField"
@@ -169,10 +196,10 @@ class InventoryToolsSettings(Document):
 					property_setter.property_type = property_type
 					property_setter.value = enabled_value
 					property_setter.module = "Inventory Tools"
-					property_setter.name = setter_name
 					property_setter.insert(ignore_permissions=True)
-			elif frappe.db.exists("Property Setter", setter_name):
-				frappe.delete_doc("Property Setter", setter_name, force=1)
+			else:
+				for setter_name in existing:
+					frappe.delete_doc("Property Setter", setter_name, force=1)
 			seen_doctypes.add(doc_type)
 
 		for doc_type in seen_doctypes:

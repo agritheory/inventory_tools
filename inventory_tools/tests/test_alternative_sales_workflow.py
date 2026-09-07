@@ -13,6 +13,9 @@ from erpnext.selling.doctype.sales_order.sales_order import create_pick_list, ma
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
 from erpnext.stock.doctype.pick_list.pick_list import create_stock_entry
 
+from inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings import (
+	InventoryToolsSettings,
+)
 from inventory_tools.inventory_tools.overrides.alternative_sales_workflow import (
 	is_alternative_sales_workflow_enabled,
 )
@@ -682,3 +685,75 @@ def test_packing_slip_cancel_cancels_pack_stock_reservation():
 		restore_pack_reserve_modes(previous_modes)
 		restore_stock_reservation(previous_reservation)
 		restore_apc_alternative_sales_workflow(previous_alt)
+
+
+def alternative_sales_workflow_property_setter_names():
+	settings = frappe.get_doc("Inventory Tools Settings", COMPANY)
+	names = []
+	for (
+		doc_type,
+		field_name,
+		property_name,
+		property_type,
+		enabled_value,
+	) in InventoryToolsSettings.ALTERNATIVE_SALES_WORKFLOW_PROPERTY_SETTERS:
+		names.extend(
+			settings.alternative_sales_workflow_property_setter_names(doc_type, field_name, property_name)
+		)
+	return names
+
+
+def alternative_sales_workflow_property_setter_values():
+	values = {}
+	for (
+		doc_type,
+		field_name,
+		property_name,
+		property_type,
+		enabled_value,
+	) in InventoryToolsSettings.ALTERNATIVE_SALES_WORKFLOW_PROPERTY_SETTERS:
+		values[(doc_type, field_name, property_name)] = frappe.db.get_value(
+			"Property Setter",
+			{
+				"doc_type": doc_type,
+				"field_name": field_name,
+				"property": property_name,
+				"module": "Inventory Tools",
+			},
+			"value",
+		)
+	return values
+
+
+@pytest.mark.order(128)
+def test_alternative_sales_workflow_property_setters_apply_on_first_save():
+	previous = configure_apc_alternative_sales_workflow(True)
+	try:
+		assert is_alternative_sales_workflow_enabled(COMPANY)
+		assert len(alternative_sales_workflow_property_setter_names()) == 3
+		assert alternative_sales_workflow_property_setter_values() == {
+			("Packing Slip", "delivery_note", "reqd"): "0",
+			("Shipment Delivery Note", "delivery_note", "reqd"): "0",
+			("Shipment Delivery Note", "delivery_note", "hidden"): "1",
+		}
+	finally:
+		restore_apc_alternative_sales_workflow(previous)
+
+
+@pytest.mark.order(130)
+def test_alternative_sales_workflow_property_setters_removed_on_first_disable():
+	previous = configure_apc_alternative_sales_workflow(True)
+	try:
+		assert alternative_sales_workflow_property_setter_names()
+		configure_apc_alternative_sales_workflow(False)
+		assert not alternative_sales_workflow_property_setter_names()
+		assert not frappe.db.exists(
+			"Property Setter",
+			"Packing Slip-delivery_note-reqd-alternative-sales-workflow",
+		)
+		assert not frappe.db.exists(
+			"Property Setter",
+			{"name": "Packing Slip-delivery_note-reqd", "module": "Inventory Tools"},
+		)
+	finally:
+		restore_apc_alternative_sales_workflow(previous)
