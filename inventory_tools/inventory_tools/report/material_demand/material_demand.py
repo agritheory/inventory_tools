@@ -239,7 +239,8 @@ def create(company, email_template, filters, creation_type, rows, companies=None
 		message = create_rfqs(company, email_template, filters, rows, companies=companies)
 	elif creation_type == "item_based":
 		message = create_item_based(company, email_template, filters, rows, companies=companies)
-	frappe.msgprint(message, alert=True, indicator="green")
+	if message:
+		frappe.msgprint(message, alert=True, indicator="green")
 
 
 @frappe.whitelist()

@@ -22,6 +22,7 @@ from erpnext.controllers.accounts_controller import (
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 from frappe import _, throw
+from frappe.contacts.doctype.address.address import get_company_address
 from frappe.utils import cint, flt
 from frappe.model.document import Document
 
@@ -77,6 +78,22 @@ def multi_company_receipt_applies_putaway_rule(company):
 	)
 
 
+def address_belongs_to_company(address_name: str | None, company: str) -> bool:
+	if not address_name:
+		return False
+	return bool(
+		frappe.db.exists(
+			"Dynamic Link",
+			{
+				"parent": address_name,
+				"parenttype": "Address",
+				"link_doctype": "Company",
+				"link_name": company,
+			},
+		)
+	)
+
+
 def apply_requesting_company_fields(doc, company):
 	cost_center = get_default_cost_center(company)
 	if doc.meta.get_field("cost_center"):
@@ -85,6 +102,24 @@ def apply_requesting_company_fields(doc, company):
 		)
 		if not doc.cost_center or (cost_center_company and cost_center_company != company):
 			doc.cost_center = cost_center
+
+	company_address = get_company_address(company)
+	if doc.meta.get_field("billing_address") and company_address.get("company_address"):
+		doc.billing_address = company_address.company_address
+		if doc.meta.get_field("billing_address_display"):
+			doc.billing_address_display = company_address.company_address_display
+
+	is_drop_ship = any(getattr(row, "delivered_by_supplier", 0) for row in doc.get("items") or [])
+	if (
+		doc.meta.get_field("shipping_address")
+		and company_address.get("company_address")
+		and not is_drop_ship
+		and not address_belongs_to_company(doc.shipping_address, company)
+	):
+		doc.shipping_address = company_address.company_address
+		if doc.meta.get_field("shipping_address_display"):
+			doc.shipping_address_display = company_address.company_address_display
+
 	for row in doc.items:
 		if row.get("material_request_item"):
 			mr_warehouse = frappe.db.get_value(
