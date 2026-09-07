@@ -31,11 +31,11 @@ def report_filters(**overrides):
 
 
 def line_rows(rows):
-	return [row for row in rows if row.get("indent") == 1]
+	return [frappe._dict(row) for row in rows if row.get("indent") == 1]
 
 
 def header_rows(rows):
-	return [row for row in rows if row.get("indent") == 0]
+	return [frappe._dict(row) for row in rows if row.get("indent") == 0]
 
 
 def cleanup_item_documents(item_code):

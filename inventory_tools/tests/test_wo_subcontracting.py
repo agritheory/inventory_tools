@@ -120,9 +120,15 @@ def test_manufacture_se_routes_correctly_and_submits():
 				not row.t_warehouse
 			), f"Raw material {row.item_code}: t_warehouse should be empty, got {row.t_warehouse}"
 
-	# Seed stock into WIP warehouse so the SE can be submitted
+	# Seed stock into WIP warehouse so the SE can be submitted.
+	# Post the receipt earlier the same day so SLE rebuild sees it before Manufacture.
 	material_receipt = frappe.copy_doc(se)
 	material_receipt.stock_entry_type = "Material Receipt"
+	material_receipt.work_order = None
+	material_receipt.fg_completed_qty = 0
+	material_receipt.set_posting_time = 1
+	material_receipt.posting_date = se.posting_date
+	material_receipt.posting_time = "00:00:01"
 	finished_rows = [row for row in material_receipt.items if row.is_finished_item]
 	for row in finished_rows:
 		material_receipt.remove(row)
@@ -140,6 +146,8 @@ def test_manufacture_se_routes_correctly_and_submits():
 	material_receipt.save()
 	material_receipt.submit()
 
+	se.set_posting_time = 1
+	se.posting_time = "12:00:00"
 	se.save()
 	se.submit()
 

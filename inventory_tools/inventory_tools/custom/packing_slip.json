@@ -1,0 +1,19 @@
+{
+	"custom_fields": [
+		{
+			"allow_on_submit": 1,
+			"default": "0",
+			"dt": "Packing Slip",
+			"fieldname": "reserve_stock_on_submit",
+			"fieldtype": "Check",
+			"hidden": 1,
+			"label": "Reserve Stock On Submit",
+			"module": "Inventory Tools",
+			"name": "Packing Slip-reserve_stock_on_submit",
+			"no_copy": 1
+		}
+	],
+	"doctype": "Packing Slip",
+	"property_setters": [],
+	"sync_on_migrate": 1
+}

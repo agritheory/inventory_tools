@@ -4,11 +4,28 @@
 frappe.ui.form.on('Inventory Tools Settings', {
 	onload(frm) {
 		set_filters(frm)
+		toggle_pack_stock_reservation_fields(frm)
 	},
 	refresh(frm) {
 		set_filters(frm)
+		toggle_pack_stock_reservation_fields(frm)
+	},
+	enable_alternative_sales_workflow(frm) {
+		toggle_pack_stock_reservation_fields(frm)
 	},
 })
+
+function toggle_pack_stock_reservation_fields(frm) {
+	const reserveFields = ['reserve_stock_on_packing_slip', 'reserve_stock_on_shipment', 'column_break_pack_reserve']
+	const showWhenAltWorkflow = frm.doc.enable_alternative_sales_workflow
+
+	frappe.db.get_single_value('Stock Settings', 'enable_stock_reservation').then(enabled => {
+		const show = showWhenAltWorkflow && cint(enabled)
+		reserveFields.forEach(fieldname => {
+			frm.toggle_display(fieldname, show)
+		})
+	})
+}
 
 function set_filters(frm) {
 	frm.set_query('cartonization_doctypes', () => {
