@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Cartonization Configuration & Validation Guide
 
 <div class="byline">
-  IshwaryaM1030, Tyler Matteson, and Francisco Roldán 2026-09-01
+  AgriTheory 2026-09-07
 </div>
 
 
@@ -96,17 +96,24 @@ Examples:
 ## 3. Physical Dimension Doctype Integration
 
 Physical dimensions are stored in the **Physical Dimension** doctype.
-To set up dimensions for an item or warehouse, create a Physical
-Dimension record with:
+To set up dimensions for an item, warehouse, or parcel template, create a
+Physical Dimension record with:
 
-- **Reference Doctype**: `Item` or `Warehouse`
-- **Reference Document**: the Item or Warehouse name
-- **Dimension Type**: `Exterior` for items, `Interior` for containers
+- **Reference Doctype**: `Item`, `Warehouse`, `Shipment Parcel Template`, `Vehicle`, or `Workstation`
+- **Reference Document**: the Item, Warehouse, template, or other record name
+- **Dimension Type**: `Exterior` for items (occupied space); `Interior` for containers (usable space)
 - **Item UOM** (`Item` references only): which handling unit the exterior dimensions describe
-- **UOM**: the unit for length / width / height numeric values (e.g., `Meter`)
+- **UOM**: the unit for length / width / height numeric values (e.g., `Meter`, `Centimeter`)
 - Length, Width, Height, Weight fields as described below
 
 Volume is computed automatically from Length × Width × Height on save.
+
+**Shipment Parcel Template** fields (`length`, `width`, `height`, `weight`) describe **Interior**
+usable cavity (centimeters / kilograms). When **Sync Parcel Template Physical Dimension** is enabled
+on Inventory Tools Settings, saving a template keeps its Interior Physical Dimension aligned with
+those fields. Interior `item_weight` is **max load capacity**, not tare weight. An optional
+**Exterior** Physical Dimension on the same template (outer carton size) is independent and is not
+used by warehouse-submit cartonization or by ShipStation packing/shipment fit logic.
 
 ### 3.1 Item Physical Dimensions (Exterior)
 
@@ -122,7 +129,7 @@ Required fields:
 - **Item UOM** (mandatory): the stocking / handling unit these dimensions describe (for example stock UOM **Pound** vs alternate **Box**). Must be either the Item’s stock UOM or an alternate UOM defined on **UOM Conversion Detail** rows for that Item.
 - UOM (dimensional unit for L/W/H numeric fields, e.g., `Meter`)
 
-You may maintain **multiple** Exterior Physical Dimensions for one Item — for example **Pound-level** dims and **Box-level** dims. Document names default to **`{Item}-{Interior|Exterior}-{dimensional UOM}-{Item UOM}`** for Items, and **`{Reference}-{Interior|Exterior}-{dimensional UOM}`** for Warehouses.
+You may maintain **multiple** Exterior Physical Dimensions for one Item — for example **Pound-level** dims and **Box-level** dims. Document names default to **`{Item}-{Interior|Exterior}-{dimensional UOM}-{Item UOM}`** for Items, and **`{Reference}-{Interior|Exterior}-{dimensional UOM}`** for Warehouses and Shipment Parcel Templates.
 
 Quantity handling:
 
@@ -143,7 +150,7 @@ Effective weight     = item weight × effective_unit_count
 
 ### 3.2 Container Physical Dimensions (Interior)
 
-Attached to Warehouse or container-type Items.
+Attached to Warehouse, Shipment Parcel Template, or container-type Items.
 
 Represents the available space inside the container.
 
@@ -153,6 +160,23 @@ Required fields:
 - Interior Height
 - Weight (used as **max weight capacity** for weight validation)
 - UOM (must match item dimensions UOM for meaningful comparison)
+
+For **Shipment Parcel Template**, template `length` / `width` / `height` are Interior dimensions.
+Interior Physical Dimensions are synced automatically when **Sync Parcel Template Physical Dimension**
+is enabled on Inventory Tools Settings. **Exterior** rows on templates are optional, created manually
+or by upstream data migration, and are not overwritten by that sync.
+
+---
+
+### ShipStation follow-up (not Inventory Tools)
+
+After this model lands in Inventory Tools, ShipStation should stop duplicating Interior sync:
+
+- `sync_physical_dimension()` in ShipStation's `shipment_parcel_template.py` override should call the
+  Inventory Tools helper or be removed so Interior is not written twice per template save.
+- `create_physical_dimension_per_parcel_template` on Shipstation Settings should be deprecated in
+  favor of **Sync Parcel Template Physical Dimension** on Inventory Tools Settings, or become a thin
+  wrapper around it.
 
 ---
 

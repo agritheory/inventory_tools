@@ -35,6 +35,8 @@ BOMS = read_json("boms")
 CUSTOMERS = read_json("customers")
 CONTACTS = read_json("contacts")
 ITEM_DIMENSIONS = read_json("item_dimensions")
+PARCEL_TEMPLATES = read_json("parcel_templates")
+PARCEL_TEMPLATE_DIMENSIONS = read_json("parcel_template_dimensions")
 ITEMS = read_json("items")
 ITEMS_STOCKENTRY = read_json("items_stockentry")
 SPECIFICATIONS = read_json("specifications")
@@ -137,6 +139,7 @@ def create_test_data():
 	create_specifications(settings)
 	create_item_dimensions()
 	create_warehouse_dimensions()
+	create_parcel_templates()
 	create_stock_entries()
 	install_demo_putaway_rules(company="Chelsea Fruit Co")
 	install_items_stockentry_transactions(company="Chelsea Fruit Co")
@@ -1464,6 +1467,59 @@ def create_warehouse_dimensions():
 		wyd = frappe.new_doc("Physical Dimension")
 		wyd.update(item)
 		wyd.save()
+
+
+def create_parcel_templates():
+	if frappe.db.exists("Inventory Tools Settings", "Chelsea Fruit Co"):
+		frappe.db.set_value(
+			"Inventory Tools Settings",
+			"Chelsea Fruit Co",
+			"sync_parcel_template_physical_dimension",
+			1,
+			update_modified=False,
+		)
+
+	for row in PARCEL_TEMPLATES:
+		name = row["parcel_template_name"]
+		if frappe.db.exists("Shipment Parcel Template", name):
+			template = frappe.get_doc("Shipment Parcel Template", name)
+		else:
+			template = frappe.new_doc("Shipment Parcel Template")
+			template.update(row)
+			template.insert(ignore_permissions=True)
+
+		if not frappe.db.exists(
+			"Physical Dimension",
+			{
+				"reference_doctype": "Shipment Parcel Template",
+				"reference_document": name,
+				"dimension_type": "Interior",
+				"uom": "Centimeter",
+			},
+		):
+			pd = frappe.new_doc("Physical Dimension")
+			pd.reference_doctype = "Shipment Parcel Template"
+			pd.reference_document = name
+			pd.dimension_type = "Interior"
+			pd.uom = "Centimeter"
+			pd.item_length = template.length
+			pd.item_width = template.width
+			pd.item_height = template.height
+			pd.item_weight = template.weight
+			pd.insert(ignore_permissions=True)
+
+	for row in PARCEL_TEMPLATE_DIMENSIONS:
+		filters = {
+			"reference_doctype": row["reference_doctype"],
+			"reference_document": row["reference_document"],
+			"dimension_type": row["dimension_type"],
+			"uom": row["uom"],
+		}
+		if frappe.db.exists("Physical Dimension", filters):
+			continue
+		pd = frappe.new_doc("Physical Dimension")
+		pd.update(row)
+		pd.insert(ignore_permissions=True)
 
 
 def _get_item_buying_rate(item_code):

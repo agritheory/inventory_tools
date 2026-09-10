@@ -4,9 +4,8 @@
 frappe.ui.form.on('Physical Dimension', {
 	refresh(frm) {
 		frm.set_query('reference_doctype', () => ({
-			filters: {
-				name: ['in', ['Item', 'Vehicle', 'Warehouse', 'Workstation']],
-			},
+			query:
+				'inventory_tools.inventory_tools.doctype.physical_dimension.physical_dimension.physical_dimension_reference_doctype_query',
 		}))
 
 		if (frm.fields_dict.item_uom) {
