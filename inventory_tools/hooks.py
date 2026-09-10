@@ -225,6 +225,14 @@ doc_events = {
 	"Warehouse": {
 		"validate": ["inventory_tools.inventory_tools.overrides.warehouse.update_warehouse_path"]
 	},
+	"Shipment Parcel Template": {
+		"after_insert": [
+			"inventory_tools.physical_dimension.sync_shipment_parcel_template_interior",
+		],
+		"on_update": [
+			"inventory_tools.physical_dimension.sync_shipment_parcel_template_interior",
+		],
+	},
 	"Workstation": {
 		"validate": [
 			"inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost.validate_workstation_costs",
@@ -254,9 +262,9 @@ override_whitelisted_methods = {
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
-# override_doctype_dashboards = {
-# 	"Task": "inventory_tools.task.get_dashboard_data"
-# }
+override_doctype_dashboards = {
+	"Shipment Parcel Template": "inventory_tools.inventory_tools.dashboard.shipment_parcel_template_dashboard.get_data",
+}
 
 standard_queries = {
 	"Warehouse": "inventory_tools.inventory_tools.overrides.warehouse.warehouse_query",

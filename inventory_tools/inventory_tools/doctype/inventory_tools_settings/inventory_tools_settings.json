@@ -58,6 +58,7 @@
 		"fitted_policy",
 		"cartonization_options_section",
 		"allow_rotation",
+		"sync_parcel_template_physical_dimension",
 		"solver_timeout_seconds",
 		"column_break_xbhv",
 		"weight_validation",
@@ -361,6 +362,13 @@
 			"fieldname": "allow_rotation",
 			"fieldtype": "Check",
 			"label": "Allow Rotation"
+		},
+		{
+			"default": "1",
+			"description": "When enabled, saving a Shipment Parcel Template creates or updates its Interior Physical Dimension from template length, width, height, and weight. Exterior Physical Dimensions are never written by this sync.",
+			"fieldname": "sync_parcel_template_physical_dimension",
+			"fieldtype": "Check",
+			"label": "Sync Parcel Template Physical Dimension"
 		},
 		{
 			"fieldname": "cartonization_tab",

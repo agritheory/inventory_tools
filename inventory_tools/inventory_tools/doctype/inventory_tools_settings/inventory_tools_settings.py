@@ -51,6 +51,7 @@ class InventoryToolsSettings(Document):
 		show_in_listview: DF.Check
 		show_on_website: DF.Check
 		solver_timeout_seconds: DF.Int
+		sync_parcel_template_physical_dimension: DF.Check
 		update_warehouse_path: DF.Check
 		volumetric_policy: DF.Literal["Ignore", "Warn", "Error"]
 		weight_validation: DF.Literal["Ignore", "Warn", "Error"]
