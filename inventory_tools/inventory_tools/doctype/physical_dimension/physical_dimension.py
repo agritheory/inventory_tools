@@ -153,3 +153,15 @@ def allowed_item_uoms(item_code):
 		pluck="uom",
 	)
 	return {stock_uom} | {u for u in alts if u}
+
+
+def add_physical_dimension_indexes():
+	frappe.db.add_index(
+		"Physical Dimension",
+		["reference_doctype", "reference_document", "dimension_type"],
+		"ref_physical_dimension_doctype_document_type",
+	)
+
+
+def on_doctype_update():
+	add_physical_dimension_indexes()
