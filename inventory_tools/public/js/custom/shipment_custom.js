@@ -2,9 +2,19 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Shipment', {
+	onload(frm) {
+		inventory_tools.alternative_sales_workflow.configure_shipment_delivery_note_fields(frm)
+	},
 	refresh(frm) {
 		show_shipment_delivery_note_button(frm)
 		inventory_tools.alternative_sales_workflow.setup_pack_stock_reservation(frm, 'Shipment')
+		inventory_tools.alternative_sales_workflow.configure_shipment_delivery_note_fields(frm)
+	},
+	validate(frm) {
+		inventory_tools.alternative_sales_workflow.remove_empty_shipment_delivery_note_rows(frm)
+	},
+	async before_save(frm) {
+		await inventory_tools.alternative_sales_workflow.configure_shipment_delivery_note_fields(frm)
 	},
 	async before_submit(frm) {
 		return inventory_tools.alternative_sales_workflow.confirm_pack_stock_reservation_on_submit(frm, 'Shipment')
