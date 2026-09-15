@@ -354,6 +354,12 @@ def submit_delivery_note_from_shipment(shipment_name: str) -> str:
 
 
 class InventoryToolsShipment(Shipment):
+	def validate(self):
+		self.remove_empty_shipment_delivery_note_rows()
+		if self.uses_alternative_sales_workflow_without_delivery_note():
+			self.validate_alternative_sales_workflow()
+		super().validate()
+
 	def _validate_mandatory(self):  # nosemgrep: no-underscore-prefix-function
 		if self.uses_alternative_sales_workflow_without_delivery_note():
 			previous = self.flags.ignore_mandatory
@@ -365,10 +371,32 @@ class InventoryToolsShipment(Shipment):
 			return
 		super()._validate_mandatory()
 
+	def remove_empty_shipment_delivery_note_rows(self) -> None:
+		self.shipment_delivery_note = [
+			row
+			for row in self.get("shipment_delivery_note") or []
+			if row.get("delivery_note") or row.get("against_sales_order") or row.get("so_detail")
+		]
+
+	def validate_alternative_sales_workflow(self) -> None:
+		if not self.get("shipment_delivery_note"):
+			frappe.throw(_("Add at least one Sales Order line to ship"))
+		for row in self.shipment_delivery_note:
+			if not row.get("so_detail") and not row.get("against_sales_order"):
+				frappe.throw(
+					_("Row {0}: Sales Order reference is required.").format(row.idx),
+				)
+
+	def shipment_has_alternative_sales_order_lines(self) -> bool:
+		return any(
+			row.get("so_detail") or row.get("against_sales_order")
+			for row in self.get("shipment_delivery_note") or []
+		)
+
 	def uses_alternative_sales_workflow_without_delivery_note(self) -> bool:
 		if self.get("delivery_note"):
 			return False
-		if not any(row.get("so_detail") for row in self.get("shipment_delivery_note") or []):
+		if not self.shipment_has_alternative_sales_order_lines():
 			return False
 		company = self.get_alternative_sales_workflow_company()
 		return bool(company and is_alternative_sales_workflow_enabled(company))

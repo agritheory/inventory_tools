@@ -11,6 +11,41 @@ inventory_tools.alternative_sales_workflow.is_enabled = function (company) {
 	return settings && settings.enable_alternative_sales_workflow
 }
 
+inventory_tools.alternative_sales_workflow.shipment_has_alternative_sales_order_lines = function (frm) {
+	return (frm.doc.shipment_delivery_note || []).some(row => row.against_sales_order || row.so_detail)
+}
+
+inventory_tools.alternative_sales_workflow.uses_alternative_sales_workflow_for_shipment = async function (frm) {
+	if (frm.doc.delivery_note) {
+		return false
+	}
+	if (!inventory_tools.alternative_sales_workflow.shipment_has_alternative_sales_order_lines(frm)) {
+		return false
+	}
+	const company = await resolve_shipment_company(frm)
+	return inventory_tools.alternative_sales_workflow.is_enabled(company)
+}
+
+inventory_tools.alternative_sales_workflow.configure_shipment_delivery_note_fields = async function (frm) {
+	const df = frappe.meta.get_docfield('Shipment Delivery Note', 'delivery_note', frm.doc.name)
+	if (!df) {
+		return
+	}
+
+	const useAlternative =
+		await inventory_tools.alternative_sales_workflow.uses_alternative_sales_workflow_for_shipment(frm)
+	if (useAlternative) {
+		df.reqd = 0
+		df.hidden = 1
+	}
+}
+
+inventory_tools.alternative_sales_workflow.remove_empty_shipment_delivery_note_rows = function (frm) {
+	frm.doc.shipment_delivery_note = (frm.doc.shipment_delivery_note || []).filter(
+		row => row.delivery_note || row.against_sales_order || row.so_detail
+	)
+}
+
 inventory_tools.alternative_sales_workflow.route_to = function (doctype, name) {
 	frappe.set_route('Form', doctype, name)
 }
