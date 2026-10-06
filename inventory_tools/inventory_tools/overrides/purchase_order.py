@@ -506,11 +506,11 @@ def make_sales_invoices(docname: str, rows: list | str) -> None:
 def get_item_details(
 	args: dict | str,
 	doc: Document | dict | str | None = None,
-	for_validate: bool | str = False,
+	for_validate: bool | str | None = False,
 	overwrite_warehouse: bool | str = True,
 ):
 	"""
-	HASH: 1187fb8e012f920bd53ee8353648e76588ece38b
+	HASH: ebe41edf31ea83373ff4bc2b0445949fe003a9ba
 	REPO: https://github.com/frappe/erpnext/
 	PATH: erpnext/stock/get_item_details.py
 	METHOD: get_item_details

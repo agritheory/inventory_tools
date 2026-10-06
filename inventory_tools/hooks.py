@@ -53,10 +53,7 @@ doctype_js = {
 	"Quality Inspection": "public/js/custom/quality_inspection_custom.js",
 	"Sales Order": "public/js/custom/sales_order_custom.js",
 	"Shipment": "public/js/custom/shipment_custom.js",
-	"Stock Entry": [
-		"public/js/custom/stock_entry_custom.js",
-		"public/js/custom/stock_entry_alternative_sales_workflow.js",
-	],
+	"Stock Entry": "public/js/custom/stock_entry_custom.js",
 	"UOM Category": "public/js/custom/uom_category_custom.js",
 	"Work Order": "public/js/custom/work_order_custom.js",
 	"Workstation": "public/js/custom/workstation_custom.js",
