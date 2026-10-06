@@ -1,0 +1,16 @@
+{
+  "custom_fields": [],
+  "doctype": "Shipment Parcel Template",
+  "links": [
+    {
+      "custom": 1,
+      "group": "Physical Dimensions",
+      "hidden": 0,
+      "is_child_table": 0,
+      "link_doctype": "Physical Dimension",
+      "link_fieldname": "reference_document"
+    }
+  ],
+  "property_setters": [],
+  "sync_on_migrate": 1
+}

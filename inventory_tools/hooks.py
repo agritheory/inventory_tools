@@ -20,6 +20,7 @@ app_include_css = [
 app_include_js = [
 	"inventory_tools.bundle.js",
 	"/assets/inventory_tools/dist/js/inventory_tools.js",
+	"/assets/inventory_tools/js/custom/alternative_sales_workflow_utils.js",
 ]
 
 # include js, css files in header of web template
@@ -46,10 +47,16 @@ doctype_js = {
 	"Job Card": "public/js/custom/job_card_custom.js",
 	"Operation": "public/js/custom/operation_custom.js",
 	"Pick List": "public/js/custom/pick_list_custom.js",
+	"Packing Slip": "public/js/custom/packing_slip_custom.js",
 	"Purchase Invoice": "public/js/custom/purchase_invoice_custom.js",
 	"Purchase Order": "public/js/custom/purchase_order_custom.js",
 	"Quality Inspection": "public/js/custom/quality_inspection_custom.js",
-	"Stock Entry": "public/js/custom/stock_entry_custom.js",
+	"Sales Order": "public/js/custom/sales_order_custom.js",
+	"Shipment": "public/js/custom/shipment_custom.js",
+	"Stock Entry": [
+		"public/js/custom/stock_entry_custom.js",
+		"public/js/custom/stock_entry_alternative_sales_workflow.js",
+	],
 	"UOM Category": "public/js/custom/uom_category_custom.js",
 	"Work Order": "public/js/custom/work_order_custom.js",
 	"Workstation": "public/js/custom/workstation_custom.js",
@@ -88,8 +95,10 @@ doctype_tree_js = {"Warehouse": "public/js/custom/warehouse_tree.js"}
 # ------------
 
 # before_install = "inventory_tools.install.before_install"
-# after_install = "inventory_tools.install.after_install"
-# after_migrate = "inventory_tools.customize.load_customizations"
+after_install = "inventory_tools.install.after_install"
+after_migrate = [
+	"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.sync_alternative_sales_workflow_property_setters",
+]
 
 # Uninstallation
 # ------------
@@ -126,6 +135,8 @@ extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
 
 override_doctype_class = {
 	"Delivery Note": "inventory_tools.inventory_tools.overrides.delivery_note.InventoryToolsDeliveryNote",
+	"Packing Slip": "inventory_tools.inventory_tools.overrides.packing_slip.InventoryToolsPackingSlip",
+	"Shipment": "inventory_tools.inventory_tools.overrides.shipment.InventoryToolsShipment",
 	"Pick List": "inventory_tools.inventory_tools.overrides.pick_list.InventoryToolsPickList",
 	"Quality Inspection": "inventory_tools.inventory_tools.overrides.quality_inspection.InventoryToolsQualityInspection",
 	"Job Card": "inventory_tools.inventory_tools.overrides.job_card.InventoryToolsJobCard",
@@ -184,7 +195,20 @@ doc_events = {
 		],
 	},
 	"Quality Inspection": {},
+	"Packing Slip": {
+		"validate": [
+			"inventory_tools.inventory_tools.overrides.sales_order_identity.stamp_packing_slip_on_validate",
+		],
+	},
+	"Shipment": {
+		"validate": [
+			"inventory_tools.inventory_tools.overrides.sales_order_identity.stamp_shipment_on_validate",
+		],
+	},
 	"Stock Entry": {
+		"before_save": [
+			"inventory_tools.inventory_tools.overrides.sales_order_identity.stamp_stock_entry_before_save",
+		],
 		"before_submit": [
 			"inventory_tools.inventory_tools.overrides.stock_entry.handle_se_quarantine",
 			"inventory_tools.inventory_tools.overrides.stock_entry.validate_block_issue_from_quarantine",
@@ -200,6 +224,14 @@ doc_events = {
 	},
 	"Warehouse": {
 		"validate": ["inventory_tools.inventory_tools.overrides.warehouse.update_warehouse_path"]
+	},
+	"Shipment Parcel Template": {
+		"after_insert": [
+			"inventory_tools.physical_dimension.sync_shipment_parcel_template_interior",
+		],
+		"on_update": [
+			"inventory_tools.physical_dimension.sync_shipment_parcel_template_interior",
+		],
 	},
 	"Workstation": {
 		"validate": [
@@ -230,9 +262,9 @@ override_whitelisted_methods = {
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
-# override_doctype_dashboards = {
-# 	"Task": "inventory_tools.task.get_dashboard_data"
-# }
+override_doctype_dashboards = {
+	"Shipment Parcel Template": "inventory_tools.inventory_tools.dashboard.shipment_parcel_template_dashboard.get_data",
+}
 
 standard_queries = {
 	"Warehouse": "inventory_tools.inventory_tools.overrides.warehouse.warehouse_query",
@@ -289,3 +321,7 @@ standard_queries = {
 # ]
 
 export_python_type_annotations = True
+
+# Warehouse Location Optimization
+# signature: (item_code, warehouse, score, context) -> float
+warehouse_location_score: list[str] = []

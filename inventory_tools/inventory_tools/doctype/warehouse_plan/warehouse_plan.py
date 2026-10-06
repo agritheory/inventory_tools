@@ -4,8 +4,11 @@
 import frappe
 from frappe.model.document import Document
 from frappe.utils import safe_json_loads
+import logging
 import networkx as nx
 import numpy as np
+
+logger = logging.getLogger(__name__)
 
 GRAPH_CACHE_KEY = "warehouse_plan:graph:{}"
 
@@ -35,21 +38,21 @@ class WarehousePlan(Document):
 	def graph(self) -> "Grid_TSP | None":
 		g = frappe.cache.get_value(GRAPH_CACHE_KEY.format(self.name))
 		if g is None and self.matrix:
-			g = self._build_graph()
+			g = self.build_plan_graph()
 			frappe.cache.set_value(GRAPH_CACHE_KEY.format(self.name), g)
 		return g
 
-	def _build_graph(self) -> "Grid_TSP":
+	def build_plan_graph(self) -> "Grid_TSP":
 		grid = np.array(safe_json_loads(self.matrix))
 		return Grid_TSP(grid, scale=self.horizontal / grid.shape[1])
 
 	def on_load(self):
 		if self.matrix and not frappe.cache.get_value(GRAPH_CACHE_KEY.format(self.name)):
-			frappe.cache.set_value(GRAPH_CACHE_KEY.format(self.name), self._build_graph())
+			frappe.cache.set_value(GRAPH_CACHE_KEY.format(self.name), self.build_plan_graph())
 
 	def on_save(self):
 		if self.matrix:
-			frappe.cache.set_value(GRAPH_CACHE_KEY.format(self.name), self._build_graph())
+			frappe.cache.set_value(GRAPH_CACHE_KEY.format(self.name), self.build_plan_graph())
 		else:
 			frappe.cache.delete_value(GRAPH_CACHE_KEY.format(self.name))
 
@@ -173,13 +176,13 @@ class Grid_TSP:
 		try:
 			path = nx.shortest_path(self.G, start, end)
 		except nx.NetworkXNoPath:
-			print("No path found between the given nodes.")
+			logger.warning("No path found between the given nodes.")
 			path = []
 		except nx.NodeNotFound as e:
-			print(f"Error: {e}")
+			logger.warning("Error: %s", e)
 			path = []
 		except Exception as e:
-			print(f"Unexpected error: {e}")
+			logger.warning("Unexpected error: %s", e)
 			path = []
 
 		distance = sum(self.G[u][v]["weight"] for u, v in zip(path, path[1:]))
@@ -203,7 +206,7 @@ class Grid_TSP:
 		else:
 			return (pickup_order, None, None)
 
-	def _plot(self, tsp_route: list[int] | None = None) -> None:
+	def plot_grid_debug(self, tsp_route: list[int] | None = None) -> None:
 		"""Debug plot of the grid and (optional) TSP route."""
 		import matplotlib.pyplot as plt
 

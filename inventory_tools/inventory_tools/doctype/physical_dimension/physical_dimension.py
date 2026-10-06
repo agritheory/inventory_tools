@@ -6,6 +6,30 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
+REFERENCE_DOCTYPE_CANDIDATES = [
+	"Item",
+	"Vehicle",
+	"Warehouse",
+	"Workstation",
+	"Shipment Parcel Template",
+]
+
+
+def allowed_physical_dimension_reference_doctypes():
+	return [name for name in REFERENCE_DOCTYPE_CANDIDATES if frappe.db.exists("DocType", name)]
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def physical_dimension_reference_doctype_query(
+	doctype, txt, searchfield, start, page_len, filters
+):
+	allowed = allowed_physical_dimension_reference_doctypes()
+	t = (txt or "").strip().lower()
+	matched = [name for name in allowed if not t or t in name.lower()]
+	page = matched[start : start + page_len]
+	return [[name, name] for name in page]
+
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -129,3 +153,15 @@ def allowed_item_uoms(item_code):
 		pluck="uom",
 	)
 	return {stock_uom} | {u for u in alts if u}
+
+
+def add_physical_dimension_indexes():
+	frappe.db.add_index(
+		"Physical Dimension",
+		["reference_doctype", "reference_document", "dimension_type"],
+		"ref_physical_dimension_doctype_document_type",
+	)
+
+
+def on_doctype_update():
+	add_physical_dimension_indexes()

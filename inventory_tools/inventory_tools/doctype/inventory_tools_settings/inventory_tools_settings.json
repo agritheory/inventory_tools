@@ -12,6 +12,7 @@
 		"purchase_order_aggregation_company",
 		"column_break_vgsiq",
 		"aggregated_purchasing_warehouse",
+		"apply_putaway_rule_on_multi_company_receipt",
 		"quotation_demand_section",
 		"sales_order_aggregation_company",
 		"column_break_ljy4o",
@@ -27,10 +28,18 @@
 		"update_warehouse_path",
 		"prettify_warehouse_tree",
 		"default_route_optimization_strategy",
+		"warehouse_slotting_section",
+		"require_plan_for_location_suggestion",
+		"location_suggestion_excluded_warehouse_types",
 		"column_break_ddssn",
 		"allow_alternative_workstations",
 		"uoms_section",
 		"enforce_uoms",
+		"alternative_sales_workflow_section",
+		"enable_alternative_sales_workflow",
+		"reserve_stock_on_packing_slip",
+		"column_break_pack_reserve",
+		"reserve_stock_on_shipment",
 		"quarantine_quality_control_section",
 		"enable_quarantine_workflow",
 		"default_quarantine_warehouse",
@@ -49,6 +58,7 @@
 		"fitted_policy",
 		"cartonization_options_section",
 		"allow_rotation",
+		"sync_parcel_template_physical_dimension",
 		"solver_timeout_seconds",
 		"column_break_xbhv",
 		"weight_validation",
@@ -86,6 +96,13 @@
 			"fieldtype": "Link",
 			"label": "Aggregated Purchasing Warehouse",
 			"options": "Warehouse"
+		},
+		{
+			"default": "1",
+			"description": "When enabled, Purchase Receipts created from a multi-company Purchase Order (Create Purchase Receipts) are saved with Apply Putaway Rule checked. Disable when receiving to the Material Request warehouse and putting away later via Stock Entry.",
+			"fieldname": "apply_putaway_rule_on_multi_company_receipt",
+			"fieldtype": "Check",
+			"label": "Apply Putaway Rule on Multi-Company Purchase Receipt"
 		},
 		{
 			"fieldname": "work_order_subcontracting_section",
@@ -217,6 +234,60 @@
 			"options": "Use Source Document Order\nFIFO\nLIFO\nDeplete maximum number of Bins\nDeplete minimum number of Bins"
 		},
 		{
+			"fieldname": "warehouse_slotting_section",
+			"fieldtype": "Section Break",
+			"label": "Warehouse Slotting"
+		},
+		{
+			"default": "1",
+			"description": "When enabled, only warehouses placed on a Warehouse Plan with coordinates are eligible for location suggestions.",
+			"fieldname": "require_plan_for_location_suggestion",
+			"fieldtype": "Check",
+			"label": "Require Plan for Location Suggestion"
+		},
+		{
+			"default": "Transit",
+			"description": "Comma-separated Warehouse Type names excluded from location suggestion candidates.",
+			"fieldname": "location_suggestion_excluded_warehouse_types",
+			"fieldtype": "Small Text",
+			"label": "Excluded Warehouse Types"
+		},
+		{
+			"fieldname": "alternative_sales_workflow_section",
+			"fieldtype": "Section Break",
+			"label": "Alternative Sales Workflow"
+		},
+		{
+			"default": "0",
+			"description": "When enabled, adds Create mappings from Sales Order and staging Stock Entry to Packing Slip and Shipment, and from pack documents to Delivery Note. Existing Create buttons are not removed.",
+			"fieldname": "enable_alternative_sales_workflow",
+			"fieldtype": "Check",
+			"label": "Enable Alternative Sales Workflow"
+		},
+		{
+			"default": "Always",
+			"depends_on": "eval:doc.enable_alternative_sales_workflow",
+			"description": "When Stock Reservation is enabled in Stock Settings, controls whether submitting a Packing Slip creates Stock Reservation Entries for unreserved Sales Order lines.",
+			"fieldname": "reserve_stock_on_packing_slip",
+			"fieldtype": "Select",
+			"label": "Reserve Stock on Packing Slip",
+			"options": "Never\nAlways\nAsk"
+		},
+		{
+			"depends_on": "eval:doc.enable_alternative_sales_workflow",
+			"fieldname": "column_break_pack_reserve",
+			"fieldtype": "Column Break"
+		},
+		{
+			"default": "Ask",
+			"depends_on": "eval:doc.enable_alternative_sales_workflow",
+			"description": "When Stock Reservation is enabled in Stock Settings, controls whether submitting a Shipment creates Stock Reservation Entries. Ask is recommended when Shipments are used for carrier quotes before picking.",
+			"fieldname": "reserve_stock_on_shipment",
+			"fieldtype": "Select",
+			"label": "Reserve Stock on Shipment",
+			"options": "Never\nAlways\nAsk"
+		},
+		{
 			"fieldname": "quarantine_quality_control_section",
 			"fieldtype": "Section Break",
 			"label": "Quarantine Quality Control"
@@ -293,6 +364,13 @@
 			"label": "Allow Rotation"
 		},
 		{
+			"default": "1",
+			"description": "When enabled, saving a Shipment Parcel Template creates or updates its Interior Physical Dimension from template length, width, height, and weight. Exterior Physical Dimensions are never written by this sync.",
+			"fieldname": "sync_parcel_template_physical_dimension",
+			"fieldtype": "Check",
+			"label": "Sync Parcel Template Physical Dimension"
+		},
+		{
 			"fieldname": "cartonization_tab",
 			"fieldtype": "Tab Break",
 			"label": "Cartonization"
@@ -333,7 +411,7 @@
 	],
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2026-01-21 08:24:16.272533",
+	"modified": "2026-09-02 11:05:00.000000",
 	"modified_by": "Administrator",
 	"module": "Inventory Tools",
 	"name": "Inventory Tools Settings",

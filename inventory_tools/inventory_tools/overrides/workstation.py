@@ -195,10 +195,10 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 		)
 		if default_fields:
 			field_values = ", ".join([v for k, v in default_fields[0].items() if k != "name"])
-			_default = (
+			default_row = (
 				default_fields[0].name,
 				f"{frappe._('(Default Workstation)')} {' - ' if field_values else ''}{field_values}",
 			)
-			workstation.insert(0, _default)
+			workstation.insert(0, default_row)
 
 	return workstation

@@ -1,0 +1,13 @@
+[
+	{
+		"reference_doctype": "Shipment Parcel Template",
+		"reference_document": "Ambrosia 12in Pie Shipper",
+		"dimension_type": "Exterior",
+		"uom": "Centimeter",
+		"item_length": 31.48,
+		"item_width": 31.48,
+		"item_height": 11.16,
+		"item_weight": 5.5,
+		"orientation": 1
+	}
+]

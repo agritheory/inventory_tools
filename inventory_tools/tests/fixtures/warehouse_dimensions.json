@@ -84,7 +84,7 @@
 		"dimension_type": "Interior",
 		"orientation": 1,
 		"reference_doctype": "Warehouse",
-		"reference_document": "Finished Goods - CFC",
+		"reference_document": "Receiving - CFC",
 		"uom": "Meter"
 	},
 	{

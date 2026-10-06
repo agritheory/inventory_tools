@@ -1,0 +1,23 @@
+[
+	{
+		"parcel_template_name": "Ambrosia 12in Pie Shipper",
+		"length": 30.48,
+		"width": 30.48,
+		"height": 10.16,
+		"weight": 5.0
+	},
+	{
+		"parcel_template_name": "Ambrosia Deep Dish Shipper",
+		"length": 35.56,
+		"width": 35.56,
+		"height": 12.7,
+		"weight": 8.0
+	},
+	{
+		"parcel_template_name": "Chelsea Fruit Mailer",
+		"length": 40.0,
+		"width": 25.0,
+		"height": 18.0,
+		"weight": 12.5
+	}
+]
