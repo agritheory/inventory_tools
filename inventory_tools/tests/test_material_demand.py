@@ -8,9 +8,17 @@ from frappe.utils import flt, getdate
 from inventory_tools.inventory_tools.report.material_demand.material_demand import (
 	execute as execute_material_demand,
 )
-from inventory_tools.tests.setup import create_southern_fruit_purchase_orders
+from inventory_tools.tests.setup import (
+	create_quarantine_quality_control_data,
+	create_southern_fruit_purchase_orders,
+)
 
-# Setup runs Bayberry-only PO -> PR (quarantine) -> QI (release) before these tests; Bayberry satisfied.
+# Module fixture runs Bayberry-only PO -> PR (quarantine) -> QI (release) before these tests.
+
+
+@pytest.fixture(scope="module", autouse=True)
+def material_demand_qc_data():
+	create_quarantine_quality_control_data(frappe._dict({"company": "Ambrosia Pie Company"}))
 
 
 def assert_setup_bayberry_po_exists():

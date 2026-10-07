@@ -9,7 +9,7 @@ from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.get_item_details import get_price_list_rate_for
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Coalesce
-from frappe.utils.data import fmt_money, getdate
+from frappe.utils.data import cint, fmt_money, getdate
 
 
 def execute(filters=None):
@@ -184,8 +184,11 @@ def get_data(filters):
 		output.append({"supplier": supplier, "indent": 0})
 		for r in rows:
 			r.total_demand = total_demand[r.item_code]
-			r.supplier_price = get_item_price(filters, r)
-			r.supplier_price = fmt_money(r.get("supplier_price"), 2, r.get("currency")).replace(" ", "")
+			supplier_price = get_item_price(filters, r)
+			# Material Request Item.rate is the fallback when the selected price
+			# list does not contain an item price for this supplier/item pair.
+			r.supplier_rate = supplier_price if supplier_price is not None else r.supplier_price
+			r.supplier_price = fmt_money(r.supplier_rate, 2, r.get("currency")).replace(" ", "")
 			r.draft_po = frappe.db.get_value(
 				"Purchase Order Item",
 				{"material_request_item": r.material_request_item, "docstatus": 0},
@@ -366,7 +369,10 @@ def create_pos(company, filters, rows, companies=None):
 		po = frappe.new_doc("Purchase Order")
 		po.schedule_date = po.posting_date = getdate()
 		po.supplier = supplier
-		po.buying_price_list = filters.price_list
+		# The filter price list is used to find supplier prices. It can be a
+		# selling-only list, which ERPNext rejects on Purchase Orders.
+		if filters.price_list and cint(frappe.db.get_value("Price List", filters.price_list, "buying")):
+			po.buying_price_list = filters.price_list
 		po.company = po_company
 		for row in supplier_rows:
 			requesting_company = requesting_company_from_demand_row(row)
@@ -382,7 +388,9 @@ def create_pos(company, filters, rows, companies=None):
 					"schedule_date": max(getdate(), getdate(row.get("schedule_date"))),
 					"requesting_company": requesting_company,
 					"qty": row.get("qty"),
-					"rate": row.get("supplier_price"),
+					# supplier_price is formatted for report display and may contain a
+					# currency symbol. Always use the raw numeric rate for documents.
+					"rate": row.get("supplier_rate", row.get("supplier_price")),
 					"uom": row.get("uom"),
 					"material_request": row.get("material_request"),
 					"material_request_item": row.get("material_request_item"),
