@@ -1382,5 +1382,15 @@
 		"item_group": "Services",
 		"is_stock_item": 0,
 		"supplier": ["Chelsea Fruit Co"]
+	},
+	{
+		"item_code": "Miscellaneous Supplies",
+		"uom": "Unit",
+		"description": "Generic placeholder for assorted supplies",
+		"item_group": "Bakery Supplies",
+		"is_stock_item": 0,
+		"is_generic_item": 1,
+		"item_price": 34,
+		"supplier": "Freedom Provisions"
 	}
 ]

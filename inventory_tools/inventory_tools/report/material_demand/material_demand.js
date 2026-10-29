@@ -3,6 +3,13 @@
 /* eslint-disable */
 
 frappe.query_reports['Material Demand'] = {
+	formatter(value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data)
+		if (column.fieldname === 'item_code' && data.is_generic_item) {
+			value += ` <span class="text-muted">(${__('Generic')})</span>`
+		}
+		return value
+	},
 	filters: [
 		{
 			fieldname: 'company',

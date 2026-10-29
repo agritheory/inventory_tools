@@ -69,6 +69,7 @@ def get_columns(filters):
 			"width": "250px",
 		},
 		{"fieldname": "item_name", "fieldtype": "Data", "hidden": 1},  # unset for export
+		{"fieldname": "is_generic_item", "fieldtype": "Check", "hidden": 1},
 		{
 			"label": "MR Qty",
 			"fieldname": "qty",
@@ -128,13 +129,16 @@ def get_data(filters):
 	MaterialRequest = DocType("Material Request")
 	MaterialRequestItem = DocType("Material Request Item")
 	ItemSupplier = DocType("Item Supplier")
+	Item = DocType("Item")
 	Company = DocType("Company")
 	query = (
 		frappe.qb.from_(MaterialRequest)
 		.join(MaterialRequestItem)
 		.on(MaterialRequest.name == MaterialRequestItem.parent)
-		.join(ItemSupplier)
+		.left_join(ItemSupplier)
 		.on(ItemSupplier.parent == MaterialRequestItem.item_code)
+		.left_join(Item)
+		.on(Item.name == MaterialRequestItem.item_code)
 		.join(Company)
 		.on(MaterialRequest.company == Company.name)
 		.select(
@@ -151,6 +155,7 @@ def get_data(filters):
 			Company.default_currency.as_("currency"),
 			MaterialRequestItem.rate.as_("supplier_price"),
 			Coalesce(ItemSupplier.supplier.as_("supplier"), "No Supplier").as_("supplier"),
+			Coalesce(Item.is_generic_item, 0).as_("is_generic_item"),
 		)
 		.distinct()
 		.where(MaterialRequest.docstatus < 2)
