@@ -10,6 +10,36 @@ frappe.ui.form.on('Purchase Order', {
 	},
 })
 
+frappe.ui.form.on('Purchase Order Item', {
+	item_code(frm, cdt, cdn) {
+		let row = locals[cdt][cdn]
+		let material_request = row.material_request
+		let material_request_item = row.material_request_item
+		if (!material_request_item) {
+			return
+		}
+		frappe
+			.xcall(
+				'inventory_tools.inventory_tools.generic_items.get_material_request_item_generic_info',
+				{ material_request_item }
+			)
+			.then(info => {
+				if (!info || !info.is_generic) {
+					return
+				}
+				frappe.model.set_value(cdt, cdn, 'material_request', material_request)
+				frappe.model.set_value(cdt, cdn, 'material_request_item', material_request_item)
+				frappe.show_alert({
+					message: __('Replacing generic item {0} from {1}', [
+						info.item_code,
+						info.material_request,
+					]),
+					indicator: 'blue',
+				})
+			})
+	},
+})
+
 function override_create_buttons(frm) {
 	if (!frm.doc.multi_company_purchase_order || frm.doc.docstatus != 1) {
 		return

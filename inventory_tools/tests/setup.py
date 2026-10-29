@@ -373,6 +373,7 @@ def setup_manufacturing_settings(settings):
 	)
 	frappe.set_value("Inventory Tools Settings", settings.company, "show_on_website", 1)
 	frappe.set_value("Inventory Tools Settings", settings.company, "show_in_listview", 1)
+	frappe.set_value("Inventory Tools Settings", settings.company, "enable_generic_items", 1)
 
 
 def create_workstations(settings):
@@ -586,6 +587,8 @@ def create_items(settings):
 		i.include_item_in_manufacturing = 0 if item.get("is_stock_item") == 0 else 1
 		i.valuation_rate = item.get("valuation_rate") or 0
 		i.is_sub_contracted_item = item.get("is_sub_contracted_item") or 0
+		if item.get("is_generic_item"):
+			i.is_generic_item = 1
 		i.default_warehouse = item.get("default_warehouse") or settings.get("warehouse")
 		i.default_supplier = item.get("default_supplier")
 		i.weight_uom = item.get("weight_uom") if i.is_stock_item else None

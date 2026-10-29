@@ -26,6 +26,13 @@ from frappe.contacts.doctype.address.address import get_company_address
 from frappe.utils import cint, flt
 from frappe.model.document import Document
 
+from inventory_tools.inventory_tools.generic_items import (
+	generic_items_enabled,
+	get_generic_material_request_items,
+	update_generic_material_request_ordered_qty,
+	validate_generic_purchase_order_rows,
+)
+
 
 def skip_bound_method(*args, **kwargs):
 	return
@@ -179,11 +186,15 @@ def build_purchase_invoice_for_company(po_name, company, po_item_names):
 class InventoryToolsPurchaseOrder(PurchaseOrder):
 	def validate_with_previous_doc(self):
 		"""
-		HASH: 8f811728d97293744bb35f6a3bdba889708127c5
+		HASH: 7cbbde220a11b418d4ccf12f40e1d713fec9ea14
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/buying/doctype/purchase_order/purchase_order.py
 		METHOD: validate_with_previous_doc
 		"""
+
+		mri_compare_fields = [["project", "="], ["item_code", "="]]
+		if self.is_subcontracted:
+			mri_compare_fields = [["project", "="]]
 
 		config = {
 			"Supplier Quotation": {
@@ -206,13 +217,44 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 			},
 			"Material Request Item": {
 				"ref_dn_field": "material_request_item",
-				"compare_fields": [["project", "="], ["item_code", "="]],
+				"compare_fields": mri_compare_fields,
 				"is_child_table": True,
 			},
 		}
 		if self.multi_company_purchase_order:
 			config.pop("Material Request")
-		super(PurchaseOrder, self).validate_with_previous_doc(config)
+
+		generic_mr_items = set()
+		cleared_rows = []
+		if generic_items_enabled(self.company):
+			mr_item_names = {
+				row.material_request_item for row in self.get("items") or [] if row.material_request_item
+			}
+			generic_mr_items = get_generic_material_request_items(mr_item_names)
+			if generic_mr_items:
+				validate_generic_purchase_order_rows(self, generic_mr_items)
+				for row in self.get("items") or []:
+					if row.material_request_item in generic_mr_items:
+						cleared_rows.append((row, row.material_request_item))
+						row.material_request_item = None
+
+		try:
+			super(PurchaseOrder, self).validate_with_previous_doc(config)
+		finally:
+			for row, material_request_item in cleared_rows:
+				row.material_request_item = material_request_item
+
+		if cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate")):
+			self.validate_rate_with_reference_doc(
+				[["Supplier Quotation", "supplier_quotation", "supplier_quotation_item"]]
+			)
+
+	def update_prevdoc_status(self):
+		if self.is_subcontracted:
+			self.status_updater[0]["source_field"] = "fg_item_qty"
+
+		super().update_prevdoc_status()
+		update_generic_material_request_ordered_qty(self)
 
 	def validate_warehouse(self):
 		warehouses = list({d.warehouse for d in self.get("items") if getattr(d, "warehouse", None)})

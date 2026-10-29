@@ -177,6 +177,7 @@ doc_events = {
 		"validate": [
 			"inventory_tools.inventory_tools.overrides.uom.duplicate_weight_to_uom_conversion",
 			"inventory_tools.inventory_tools.faceted_search.update_specification_attribute_values",
+			"inventory_tools.inventory_tools.generic_items.validate_generic_item",
 		],
 	},
 	"Operation": {

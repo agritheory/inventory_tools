@@ -20,6 +20,8 @@
 		"work_order_subcontracting_section",
 		"enable_work_order_subcontracting",
 		"create_purchase_orders",
+		"generic_items_section",
+		"enable_generic_items",
 		"bom_column",
 		"create_job_cards_automatically",
 		"column_break_ilobm",
@@ -114,6 +116,18 @@
 			"fieldname": "enable_work_order_subcontracting",
 			"fieldtype": "Check",
 			"label": "Enable Work Order Subcontracting"
+		},
+		{
+			"fieldname": "generic_items_section",
+			"fieldtype": "Section Break",
+			"label": "Generic Items"
+		},
+		{
+			"default": "0",
+			"description": "Allow Purchase Order lines linked to a generic Material Request item to use a different item code. Ordered progress on the Material Request is tracked by amount.",
+			"fieldname": "enable_generic_items",
+			"fieldtype": "Check",
+			"label": "Enable Generic Items"
 		},
 		{
 			"default": "0",
