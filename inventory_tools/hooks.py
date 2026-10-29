@@ -252,6 +252,7 @@ doc_events = {
 override_whitelisted_methods = {
 	"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry": "inventory_tools.inventory_tools.overrides.work_order.make_stock_entry",
 	"erpnext.stock.get_item_details.get_item_details": "inventory_tools.inventory_tools.overrides.purchase_order.get_item_details",
+	"erpnext.controllers.stock_controller.check_item_quality_inspection": "inventory_tools.inventory_tools.overrides.inspection.check_item_quality_inspection",
 	"webshop.webshop.api.get_product_filter_data": "inventory_tools.inventory_tools.faceted_search.get_product_filter_data",
 }
 
