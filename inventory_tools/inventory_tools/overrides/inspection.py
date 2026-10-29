@@ -3,7 +3,10 @@
 
 """Company-scoped quality inspection requirements via Item Default."""
 
+import json
+
 import frappe
+from frappe.utils import cint
 
 
 INSPECTION_FIELDNAMES = (
@@ -37,6 +40,65 @@ def get_inspection_required(item_code: str, company: str, field_name: str) -> bo
 		field_name,
 	)
 	return bool(item_default_val) if item_default_val is not None else False
+
+
+def items_requiring_quality_inspection(
+	doctype: str, docstatus: int | str, items: list[dict], company: str
+) -> list[dict]:
+	"""Same rule as validate_inspection, but returns item rows for BEAM and the desk QI button."""
+	if isinstance(items, str):
+		items = json.loads(items)
+
+	docstatus = cint(docstatus)
+	inspection_required_fieldname = INSPECTION_FIELDNAME_MAP.get(doctype)
+
+	if doctype == "Stock Entry":
+		if docstatus == 1:
+			settings = frappe.get_cached_doc("Inventory Tools Settings", company)
+			if settings.enable_quarantine_workflow:
+				return []
+		return items
+
+	if inspection_required_fieldname is None:
+		return []
+
+	settings = frappe.get_cached_doc("Inventory Tools Settings", company)
+	if settings.enable_quarantine_workflow and doctype in (
+		"Purchase Receipt",
+		"Subcontracting Receipt",
+	):
+		return []
+
+	allow_after = docstatus == 1 and frappe.get_single_value(
+		"Stock Settings", "allow_to_make_quality_inspection_after_purchase_or_delivery"
+	)
+	if allow_after:
+		return items
+
+	required: list[dict] = []
+	for item in items:
+		item_code = item.get("item_code")
+		if item_code and get_inspection_required(item_code, company, inspection_required_fieldname):
+			required.append(item)
+	return required
+
+
+@frappe.whitelist()
+def check_item_quality_inspection(doctype: str, docstatus: str | int, items: str | list[dict]):
+	"""Override ERPNext: company-scoped Item Default flags and quarantine timing."""
+	rows: list[dict] = json.loads(items) if isinstance(items, str) else items
+
+	company = None
+	if rows:
+		parent = rows[0].get("parent")
+		if parent and doctype:
+			company = frappe.db.get_value(doctype, parent, "company")
+	if not company and frappe.form_dict.get("company"):
+		company = frappe.form_dict.get("company")
+	if not company:
+		company = frappe.defaults.get_user_default("Company")
+
+	return items_requiring_quality_inspection(doctype, docstatus, rows, company)
 
 
 def validate_inspection_with_company_scope(doc) -> None:
