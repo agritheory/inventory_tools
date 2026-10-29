@@ -160,7 +160,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 
 	def update_operation_status(self, operation_id=None):
 		"""
-		HASH: 30a27067aa5c07e883f8ba4e92bdaa7ed9b5b031
+		HASH: bb201a1f2ddcca7066188ff9ba40fc7beaabfa5a
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: update_operation_status

@@ -266,11 +266,12 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 
 	def set_missing_item_details(self, for_validate=False):
 		"""
-		HASH: baa6d2bcdca633d60bfb596fc76df5cc5ab8b8fd
+		HASH: 7dd8ea7b014d9ebf910eed43434d03e22e5bc684
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/controllers/accounts_controller.py
 		METHOD: set_missing_item_details
 		"""
+		import erpnext.stock.get_item_details
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		if hasattr(self, "items"):
@@ -313,8 +314,11 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
 
-					# CUSTOM CODE START (uses overridden function defined below)
-					ret = get_item_details(args, self, for_validate=for_validate, overwrite_warehouse=False)
+					# CUSTOM CODE START (uses overridden validate_item_details defined below)
+					erpnext.stock.get_item_details.validate_item_details = validate_item_details
+					ret = erpnext.stock.get_item_details._get_item_details(
+						args, self, for_validate=for_validate, overwrite_warehouse=False
+					)
 					# CUSTOM CODE END
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
@@ -489,7 +493,8 @@ def make_sales_invoices(docname: str, rows: list | str) -> None:
 		for row in si.items:
 			row.purchase_order = doc.name
 			row.warehouse = aggregated_warehouse
-		pi.buying_price_list = si.selling_price_list
+		if si.selling_price_list and frappe.db.get_value("Price List", si.selling_price_list, "buying"):
+			pi.buying_price_list = si.selling_price_list
 		taxes_and_charges = get_default_taxes_and_charges(
 			"Purchase Taxes and Charges Template", company=pi.company
 		)
@@ -510,7 +515,7 @@ def get_item_details(
 	overwrite_warehouse: bool | str = True,
 ):
 	"""
-	HASH: ebe41edf31ea83373ff4bc2b0445949fe003a9ba
+	HASH: 972defb9273411036d45d7b65e18b13c4c52a263
 	REPO: https://github.com/frappe/erpnext/
 	PATH: erpnext/stock/get_item_details.py
 	METHOD: get_item_details

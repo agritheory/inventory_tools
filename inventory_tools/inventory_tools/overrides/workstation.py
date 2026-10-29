@@ -51,21 +51,23 @@ class InventoryToolsWorkstation(Workstation):
 
 	def validate_overlap_for_operation_timings(self):
 		"""
-		HASH: 9771ed4c572510ec51586606f9d57ab6459717f1
+		HASH: 747ed0dfca44e4985dc6b8cbe3dfab1328d552a0
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/workstation/workstation.py
 		METHOD: validate_overlap_for_operation_timings
 		"""
 		for d in self.get("working_hours"):
-			existing = frappe.db.sql_list(
-				"""select idx from `tabWorkstation Working Hour`
-				where parent = %s and name != %s
-					and (
-						(start_time between %s and %s) or
-						(end_time between %s and %s) or
-						(%s between start_time and end_time))
-				""",
-				(self.name, d.name, d.start_time, d.end_time, d.start_time, d.end_time, d.start_time),
+			wh = frappe.qb.DocType("Workstation Working Hour")
+			existing = (
+				frappe.qb.from_(wh)
+				.select(wh.idx)
+				.where(
+					(wh.parent == self.name)
+					& (wh.name != d.name)
+					& (wh.start_time < d.end_time)
+					& (wh.end_time > d.start_time)
+				)
+				.run(pluck=True)
 			)
 
 			if existing:
