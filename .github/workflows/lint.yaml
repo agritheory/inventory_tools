@@ -12,7 +12,7 @@ env:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -44,7 +44,7 @@ jobs:
 
   mypy:
     needs: [validate]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -63,7 +63,7 @@ jobs:
 
   black:
     needs: [validate]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -79,20 +79,20 @@ jobs:
 
   prettier:
     needs: [validate]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
 
       - name: Run Prettier
         run: npx --yes prettier@3.1.0 --check --config ./.prettierrc.cjs --ignore-path ./.prettierignore "**/*.js" "**/*.vue"
 
   json_diff:
     needs: [validate]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
