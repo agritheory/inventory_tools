@@ -87,7 +87,7 @@ jobs:
 
       - uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Run Prettier
         run: npx --yes prettier@3.1.0 --check --config ./.prettierrc.cjs --ignore-path ./.prettierignore "**/*.js" "**/*.vue"
