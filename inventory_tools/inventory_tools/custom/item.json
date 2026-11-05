@@ -1,33 +1,42 @@
 {
-	"custom_fields": [],
-	"doctype": "Item",
-	"property_setters": [
-		{
-			"doc_type": "Item",
-			"doctype": "Property Setter",
-			"doctype_or_field": "DocField",
-			"field_name": "inspection_required_before_delivery",
-			"idx": 0,
-			"is_system_generated": 0,
-			"module": "Inventory Tools",
-			"name": "Item-inspection_required_before_delivery-hidden",
-			"property": "hidden",
-			"property_type": "Check",
-			"value": "1"
-		},
-		{
-			"doc_type": "Item",
-			"doctype": "Property Setter",
-			"doctype_or_field": "DocField",
-			"field_name": "inspection_required_before_purchase",
-			"idx": 0,
-			"is_system_generated": 0,
-			"module": "Inventory Tools",
-			"name": "Item-inspection_required_before_purchase-hidden",
-			"property": "hidden",
-			"property_type": "Check",
-			"value": "1"
-		}
-	],
-	"sync_on_migrate": 1
+  "custom_fields": [
+    {
+      "default": "0",
+      "depends_on": "eval:!doc.is_stock_item",
+      "description": "When enabled, this item can be requested on a Material Request and replaced by one or more specific items on a Purchase Order.",
+      "dt": "Item",
+      "fieldname": "is_generic_item",
+      "fieldtype": "Check",
+      "insert_after": "is_stock_item",
+      "label": "Is Generic Item",
+      "module": "Inventory Tools",
+      "name": "Item-is_generic_item"
+    }
+  ],
+  "doctype": "Item",
+  "property_setters": [
+    {
+      "doc_type": "Item",
+      "doctype": "Property Setter",
+      "doctype_or_field": "DocField",
+      "field_name": "inspection_required_before_delivery",
+      "module": "Inventory Tools",
+      "name": "Item-inspection_required_before_delivery-hidden",
+      "property": "hidden",
+      "property_type": "Check",
+      "value": "1"
+    },
+    {
+      "doc_type": "Item",
+      "doctype": "Property Setter",
+      "doctype_or_field": "DocField",
+      "field_name": "inspection_required_before_purchase",
+      "module": "Inventory Tools",
+      "name": "Item-inspection_required_before_purchase-hidden",
+      "property": "hidden",
+      "property_type": "Check",
+      "value": "1"
+    }
+  ],
+  "sync_on_migrate": 1
 }

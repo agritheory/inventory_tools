@@ -4,13 +4,14 @@ For license information, please see license.txt-->
 # Inventory Tools Documentation
 
 <div class="byline">
-  Rohan Bansal, Devarsh Bhatt, coleandreoli, IshwaryaM1030, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2026-09-01
+  AgriTheory 2026-09-15
 </div>
 
 
 The Inventory Tools application enhances and extends inventory-related functionality and workflows in ERPNext. It includes the following features:
 
 - **[Material Demand](./material_demand.md)**: a report-based interface to aggregate required Items across multiple sources, then optionally create Purchase Orders or Request for Quotations
+- **[Generic Items](./generic_items.md)**: non-stock placeholder Items on Material Requests that a purchasing agent replaces with specific items on the Purchase Order
 - **[Warehouse Path](./warehouse_path.md)**: for any warehouse selection field, this features helps clearly identify warehouses by creating a warehouse path and adding a human-readable string under the warehouse name in the format "parent warehouse(s)->warehouse"
 - **[Quotation Demand](./quotation_demand.md)**: a report-based interface to aggregate required Items across multiple Quotations, Customers, and Companies, then create draft Sales Orders
 - **[Warehouse Path](./warehouse_path.md)**: for any warehouse selection field, this feature helps clearly identify warehouses by creating a warehouse path and adding a human-readable string under the warehouse name in the format "parent warehouse(s)->warehouse"
