@@ -1,7 +1,7 @@
 # Copyright (c) 2024, AgriTheory and contributors
 # For license information, please see license.txt
 
-__version__ = "15.18.3"
+__version__ = "15.19.0"
 
 import erpnext.stock.get_item_details
 import frappe
