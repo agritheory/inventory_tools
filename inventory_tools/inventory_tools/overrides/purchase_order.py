@@ -9,6 +9,7 @@ from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	make_inter_company_purchase_invoice,
 )
+from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
 from erpnext.accounts.party import get_party_account
 from erpnext.buying.doctype.purchase_order.purchase_order import (
 	PurchaseOrder,
@@ -19,12 +20,20 @@ from erpnext.controllers.accounts_controller import (
 	get_default_taxes_and_charges,
 	force_item_fields,
 )
+from erpnext.stock.get_item_details import _get_item_details
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 from frappe import _, throw
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.utils import cint, flt
-from frappe.model.document import Document
+
+from inventory_tools.inventory_tools.generic_items import (
+	generic_items_enabled,
+	get_generic_material_request_items,
+	get_replaced_generic_rows,
+	resolve_generic_material_request_items,
+	validate_generic_purchase_order_rows,
+)
 
 
 def skip_bound_method(*args, **kwargs):
@@ -179,11 +188,15 @@ def build_purchase_invoice_for_company(po_name, company, po_item_names):
 class InventoryToolsPurchaseOrder(PurchaseOrder):
 	def validate_with_previous_doc(self):
 		"""
-		HASH: 8f811728d97293744bb35f6a3bdba889708127c5
+		HASH: e5cde8c4b9e3f7f567a92ca3e65fd411402b89ce
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/buying/doctype/purchase_order/purchase_order.py
 		METHOD: validate_with_previous_doc
 		"""
+
+		mri_compare_fields = [["project", "="], ["item_code", "="]]
+		if self.is_subcontracted:
+			mri_compare_fields = [["project", "="]]
 
 		config = {
 			"Supplier Quotation": {
@@ -206,13 +219,38 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 			},
 			"Material Request Item": {
 				"ref_dn_field": "material_request_item",
-				"compare_fields": [["project", "="], ["item_code", "="]],
+				"compare_fields": mri_compare_fields,
 				"is_child_table": True,
 			},
 		}
 		if self.multi_company_purchase_order:
 			config.pop("Material Request")
-		super(PurchaseOrder, self).validate_with_previous_doc(config)
+
+		cleared_rows = []
+		if generic_items_enabled(self.company):
+			mr_item_names = {row.material_request_item for row in self.get("items") or []}
+			generic_mr_items = get_generic_material_request_items(mr_item_names)
+			if generic_mr_items:
+				validate_generic_purchase_order_rows(self, generic_mr_items)
+				for row in get_replaced_generic_rows(self, generic_mr_items):
+					cleared_rows.append((row, row.material_request_item))
+					row.material_request_item = None
+
+		try:
+			super(PurchaseOrder, self).validate_with_previous_doc(config)
+		finally:
+			for row, material_request_item in cleared_rows:
+				row.material_request_item = material_request_item
+
+		if cint(frappe.db.get_single_value("Buying Settings", "maintain_same_rate")):
+			self.validate_rate_with_reference_doc(
+				[["Supplier Quotation", "supplier_quotation", "supplier_quotation_item"]]
+			)
+
+	def update_prevdoc_status(self):
+		if self.docstatus == 1:
+			resolve_generic_material_request_items(self)
+		super().update_prevdoc_status()
 
 	def validate_warehouse(self):
 		warehouses = list({d.warehouse for d in self.get("items") if getattr(d, "warehouse", None)})
@@ -266,7 +304,7 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 
 	def set_missing_item_details(self, for_validate=False):
 		"""
-		HASH: baa6d2bcdca633d60bfb596fc76df5cc5ab8b8fd
+		HASH: e5cde8c4b9e3f7f567a92ca3e65fd411402b89ce
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/controllers/accounts_controller.py
 		METHOD: set_missing_item_details
@@ -291,6 +329,7 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 				parent_dict.update({"customer": parent_dict.get("party_name")})
 
 			self.pricing_rules = []
+			removed_pricing_rules = set()
 
 			for item in self.get("items"):
 				if item.get("item_code"):
@@ -313,9 +352,12 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
 
-					# CUSTOM CODE START (uses overridden function defined below)
-					ret = get_item_details(args, self, for_validate=for_validate, overwrite_warehouse=False)
-					# CUSTOM CODE END
+					ret = _get_item_details(args, self, for_validate=for_validate, overwrite_warehouse=False)
+					if ret.get("pricing_rule_removed"):
+						removed_pricing_rules.update(
+							set(get_applied_pricing_rules(args.get("pricing_rules")))
+							- set(get_applied_pricing_rules(ret.get("pricing_rules")))
+						)
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
 							if (
@@ -344,6 +386,7 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 								and value is not None
 								and fieldname
 								in [
+									"price_list_rate",
 									"discount_percentage",
 									"discount_amount",
 									"rate",
@@ -385,6 +428,19 @@ class InventoryToolsPurchaseOrder(PurchaseOrder):
 						or item.get("conversion_factor")
 						or 1
 					)
+
+			if removed_pricing_rules:
+				# Keep free items when the same rule still applies to another row.
+				removed_pricing_rules.difference_update(row.pricing_rule for row in self.pricing_rules)
+				for item in self.items[:]:
+					if (
+						item.get("is_free_item")
+						and item.get("pricing_rules") in removed_pricing_rules
+						and not frappe.get_cached_value(
+							"Pricing Rule", item.pricing_rules, "dont_enforce_free_item_qty"
+						)
+					):
+						self.remove(item)
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
@@ -500,60 +556,3 @@ def make_sales_invoices(docname: str, rows: list | str) -> None:
 		pi.inter_company_invoice_reference = si.name
 		pi.title = f"Transfer {doc.supplier} to {pi.company}"
 		pi.save()
-
-
-@frappe.whitelist()
-def get_item_details(
-	args: dict | str,
-	doc: Document | dict | str | None = None,
-	for_validate: bool | str | None = False,
-	overwrite_warehouse: bool | str = True,
-):
-	"""
-	HASH: ebe41edf31ea83373ff4bc2b0445949fe003a9ba
-	REPO: https://github.com/frappe/erpnext/
-	PATH: erpnext/stock/get_item_details.py
-	METHOD: get_item_details
-	"""
-
-	import erpnext.stock.get_item_details
-
-	erpnext.stock.get_item_details.validate_item_details = validate_item_details
-	out = erpnext.stock.get_item_details.get_item_details(
-		args, doc, for_validate, overwrite_warehouse
-	)
-	return out
-
-
-@frappe.whitelist()
-def validate_item_details(args, item):
-	"""
-	HASH: af21bca2318089bfee543fdf2180e9d55c7f2833
-	REPO: https://github.com/frappe/erpnext/
-	PATH: erpnext/stock/get_item_details.py
-	METHOD: validate_item_details
-	"""
-
-	if not args.company:
-		throw(_("Please specify Company"))
-
-	settings = frappe.get_doc("Inventory Tools Settings", {"company": args.company})
-
-	from erpnext.stock.doctype.item.item import validate_end_of_life
-
-	validate_end_of_life(item.name, item.end_of_life, item.disabled)
-
-	if frappe.utils.cint(item.has_variants):
-		msg = f"Item {item.name} is a template, please select one of its variants"
-
-		throw(_(msg), title=_("Template Item Selected"))
-
-	elif args.transaction_type == "buying" and args.doctype != "Material Request":
-		if not (settings and settings.enable_work_order_subcontracting):
-			if args.get("is_subcontracted"):
-				if args.get("is_old_subcontracting_flow"):
-					if item.is_sub_contracted_item != 1:
-						throw(_("Item {0} must be a Sub-contracted Item").format(item.name))
-				else:
-					if item.is_stock_item:
-						throw(_("Item {0} must be a Non-Stock Item").format(item.name))

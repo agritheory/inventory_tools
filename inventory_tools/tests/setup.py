@@ -135,6 +135,7 @@ def create_test_data():
 		create_material_request(settings)
 	create_production_plan(settings, prod_plan_from_doc)
 	create_fruit_material_request(settings)
+	create_generic_material_requests(settings)
 	create_quotations(settings)
 	create_specifications(settings)
 	create_item_dimensions()
@@ -373,6 +374,7 @@ def setup_manufacturing_settings(settings):
 	)
 	frappe.set_value("Inventory Tools Settings", settings.company, "show_on_website", 1)
 	frappe.set_value("Inventory Tools Settings", settings.company, "show_in_listview", 1)
+	frappe.set_value("Inventory Tools Settings", settings.company, "enable_generic_items", 1)
 
 
 def create_workstations(settings):
@@ -586,6 +588,8 @@ def create_items(settings):
 		i.include_item_in_manufacturing = 0 if item.get("is_stock_item") == 0 else 1
 		i.valuation_rate = item.get("valuation_rate") or 0
 		i.is_sub_contracted_item = item.get("is_sub_contracted_item") or 0
+		if item.get("is_generic_item"):
+			i.is_generic_item = 1
 		i.default_warehouse = item.get("default_warehouse") or settings.get("warehouse")
 		i.default_supplier = item.get("default_supplier")
 		i.weight_uom = item.get("weight_uom") if i.is_stock_item else None
@@ -1271,6 +1275,79 @@ def create_production_plan(settings, prod_plan_from_doc):
 	assert po_name, "make_purchase_order did not return a PO name"
 	po = frappe.get_doc("Purchase Order", po_name)
 	po.submit()
+
+
+GENERIC_MR_PARCHMENT = "Generic Parchment Sheets Request"
+GENERIC_MR_DUPLICATE_PO = "Generic Duplicate Line Request"
+GENERIC_MR_QTY_MISMATCH = "Generic Quantity Mismatch Request"
+GENERIC_MR_SETTING_OFF = "Generic Setting Disabled Request"
+SALT_MR_REORDER = "Salt Reorder Request"
+
+
+def create_generic_material_requests(settings):
+	"""Submitted Purchase Material Requests with generic placeholder lines for generic-item tests."""
+	company = settings.company
+	lines = [
+		(GENERIC_MR_PARCHMENT, 1, 34, "12×16 parchment sheets for pie production."),
+		(GENERIC_MR_DUPLICATE_PO, 1, 34, "Office tape refill."),
+		(GENERIC_MR_QTY_MISMATCH, 1, 100, "Disposable gloves, medium."),
+		(GENERIC_MR_SETTING_OFF, 1, 34, "Misc supply for settings-off validation."),
+	]
+	for title, qty, rate, description in lines:
+		if frappe.db.exists("Material Request", {"title": title, "company": company}):
+			continue
+		mr = frappe.new_doc("Material Request")
+		mr.company = company
+		mr.material_request_type = "Purchase"
+		mr.transaction_date = settings.day
+		mr.schedule_date = settings.day
+		mr.title = title
+		mr.append(
+			"items",
+			{
+				"item_code": "Miscellaneous Supplies",
+				"qty": qty,
+				"rate": rate,
+				"warehouse": "Storeroom - APC",
+				"uom": "Unit",
+				"description": description,
+			},
+		)
+		mr.save()
+		mr.submit()
+
+	if not frappe.db.exists("Material Request", {"title": SALT_MR_REORDER, "company": company}):
+		mr = frappe.new_doc("Material Request")
+		mr.company = company
+		mr.material_request_type = "Purchase"
+		mr.transaction_date = settings.day
+		mr.schedule_date = settings.day
+		mr.title = SALT_MR_REORDER
+		mr.append(
+			"items",
+			{
+				"item_code": "Salt",
+				"qty": 1,
+				"warehouse": "Storeroom - APC",
+				"uom": "Pound",
+			},
+		)
+		mr.save()
+		mr.submit()
+
+
+def fixture_material_request(title):
+	name = frappe.db.get_value(
+		"Material Request",
+		{"title": title, "company": "Ambrosia Pie Company", "docstatus": 1},
+	)
+	if not name:
+		frappe.throw(f"Missing fixture Material Request: {title}")
+	return frappe.get_doc("Material Request", name)
+
+
+def material_demand_rows_without_generic(rows):
+	return [row for row in rows if not row.get("is_generic_item")]
 
 
 def create_fruit_material_request(settings):

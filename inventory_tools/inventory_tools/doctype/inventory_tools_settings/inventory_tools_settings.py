@@ -33,6 +33,7 @@ class InventoryToolsSettings(Document):
 		default_packing_mode: DF.Literal["", "2D Floor", "3D Volumetric", "3D Fitted"]
 		default_quarantine_warehouse: DF.Link | None
 		enable_cartonization: DF.Check
+		enable_generic_items: DF.Check
 		enable_quarantine_workflow: DF.Check
 		enable_alternative_sales_workflow: DF.Check
 		enable_work_order_subcontracting: DF.Check
@@ -41,6 +42,7 @@ class InventoryToolsSettings(Document):
 		enforce_uoms: DF.Check
 		fitted_policy: DF.Literal["Ignore", "Warn", "Error"]
 		floor_packing_policy: DF.Literal["", "Ignore", "Warn", "Error"]
+		generic_item_qty_mismatch: DF.Literal["Ignore", "Warn", "Error"]
 		location_suggestion_excluded_warehouse_types: DF.SmallText | None
 		max_weight_uom: DF.Link | None
 		overproduction_percentage_for_work_order: DF.Percent
@@ -68,6 +70,15 @@ class InventoryToolsSettings(Document):
 		self.validate_single_aggregation_company()
 		self.set_faceted_search_for_all_companies()
 		self.sync_alternative_sales_workflow_property_setters()
+		set_generic_item_field_visibility(self.any_company_has_generic_items())
+
+	def any_company_has_generic_items(self) -> bool:
+		if self.enable_generic_items:
+			return True
+		filters: dict[str, int | list[str]] = {"enable_generic_items": 1}
+		if self.name:
+			filters["name"] = ["!=", self.name]
+		return bool(frappe.db.exists("Inventory Tools Settings", filters))
 
 	def create_warehouse_path_custom_field(self):
 		if frappe.db.exists("Custom Field", "Warehouse-warehouse_path"):
@@ -219,6 +230,34 @@ def sync_alternative_sales_workflow_property_setters() -> None:
 		frappe.get_doc(
 			"Inventory Tools Settings", name
 		).sync_alternative_sales_workflow_property_setters()
+
+
+def sync_generic_item_field_visibility() -> None:
+	set_generic_item_field_visibility(
+		bool(frappe.db.exists("Inventory Tools Settings", {"enable_generic_items": 1}))
+	)
+
+
+def set_generic_item_field_visibility(enabled: bool) -> None:
+	"""Hides Item.is_generic_item unless at least one company has generic items enabled."""
+	filters = {"doc_type": "Item", "field_name": "is_generic_item", "property": "hidden"}
+	existing = frappe.get_all("Property Setter", filters, pluck="name")
+	if enabled:
+		if not existing:
+			return
+		for name in existing:
+			frappe.delete_doc("Property Setter", name, force=1)
+	else:
+		if existing:
+			return
+		property_setter = frappe.new_doc("Property Setter")
+		property_setter.update(filters)
+		property_setter.doctype_or_field = "DocField"
+		property_setter.property_type = "Check"
+		property_setter.value = "1"
+		property_setter.module = "Inventory Tools"
+		property_setter.insert(ignore_permissions=True)
+	frappe.clear_cache(doctype="Item")
 
 
 @frappe.whitelist()

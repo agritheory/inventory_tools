@@ -16,11 +16,11 @@ permissions:
 jobs:
   tests:
     name: Server
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     services:
       mariadb:
-        image: mariadb:10.6
+        image: mariadb:10.6.24
         env:
           MYSQL_ALLOW_EMPTY_PASSWORD: YES
           MYSQL_ROOT_PASSWORD: 'admin'
@@ -40,7 +40,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
           check-latest: true
           cache: 'yarn'  # Replaces `Get yarn cache directory path` and `yarn-cache` steps
 
