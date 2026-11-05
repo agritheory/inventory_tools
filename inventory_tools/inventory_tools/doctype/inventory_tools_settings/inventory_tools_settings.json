@@ -20,6 +20,9 @@
 		"work_order_subcontracting_section",
 		"enable_work_order_subcontracting",
 		"create_purchase_orders",
+		"generic_items_section",
+		"enable_generic_items",
+		"generic_item_qty_mismatch",
 		"bom_column",
 		"create_job_cards_automatically",
 		"column_break_ilobm",
@@ -114,6 +117,27 @@
 			"fieldname": "enable_work_order_subcontracting",
 			"fieldtype": "Check",
 			"label": "Enable Work Order Subcontracting"
+		},
+		{
+			"fieldname": "generic_items_section",
+			"fieldtype": "Section Break",
+			"label": "Generic Items"
+		},
+		{
+			"default": "0",
+			"description": "Allow Purchase Order lines linked to a generic Material Request item to use a different item code. On submit, the Material Request line is updated to the purchased item.",
+			"fieldname": "enable_generic_items",
+			"fieldtype": "Check",
+			"label": "Enable Generic Items"
+		},
+		{
+			"default": "Warn",
+			"depends_on": "eval:doc.enable_generic_items",
+			"description": "Action when a Purchase Order line replacing a generic item has a different quantity than the Material Request line.",
+			"fieldname": "generic_item_qty_mismatch",
+			"fieldtype": "Select",
+			"label": "Generic Item Quantity Mismatch",
+			"options": "Ignore\nWarn\nError"
 		},
 		{
 			"default": "0",
@@ -411,7 +435,7 @@
 	],
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2026-09-02 11:05:00.000000",
+	"modified": "2026-10-29 16:00:00.000000",
 	"modified_by": "Administrator",
 	"module": "Inventory Tools",
 	"name": "Inventory Tools Settings",

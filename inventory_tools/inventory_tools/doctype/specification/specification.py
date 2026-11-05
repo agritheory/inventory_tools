@@ -120,7 +120,7 @@ def convert_to_epoch(date):
 
 	d = datetime.datetime.now(tz)  # or some other local date
 	utc_offset = d.utcoffset()
-	if utc_offset:
+	if utc_offset is not None:
 		utc_offset_seconds = utc_offset.total_seconds()
 		offset_d = (
 			get_datetime(date) - datetime.timedelta(hours=12, seconds=int(utc_offset_seconds))

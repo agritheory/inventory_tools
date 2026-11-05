@@ -9,6 +9,7 @@ from erpnext.stock.doctype.item.item import get_last_purchase_details
 from erpnext.stock.get_item_details import get_price_list_rate_for
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Coalesce
+from frappe.utils import cint, strip_html_tags
 from frappe.utils.data import fmt_money, getdate
 
 
@@ -69,6 +70,8 @@ def get_columns(filters):
 			"width": "250px",
 		},
 		{"fieldname": "item_name", "fieldtype": "Data", "hidden": 1},  # unset for export
+		{"fieldname": "is_generic_item", "fieldtype": "Check", "hidden": 1},
+		{"fieldname": "description", "fieldtype": "Data", "hidden": 1},
 		{
 			"label": "MR Qty",
 			"fieldname": "qty",
@@ -128,6 +131,7 @@ def get_data(filters):
 	MaterialRequest = DocType("Material Request")
 	MaterialRequestItem = DocType("Material Request Item")
 	ItemSupplier = DocType("Item Supplier")
+	Item = DocType("Item")
 	Company = DocType("Company")
 	query = (
 		frappe.qb.from_(MaterialRequest)
@@ -135,6 +139,8 @@ def get_data(filters):
 		.on(MaterialRequest.name == MaterialRequestItem.parent)
 		.join(ItemSupplier)
 		.on(ItemSupplier.parent == MaterialRequestItem.item_code)
+		.left_join(Item)
+		.on(Item.name == MaterialRequestItem.item_code)
 		.join(Company)
 		.on(MaterialRequest.company == Company.name)
 		.select(
@@ -145,12 +151,14 @@ def get_data(filters):
 			MaterialRequestItem.name.as_("mri"),
 			MaterialRequestItem.item_code,
 			MaterialRequestItem.item_name,
+			MaterialRequestItem.description,
 			MaterialRequestItem.qty,
 			MaterialRequestItem.uom,
 			MaterialRequestItem.warehouse,
 			Company.default_currency.as_("currency"),
 			MaterialRequestItem.rate.as_("supplier_price"),
 			Coalesce(ItemSupplier.supplier.as_("supplier"), "No Supplier").as_("supplier"),
+			Coalesce(Item.is_generic_item, 0).as_("is_generic_item"),
 		)
 		.distinct()
 		.where(MaterialRequest.docstatus < 2)
@@ -170,22 +178,28 @@ def get_data(filters):
 
 	data = query.run(as_dict=1)
 	total_demand = frappe._dict()
-	mris = []
+	mris = set()
 	for row in data:
-		if row.item_code not in total_demand and row.mri not in mris:
-			total_demand[row.item_code] = row.qty
-			mris.append(row.mri)
-		elif row.item_code in total_demand and row.mri not in mris:
-			total_demand[row.item_code] += row.qty
-			mris.append(row.mri)
+		if cint(row.is_generic_item):
+			row.description = strip_html_tags(row.description or "").strip()
+		else:
+			row.description = None
+		if row.mri in mris:
+			continue
+		mris.add(row.mri)
+		key = demand_key(row)
+		total_demand[key] = total_demand.get(key, 0) + row.qty
 
 	for supplier, _rows in groupby(data, lambda x: x.get("supplier")):
 		rows = list(_rows)
 		output.append({"supplier": supplier, "indent": 0})
 		for r in rows:
-			r.total_demand = total_demand[r.item_code]
-			r.supplier_price = get_item_price(filters, r)
-			r.supplier_price = fmt_money(r.get("supplier_price"), 2, r.get("currency")).replace(" ", "")
+			r.total_demand = total_demand[demand_key(r)]
+			supplier_price = get_item_price(filters, r)
+			# Material Request Item.rate is the fallback when the selected price
+			# list does not contain an item price for this supplier/item pair.
+			r.supplier_rate = supplier_price if supplier_price is not None else r.supplier_price
+			r.supplier_price = fmt_money(r.supplier_rate, 2, r.get("currency")).replace(" ", "")
 			r.draft_po = frappe.db.get_value(
 				"Purchase Order Item",
 				{"material_request_item": r.material_request_item, "docstatus": 0},
@@ -194,6 +208,24 @@ def get_data(filters):
 			r.draft_po = f'<span style="color: red">{r.draft_po}</span>' if r.draft_po else None
 			output.append({**r, "indent": 1})
 	return output
+
+
+def demand_key(row):
+	"""
+	Generic placeholder lines each describe a different purchase, so their demand is
+	tracked per Material Request line instead of being summed per item.
+	"""
+	if cint(row.get("is_generic_item")):
+		return row.get("material_request_item")
+	return row.get("item_code")
+
+
+def generic_line_description(row):
+	if not cint(row.get("is_generic_item")) or not row.get("material_request_item"):
+		return None
+	return frappe.db.get_value(
+		"Material Request Item", row.get("material_request_item"), "description"
+	)
 
 
 def get_item_price(filters, r):
@@ -205,6 +237,20 @@ def get_item_price(filters, r):
 	else:
 		details = get_last_purchase_details(r.item_code, None, conversion_rate=1.0)
 		return details.get("rate")
+
+
+def buying_price_list_for_po(filters, supplier):
+	"""Report filters may use a selling price list; Purchase Orders require a buying list."""
+	price_list = filters.get("price_list")
+	if price_list and cint(frappe.db.get_value("Price List", price_list, "buying")):
+		return price_list
+	for candidate in (
+		frappe.db.get_value("Supplier", supplier, "default_price_list"),
+		frappe.db.get_single_value("Buying Settings", "buying_price_list"),
+	):
+		if candidate and cint(frappe.db.get_value("Price List", candidate, "buying")):
+			return candidate
+	return price_list
 
 
 def parse_companies(companies):
@@ -366,8 +412,8 @@ def create_pos(company, filters, rows, companies=None):
 		po = frappe.new_doc("Purchase Order")
 		po.schedule_date = po.posting_date = getdate()
 		po.supplier = supplier
-		po.buying_price_list = filters.price_list
 		po.company = po_company
+		po.buying_price_list = buying_price_list_for_po(filters, supplier)
 		for row in supplier_rows:
 			requesting_company = requesting_company_from_demand_row(row)
 			if aggregated_warehouse and aggregation_company:
@@ -379,10 +425,13 @@ def create_pos(company, filters, rows, companies=None):
 				{
 					"item_code": row.get("item_code"),
 					"item_name": row.get("item_name"),
+					"description": generic_line_description(row),
 					"schedule_date": max(getdate(), getdate(row.get("schedule_date"))),
 					"requesting_company": requesting_company,
 					"qty": row.get("qty"),
-					"rate": row.get("supplier_price"),
+					# supplier_price is formatted for report display and may contain a
+					# currency symbol. Always use the raw numeric rate for documents.
+					"rate": row.get("supplier_rate", row.get("supplier_price")),
 					"uom": row.get("uom"),
 					"material_request": row.get("material_request"),
 					"material_request_item": row.get("material_request_item"),

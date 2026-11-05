@@ -3,6 +3,18 @@
 /* eslint-disable */
 
 frappe.query_reports['Material Demand'] = {
+	formatter(value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data)
+		if (column.fieldname === 'item_code' && data && data.is_generic_item) {
+			const description = frappe.utils.escape_html(data.description || '')
+			value += ` <span class="text-muted" title="${description}">(${__('Generic')})`
+			if (description) {
+				value += `: ${description}`
+			}
+			value += '</span>'
+		}
+		return value
+	},
 	filters: [
 		{
 			fieldname: 'company',
@@ -227,25 +239,28 @@ function update_selection(row) {
 	}
 }
 
+function demand_key(row) {
+	// generic placeholder lines are separate purchases, not one item's demand
+	return row.is_generic_item ? row.material_request_item : row.item_code
+}
+
 function update_selected_qty() {
 	// iterate all rows for selected items
 	let item_map = {}
 	frappe.query_report.datatable.datamanager.data.forEach((supplier_row, index) => {
-		if (frappe.query_report.datatable.rowmanager.checkMap[index]) {
-			if (supplier_row.item_code && !item_map[supplier_row.item_code]) {
-				item_map[supplier_row.item_code] = supplier_row.qty
-			} else if (supplier_row.item_code && item_map[supplier_row.item_code]) {
-				item_map[supplier_row.item_code] += supplier_row.qty
-			}
+		if (frappe.query_report.datatable.rowmanager.checkMap[index] && supplier_row.item_code) {
+			const key = demand_key(supplier_row)
+			item_map[key] = (item_map[key] || 0) + supplier_row.qty
 		}
 	})
 	frappe.query_report.datatable.datamanager.data.forEach((supplier_row, index) => {
-		if (supplier_row.item_code in item_map) {
+		const key = demand_key(supplier_row)
+		if (supplier_row.item_code && key in item_map) {
 			let supplier_price = Number(String(supplier_row.supplier_price).replace(/[^0-9\.-]+/g, ''))
-			let total_selected = item_map[supplier_row.item_code]
-			let selected_price = item_map[supplier_row.item_code] * (supplier_price || 0)
+			let total_selected = item_map[key]
+			let selected_price = item_map[key] * (supplier_price || 0)
 			selected_price = format_currency(selected_price, supplier_row.currency, 2)
-			if (item_map[supplier_row.item_code] > supplier_row.total_demand) {
+			if (item_map[key] > supplier_row.total_demand) {
 				total_selected = `<span style="color: red">${total_selected}</span>`
 				selected_price = `<span style="color: red">${selected_price}</span>`
 			}

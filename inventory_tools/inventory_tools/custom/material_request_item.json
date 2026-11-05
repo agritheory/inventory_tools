@@ -1,0 +1,22 @@
+{
+  "custom_fields": [
+    {
+      "depends_on": "eval:doc.generic_item_code",
+      "description": "The generic item originally requested on this line. Set when a Purchase Order replaces it with a specific item.",
+      "dt": "Material Request Item",
+      "fieldname": "generic_item_code",
+      "fieldtype": "Link",
+      "insert_after": "item_code",
+      "label": "Generic Item",
+      "module": "Inventory Tools",
+      "name": "Material Request Item-generic_item_code",
+      "no_copy": 1,
+      "options": "Item",
+      "print_hide": 1,
+      "read_only": 1
+    }
+  ],
+  "doctype": "Material Request Item",
+  "property_setters": [],
+  "sync_on_migrate": 1
+}

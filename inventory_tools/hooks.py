@@ -53,10 +53,7 @@ doctype_js = {
 	"Quality Inspection": "public/js/custom/quality_inspection_custom.js",
 	"Sales Order": "public/js/custom/sales_order_custom.js",
 	"Shipment": "public/js/custom/shipment_custom.js",
-	"Stock Entry": [
-		"public/js/custom/stock_entry_custom.js",
-		"public/js/custom/stock_entry_alternative_sales_workflow.js",
-	],
+	"Stock Entry": "public/js/custom/stock_entry_custom.js",
 	"UOM Category": "public/js/custom/uom_category_custom.js",
 	"Work Order": "public/js/custom/work_order_custom.js",
 	"Workstation": "public/js/custom/workstation_custom.js",
@@ -98,6 +95,7 @@ doctype_tree_js = {"Warehouse": "public/js/custom/warehouse_tree.js"}
 after_install = "inventory_tools.install.after_install"
 after_migrate = [
 	"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.sync_alternative_sales_workflow_property_setters",
+	"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.sync_generic_item_field_visibility",
 ]
 
 # Uninstallation
@@ -140,6 +138,7 @@ override_doctype_class = {
 	"Pick List": "inventory_tools.inventory_tools.overrides.pick_list.InventoryToolsPickList",
 	"Quality Inspection": "inventory_tools.inventory_tools.overrides.quality_inspection.InventoryToolsQualityInspection",
 	"Job Card": "inventory_tools.inventory_tools.overrides.job_card.InventoryToolsJobCard",
+	"Material Request": "inventory_tools.inventory_tools.overrides.material_request.InventoryToolsMaterialRequest",
 	"Production Plan": "inventory_tools.inventory_tools.overrides.production_plan.InventoryToolsProductionPlan",
 	"Purchase Invoice": "inventory_tools.inventory_tools.overrides.purchase_invoice.InventoryToolsPurchaseInvoice",
 	"Purchase Order": "inventory_tools.inventory_tools.overrides.purchase_order.InventoryToolsPurchaseOrder",
@@ -169,6 +168,9 @@ doc_events = {
 		],
 	},
 	"Delivery Note": {
+		"validate": [
+			"inventory_tools.inventory_tools.generic_items.reject_generic_items",
+		],
 		"on_submit": [
 			"inventory_tools.cartonization.run_cartonization",
 		],
@@ -177,6 +179,12 @@ doc_events = {
 		"validate": [
 			"inventory_tools.inventory_tools.overrides.uom.duplicate_weight_to_uom_conversion",
 			"inventory_tools.inventory_tools.faceted_search.update_specification_attribute_values",
+			"inventory_tools.inventory_tools.generic_items.validate_generic_item",
+		],
+	},
+	"Item Price": {
+		"validate": [
+			"inventory_tools.inventory_tools.generic_items.validate_generic_item_price",
 		],
 	},
 	"Operation": {
@@ -185,13 +193,54 @@ doc_events = {
 		]
 	},
 	"Pick List": {
+		"validate": [
+			"inventory_tools.inventory_tools.generic_items.reject_generic_items",
+		],
 		"on_submit": [
 			"inventory_tools.cartonization.run_cartonization",
 		],
 	},
+	"Purchase Invoice": {
+		"validate": [
+			"inventory_tools.inventory_tools.generic_items.reject_generic_items",
+		],
+	},
+	"Purchase Order": {
+		"before_submit": [
+			"inventory_tools.inventory_tools.generic_items.reject_generic_items",
+		],
+	},
 	"Purchase Receipt": {
+		"validate": [
+			"inventory_tools.inventory_tools.generic_items.reject_generic_items",
+		],
 		"before_submit": [
 			"inventory_tools.inventory_tools.overrides.purchase_receipt.handle_pr_quarantine",
+		],
+	},
+	"Request for Quotation": {
+		"validate": [
+			"inventory_tools.inventory_tools.generic_items.reject_generic_items",
+		],
+	},
+	"Sales Invoice": {
+		"validate": [
+			"inventory_tools.inventory_tools.generic_items.reject_generic_items",
+		],
+	},
+	"Stock Reconciliation": {
+		"validate": [
+			"inventory_tools.inventory_tools.generic_items.reject_generic_items",
+		],
+	},
+	"Subcontracting Order": {
+		"validate": [
+			"inventory_tools.inventory_tools.generic_items.reject_generic_items",
+		],
+	},
+	"Supplier Quotation": {
+		"validate": [
+			"inventory_tools.inventory_tools.generic_items.reject_generic_items",
 		],
 	},
 	"Quality Inspection": {},
@@ -206,6 +255,9 @@ doc_events = {
 		],
 	},
 	"Stock Entry": {
+		"validate": [
+			"inventory_tools.inventory_tools.generic_items.reject_generic_items",
+		],
 		"before_save": [
 			"inventory_tools.inventory_tools.overrides.sales_order_identity.stamp_stock_entry_before_save",
 		],
@@ -218,6 +270,9 @@ doc_events = {
 		],
 	},
 	"Subcontracting Receipt": {
+		"validate": [
+			"inventory_tools.inventory_tools.generic_items.reject_generic_items",
+		],
 		"before_submit": [
 			"inventory_tools.inventory_tools.overrides.subcontracting_receipt.handle_scr_quarantine",
 		],
@@ -254,7 +309,6 @@ doc_events = {
 #
 override_whitelisted_methods = {
 	"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry": "inventory_tools.inventory_tools.overrides.work_order.make_stock_entry",
-	"erpnext.stock.get_item_details.get_item_details": "inventory_tools.inventory_tools.overrides.purchase_order.get_item_details",
 	"webshop.webshop.api.get_product_filter_data": "inventory_tools.inventory_tools.faceted_search.get_product_filter_data",
 }
 

@@ -158,9 +158,9 @@ class InventoryToolsWorkOrder(WorkOrder):
 		if self.production_plan:
 			self.update_production_plan_status()
 
-	def update_operation_status(self):
+	def update_operation_status(self, operation_id=None):
 		"""
-		HASH: 4dd9f0b25545a034ae3cc2012dc5a1049449c5b7
+		HASH: 30a27067aa5c07e883f8ba4e92bdaa7ed9b5b031
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: update_operation_status
@@ -179,7 +179,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 				d.status = "Work in Progress"
 			elif qty == flt(self.qty, precision):
 				d.status = "Completed"
-			elif qty <= flt(max_allowed_qty_for_wo, precision):
+			elif qty <= flt(max_allowed_qty_for_wo, precision) or d.name != operation_id:
 				d.status = "Completed"
 			else:
 				frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))

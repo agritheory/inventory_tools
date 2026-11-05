@@ -6,11 +6,24 @@ import pytest
 from frappe.utils import flt, getdate
 
 from inventory_tools.inventory_tools.report.material_demand.material_demand import (
+	create_pos,
 	execute as execute_material_demand,
 )
-from inventory_tools.tests.setup import create_southern_fruit_purchase_orders
+from inventory_tools.tests.setup import (
+	GENERIC_MR_PARCHMENT,
+	GENERIC_MR_QTY_MISMATCH,
+	create_quarantine_quality_control_data,
+	create_southern_fruit_purchase_orders,
+	fixture_material_request,
+	material_demand_rows_without_generic,
+)
 
-# Setup runs Bayberry-only PO -> PR (quarantine) -> QI (release) before these tests; Bayberry satisfied.
+# Module fixture runs Bayberry-only PO -> PR (quarantine) -> QI (release) before these tests.
+
+
+@pytest.fixture(scope="module", autouse=True)
+def material_demand_qc_data():
+	create_quarantine_quality_control_data(frappe._dict({"company": "Ambrosia Pie Company"}))
 
 
 def assert_setup_bayberry_po_exists():
@@ -35,12 +48,12 @@ def test_report_po_without_aggregation():
 		{"end_date": getdate(), "price_list": "Bakery Wholesale", "company": "Ambrosia Pie Company"}
 	)
 	columns, rows = execute_material_demand(filters)
-	assert len(rows) == 34
+	assert len(rows) == 39
 	assert rows[1].get("supplier") == "Chelsea Fruit Co"
 
 	selected_rows = [
 		row
-		for row in rows
+		for row in material_demand_rows_without_generic(rows)
 		if row.get("supplier") not in ["Southern Fruit Supply", "Unity Bakery Supply"]
 	]
 
@@ -65,7 +78,7 @@ def test_report_po_without_aggregation():
 		if po.supplier == "Chelsea Fruit Co":
 			assert po.grand_total == flt(501.07, 2)
 		elif po.supplier == "Freedom Provisions":
-			assert po.grand_total == flt(375.89, 2)
+			assert po.grand_total == flt(440.25, 2)
 		elif po.supplier == "Credible Contract Baking":
 			continue  # subcontracting PO created by fixture, not this test
 		else:
@@ -79,10 +92,14 @@ def test_report_rfq_without_aggregation():
 		{"end_date": getdate(), "price_list": "Bakery Wholesale", "company": "Ambrosia Pie Company"}
 	)
 	columns, rows = execute_material_demand(filters)
-	assert len(rows) == 34
+	assert len(rows) == 39
 	assert rows[1].get("supplier") == "Chelsea Fruit Co"
 
-	selected_rows = [row for row in rows if row.get("supplier") not in ["Southern Fruit Supply"]]
+	selected_rows = [
+		row
+		for row in material_demand_rows_without_generic(rows)
+		if row.get("supplier") not in ["Southern Fruit Supply"]
+	]
 
 	frappe.call(
 		"inventory_tools.inventory_tools.report.material_demand.material_demand.create",
@@ -125,11 +142,11 @@ def test_report_item_based_without_aggregation():
 		{"end_date": getdate(), "price_list": "Bakery Wholesale", "company": "Ambrosia Pie Company"}
 	)
 	columns, rows = execute_material_demand(filters)
-	assert len(rows) == 34
+	assert len(rows) == 39
 
 	selected_rows = [
 		row
-		for row in rows
+		for row in material_demand_rows_without_generic(rows)
 		if row.get("supplier") not in ["Southern Fruit Supply", "Unity Bakery Supply"]
 	]
 
@@ -150,7 +167,7 @@ def test_report_item_based_without_aggregation():
 		if po.supplier == "Chelsea Fruit Co":
 			assert po.grand_total == flt(501.07, 2)
 		elif po.supplier == "Freedom Provisions":
-			assert po.grand_total == flt(375.89, 2)
+			assert po.grand_total == flt(440.25, 2)
 		elif po.supplier in ("Southern Fruit Supply", "Credible Contract Baking"):
 			continue  # Southern Fruit Supply excluded by design; Credible Contract Baking is the subcontracting fixture PO
 		else:
@@ -183,11 +200,13 @@ def test_report_po_with_aggregation_and_no_aggregation_warehouse():
 
 	filters = frappe._dict({"end_date": getdate(), "price_list": "Bakery Wholesale"})
 	columns, rows = execute_material_demand(filters)
-	assert len(rows) == 48
+	assert len(rows) == 53
 	assert rows[1].get("supplier") == "Chelsea Fruit Co"
 
 	selected_rows = [
-		row for row in rows if row.get("supplier") not in ["Chelsea Fruit Co", "Unity Bakery Supply"]
+		row
+		for row in material_demand_rows_without_generic(rows)
+		if row.get("supplier") not in ["Chelsea Fruit Co", "Unity Bakery Supply"]
 	]
 
 	frappe.call(
@@ -246,11 +265,13 @@ def test_report_po_with_aggregation_and_aggregation_warehouse():
 
 	filters = frappe._dict({"end_date": getdate(), "price_list": "Bakery Wholesale"})
 	columns, rows = execute_material_demand(filters)
-	assert len(rows) == 48
+	assert len(rows) == 53
 	assert rows[1].get("supplier") == "Chelsea Fruit Co"
 
 	selected_rows = [
-		row for row in rows if row.get("supplier") not in ["Chelsea Fruit Co", "Unity Bakery Supply"]
+		row
+		for row in material_demand_rows_without_generic(rows)
+		if row.get("supplier") not in ["Chelsea Fruit Co", "Unity Bakery Supply"]
 	]
 
 	frappe.call(
@@ -334,7 +355,7 @@ def test_create_po_uses_company_filter_when_aggregation_is_unset():
 	columns, rows = execute_material_demand(filters)
 	selected_rows = [
 		row
-		for row in rows
+		for row in material_demand_rows_without_generic(rows)
 		if row.get("item_code")
 		and row.get("supplier") not in ["Southern Fruit Supply", "Unity Bakery Supply"]
 	]
@@ -628,3 +649,44 @@ def test_seed_southern_fruit_po_prs_from_material_demand():
 			assert (
 				warehouse_company == pr.company
 			), f"{item.warehouse} belongs to {warehouse_company}, not {pr.company}"
+
+
+@pytest.mark.order(43)
+def test_generic_rows_show_request_description_and_line_demand():
+	"""
+	Each generic placeholder line is its own purchase: the report shows the requester's
+	description and does not sum demand across unrelated generic lines.
+	"""
+	filters = frappe._dict(
+		{"end_date": getdate(), "price_list": "Bakery Wholesale", "company": "Ambrosia Pie Company"}
+	)
+	columns, rows = execute_material_demand(filters)
+	generic_rows = {row["material_request"]: row for row in rows if row.get("is_generic_item")}
+
+	parchment = generic_rows[fixture_material_request(GENERIC_MR_PARCHMENT).name]
+	assert parchment["description"] == "12×16 parchment sheets for pie production."
+	gloves = generic_rows[fixture_material_request(GENERIC_MR_QTY_MISMATCH).name]
+	assert gloves["description"] == "Disposable gloves, medium."
+	for row in generic_rows.values():
+		assert flt(row["total_demand"]) == flt(row["qty"])
+	assert all(not row.get("description") for row in material_demand_rows_without_generic(rows))
+
+
+@pytest.mark.order(44)
+def test_po_from_generic_row_keeps_request_description():
+	filters = frappe._dict(
+		{"end_date": getdate(), "price_list": "Bakery Wholesale", "company": "Ambrosia Pie Company"}
+	)
+	columns, rows = execute_material_demand(filters)
+	mr_name = fixture_material_request(GENERIC_MR_PARCHMENT).name
+	row = next(r for r in rows if r.get("is_generic_item") and r["material_request"] == mr_name)
+	existing_pos = set(frappe.get_all("Purchase Order", pluck="name"))
+
+	create_pos("Ambrosia Pie Company", filters, [frappe._dict(row)])
+
+	new_pos = set(frappe.get_all("Purchase Order", pluck="name")) - existing_pos
+	assert len(new_pos) == 1
+	po = frappe.get_doc("Purchase Order", new_pos.pop())
+	assert po.items[0].item_code == "Miscellaneous Supplies"
+	assert "12×16 parchment sheets" in po.items[0].description
+	frappe.delete_doc("Purchase Order", po.name, force=1)
