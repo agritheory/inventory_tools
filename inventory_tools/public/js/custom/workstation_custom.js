@@ -4,6 +4,7 @@
 frappe.ui.form.on('Workstation', {
 	refresh: frm => {
 		set_item_query(frm)
+		set_warehouse_query(frm)
 		set_read_only(frm)
 	},
 })
@@ -44,6 +45,17 @@ function set_item_query(frm) {
 			filters: {
 				is_stock_item: 0,
 				is_fixed_asset: 0,
+				disabled: 0,
+			},
+		}
+	})
+}
+
+function set_warehouse_query(frm) {
+	frm.set_query('warehouse', () => {
+		return {
+			filters: {
+				is_group: 0,
 				disabled: 0,
 			},
 		}

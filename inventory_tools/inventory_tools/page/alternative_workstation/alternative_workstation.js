@@ -14,6 +14,44 @@ frappe.pages['alternative-workstation'].on_page_load = function (wrapper) {
 		<div class="sticky-work-order-filter"></div>
 	`).prependTo(page.body)
 
+	let syncing_from_url = false
+
+	function load_work_order_chart(selected_work_order) {
+		if (!selected_work_order) {
+			container.find('.chart-display-area').empty()
+			return
+		}
+
+		container
+			.find('.chart-display-area')
+			.html(`<div class="text-muted p-4"><i class="fa fa-spinner fa-spin"></i> Loading...</div>`)
+
+		frappe.call({
+			method: 'inventory_tools.inventory_tools.page.alternative_workstation.get_workstation_availability',
+			args: { work_order: selected_work_order },
+			callback: function (r) {
+				if (r.message) {
+					render_page_workstation_chart(container.find('.chart-display-area'), r.message, selected_work_order)
+				} else {
+					container.find('.chart-display-area').html(`
+						<div class="alert alert-info">
+							<i class="fa fa-info-circle"></i>
+							No operations found for this Work Order or backend method not available.
+						</div>
+					`)
+				}
+			},
+			error: function () {
+				container.find('.chart-display-area').html(`
+					<div class="alert alert-warning">
+						<i class="fa fa-exclamation-triangle"></i>
+						Error loading data
+					</div>
+				`)
+			},
+		})
+	}
+
 	let work_order_field = page.add_field({
 		fieldtype: 'Link',
 		fieldname: 'work_order',
@@ -21,51 +59,50 @@ frappe.pages['alternative-workstation'].on_page_load = function (wrapper) {
 		label: 'Work Order',
 		reqd: 1,
 		change: function () {
-			let selected_work_order = work_order_field.get_value()
-			if (!selected_work_order) {
-				container.find('.chart-display-area').empty()
+			if (syncing_from_url) {
 				return
 			}
-
-			container
-				.find('.chart-display-area')
-				.html(`<div class="text-muted p-4"><i class="fa fa-spinner fa-spin"></i> Loading...</div>`)
-
-			frappe.call({
-				method: 'inventory_tools.inventory_tools.page.alternative_workstation.get_workstation_availability',
-				args: { work_order: selected_work_order },
-				callback: function (r) {
-					if (r.message) {
-						render_page_workstation_chart(container.find('.chart-display-area'), r.message, selected_work_order)
-					} else {
-						container.find('.chart-display-area').html(`
-						<div class="alert alert-info">
-							<i class="fa fa-info-circle"></i>
-							No operations found for this Work Order or backend method not available.
-						</div>
-					`)
-					}
-				},
-				error: function () {
-					container.find('.chart-display-area').html(`
-					<div class="alert alert-warning">
-						<i class="fa fa-exclamation-triangle"></i>
-						Error loading data
-					</div>
-				`)
-				},
-			})
+			let selected_work_order = work_order_field.get_value()
+			inventory_tools.alternative_workstation.set_work_order_url(selected_work_order)
+			load_work_order_chart(selected_work_order)
 		},
 	})
 	$(work_order_field.$wrapper).appendTo(filter_wrapper)
 
-	// Place chart display area below the field
 	$('<div class="chart-display-area"></div>').appendTo(container)
 
-	// Preload if route contains work order
-	let work_order_id = frappe.get_route()[1]
-	if (work_order_id) {
-		work_order_field.set_value(work_order_id)
+	wrapper.alternative_workstation_page = {
+		work_order_field,
+		sync_from_url: function () {
+			let work_order_id = inventory_tools.alternative_workstation.get_work_order_from_url()
+			const route = frappe.get_route() || []
+			if (route[0] === 'alternative-workstation' && route[1] && !work_order_id) {
+				work_order_id = route[1]
+			}
+			if (route[0] === 'alternative-workstation' && route[1] && work_order_id) {
+				inventory_tools.alternative_workstation.set_work_order_url(work_order_id)
+			}
+			const current = work_order_field.get_value()
+			if (work_order_id && work_order_id !== current) {
+				syncing_from_url = true
+				work_order_field.set_value(work_order_id)
+				syncing_from_url = false
+				load_work_order_chart(work_order_id)
+			} else if (!work_order_id && current) {
+				syncing_from_url = true
+				work_order_field.set_value('')
+				syncing_from_url = false
+				container.find('.chart-display-area').empty()
+			} else if (work_order_id && work_order_id === current) {
+				load_work_order_chart(work_order_id)
+			}
+		},
+	}
+}
+
+frappe.pages['alternative-workstation'].on_page_show = function (wrapper) {
+	if (wrapper.alternative_workstation_page) {
+		wrapper.alternative_workstation_page.sync_from_url()
 	}
 }
 
@@ -96,6 +133,7 @@ function render_operation_tree_for_page(operation, index) {
 		return a_time - b_time
 	})
 
+	const is_completed = !!cint(operation.is_completed)
 	let primary_card_class = 'primary'
 	let primary_btn_class = 'btn-primary'
 
@@ -107,20 +145,16 @@ function render_operation_tree_for_page(operation, index) {
 	const primary_is_earliest = !earliest_alt_time || primary_time <= earliest_alt_time
 
 	if (!operation.is_bom_default) {
-		// Purple - non-default workstation chosen
 		primary_card_class += ' non-default'
 		primary_btn_class = 'btn-purple'
 	} else if (operation.availability === 'available' && primary_is_earliest) {
-		// Green - primary is available and earliest
 		primary_card_class += ' earliest'
 		primary_btn_class = 'btn-success'
 	} else if (operation.availability === 'busy' || !primary_is_earliest) {
-		// Yellow - primary is busy OR not the earliest option
 		primary_card_class += ' busy'
 		primary_btn_class = 'btn-warning'
 	}
 
-	// Primary card HTML (removed "Primary:")
 	let primary_html = `
 		<div class="workstation-node ${primary_card_class}" data-workstation="${operation.workstation}">
 			<div class="node-content">
@@ -142,7 +176,6 @@ function render_operation_tree_for_page(operation, index) {
 		</div>
 	`
 
-	// Alternatives HTML
 	let alternatives_html = ''
 	if (sorted_alternatives.length > 0) {
 		alternatives_html = '<div class="alternative-stations">'
@@ -150,11 +183,13 @@ function render_operation_tree_for_page(operation, index) {
 			let alt_card_class = 'alternative'
 			let alt_btn_class = 'btn-outline-primary'
 
-			if (i === 0) {
-				alt_card_class += ' earliest' // green
+			if (is_completed) {
+				alt_btn_class = 'btn-default'
+			} else if (i === 0) {
+				alt_card_class += ' earliest'
 				alt_btn_class = 'btn-success'
 			} else {
-				alt_card_class += ' busy' // yellow
+				alt_card_class += ' busy'
 				alt_btn_class = 'btn-warning'
 			}
 
@@ -176,8 +211,9 @@ function render_operation_tree_for_page(operation, index) {
 						<button class="btn btn-sm ${alt_btn_class} use-workstation-btn mt-2"
 								data-workstation="${alt.workstation}"
 								data-operation="${operation.operation_name || operation.operation}"
-								data-operation-display="${operation.operation}">
-							Use Alternative
+								data-operation-display="${operation.operation}"
+								${is_completed ? `disabled title="${__('Operation already completed')}"` : ''}>
+							${__('Use Alternative')}
 						</button>
 					</div>
 				</div>
@@ -192,13 +228,19 @@ function render_operation_tree_for_page(operation, index) {
 		`
 	}
 
-	// Wrap everything in operation tree
 	return `
-		<div class="operation-tree" data-operation="${operation.operation}">
+		<div class="operation-tree${is_completed ? ' completed' : ''}" data-operation="${operation.operation}">
 			<div class="operation-header">
 				<h3>
 					<span class="operation-number">${operation.idx}</span>
 					${operation.operation}
+					${
+						is_completed
+							? `<span class="completed-indicator text-success" title="${__('Completed')}">
+								${frappe.utils.icon('tick', 'sm')} ${__('Completed')}
+							</span>`
+							: ''
+					}
 				</h3>
 			</div>
 			<div class="workstation-tree">
@@ -211,9 +253,22 @@ function render_operation_tree_for_page(operation, index) {
 	`
 }
 
+function refresh_alternative_chart(container, work_order) {
+	frappe.call({
+		method: 'inventory_tools.inventory_tools.page.alternative_workstation.get_workstation_availability',
+		args: { work_order: work_order },
+		callback: function (res) {
+			if (res.message) {
+				render_page_workstation_chart(container, res.message, work_order)
+			}
+		},
+	})
+}
+
 function setup_page_workstation_handlers(container, work_order) {
 	container.find('.use-workstation-btn').click(function () {
 		let btn = $(this)
+		btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>')
 		let workstation = btn.data('workstation')
 		let operation = btn.data('operation')
 		frappe.call({
@@ -224,30 +279,21 @@ function setup_page_workstation_handlers(container, work_order) {
 				workstation: workstation,
 			},
 			callback: function (r) {
-				if (r.message && r.message.status === 'success') {
+				let msg = r.message
+				if (msg && msg.status === 'success') {
 					frappe.show_alert({
-						message: r.message.message,
+						message: msg.message,
 						indicator: 'green',
 					})
-
-					frappe.call({
-						method: 'inventory_tools.inventory_tools.page.alternative_workstation.get_workstation_availability',
-						args: { work_order: work_order },
-						callback: function (res) {
-							if (res.message) {
-								render_page_workstation_chart(container, res.message, work_order)
-							}
-						},
-					})
-
+					refresh_alternative_chart(container, work_order)
 					container.closest('.workstation-page-container').find('.load-chart-btn').click()
 				} else {
-					btn.prop('disabled', false).html('Use Alternative')
+					btn.prop('disabled', false).html(__('Use Alternative'))
 					frappe.msgprint(__('Failed to assign workstation'))
 				}
 			},
 			error: function () {
-				btn.prop('disabled', false).html('Use Alternative')
+				btn.prop('disabled', false).html(__('Use Alternative'))
 				frappe.msgprint(__('Error occurred while assigning workstation'))
 			},
 		})

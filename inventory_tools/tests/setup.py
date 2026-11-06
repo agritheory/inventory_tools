@@ -401,6 +401,8 @@ def create_workstations(settings):
 		work.production_capacity = ws.get("hour_rate")
 		work.hour_rate = ws.get("hour_rate")
 		work.workstation_type = ws.get("workstation_type")
+		if ws.get("warehouse"):
+			work.warehouse = ws.get("warehouse")
 		work.plant_floor = "Kitchen"
 		work.off_status_image = ws.get("off_status_image")
 		work.on_status_image = ws.get("on_status_image")
