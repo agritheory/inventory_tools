@@ -181,6 +181,7 @@
 	},
 	{
 		"name": "Assemble Pie Station",
+		"warehouse": "Storeroom - APC",
 		"workstation_type": "Table",
 		"hour_rate": "20",
 		"off_status_image": "table.png",
@@ -271,6 +272,7 @@
 	},
 	{
 		"name": "Food Prep Table 2",
+		"warehouse": "Kitchen - APC",
 		"workstation_type": "Table",
 		"hour_rate": "10",
 		"off_status_image": "table.png",
@@ -301,6 +303,7 @@
 	},
 	{
 		"name": "Food Prep Table 1",
+		"warehouse": "Kitchen - APC",
 		"workstation_type": "Table",
 		"hour_rate": "5",
 		"off_status_image": "table.png",
