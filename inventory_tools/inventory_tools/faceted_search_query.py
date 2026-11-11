@@ -479,7 +479,7 @@ def get_web_item_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 				& (item.name == bin.item_code)
 				& (item.name == "item_code")
 				& (warehouse.name == bin.warehouse)
-				& (warehouse.up_purpose == "Storage")
+				& (warehouse.warehouse_type == "Storage")
 			)
 			.run(as_dict=True)
 		)
