@@ -6,14 +6,14 @@
 from __future__ import annotations
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, getdate, nowtime, today
+from frappe.utils import flt, get_link_to_form, getdate, nowtime, today
 
 from erpnext.accounts.party import get_party_shipping_address
-from erpnext.stock.doctype.shipment.shipment import Shipment
+from erpnext.stock.doctype.shipment.shipment import Shipment, get_other_shipment
 
 from inventory_tools.inventory_tools.overrides.alternative_sales_workflow import (
 	ensure_alternative_sales_workflow_enabled,
@@ -377,6 +377,81 @@ class InventoryToolsShipment(Shipment):
 			for row in self.get("shipment_delivery_note") or []
 			if row.get("delivery_note") or row.get("against_sales_order") or row.get("so_detail")
 		]
+
+	def validate_delivery_notes(self):
+		"""
+		HASH: b4fd306803c17cd2d7c1285b706bc1f36cd38ea0
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/stock/doctype/shipment/shipment.py
+		METHOD: validate_delivery_notes
+
+		Alternative Sales Workflow rows may ship a Sales Order line with no Delivery
+		Note, or carry one row per Delivery Note item (`dn_detail`) at the item amount.
+		Rows without `dn_detail` keep the upstream checks.
+		"""
+		delivery_notes = set()
+		dn_details = set()
+		item_rows_by_delivery_note = {}
+		for row in self.get("shipment_delivery_note"):
+			if not row.get("delivery_note"):
+				continue
+			if row.get("dn_detail"):
+				if row.dn_detail in dn_details:
+					frappe.throw(
+						_("Row #{0}: Delivery Note item {1} is added more than once").format(
+							row.idx, bold(row.dn_detail)
+						)
+					)
+				dn_details.add(row.dn_detail)
+				item_rows_by_delivery_note.setdefault(row.delivery_note, row)
+				continue
+			if row.delivery_note in delivery_notes:
+				frappe.throw(
+					_("Row #{0}: Delivery Note {1} is added more than once").format(
+						row.idx, bold(row.delivery_note)
+					)
+				)
+			delivery_notes.add(row.delivery_note)
+			self.validate_delivery_note_row(row)
+
+		for row in item_rows_by_delivery_note.values():
+			self.validate_item_level_delivery_note(row)
+
+	def validate_item_level_delivery_note(self, row) -> None:
+		"""Upstream `validate_delivery_note_row` checks for item-level rows, without
+		replacing the row's item amount with the Delivery Note grand total. A draft
+		Delivery Note is allowed when the Alternative Sales Workflow submits it with
+		the Shipment."""
+		lock = self.docstatus == 1
+		delivery_note = frappe.db.get_value(
+			"Delivery Note",
+			row.delivery_note,
+			["docstatus", "customer"],
+			as_dict=True,
+			for_update=lock,
+		)
+		if not delivery_note:
+			frappe.throw(
+				_("Row #{0}: Delivery Note {1} does not exist").format(row.idx, bold(row.delivery_note))
+			)
+		company = self.get_alternative_sales_workflow_company()
+		allows_draft = bool(company and is_alternative_sales_workflow_enabled(company))
+		if delivery_note.docstatus == 2 or (delivery_note.docstatus == 0 and not allows_draft):
+			frappe.throw(
+				_("Row #{0}: Delivery Note {1} must be submitted").format(row.idx, bold(row.delivery_note))
+			)
+		if self.delivery_to_type == "Customer" and delivery_note.customer != self.delivery_customer:
+			frappe.throw(
+				_("Row #{0}: Delivery Note {1} belongs to Customer {2}").format(
+					row.idx, bold(row.delivery_note), bold(delivery_note.customer)
+				)
+			)
+		if shipment := get_other_shipment(row.delivery_note, self.name, for_update=lock):
+			frappe.throw(
+				_("Row #{0}: Delivery Note {1} is already in Shipment {2}").format(
+					row.idx, bold(row.delivery_note), get_link_to_form("Shipment", shipment)
+				)
+			)
 
 	def validate_alternative_sales_workflow(self) -> None:
 		if not self.get("shipment_delivery_note"):

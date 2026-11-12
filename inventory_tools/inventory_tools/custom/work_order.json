@@ -11,6 +11,16 @@
       "name": "Work Order-supplier",
       "options": "Supplier",
       "read_only": 1
+    },
+    {
+      "depends_on": "eval:(doc.operations || []).length",
+      "dt": "Work Order",
+      "fieldname": "operation_flowchart",
+      "fieldtype": "HTML",
+      "insert_after": "operations",
+      "label": "Operation Flowchart",
+      "module": "Inventory Tools",
+      "name": "Work Order-operation_flowchart"
     }
   ],
   "doctype": "Work Order",

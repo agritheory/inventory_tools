@@ -1,0 +1,17 @@
+{
+  "custom_fields": [
+    {
+      "depends_on": "eval:(doc.operations || []).length",
+      "dt": "Routing",
+      "fieldname": "operation_flowchart",
+      "fieldtype": "HTML",
+      "insert_after": "operations",
+      "label": "Operation Flowchart",
+      "module": "Inventory Tools",
+      "name": "Routing-operation_flowchart"
+    }
+  ],
+  "doctype": "Routing",
+  "property_setters": [],
+  "sync_on_migrate": 1
+}

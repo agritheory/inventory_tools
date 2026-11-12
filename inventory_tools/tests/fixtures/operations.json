@@ -24,7 +24,9 @@
 		"Cook Pie Filling Operation",
 		"Range Station",
 		"5",
-		"- Bring ingredients to simmer and cook for 15 minutes\n\t- Remove from heat and mix in remaining 1/4 berries and butter\n\t- Store in refrigerator if not using immediately"
+		"- Bring ingredients to simmer and cook for 15 minutes\n\t- Remove from heat and mix in remaining 1/4 berries and butter\n\t- Store in refrigerator if not using immediately",
+		[],
+		{ "predecessor_relation": "Start to Start", "lag_mins": 2 }
 	],
 	[
 		"Mix Dough Op",
@@ -62,6 +64,21 @@
 		"1",
 		"Cool baked pies for at least 30 minutes before boxing",
 		["Cooling Station", "Refrigerator Station"]
+	],
+	[
+		"Prep Pie Tins Op",
+		"Food Prep Table 1",
+		"5",
+		"- Line pie tins with parchment paper\n\t- Set tins out on sheet trays for rolled crusts",
+		["Food Prep Table 2"]
+	],
+	["Preheat Oven Op", "Oven Station", "5", "- Preheat oven to 375F", ["Baking Station"]],
+	[
+		"Chill Pie Op",
+		"Refrigerator Station",
+		"5",
+		"- Chill key lime pies for at least 2 hours before boxing",
+		["Cooling Station"]
 	],
 	["Assemble Pocket Op", "Food Prep Table 1", "5", "- Fold 3 poppers into dough pocket"],
 	["Assemble Popper Op", "Food Prep Table 1", "5", "- Top dough bite with fruit"],
