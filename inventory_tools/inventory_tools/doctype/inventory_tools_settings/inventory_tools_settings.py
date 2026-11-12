@@ -24,6 +24,7 @@ class InventoryToolsSettings(Document):
 			"Allow Manually Defined Alternative Workstations",
 			"Allow Alternative Workstations Based on Workstation Type",
 		]
+		allow_job_card_workstation_change: DF.Check
 		allow_rotation: DF.Check
 		block_issue_from_quarantine: DF.Check
 		cartonization_doctypes: DF.TableMultiSelect[CartonizationApplicableDoctype]

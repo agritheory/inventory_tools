@@ -46,6 +46,19 @@
 	margin-right: 10px;
 }
 
+.workstation-page-container .completed-indicator {
+	font-size: 12px;
+	margin-left: 10px;
+}
+
+.workstation-page-container .operation-tree.completed .operation-number {
+	background: #28a745;
+}
+
+.workstation-page-container .operation-tree.completed .alternative-stations {
+	opacity: 0.6;
+}
+
 /* Tree container */
 .workstation-page-container .workstation-tree {
 	padding: 20px;

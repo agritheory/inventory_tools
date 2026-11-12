@@ -20,15 +20,24 @@ frappe.ui.form.on('Work Order', {
 })
 
 function workstation_selection_button(frm) {
-	if (frm.doc.docstatus == 1 && frm.doc.status !== 'Completed') {
-		frm.add_custom_button(
-			__('Alternative Workstations'),
-			function () {
-				frappe.set_route('alternative-workstation', frm.doc.name)
-			},
-			__('View')
-		)
+	if (frm.doc.docstatus != 1 || frm.doc.status === 'Completed' || !frm.doc.company) {
+		return
 	}
+	frappe.db
+		.get_value('Inventory Tools Settings', { company: frm.doc.company }, 'allow_alternative_workstations')
+		.then(r => {
+			const setting = r && r.message && r.message.allow_alternative_workstations
+			if (setting === 'Do Not Allow Alternative Workstations') {
+				return
+			}
+			frm.add_custom_button(
+				__('Alternative Workstations'),
+				function () {
+					inventory_tools.alternative_workstation.open(frm.doc.name)
+				},
+				__('View')
+			)
+		})
 }
 
 function get_workstations(frm) {
@@ -42,6 +51,7 @@ function get_workstations(frm) {
 			filters: {
 				operation: d.operation,
 				company: frm.doc.company,
+				bom_no: frm.doc.bom_no,
 			},
 		}
 	})

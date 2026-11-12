@@ -21,6 +21,7 @@ app_include_js = [
 	"inventory_tools.bundle.js",
 	"/assets/inventory_tools/dist/js/inventory_tools.js",
 	"/assets/inventory_tools/js/custom/alternative_sales_workflow_utils.js",
+	"/assets/inventory_tools/js/custom/alternative_workstation_utils.js",
 ]
 
 # include js, css files in header of web template
@@ -244,6 +245,11 @@ doc_events = {
 		],
 	},
 	"Quality Inspection": {},
+	"Job Card": {
+		"validate": [
+			"inventory_tools.inventory_tools.overrides.workstation.validate_job_card_alternative_workstation",
+		],
+	},
 	"Packing Slip": {
 		"validate": [
 			"inventory_tools.inventory_tools.overrides.sales_order_identity.stamp_packing_slip_on_validate",
@@ -292,6 +298,7 @@ doc_events = {
 		"validate": [
 			"inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost.validate_workstation_costs",
 			"inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstation_operating_cost.validate_dates",
+			"inventory_tools.inventory_tools.overrides.workstation.validate_workstation_warehouse",
 		]
 	},
 }

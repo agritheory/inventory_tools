@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Inventory Tools Documentation
 
 <div class="byline">
-  AgriTheory 2026-09-15
+  Rohan Bansal, Devarsh Bhatt, coleandreoli, IshwaryaM1030, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2026-11-05
 </div>
 
 
@@ -21,7 +21,7 @@ The Inventory Tools application enhances and extends inventory-related functiona
 - **[Manufacturing Capacity](./manufacturing_capacity.md)**: a report-based interface to show, for a given BOM, the entire hierarchy of any BOM tree containing that BOM with demand and in-stock quantities for all levels
 - **[Workstation Operating Cost](./workstation_operating_cost.md)**: a flexible, time-based system for tracking and allocating manufacturing overhead to production operations with historical cost periods and detailed cost breakdowns
 - **[Faceted Search](./faceted_search.md)**: loosely-coupled attributes for Items, visible in both Ecommerce and Item Listview search contexts
-- **[Alternate Workstation](./alternate_workstation.md)**: allows selecting alternative workstations that can perform the same operation
+- **[Alternate Workstation](./alternate_workstation.md)**: allows selecting alternative workstations that can perform the same operation; changing assignment can change operating cost and does not move inventory by itself
 - **[Cartonization](./cartonization.md)**: Cartonization ensures that items involved in inventory transactions physically fit into their 
 target containers
 - **[Quarantine Quality Control](./quarantine_quality_control_workflows.md)**: allows inventory to be automatically moved to a quarantine warehouse for inspection, Items remain in quarantine until quality inspection is completed and approved

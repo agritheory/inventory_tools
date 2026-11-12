@@ -6,7 +6,45 @@ import datetime
 import frappe
 from erpnext.manufacturing.doctype.workstation.workstation import Workstation
 from frappe.desk.reportview import execute
-from frappe.utils.data import comma_and, flt, get_time, time_diff_in_hours, getdate
+from frappe.utils import cint
+from frappe.utils.data import comma_and, cstr, flt, get_time, time_diff_in_hours, getdate
+
+
+def validate_workstation_warehouse(doc, method=None):
+	if not doc.get("warehouse"):
+		return
+	wh = frappe.db.get_value("Warehouse", doc.warehouse, ["is_group", "disabled"], as_dict=True)
+	if wh and cint(wh.is_group):
+		frappe.throw(
+			frappe._("Workstation Warehouse cannot be a group warehouse. Please select a leaf warehouse.")
+		)
+	if wh and cint(wh.disabled):
+		frappe.throw(frappe._("Workstation Warehouse cannot be disabled."))
+
+
+def validate_job_card_alternative_workstation(doc, method=None):
+	"""A changed workstation must share the BOM (or Operation) default workstation's warehouse."""
+	if doc.is_new() or not doc.operation or not doc.workstation:
+		return
+	if (
+		get_allow_alternative_workstations_setting(doc.company)
+		== "Do Not Allow Alternative Workstations"
+	):
+		return
+	previous = doc.get_doc_before_save()
+	if not previous or previous.workstation == doc.workstation:
+		return
+	if not is_compatible_workstation(doc.operation, doc.workstation, doc.bom_no):
+		throw_incompatible_workstation(doc.workstation, doc.operation)
+
+
+def throw_incompatible_workstation(workstation, operation):
+	frappe.throw(
+		frappe._(
+			"Workstation {0} is not compatible with Operation {1}. Use a workstation with the same "
+			"warehouse as the operation's default workstation, or one with no warehouse."
+		).format(frappe.bold(workstation), frappe.bold(operation))
+	)
 
 
 def working_hour_spans(start_time, end_time):
@@ -145,15 +183,126 @@ class InventoryToolsWorkstation(Workstation):
 """
 
 
+def get_allow_alternative_workstations_setting(company):
+	return frappe.get_cached_value(
+		"Inventory Tools Settings", company, "allow_alternative_workstations"
+	)
+
+
+def get_anchor_workstation(operation_name, bom_no=None):
+	"""The BOM's workstation for this operation, falling back to the Operation default."""
+	if bom_no:
+		bom_workstation = frappe.db.get_value(
+			"BOM Operation",
+			{"parent": bom_no, "parenttype": "BOM", "operation": operation_name},
+			"workstation",
+			order_by="idx asc",
+		)
+		if bom_workstation:
+			return bom_workstation
+	return frappe.db.get_value("Operation", operation_name, "workstation")
+
+
+def get_workstation_warehouses(workstation_names):
+	names = list({name for name in workstation_names if name})
+	if not names:
+		return {}
+	return {
+		row.name: cstr(row.warehouse).strip() or None
+		for row in frappe.get_all(
+			"Workstation", filters={"name": ("in", names)}, fields=["name", "warehouse"]
+		)
+	}
+
+
+def warehouse_is_compatible(anchor_warehouse, candidate_warehouse):
+	if not candidate_warehouse:
+		return True
+	return bool(anchor_warehouse) and candidate_warehouse == anchor_warehouse
+
+
+def filter_compatible_workstations(operation_name, workstation_names, bom_no=None):
+	"""Alternatives must share the anchor workstation's warehouse, or have none."""
+	anchor = get_anchor_workstation(operation_name, bom_no)
+	warehouses = get_workstation_warehouses([anchor, *workstation_names])
+	anchor_warehouse = warehouses.get(anchor)
+	return [
+		name
+		for name in workstation_names
+		if name == anchor or warehouse_is_compatible(anchor_warehouse, warehouses.get(name))
+	]
+
+
+def is_compatible_workstation(operation_name, workstation_name, bom_no=None):
+	if not workstation_name:
+		return True
+	return bool(filter_compatible_workstations(operation_name, [workstation_name], bom_no))
+
+
+def warehouse_compatibility_clause(workstation_table, anchor_warehouse):
+	blank = workstation_table.warehouse.isnull() | (workstation_table.warehouse == "")
+	if anchor_warehouse:
+		return blank | (workstation_table.warehouse == anchor_warehouse)
+	return blank
+
+
+def iter_operation_alternative_workstation_names(operation_doc):
+	if hasattr(operation_doc, "alternative_workstations") and operation_doc.alternative_workstations:
+		for row in operation_doc.alternative_workstations:
+			if hasattr(row, "workstation") and row.workstation:
+				yield row.workstation
+	if hasattr(operation_doc, "alternative_workstation") and operation_doc.alternative_workstation:
+		for alt_row in operation_doc.alternative_workstation:
+			if hasattr(alt_row, "workstation") and alt_row.workstation:
+				yield alt_row.workstation
+
+
+def resolve_alternative_workstation_names(
+	operation, company, current_workstation=None, bom_no=None
+):
+	setting_value = get_allow_alternative_workstations_setting(company)
+	if setting_value == "Do Not Allow Alternative Workstations":
+		return []
+
+	default_workstation_name = frappe.db.get_value("Operation", operation, "workstation")
+	anchor_workstation = get_anchor_workstation(operation, bom_no)
+
+	if setting_value == "Allow Alternative Workstations Based on Workstation Type":
+		if not default_workstation_name:
+			return []
+		workstation_type = frappe.db.get_value(
+			"Workstation", default_workstation_name, "workstation_type"
+		)
+		if not workstation_type:
+			return []
+		candidates = frappe.get_all(
+			"Workstation", filters={"workstation_type": workstation_type}, pluck="name"
+		)
+	else:
+		operation_doc = frappe.get_doc("Operation", operation)
+		candidates = [
+			anchor_workstation,
+			default_workstation_name,
+			*iter_operation_alternative_workstation_names(operation_doc),
+		]
+
+	names = []
+	for ws_name in candidates:
+		if not ws_name or ws_name == current_workstation or ws_name in names:
+			continue
+		names.append(ws_name)
+
+	return filter_compatible_workstations(operation, names, bom_no)
+
+
 @frappe.whitelist()
 @frappe.read_only()
 @frappe.validate_and_sanitize_search_inputs
 def get_alternative_workstations(doctype, txt, searchfield, start, page_len, filters):
 	company = filters.get("company") or frappe.defaults.get_defaults().get("company")
-	setting_value = frappe.get_cached_value(
-		"Inventory Tools Settings", company, "allow_alternative_workstations"
-	)
+	setting_value = get_allow_alternative_workstations_setting(company)
 
+	bom_no = filters.pop("bom_no", None)
 	if setting_value == "Do Not Allow Alternative Workstations":
 		filters.pop("operation", None)
 		filters.pop("company", None)
@@ -172,6 +321,8 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 
 	searchfields = list(reversed(frappe.get_meta(doctype).get_search_fields()))
 	default_workstation_name = frappe.db.get_value("Operation", operation, "workstation")
+	anchor_workstation = get_anchor_workstation(operation, bom_no)
+	anchor_wh = get_workstation_warehouses([anchor_workstation]).get(anchor_workstation)
 	Workstation = frappe.qb.DocType("Workstation")
 
 	if setting_value == "Allow Alternative Workstations Based on Workstation Type":
@@ -188,6 +339,7 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 			frappe.qb.from_(Workstation)
 			.select(*[Workstation[field] for field in searchfields])
 			.where(Workstation.workstation_type == workstation_type)
+			.where(warehouse_compatibility_clause(Workstation, anchor_wh))
 			.distinct()
 		)
 
@@ -209,6 +361,7 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 			.on(AlternativeWorkstation.parent == Operation.name)
 			.select(*[Workstation[field] for field in searchfields])
 			.where(AlternativeWorkstation.parent == operation)
+			.where(warehouse_compatibility_clause(Workstation, anchor_wh))
 			.distinct()
 		)
 
@@ -217,9 +370,9 @@ def get_alternative_workstations(doctype, txt, searchfield, start, page_len, fil
 
 		workstation = list(query.run(as_dict=False))
 
-	if default_workstation_name and default_workstation_name not in [row[0] for row in workstation]:
+	if anchor_workstation and anchor_workstation not in [row[0] for row in workstation]:
 		default_fields = frappe.db.get_values(
-			"Workstation", default_workstation_name, searchfields, as_dict=True
+			"Workstation", anchor_workstation, searchfields, as_dict=True
 		)
 		if default_fields:
 			field_values = ", ".join([v for k, v in default_fields[0].items() if k != "name"])
