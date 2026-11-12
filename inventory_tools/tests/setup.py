@@ -127,6 +127,7 @@ def create_test_data():
 	create_chelsea_standard_selling_prices(settings)
 	create_workstations(settings)
 	create_operations()
+	create_routings()
 	create_boms(settings)
 	prod_plan_from_doc = "Sales Order"
 	if prod_plan_from_doc == "Sales Order":
@@ -456,7 +457,9 @@ def create_operations():
 		oper.workstation = op[1]
 		oper.batch_size = op[2]
 		oper.description = op[3]
-		if len(op) == 5:
+		if len(op) >= 6:
+			oper.update(op[5])
+		if len(op) >= 5:
 			for aw in op[4]:
 				oper.append(
 					"alternative_workstations",
@@ -917,6 +920,17 @@ def receive_qc_workflow():
 	cfc_settings.save()
 
 
+def create_routings():
+	for routing in read_json("routings"):
+		if frappe.db.exists("Routing", routing["routing_name"]):
+			continue
+		r = frappe.new_doc("Routing")
+		r.routing_name = routing["routing_name"]
+		for operation in routing["operations"]:
+			r.append("operations", operation)
+		r.save()
+
+
 def create_boms(settings):
 	for bom in BOMS[::-1]:  # reversed
 		if frappe.db.exists("BOM", {"item": bom.get("item")}) and bom.get("item") != "Pie Crust":
@@ -935,6 +949,7 @@ def create_boms(settings):
 		b.buying_price_list = "Bakery Buying"
 		b.currency = "USD"
 		b.with_operations = 0 if bom.get("with_operations") == 0 else 1
+		b.routing = bom.get("routing")
 		for item in bom.get("items"):
 			b.append("items", {**item, "stock_uom": item.get("uom")})
 			b.items[-1].bom_no = frappe.get_value("BOM", {"item": item.get("item_code")})

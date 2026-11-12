@@ -1,0 +1,105 @@
+[
+	{
+		"routing_name": "Fruit Pie",
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Assemble Pie Op",
+				"time_in_mins": 10.0,
+				"workstation": "Food Prep Table 2",
+				"hour_rate": 15.0
+			},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station",
+				"hour_rate": 15.0
+			},
+			{
+				"batch_size": 1,
+				"operation": "Cool Pie Op",
+				"time_in_mins": 30.0,
+				"workstation": "Cooling Racks Station",
+				"hour_rate": 15.0
+			},
+			{
+				"batch_size": 5,
+				"operation": "Box Pie Op",
+				"time_in_mins": 5.0,
+				"workstation": "Packaging Station",
+				"hour_rate": 15.0
+			}
+		]
+	},
+	{
+		"routing_name": "Preheated Fruit Pie",
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Assemble Pie Op",
+				"time_in_mins": 10.0,
+				"workstation": "Food Prep Table 2",
+				"sequence_id": 1,
+				"hour_rate": 15.0
+			},
+			{
+				"batch_size": 5,
+				"operation": "Preheat Oven Op",
+				"time_in_mins": 15.0,
+				"workstation": "Oven Station",
+				"sequence_id": 1,
+				"hour_rate": 15.0
+			},
+			{
+				"batch_size": 1,
+				"operation": "Bake Op",
+				"time_in_mins": 50.0,
+				"workstation": "Oven Station",
+				"sequence_id": 2,
+				"predecessor_relation": "Finish to Start",
+				"lag_mins": 0,
+				"hour_rate": 15.0
+			},
+			{
+				"batch_size": 1,
+				"operation": "Cool Pie Op",
+				"time_in_mins": 30.0,
+				"workstation": "Cooling Racks Station",
+				"sequence_id": 3,
+				"hour_rate": 15.0
+			},
+			{
+				"batch_size": 5,
+				"operation": "Box Pie Op",
+				"time_in_mins": 5.0,
+				"workstation": "Packaging Station",
+				"sequence_id": 4,
+				"predecessor_relation": "Finish to Finish",
+				"lag_mins": 5,
+				"hour_rate": 15.0
+			}
+		]
+	},
+	{
+		"routing_name": "Pie Filling",
+		"operations": [
+			{
+				"batch_size": 5,
+				"operation": "Gather Pie Filling Ingredients",
+				"time_in_mins": 5.0,
+				"workstation": "Food Prep Table 1",
+				"hour_rate": 15.0
+			},
+			{
+				"batch_size": 5,
+				"operation": "Cook Pie Filling Operation",
+				"time_in_mins": 15.0,
+				"workstation": "Range Station",
+				"predecessor_relation": "Start to Start",
+				"lag_mins": 2,
+				"hour_rate": 15.0
+			}
+		]
+	}
+]

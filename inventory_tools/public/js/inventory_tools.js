@@ -6,6 +6,7 @@ import { createApp } from 'vue'
 
 import WarehousePlan from './wms/WarehousePlan.vue'
 import './faceted_search/faceted_search.js'
+import './scheduling/operation_flowchart.js'
 
 frappe.provide('inventory_tools')
 

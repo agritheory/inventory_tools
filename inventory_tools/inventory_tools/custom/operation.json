@@ -9,6 +9,28 @@
       "module": "Inventory Tools",
       "name": "Operation-alternative_workstations",
       "options": "Alternative Workstation"
+    },
+    {
+      "description": "Default relation to the previous operation in a routing. Leave blank to start after the previous operations finish plus the Time Between Operations in Manufacturing Settings.",
+      "dt": "Operation",
+      "fieldname": "predecessor_relation",
+      "fieldtype": "Select",
+      "insert_after": "batch_size",
+      "label": "Relation to Previous Operation",
+      "module": "Inventory Tools",
+      "name": "Operation-predecessor_relation",
+      "options": "\nFinish to Start\nStart to Start\nFinish to Finish\nStart to Finish"
+    },
+    {
+      "depends_on": "predecessor_relation",
+      "description": "Minutes after the related start or finish of the previous operation. Negative values let this operation lead.",
+      "dt": "Operation",
+      "fieldname": "lag_mins",
+      "fieldtype": "Int",
+      "insert_after": "predecessor_relation",
+      "label": "Lag (Mins)",
+      "module": "Inventory Tools",
+      "name": "Operation-lag_mins"
     }
   ],
   "doctype": "Operation",

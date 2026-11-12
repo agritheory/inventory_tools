@@ -1,0 +1,21 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='680' height='200' viewBox='0 0 680 200' font-family='system-ui, -apple-system, Segoe UI, sans-serif'>
+<defs><marker id='arrow' viewBox='0 0 10 10' refX='9' refY='5' markerWidth='7' markerHeight='7' orient='auto'><path d='M0 0L10 5L0 10z' fill='#2490ef'/></marker></defs>
+<rect width='680' height='200' fill='#ffffff'/>
+<text x='16' y='24' font-size='14' font-weight='600' fill='#1f272e'>Start to Finish, lag +120m: boxing ends no sooner than 2 hours into the chill</text>
+<text x='16' y='66' font-size='12' fill='#525252'>Previous operation</text>
+<text x='16' y='132' font-size='12' fill='#525252'>This operation</text>
+<line x1='150.0' y1='40' x2='150.0' y2='170' stroke='#f0f0f0'/><text x='150.0' y='186' font-size='11' fill='#7c7c7c' text-anchor='middle'>0m</text>
+<line x1='221.4' y1='40' x2='221.4' y2='170' stroke='#f0f0f0'/><text x='221.4' y='186' font-size='11' fill='#7c7c7c' text-anchor='middle'>20m</text>
+<line x1='292.9' y1='40' x2='292.9' y2='170' stroke='#f0f0f0'/><text x='292.9' y='186' font-size='11' fill='#7c7c7c' text-anchor='middle'>40m</text>
+<line x1='364.3' y1='40' x2='364.3' y2='170' stroke='#f0f0f0'/><text x='364.3' y='186' font-size='11' fill='#7c7c7c' text-anchor='middle'>60m</text>
+<line x1='435.7' y1='40' x2='435.7' y2='170' stroke='#f0f0f0'/><text x='435.7' y='186' font-size='11' fill='#7c7c7c' text-anchor='middle'>80m</text>
+<line x1='507.1' y1='40' x2='507.1' y2='170' stroke='#f0f0f0'/><text x='507.1' y='186' font-size='11' fill='#7c7c7c' text-anchor='middle'>100m</text>
+<line x1='578.6' y1='40' x2='578.6' y2='170' stroke='#f0f0f0'/><text x='578.6' y='186' font-size='11' fill='#7c7c7c' text-anchor='middle'>120m</text>
+<line x1='650.0' y1='40' x2='650.0' y2='170' stroke='#f0f0f0'/><text x='650.0' y='186' font-size='11' fill='#7c7c7c' text-anchor='middle'>140m</text>
+<line x1='150' y1='170' x2='650' y2='170' stroke='#c7c7c7'/>
+<rect x='150.0' y='46' width='428.6' height='30' rx='5' fill='#f3f3f3' stroke='#c7c7c7'/><text x='158.0' y='65' font-size='12' fill='#1f272e' text-anchor='start'>Chill Pie (120m)</text>
+<rect x='560.7' y='112' width='17.9' height='30' rx='5' fill='#e8f2fd' stroke='#2490ef'/><text x='586.6' y='131' font-size='12' fill='#1f272e' text-anchor='start'>Box Pie (5m)</text>
+<circle cx='150.0' cy='76' r='3.5' fill='#2490ef'/>
+<path d='M150.0 76 V94.0 H578.6' fill='none' stroke='#2490ef' stroke-width='1.5'/><text x='364.3' y='89.0' font-size='11' fill='#2490ef' text-anchor='middle'>lag +120m</text>
+<path d='M578.6 94.0 V112' fill='none' stroke='#2490ef' stroke-width='1.5' marker-end='url(#arrow)'/>
+</svg>

@@ -30,6 +30,16 @@
       "label": "Overproduction Percentage For Work Order",
       "module": "Inventory Tools",
       "name": "BOM-overproduction_percentage_for_work_order"
+    },
+    {
+      "depends_on": "eval:doc.with_operations && (doc.operations || []).length",
+      "dt": "BOM",
+      "fieldname": "operation_flowchart",
+      "fieldtype": "HTML",
+      "insert_after": "operations",
+      "label": "Operation Flowchart",
+      "module": "Inventory Tools",
+      "name": "BOM-operation_flowchart"
     }
   ],
   "doctype": "BOM",

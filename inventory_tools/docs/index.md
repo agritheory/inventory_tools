@@ -4,7 +4,7 @@ For license information, please see license.txt-->
 # Inventory Tools Documentation
 
 <div class="byline">
-  Rohan Bansal, Devarsh Bhatt, coleandreoli, IshwaryaM1030, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2026-11-05
+  Rohan Bansal, Devarsh Bhatt, coleandreoli, IshwaryaM1030, Heather Kusmierz, Tyler Matteson, and Francisco Roldán 2026-11-12
 </div>
 
 
@@ -29,6 +29,7 @@ target containers
 - **[Multi-Company Sales Order](./multi_company_sales_order.md)**: enables Sales Orders to use warehouses from multiple companies, supporting centralized sales with distributed inventory fulfillment
 - **[UOM Category curation](./uom_category_curation.md)**: overview and bulk enable/disable helpers on **UOM Category** for Units of Measure that appear only on conversion factors for that category versus Item, transactional, and cross-category usage
 - **[Warehouse Location Optimization](./warehouse_location_optimization.md)**: ranks items by stock movement activity and suggests nearer leaf bins for default warehouse and Putaway Rules, using Warehouse Plan distance and physical Slot Capacity
+- **[Operation Relations](./operation_relations.md)**: Finish to Start, Start to Start, Finish to Finish, and Start to Finish relations with lag between operations on Operations, Routings, BOMs, and Work Orders, plus a read-only flowchart that shows the timing and critical path
 - **[Undeclared UOM](./undeclared_uom.md)**: a report that finds transaction lines whose UOM is not on the Item's conversion table, surfacing unsafe identity conversions (for example 1 Kilometer posted as 1 Pound)
 
 ## Configuration

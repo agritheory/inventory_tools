@@ -14,7 +14,7 @@ required_apps = ["erpnext", "hrms", "webshop"]
 
 # include js, css files in header of desk.html
 app_include_css = [
-	"/assets/inventory_tools/dist/js/assets/style.css",
+	"/assets/inventory_tools/dist/js/assets/inventory_tools.css",
 	"/assets/inventory_tools/css/alternative_workstation.css",
 ]
 app_include_js = [
@@ -22,11 +22,12 @@ app_include_js = [
 	"/assets/inventory_tools/dist/js/inventory_tools.js",
 	"/assets/inventory_tools/js/custom/alternative_sales_workflow_utils.js",
 	"/assets/inventory_tools/js/custom/alternative_workstation_utils.js",
+	"/assets/inventory_tools/js/custom/operation_flowchart_utils.js",
 ]
 
 # include js, css files in header of web template
 web_include_css = [
-	"/assets/inventory_tools/dist/js/assets/style.css",
+	"/assets/inventory_tools/dist/js/assets/inventory_tools.css",
 ]
 web_include_js = [
 	"/assets/inventory_tools/dist/js/inventory_tools.js",
@@ -133,6 +134,7 @@ extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
 # Override standard doctype classes
 
 override_doctype_class = {
+	"BOM": "inventory_tools.inventory_tools.overrides.bom.InventoryToolsBOM",
 	"Delivery Note": "inventory_tools.inventory_tools.overrides.delivery_note.InventoryToolsDeliveryNote",
 	"Packing Slip": "inventory_tools.inventory_tools.overrides.packing_slip.InventoryToolsPackingSlip",
 	"Shipment": "inventory_tools.inventory_tools.overrides.shipment.InventoryToolsShipment",
