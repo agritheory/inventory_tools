@@ -9,6 +9,31 @@ from frappe.desk.reportview import execute
 from frappe.utils.data import comma_and, flt, get_time, time_diff_in_hours, getdate
 
 
+def working_hour_spans(start_time, end_time):
+	"""48-hour spans for one working-hour row.
+
+	Intended to match HRMS Shift Assignment Tool
+	(get_query_checking_overlapping_shift_timings): an end at or before its start
+	is moved forward 24 hours. Each span is also repeated one day later. HRMS
+	compares a single pair, which misses a morning row against a shift that
+	crossed midnight (22:00–06:00 overlaps 05:00–07:00).
+	"""
+	start = datetime.datetime.combine(datetime.date.min, get_time(start_time))
+	end = datetime.datetime.combine(datetime.date.min, get_time(end_time))
+	if end <= start:
+		end += datetime.timedelta(hours=24)
+	day = datetime.timedelta(hours=24)
+	return ((start, end), (start + day, end + day))
+
+
+def working_hours_overlap(left, right) -> bool:
+	for left_start, left_end in left:
+		for right_start, right_end in right:
+			if left_start < right_end and right_start < left_end:
+				return True
+	return False
+
+
 class InventoryToolsWorkstation(Workstation):
 	def validate_working_hours(self, row):
 		"""
@@ -56,28 +81,24 @@ class InventoryToolsWorkstation(Workstation):
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/workstation/workstation.py
 		METHOD: validate_overlap_for_operation_timings
+
+		Intentionally diverges from that ERPNext query. Overlap uses the same
+		48-hour clock as HRMS shift assignment; see working_hour_spans.
+		Disabled rows are ignored, matching ERPNext.
 		"""
-		for d in self.get("working_hours"):
-			if not d.enabled:
-				continue
-
-			wh = frappe.qb.DocType("Workstation Working Hour")
-			existing = (
-				frappe.qb.from_(wh)
-				.select(wh.idx)
-				.where(
-					(wh.parent == self.name)
-					& (wh.name != d.name)
-					& (wh.enabled == 1)
-					& (wh.start_time < d.end_time)
-					& (wh.end_time > d.start_time)
-				)
-				.run(pluck=True)
-			)
-
-			if existing:
+		rows = [
+			row for row in self.get("working_hours") if row.enabled and row.start_time and row.end_time
+		]
+		spans = [(row, working_hour_spans(row.start_time, row.end_time)) for row in rows]
+		for row, row_spans in spans:
+			overlapping = [
+				other.idx
+				for other, other_spans in spans
+				if other is not row and working_hours_overlap(row_spans, other_spans)
+			]
+			if overlapping:
 				frappe.msgprint(
-					frappe._("Row #{0}: May overlap with row {1}").format(d.idx, comma_and(existing)),
+					frappe._("Row #{0}: May overlap with row {1}").format(row.idx, comma_and(overlapping)),
 				)
 
 	def set_hour_rate(self):

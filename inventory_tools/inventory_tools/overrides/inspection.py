@@ -51,21 +51,34 @@ def items_requiring_quality_inspection(
 
 	docstatus = cint(docstatus)
 	inspection_required_fieldname = INSPECTION_FIELDNAME_MAP.get(doctype)
+	settings = frappe.get_cached_doc("Inventory Tools Settings", company)
+	quarantine = settings.enable_quarantine_workflow
 
 	if doctype == "Stock Entry":
-		if docstatus == 1:
-			settings = frappe.get_cached_doc("Inventory Tools Settings", company)
-			if settings.enable_quarantine_workflow:
-				return []
+		if docstatus == 1 and quarantine:
+			manufacture_rows: list[dict] = []
+			for item in items:
+				item_code = item.get("item_code")
+				if item_code and get_inspection_required(
+					item_code, company, "inspection_required_before_manufacture"
+				):
+					manufacture_rows.append(item)
+			return manufacture_rows
 		return items
 
 	if inspection_required_fieldname is None:
 		return []
 
-	settings = frappe.get_cached_doc("Inventory Tools Settings", company)
-	if settings.enable_quarantine_workflow and doctype in (
-		"Purchase Receipt",
-		"Subcontracting Receipt",
+	# Submit clears any QI link while routing into quarantine, so the button is
+	# offered only after the receipt is submitted.
+	if (
+		quarantine
+		and docstatus != 1
+		and doctype
+		in (
+			"Purchase Receipt",
+			"Subcontracting Receipt",
+		)
 	):
 		return []
 
