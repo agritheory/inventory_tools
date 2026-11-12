@@ -299,6 +299,7 @@ def setup_manufacturing_settings(settings):
 		wip.currency = "USD"
 		wip.report_type = "Balance Sheet"
 		wip.root_type = "Asset"
+		wip.account_type = "Stock"
 		wip.save()
 		frappe.set_value("Warehouse", "Kitchen - APC", "account", wip.name)
 

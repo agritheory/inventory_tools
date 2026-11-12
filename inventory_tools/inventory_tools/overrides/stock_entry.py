@@ -19,7 +19,7 @@ from inventory_tools.inventory_tools.doctype.workstation_operating_cost.workstat
 class InventoryToolsStockEntry(StockEntry):
 	def check_if_operations_completed(self):
 		"""
-		HASH: 4dd9f0b25545a034ae3cc2012dc5a1049449c5b7
+		HASH: 8cbd0f63de3183fe1fd216b3faecf2a7fa08c0af
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/stock/doctype/stock_entry/stock_entry.py
 		METHOD: check_if_operations_completed
@@ -29,6 +29,8 @@ class InventoryToolsStockEntry(StockEntry):
 		Since customized code rewires so stock entries happen via a Job Card, the function now
 		checks that the stock entry amount plus what's already been produced in the WO is not
 		greater than the amount to be manufactured plus the overallowance amount.
+		Upstream later added process loss and upstream process loss inside that per-operation
+		loop. This override still replaces the loop.
 		"""
 
 		prod_order = frappe.get_doc("Work Order", self.work_order)
