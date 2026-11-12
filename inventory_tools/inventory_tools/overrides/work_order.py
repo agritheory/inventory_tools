@@ -6,6 +6,8 @@ from erpnext.manufacturing.doctype.work_order.work_order import (
 	OverProductionError,
 	StockOverProductionError,
 	WorkOrder,
+	get_operation_target_qty,
+	get_upstream_process_loss,
 )
 from erpnext.manufacturing.doctype.work_order.work_order import (
 	make_stock_entry as _make_stock_entry,
@@ -17,7 +19,7 @@ from frappe.utils import cint, flt, get_link_to_form, getdate
 class InventoryToolsWorkOrder(WorkOrder):
 	def onload(self):
 		"""
-		HASH: 4dd9f0b25545a034ae3cc2012dc5a1049449c5b7
+		HASH: 3df3d4c8e5257399c0d55b35dbca6e818ce86e9b
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: onload
@@ -28,6 +30,10 @@ class InventoryToolsWorkOrder(WorkOrder):
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
 		self.set_onload("overproduction_percentage", get_allowance_percentage(self.company, self.bom_no))
+		self.set_onload(
+			"operation_target_qty", {d.name: get_operation_target_qty(self, d) for d in self.operations}
+		)
+		self.set_onload("upstream_process_loss", get_upstream_process_loss(self))
 
 	def validate(self):
 		if self.is_work_order_subcontracting_enabled() and frappe.get_value(
@@ -114,7 +120,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 
 	def update_work_order_qty(self):
 		"""
-		HASH: 4dd9f0b25545a034ae3cc2012dc5a1049449c5b7
+		HASH: 3df3d4c8e5257399c0d55b35dbca6e818ce86e9b
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: update_work_order_qty
@@ -147,6 +153,9 @@ class InventoryToolsWorkOrder(WorkOrder):
 					StockOverProductionError,
 				)
 
+			if purpose == "Manufacture":
+				self.validate_produced_qty_covers_disassembly(qty, self.precision("disassembled_qty"))
+
 			self.db_set(fieldname, qty)
 			self.set_process_loss_qty()
 
@@ -160,7 +169,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 
 	def update_operation_status(self, operation_id=None):
 		"""
-		HASH: 30a27067aa5c07e883f8ba4e92bdaa7ed9b5b031
+		HASH: 3df3d4c8e5257399c0d55b35dbca6e818ce86e9b
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: update_operation_status
@@ -172,10 +181,10 @@ class InventoryToolsWorkOrder(WorkOrder):
 		for d in self.get("operations"):
 			precision = d.precision("completed_qty")
 			qty = flt(flt(d.completed_qty, precision) + flt(d.process_loss_qty, precision), precision)
-
-			if not qty:
+			operation_target_qty = get_operation_target_qty(self, d)
+			if not qty and operation_target_qty:
 				d.status = "Pending"
-			elif qty < flt(self.qty, precision):
+			elif qty < operation_target_qty:
 				d.status = "Work in Progress"
 			elif qty == flt(self.qty, precision):
 				d.status = "Completed"
@@ -186,7 +195,7 @@ class InventoryToolsWorkOrder(WorkOrder):
 
 	def validate_qty(self):
 		"""
-		HASH: 4dd9f0b25545a034ae3cc2012dc5a1049449c5b7
+		HASH: 3df3d4c8e5257399c0d55b35dbca6e818ce86e9b
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
 		METHOD: validate_qty
@@ -194,6 +203,9 @@ class InventoryToolsWorkOrder(WorkOrder):
 
 		if not self.qty > 0:
 			frappe.throw(_("Quantity to Manufacture must be greater than 0."))
+
+		if flt(self.batch_size) < 0:
+			frappe.throw(_("Batch Size cannot be negative."))
 
 		if (
 			self.stock_uom

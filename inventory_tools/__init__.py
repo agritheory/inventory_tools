@@ -61,7 +61,7 @@ def patched_validate_item_details(args, item):
 
 def patched_insert_item_price(args):
 	"""
-	APP: inventory_tools HASH: a1676c3b47ef16a39e9333ae41ad82f8c63a5fb4 REPO: https://github.com/frappe/erpnext PATH: erpnext/stock/get_item_details.py METHOD: insert_item_price
+	APP: inventory_tools HASH: de2a363416328242f3ae6fd14a12587047285754 REPO: https://github.com/frappe/erpnext PATH: erpnext/stock/get_item_details.py METHOD: insert_item_price
 	"""
 	if args.get("item_code") and is_generic_item(args.item_code):
 		return

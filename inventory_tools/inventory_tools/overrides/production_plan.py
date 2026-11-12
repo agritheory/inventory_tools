@@ -12,12 +12,13 @@ class InventoryToolsProductionPlan(ProductionPlan):
 	@frappe.whitelist()
 	def make_work_order(self):
 		"""
-		HASH: 5798409f695d8adadd5a5bbba971708015658250
+		HASH: c290374e2d791d9ac322992bd0c4d023df71011a
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/production_plan/production_plan.py
 		METHOD: make_work_order
 		"""
 
+		self.validate_plan_is_open()
 		wo_list, po_list = [], []
 		subcontracted_po = {}
 		default_warehouses = get_default_warehouse()

@@ -16,11 +16,11 @@ MIT
 
 ## Install Instructions
 
-Set up a new bench, substitute a path to the python version to use, which should 3.10 latest
+Set up a new bench with Python **3.11 or newer** (below 3.15), matching Frappe `version-15` (`requires-python >=3.11,<3.15`).
 
 ```
 # for linux development
-bench init --frappe-branch version-15 {{ bench name }} --python ~/.pyenv/versions/3.10.16/bin/python3
+bench init --frappe-branch version-15 {{ bench name }} --python ~/.pyenv/versions/3.11.10/bin/python3
 ```
 Create a new site in that bench
 ```
