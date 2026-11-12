@@ -6,38 +6,33 @@ authors = [
     { name = "AgriTheory", email = "support@agritheory.dev"}
 ]
 readme = "README.md"
-requires-python = ">=3.10"
-dynamic = ["dependencies"]
-
-[tool.poetry.dependencies]
-python = "^3.10"
-matplotlib = "^3.10.1"
-numpy = "^2.0.2"
-networkx = "^3.4.2"
-packaging = "<25"
-typing-extensions = "<4.16"
-mip = "^1.14"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.2.2"
-pytest-cov = "^5.0.0"
-pytest-order = "^1.2.1"
-mypy = "^1.10.0"
+requires-python = ">=3.11,<3.15"
+dependencies = [
+    "matplotlib>=3.10.1",
+    "mip>=1.14",
+    "networkx>=3.4.2",
+    "numpy>=2.0.2",
+    "packaging>=24,<25",
+    "pillow>=13.0.0",
+    "typing-extensions>=4.14,<4.16",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["flit_core>=3.2,<4"]
+build-backend = "flit_core.buildapi"
 
 [tool.bench.frappe-dependencies]
 frappe = ">=15.0.0,<16.0.0"
 erpnext = ">=15.0.0,<16.0.0"
 hrms = ">=15.0.0,<16.0.0"
+webshop = ">=0.0.1"
 
 [tool.bench.dev-dependencies]
-pytest = "~=8.2.2"
+pytest = "~=9.0.3"
 pytest-cov = "~=5.0.0"
 pytest-order = "~=1.2.1"
 test_utils = "@git+https://github.com/agritheory/test_utils.git#egg=test_utils"
+pygments = "~=2.20.0"
 
 [tool.codespell]
 skip = "CHANGELOG.md"

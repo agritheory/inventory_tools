@@ -47,6 +47,31 @@ def throw_incompatible_workstation(workstation, operation):
 	)
 
 
+def working_hour_spans(start_time, end_time):
+	"""48-hour spans for one working-hour row.
+
+	Intended to match HRMS Shift Assignment Tool
+	(get_query_checking_overlapping_shift_timings): an end at or before its start
+	is moved forward 24 hours. Each span is also repeated one day later. HRMS
+	compares a single pair, which misses a morning row against a shift that
+	crossed midnight (22:00–06:00 overlaps 05:00–07:00).
+	"""
+	start = datetime.datetime.combine(datetime.date.min, get_time(start_time))
+	end = datetime.datetime.combine(datetime.date.min, get_time(end_time))
+	if end <= start:
+		end += datetime.timedelta(hours=24)
+	day = datetime.timedelta(hours=24)
+	return ((start, end), (start + day, end + day))
+
+
+def working_hours_overlap(left, right) -> bool:
+	for left_start, left_end in left:
+		for right_start, right_end in right:
+			if left_start < right_end and right_start < left_end:
+				return True
+	return False
+
+
 class InventoryToolsWorkstation(Workstation):
 	def validate_working_hours(self, row):
 		"""
@@ -67,7 +92,7 @@ class InventoryToolsWorkstation(Workstation):
 
 	def set_total_working_hours(self):
 		"""
-		HASH: 9771ed4c572510ec51586606f9d57ab6459717f1
+		HASH: 1417f9f12fa4ebd221201664cedaf2195eab9082
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/workstation/workstation.py
 		METHOD: set_total_working_hours
@@ -85,32 +110,33 @@ class InventoryToolsWorkstation(Workstation):
 					row.hours = flt(time_diff_in_hours(end_time, start_time), row.precision("hours"))
 				else:
 					row.hours = flt(time_diff_in_hours(row.end_time, row.start_time), row.precision("hours"))
-				self.total_working_hours += row.hours
+				if row.enabled:
+					self.total_working_hours += row.hours
 
 	def validate_overlap_for_operation_timings(self):
 		"""
-		HASH: ba442c4feb47cdb3a6a3173bf604b3f2a13ffaa4
+		HASH: 1417f9f12fa4ebd221201664cedaf2195eab9082
 		REPO: https://github.com/frappe/erpnext/
 		PATH: erpnext/manufacturing/doctype/workstation/workstation.py
 		METHOD: validate_overlap_for_operation_timings
-		"""
-		for d in self.get("working_hours"):
-			wh = frappe.qb.DocType("Workstation Working Hour")
-			existing = (
-				frappe.qb.from_(wh)
-				.select(wh.idx)
-				.where(
-					(wh.parent == self.name)
-					& (wh.name != d.name)
-					& (wh.start_time < d.end_time)
-					& (wh.end_time > d.start_time)
-				)
-				.run(pluck=True)
-			)
 
-			if existing:
+		Intentionally diverges from that ERPNext query. Overlap uses the same
+		48-hour clock as HRMS shift assignment; see working_hour_spans.
+		Disabled rows are ignored, matching ERPNext.
+		"""
+		rows = [
+			row for row in self.get("working_hours") if row.enabled and row.start_time and row.end_time
+		]
+		spans = [(row, working_hour_spans(row.start_time, row.end_time)) for row in rows]
+		for row, row_spans in spans:
+			overlapping = [
+				other.idx
+				for other, other_spans in spans
+				if other is not row and working_hours_overlap(row_spans, other_spans)
+			]
+			if overlapping:
 				frappe.msgprint(
-					frappe._("Row #{0}: May overlap with row {1}").format(d.idx, comma_and(existing)),
+					frappe._("Row #{0}: May overlap with row {1}").format(row.idx, comma_and(overlapping)),
 				)
 
 	def set_hour_rate(self):

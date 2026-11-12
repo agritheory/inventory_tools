@@ -545,7 +545,8 @@ def make_sales_invoices(docname: str, rows: list | str) -> None:
 		for row in si.items:
 			row.purchase_order = doc.name
 			row.warehouse = aggregated_warehouse
-		pi.buying_price_list = si.selling_price_list
+		if si.selling_price_list and frappe.db.get_value("Price List", si.selling_price_list, "buying"):
+			pi.buying_price_list = si.selling_price_list
 		taxes_and_charges = get_default_taxes_and_charges(
 			"Purchase Taxes and Charges Template", company=pi.company
 		)

@@ -9,6 +9,8 @@ from frappe.utils import flt
 from inventory_tools.inventory_tools.overrides.workstation import (
 	get_alternative_workstations,
 	resolve_alternative_workstation_names,
+	working_hour_spans,
+	working_hours_overlap,
 )
 
 # Kept separate from Refrigerated Display - APC so these receipts don't move the
@@ -83,6 +85,12 @@ def create_submitted_ambrosia_pie_work_order(qty, company="Ambrosia Pie Company"
 	wo.insert()
 	wo.submit()
 	return wo.name
+
+
+from inventory_tools.inventory_tools.overrides.workstation import (
+	working_hour_spans,
+	working_hours_overlap,
+)
 
 
 @pytest.mark.order(26)
@@ -569,3 +577,21 @@ def assert_manufacture_backflush(work_order_name, manufacture_se_name, qty):
 	]
 	assert wip_entries
 	assert sum(flt(e.credit) for e in wip_entries) > 0
+
+
+@pytest.mark.order(45)
+def test_overnight_working_hours_overlap_on_48_hour_clock():
+	"""A shift that crosses midnight overlaps a morning shift on the next day."""
+	overnight = working_hour_spans("22:00:00", "06:00:00")
+	morning = working_hour_spans("05:00:00", "07:00:00")
+	assert working_hours_overlap(overnight, morning)
+
+	later_that_morning = working_hour_spans("07:00:00", "08:00:00")
+	assert not working_hours_overlap(overnight, later_that_morning)
+
+	starts_when_overnight_ends = working_hour_spans("06:00:00", "08:00:00")
+	assert not working_hours_overlap(overnight, starts_when_overnight_ends)
+
+	day = working_hour_spans("09:00:00", "17:00:00")
+	late_afternoon = working_hour_spans("16:00:00", "18:00:00")
+	assert working_hours_overlap(day, late_afternoon)

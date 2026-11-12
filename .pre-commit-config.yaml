@@ -23,7 +23,7 @@ repos:
     hooks:
       - id: codespell
         args: ["--ignore-words-list", "notin"]
-        exclude: 'yarn.lock|poetry.lock'
+        exclude: 'yarn.lock'
         additional_dependencies:
           - tomli
 
