@@ -4,6 +4,11 @@
 import frappe
 import pytest
 
+from inventory_tools.inventory_tools.overrides.workstation import (
+	working_hour_spans,
+	working_hours_overlap,
+)
+
 
 @pytest.mark.order(26)
 def test_alternative_workstation_query():
@@ -79,3 +84,21 @@ def test_alternative_workstation_by_type_query():
 	workstation_values = [r.get("value") for r in response]
 	assert "Food Prep Table 1" in workstation_values
 	assert "Food Prep Table 2" in workstation_values
+
+
+@pytest.mark.order(45)
+def test_overnight_working_hours_overlap_on_48_hour_clock():
+	"""A shift that crosses midnight overlaps a morning shift on the next day."""
+	overnight = working_hour_spans("22:00:00", "06:00:00")
+	morning = working_hour_spans("05:00:00", "07:00:00")
+	assert working_hours_overlap(overnight, morning)
+
+	later_that_morning = working_hour_spans("07:00:00", "08:00:00")
+	assert not working_hours_overlap(overnight, later_that_morning)
+
+	starts_when_overnight_ends = working_hour_spans("06:00:00", "08:00:00")
+	assert not working_hours_overlap(overnight, starts_when_overnight_ends)
+
+	day = working_hour_spans("09:00:00", "17:00:00")
+	late_afternoon = working_hour_spans("16:00:00", "18:00:00")
+	assert working_hours_overlap(day, late_afternoon)
