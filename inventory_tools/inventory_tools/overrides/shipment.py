@@ -360,6 +360,24 @@ class InventoryToolsShipment(Shipment):
 			self.validate_alternative_sales_workflow()
 		super().validate()
 
+	def validate_delivery_notes(self):
+		alternative_workflow = self.uses_alternative_sales_workflow_without_delivery_note()
+		delivery_notes = set()
+		for row in self.get("shipment_delivery_note") or []:
+			if not row.delivery_note:
+				if alternative_workflow and (row.get("against_sales_order") or row.get("so_detail")):
+					continue
+				frappe.throw(_("Row {0}: Delivery Note is required.").format(row.idx))
+
+			if row.delivery_note in delivery_notes:
+				continue
+			delivery_notes.add(row.delivery_note)
+			grand_total = row.grand_total
+			super().validate_delivery_note_row(row)
+			if row.get("dn_detail"):
+				# Upstream assigns the whole DN total; keep the item amount for value_of_goods.
+				row.grand_total = grand_total
+
 	def _validate_mandatory(self):  # nosemgrep: no-underscore-prefix-function
 		if self.uses_alternative_sales_workflow_without_delivery_note():
 			previous = self.flags.ignore_mandatory
