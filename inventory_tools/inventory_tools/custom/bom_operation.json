@@ -1,0 +1,29 @@
+{
+  "custom_fields": [
+    {
+      "description": "Leave blank to start after the previous operations finish plus the Time Between Operations in Manufacturing Settings, or with the other operations sharing this Sequence ID.",
+      "dt": "BOM Operation",
+      "fieldname": "predecessor_relation",
+      "fieldtype": "Select",
+      "insert_after": "fixed_time",
+      "label": "Relation to Previous Operation",
+      "module": "Inventory Tools",
+      "name": "BOM Operation-predecessor_relation",
+      "options": "\nFinish to Start\nStart to Start\nFinish to Finish\nStart to Finish"
+    },
+    {
+      "depends_on": "predecessor_relation",
+      "description": "Minutes after the related start or finish of the previous operation. Negative values let this operation lead.",
+      "dt": "BOM Operation",
+      "fieldname": "lag_mins",
+      "fieldtype": "Int",
+      "insert_after": "predecessor_relation",
+      "label": "Lag (Mins)",
+      "module": "Inventory Tools",
+      "name": "BOM Operation-lag_mins"
+    }
+  ],
+  "doctype": "BOM Operation",
+  "property_setters": [],
+  "sync_on_migrate": 1
+}

@@ -1,5 +1,26 @@
 {
-  "custom_fields": [],
+  "custom_fields": [
+    {
+      "dt": "Work Order Operation",
+      "fieldname": "predecessor_relation",
+      "fieldtype": "Select",
+      "insert_after": "sequence_id",
+      "label": "Relation to Previous Operation",
+      "module": "Inventory Tools",
+      "name": "Work Order Operation-predecessor_relation",
+      "options": "\nFinish to Start\nStart to Start\nFinish to Finish\nStart to Finish"
+    },
+    {
+      "depends_on": "predecessor_relation",
+      "dt": "Work Order Operation",
+      "fieldname": "lag_mins",
+      "fieldtype": "Int",
+      "insert_after": "predecessor_relation",
+      "label": "Lag (Mins)",
+      "module": "Inventory Tools",
+      "name": "Work Order Operation-lag_mins"
+    }
+  ],
   "doctype": "Work Order Operation",
   "property_setters": [
     {

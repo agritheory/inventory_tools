@@ -173,32 +173,8 @@
 				"uom": "Nos"
 			}
 		],
-		"operations": [
-			{
-				"batch_size": 5,
-				"operation": "Assemble Pie Op",
-				"time_in_mins": 10.0,
-				"workstation": "Food Prep Table 2"
-			},
-			{
-				"batch_size": 1,
-				"operation": "Bake Op",
-				"time_in_mins": 50.0,
-				"workstation": "Oven Station"
-			},
-			{
-				"batch_size": 1,
-				"operation": "Cool Pie Op",
-				"time_in_mins": 30.0,
-				"workstation": "Cooling Racks Station"
-			},
-			{
-				"batch_size": 5,
-				"operation": "Box Pie Op",
-				"time_in_mins": 5.0,
-				"workstation": "Packaging Station"
-			}
-		]
+		"routing": "Fruit Pie",
+		"operations": []
 	},
 	{
 		"item": "Double Plum Pie",
@@ -224,32 +200,8 @@
 				"uom": "Nos"
 			}
 		],
-		"operations": [
-			{
-				"batch_size": 5,
-				"operation": "Assemble Pie Op",
-				"time_in_mins": 10.0,
-				"workstation": "Food Prep Table 2"
-			},
-			{
-				"batch_size": 1,
-				"operation": "Bake Op",
-				"time_in_mins": 50.0,
-				"workstation": "Oven Station"
-			},
-			{
-				"batch_size": 1,
-				"operation": "Cool Pie Op",
-				"time_in_mins": 30.0,
-				"workstation": "Cooling Racks Station"
-			},
-			{
-				"batch_size": 5,
-				"operation": "Box Pie Op",
-				"time_in_mins": 5.0,
-				"workstation": "Packaging Station"
-			}
-		]
+		"routing": "Fruit Pie",
+		"operations": []
 	},
 	{
 		"item": "Kaduka Key Lime Pie",
@@ -296,9 +248,19 @@
 			},
 			{
 				"batch_size": 5,
+				"operation": "Chill Pie Op",
+				"time_in_mins": 120.0,
+				"workstation": "Refrigerator Station",
+				"predecessor_relation": "Start to Start",
+				"lag_mins": 15
+			},
+			{
+				"batch_size": 5,
 				"operation": "Box Pie Op",
 				"time_in_mins": 5.0,
-				"workstation": "Packaging Station"
+				"workstation": "Packaging Station",
+				"predecessor_relation": "Start to Finish",
+				"lag_mins": 120
 			}
 		]
 	},
@@ -326,32 +288,8 @@
 				"uom": "Nos"
 			}
 		],
-		"operations": [
-			{
-				"batch_size": 5,
-				"operation": "Assemble Pie Op",
-				"time_in_mins": 10.0,
-				"workstation": "Food Prep Table 2"
-			},
-			{
-				"batch_size": 1,
-				"operation": "Bake Op",
-				"time_in_mins": 50.0,
-				"workstation": "Oven Station"
-			},
-			{
-				"batch_size": 1,
-				"operation": "Cool Pie Op",
-				"time_in_mins": 30.0,
-				"workstation": "Cooling Racks Station"
-			},
-			{
-				"batch_size": 5,
-				"operation": "Box Pie Op",
-				"time_in_mins": 5.0,
-				"workstation": "Packaging Station"
-			}
-		]
+		"routing": "Preheated Fruit Pie",
+		"operations": []
 	},
 	{
 		"item": "Ambrosia Pie",
@@ -378,32 +316,8 @@
 				"uom": "Nos"
 			}
 		],
-		"operations": [
-			{
-				"batch_size": 5,
-				"operation": "Assemble Pie Op",
-				"time_in_mins": 10.0,
-				"workstation": "Food Prep Table 2"
-			},
-			{
-				"batch_size": 1,
-				"operation": "Bake Op",
-				"time_in_mins": 50.0,
-				"workstation": "Oven Station"
-			},
-			{
-				"batch_size": 1,
-				"operation": "Cool Pie Op",
-				"time_in_mins": 30.0,
-				"workstation": "Cooling Racks Station"
-			},
-			{
-				"batch_size": 5,
-				"operation": "Box Pie Op",
-				"time_in_mins": 5.0,
-				"workstation": "Packaging Station"
-			}
-		]
+		"routing": "Fruit Pie",
+		"operations": []
 	},
 	{
 		"item": "Bayberry Pie Filling",
@@ -441,20 +355,8 @@
 				"uom": "Pound"
 			}
 		],
-		"operations": [
-			{
-				"batch_size": 5,
-				"operation": "Gather Pie Filling Ingredients",
-				"time_in_mins": 5.0,
-				"workstation": "Food Prep Table 1"
-			},
-			{
-				"batch_size": 5,
-				"operation": "Cook Pie Filling Operation",
-				"time_in_mins": 15.0,
-				"workstation": "Range Station"
-			}
-		]
+		"routing": "Pie Filling",
+		"operations": []
 	},
 	{
 		"item": "Double Plum Pie Filling",
@@ -498,20 +400,8 @@
 				"uom": "Pound"
 			}
 		],
-		"operations": [
-			{
-				"batch_size": 5,
-				"operation": "Gather Pie Filling Ingredients",
-				"time_in_mins": 5.0,
-				"workstation": "Food Prep Table 1"
-			},
-			{
-				"batch_size": 5,
-				"operation": "Cook Pie Filling Operation",
-				"time_in_mins": 15.0,
-				"workstation": "Range Station"
-			}
-		]
+		"routing": "Pie Filling",
+		"operations": []
 	},
 	{
 		"item": "Kaduka Key Lime Pie Filling",
@@ -555,20 +445,8 @@
 				"uom": "Pound"
 			}
 		],
-		"operations": [
-			{
-				"batch_size": 5,
-				"operation": "Gather Pie Filling Ingredients",
-				"time_in_mins": 5.0,
-				"workstation": "Food Prep Table 1"
-			},
-			{
-				"batch_size": 5,
-				"operation": "Cook Pie Filling Operation",
-				"time_in_mins": 15.0,
-				"workstation": "Range Station"
-			}
-		]
+		"routing": "Pie Filling",
+		"operations": []
 	},
 	{
 		"item": "Gooseberry Pie Filling",
@@ -606,20 +484,8 @@
 				"uom": "Pound"
 			}
 		],
-		"operations": [
-			{
-				"batch_size": 5,
-				"operation": "Gather Pie Filling Ingredients",
-				"time_in_mins": 5.0,
-				"workstation": "Food Prep Table 1"
-			},
-			{
-				"batch_size": 5,
-				"operation": "Cook Pie Filling Operation",
-				"time_in_mins": 15.0,
-				"workstation": "Range Station"
-			}
-		]
+		"routing": "Pie Filling",
+		"operations": []
 	},
 	{
 		"item": "Ambrosia Pie Filling",
@@ -669,20 +535,8 @@
 				"uom": "Cup"
 			}
 		],
-		"operations": [
-			{
-				"batch_size": 5,
-				"operation": "Gather Pie Filling Ingredients",
-				"time_in_mins": 5.0,
-				"workstation": "Food Prep Table 1"
-			},
-			{
-				"batch_size": 5,
-				"operation": "Cook Pie Filling Operation",
-				"time_in_mins": 15.0,
-				"workstation": "Range Station"
-			}
-		]
+		"routing": "Pie Filling",
+		"operations": []
 	},
 	{
 		"item": "Pie Crust",
@@ -772,31 +626,45 @@
 				"batch_size": 5,
 				"operation": "Gather Pie Crust Ingredients",
 				"time_in_mins": 5.0,
-				"workstation": "Food Prep Table 2"
+				"workstation": "Food Prep Table 2",
+				"sequence_id": 1
 			},
 			{
 				"batch_size": 5,
 				"operation": "Mix Dough Op",
 				"time_in_mins": 5.0,
-				"workstation": "Mixer Station"
+				"workstation": "Mixer Station",
+				"sequence_id": 2
 			},
 			{
 				"batch_size": 1,
 				"operation": "Divide Dough Op",
 				"time_in_mins": 2.0,
-				"workstation": "Food Prep Table 2"
+				"workstation": "Food Prep Table 2",
+				"sequence_id": 3,
+				"predecessor_relation": "Finish to Finish",
+				"lag_mins": 2
 			},
 			{
 				"batch_size": 1,
 				"operation": "Chill Pie Crust Op",
 				"time_in_mins": 30.0,
-				"workstation": "Refrigerator Station"
+				"workstation": "Refrigerator Station",
+				"sequence_id": 4
+			},
+			{
+				"batch_size": 5,
+				"operation": "Prep Pie Tins Op",
+				"time_in_mins": 5.0,
+				"workstation": "Food Prep Table 1",
+				"sequence_id": 4
 			},
 			{
 				"batch_size": 5,
 				"operation": "Roll Pie Crust Op",
 				"time_in_mins": 10.0,
-				"workstation": "Food Prep Table 2"
+				"workstation": "Food Prep Table 2",
+				"sequence_id": 5
 			}
 		]
 	}

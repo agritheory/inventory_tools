@@ -118,6 +118,68 @@ class InventoryToolsWorkOrder(WorkOrder):
 			return
 		return super().create_job_card()
 
+	def set_work_order_operations(self):
+		"""
+		HASH: 3df3d4c8e5257399c0d55b35dbca6e818ce86e9b
+		REPO: https://github.com/frappe/erpnext/
+		PATH: erpnext/manufacturing/doctype/work_order/work_order.py
+		METHOD: set_work_order_operations
+
+		Adds the operation relation fields to the copied BOM Operation fields.
+		"""
+
+		def get_bom_operations(bom_no, qty=1):
+			data = frappe.get_all(
+				"BOM Operation",
+				filters={"parent": bom_no},
+				fields=[
+					"operation",
+					"description",
+					"workstation",
+					"idx",
+					"workstation_type",
+					"base_hour_rate as hour_rate",
+					"time_in_mins",
+					"parent as bom",
+					"batch_size",
+					"sequence_id",
+					"fixed_time",
+					"predecessor_relation",
+					"lag_mins",
+				],
+				order_by="idx",
+			)
+
+			for d in data:
+				if not d.fixed_time:
+					d.time_in_mins = flt(d.time_in_mins) * flt(qty)
+				d.status = "Pending"
+
+			return data
+
+		self.set("operations", [])
+		if not self.bom_no or not frappe.get_cached_value("BOM", self.bom_no, "with_operations"):
+			return
+
+		operations = []
+
+		if self.use_multi_level_bom:
+			bom_tree = frappe.get_doc("BOM", self.bom_no).get_tree_representation()
+			bom_traversal = reversed(bom_tree.level_order_traversal())
+
+			for node in bom_traversal:
+				if node.is_bom:
+					operations.extend(get_bom_operations(node.name, qty=node.exploded_qty / node.bom_qty))
+
+		bom_qty = frappe.get_cached_value("BOM", self.bom_no, "quantity")
+		operations.extend(get_bom_operations(self.bom_no, qty=1.0 / bom_qty))
+
+		for correct_index, operation in enumerate(operations, start=1):
+			operation.idx = correct_index
+
+		self.set("operations", operations)
+		self.calculate_time()
+
 	def update_work_order_qty(self):
 		"""
 		HASH: 3df3d4c8e5257399c0d55b35dbca6e818ce86e9b

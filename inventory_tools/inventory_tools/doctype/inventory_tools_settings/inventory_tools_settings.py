@@ -35,6 +35,7 @@ class InventoryToolsSettings(Document):
 		default_quarantine_warehouse: DF.Link | None
 		enable_cartonization: DF.Check
 		enable_generic_items: DF.Check
+		enable_operation_relations: DF.Check
 		enable_quarantine_workflow: DF.Check
 		enable_alternative_sales_workflow: DF.Check
 		enable_work_order_subcontracting: DF.Check
@@ -72,6 +73,15 @@ class InventoryToolsSettings(Document):
 		self.set_faceted_search_for_all_companies()
 		self.sync_alternative_sales_workflow_property_setters()
 		set_generic_item_field_visibility(self.any_company_has_generic_items())
+		set_operation_relation_field_visibility(self.any_company_has_operation_relations())
+
+	def any_company_has_operation_relations(self) -> bool:
+		if self.enable_operation_relations:
+			return True
+		filters: dict[str, int | list[str]] = {"enable_operation_relations": 1}
+		if self.name:
+			filters["name"] = ["!=", self.name]
+		return bool(frappe.db.exists("Inventory Tools Settings", filters))
 
 	def any_company_has_generic_items(self) -> bool:
 		if self.enable_generic_items:
@@ -259,6 +269,60 @@ def set_generic_item_field_visibility(enabled: bool) -> None:
 		property_setter.module = "Inventory Tools"
 		property_setter.insert(ignore_permissions=True)
 	frappe.clear_cache(doctype="Item")
+
+
+OPERATION_RELATION_FIELDS = (
+	("Operation", "predecessor_relation"),
+	("Operation", "lag_mins"),
+	("BOM Operation", "predecessor_relation"),
+	("BOM Operation", "lag_mins"),
+	("Work Order Operation", "predecessor_relation"),
+	("Work Order Operation", "lag_mins"),
+	("BOM", "operation_flowchart"),
+	("Routing", "operation_flowchart"),
+	("Work Order", "operation_flowchart"),
+)
+
+
+def operation_relations_enabled(company: str | None = None) -> bool:
+	"""Per company when given, otherwise whether any company has the feature on.
+	A company without settings counts as enabled, matching the field default."""
+	if company:
+		value = frappe.db.get_value(
+			"Inventory Tools Settings", {"company": company}, "enable_operation_relations"
+		)
+		return value is None or bool(value)
+	if not frappe.db.count("Inventory Tools Settings"):
+		return True
+	return bool(frappe.db.exists("Inventory Tools Settings", {"enable_operation_relations": 1}))
+
+
+def sync_operation_relation_field_visibility() -> None:
+	set_operation_relation_field_visibility(operation_relations_enabled())
+
+
+def set_operation_relation_field_visibility(enabled: bool) -> None:
+	"""Hides the relation fields and flowcharts unless at least one company has
+	Operation Relations enabled."""
+	changed_doctypes = set()
+	for doc_type, field_name in OPERATION_RELATION_FIELDS:
+		filters = {"doc_type": doc_type, "field_name": field_name, "property": "hidden"}
+		existing = frappe.get_all("Property Setter", filters, pluck="name")
+		if enabled and existing:
+			for name in existing:
+				frappe.delete_doc("Property Setter", name, force=1)
+			changed_doctypes.add(doc_type)
+		elif not enabled and not existing:
+			property_setter = frappe.new_doc("Property Setter")
+			property_setter.update(filters)
+			property_setter.doctype_or_field = "DocField"
+			property_setter.property_type = "Check"
+			property_setter.value = "1"
+			property_setter.module = "Inventory Tools"
+			property_setter.insert(ignore_permissions=True)
+			changed_doctypes.add(doc_type)
+	for doc_type in changed_doctypes:
+		frappe.clear_cache(doctype=doc_type)
 
 
 @frappe.whitelist()

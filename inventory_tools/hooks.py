@@ -14,7 +14,7 @@ required_apps = ["erpnext", "hrms", "webshop"]
 
 # include js, css files in header of desk.html
 app_include_css = [
-	"/assets/inventory_tools/dist/js/assets/style.css",
+	"/assets/inventory_tools/dist/js/assets/inventory_tools.css",
 	"/assets/inventory_tools/css/alternative_workstation.css",
 ]
 app_include_js = [
@@ -22,11 +22,12 @@ app_include_js = [
 	"/assets/inventory_tools/dist/js/inventory_tools.js",
 	"/assets/inventory_tools/js/custom/alternative_sales_workflow_utils.js",
 	"/assets/inventory_tools/js/custom/alternative_workstation_utils.js",
+	"/assets/inventory_tools/js/custom/operation_flowchart_utils.js",
 ]
 
 # include js, css files in header of web template
 web_include_css = [
-	"/assets/inventory_tools/dist/js/assets/style.css",
+	"/assets/inventory_tools/dist/js/assets/inventory_tools.css",
 ]
 web_include_js = [
 	"/assets/inventory_tools/dist/js/inventory_tools.js",
@@ -97,6 +98,7 @@ after_install = "inventory_tools.install.after_install"
 after_migrate = [
 	"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.sync_alternative_sales_workflow_property_setters",
 	"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.sync_generic_item_field_visibility",
+	"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.sync_operation_relation_field_visibility",
 ]
 
 # Uninstallation
@@ -133,6 +135,7 @@ extend_bootinfo = "inventory_tools.inventory_tools.boot.boot_session"
 # Override standard doctype classes
 
 override_doctype_class = {
+	"BOM": "inventory_tools.inventory_tools.overrides.bom.InventoryToolsBOM",
 	"Delivery Note": "inventory_tools.inventory_tools.overrides.delivery_note.InventoryToolsDeliveryNote",
 	"Packing Slip": "inventory_tools.inventory_tools.overrides.packing_slip.InventoryToolsPackingSlip",
 	"Shipment": "inventory_tools.inventory_tools.overrides.shipment.InventoryToolsShipment",
