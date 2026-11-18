@@ -20,16 +20,17 @@ def is_generic_item(item_code) -> bool:
 
 
 def work_order_subcontracting_enabled(company) -> bool:
-	try:
-		return bool(
-			frappe.db.get_value(
-				"Inventory Tools Settings",
-				{"company": company},
-				"enable_work_order_subcontracting",
-			)
-		)
-	except Exception:
+	if not company or not frappe.db.table_exists("Inventory Tools Settings"):
 		return False
+	if not frappe.db.exists("Inventory Tools Settings", {"company": company}):
+		return False
+	return bool(
+		frappe.db.get_value(
+			"Inventory Tools Settings",
+			{"company": company},
+			"enable_work_order_subcontracting",
+		)
+	)
 
 
 def patched_validate_item_details(args, item):
@@ -68,5 +69,10 @@ def patched_insert_item_price(args):
 	return original_insert_item_price(args)
 
 
-erpnext.stock.get_item_details.validate_item_details = patched_validate_item_details
-erpnext.stock.get_item_details.insert_item_price = patched_insert_item_price
+# Apply monkey patches only on sites where this app is installed.
+try:
+	if "inventory_tools" in frappe.get_installed_apps():
+		erpnext.stock.get_item_details.validate_item_details = patched_validate_item_details
+		erpnext.stock.get_item_details.insert_item_price = patched_insert_item_price
+except Exception:
+	pass
