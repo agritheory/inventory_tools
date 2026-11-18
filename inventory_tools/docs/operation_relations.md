@@ -24,6 +24,9 @@ In a production-scheduling model these relations are processing constraints on t
 
 The **Operation Flowchart** draws the route with these relations and computes when each operation can start.
 
+## Configuration
+Operation Relations are on by default. To turn them off for a company, uncheck **Enable Operation Relations** in that company's Inventory Tools Settings. BOMs and Work Orders for that company then hide the relation fields and the flowchart. Operations and Routings have no company, so they hide them only when every company has the feature turned off. Values already saved on operations are kept, so turning the setting back on restores them.
+
 ## Where Relations Are Set
 Two fields are added to Operation, BOM Operation (used by both BOM and Routing), and Work Order Operation:
 

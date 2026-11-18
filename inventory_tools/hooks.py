@@ -98,6 +98,7 @@ after_install = "inventory_tools.install.after_install"
 after_migrate = [
 	"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.sync_alternative_sales_workflow_property_setters",
 	"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.sync_generic_item_field_visibility",
+	"inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings.sync_operation_relation_field_visibility",
 ]
 
 # Uninstallation

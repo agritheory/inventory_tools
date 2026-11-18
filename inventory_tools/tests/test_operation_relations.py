@@ -184,3 +184,39 @@ def test_work_order_operations_copy_relations_from_bom():
 	preheat = next(row for row in wo.operations if row.operation == "Preheat Oven Op")
 	assemble = next(row for row in wo.operations if row.operation == "Assemble Pie Op")
 	assert preheat.sequence_id == assemble.sequence_id == 1
+
+
+@pytest.mark.order(142)
+def test_disabling_operation_relations_hides_fields_and_flowchart():
+	bom = frappe.db.get_value(
+		"BOM", {"item": "Gooseberry Pie", "is_default": 1, "docstatus": 1}, "name"
+	)
+	hidden_filters = {
+		"doc_type": "BOM Operation",
+		"field_name": "predecessor_relation",
+		"property": "hidden",
+	}
+	settings_names = frappe.get_all(
+		"Inventory Tools Settings", {"enable_operation_relations": 1}, pluck="name"
+	)
+	assert settings_names, "Operation Relations should be enabled by default"
+	assert not frappe.db.exists("Property Setter", hidden_filters)
+	try:
+		for name in settings_names:
+			settings = frappe.get_doc("Inventory Tools Settings", name)
+			settings.enable_operation_relations = 0
+			settings.save()
+		assert frappe.db.exists("Property Setter", hidden_filters)
+		assert frappe.db.exists(
+			"Property Setter",
+			{"doc_type": "Routing", "field_name": "operation_flowchart", "property": "hidden"},
+		)
+		with pytest.raises(frappe.ValidationError):
+			get_operation_flowchart("BOM", bom)
+	finally:
+		for name in settings_names:
+			settings = frappe.get_doc("Inventory Tools Settings", name)
+			settings.enable_operation_relations = 1
+			settings.save()
+	assert not frappe.db.exists("Property Setter", hidden_filters)
+	assert get_operation_flowchart("BOM", bom)["nodes"]

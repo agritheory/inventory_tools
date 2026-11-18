@@ -10,6 +10,9 @@ from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings
 from frappe import _
 from frappe.utils import add_to_date, flt, get_datetime, time_diff_in_seconds
 
+from inventory_tools.inventory_tools.doctype.inventory_tools_settings.inventory_tools_settings import (
+	operation_relations_enabled,
+)
 from inventory_tools.inventory_tools.scheduling.precedence import (
 	RELATION_ABBREVIATIONS,
 	TOLERANCE,
@@ -44,6 +47,9 @@ def get_operation_flowchart(doctype: str, name: str | None = None, doc: str | No
 	else:
 		document = frappe.get_doc(doctype, name)
 		document.check_permission("read")
+
+	if not operation_relations_enabled(document.get("company")):
+		frappe.throw(_("Operation Relations are not enabled in Inventory Tools Settings."))
 
 	return build_flowchart(document)
 

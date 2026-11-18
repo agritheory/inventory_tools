@@ -30,6 +30,8 @@
 		"alternative_workstations_section",
 		"allow_alternative_workstations",
 		"allow_job_card_workstation_change",
+		"operation_relations_section",
+		"enable_operation_relations",
 		"section_break_0",
 		"update_warehouse_path",
 		"prettify_warehouse_tree",
@@ -209,6 +211,18 @@
 			"fieldname": "allow_job_card_workstation_change",
 			"fieldtype": "Check",
 			"label": "Allow Workstation Change on Job Card"
+		},
+		{
+			"fieldname": "operation_relations_section",
+			"fieldtype": "Section Break",
+			"label": "Operation Relations"
+		},
+		{
+			"default": "1",
+			"description": "Show the Relation to Previous Operation and Lag fields on operations, and the Operation Flowchart on BOM, Routing, and Work Order.",
+			"fieldname": "enable_operation_relations",
+			"fieldtype": "Check",
+			"label": "Enable Operation Relations"
 		},
 		{
 			"fieldname": "quotation_demand_section",
@@ -450,7 +464,7 @@
 	],
 	"index_web_pages_for_search": 1,
 	"links": [],
-	"modified": "2026-10-29 16:00:00.000000",
+	"modified": "2026-11-12 14:00:00.000000",
 	"modified_by": "Administrator",
 	"module": "Inventory Tools",
 	"name": "Inventory Tools Settings",
